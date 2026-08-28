@@ -2,13 +2,38 @@
 
 [简体中文](README-zh.md)
 
-Howling Werewolf is an independently developed werewolf progression Mod for Minecraft
-Java Edition. Become infected, survive lunar transformations, grow through a two-part
-skill system, master three playable forms, and challenge the Moon-Crowned Alpha.
+## Before the first howl
+
+A claw mark in a dark forest may look like just another wound. Then another night
+arrives, the blood wakes, and the moon begins making choices for you.
+
+At first, becoming a werewolf is something to survive. In time, it becomes something to
+master. You learn when to surrender to the full moon and when to transform by your own
+will. Each hunt feeds a growing bloodline: new instincts appear, claws take on strange
+properties, and the wolf learns to run on four legs. Far beyond that first transformation
+waits a five-altar moon-oath, a company of Silver-Oath Watchers, and the Moon-Crowned
+Alpha whose defeat awakens the Beast within.
+
+Howling Werewolf is an independently developed progression Mod for Minecraft Java
+Edition. It turns lycanthropy into a survival journey rather than a single status effect:
+infection and awakening lead into levels, a skill tree, learnable abilities, three
+werewolf forms, Hunters, Silver, Wolfsbane, and a repeatable endgame trial.
 
 The Mod was inspired by several outstanding werewolf Mods created by the Minecraft
 community. It is not a port, fork, official continuation, or official remake of any
 other project and is not affiliated with or endorsed by their creators.
+
+## The journey in brief
+
+1. **Survive the bloodline.** Become infected by a Feral Werewolf and awaken on a later
+   night, or use a Werewolf Potion to begin immediately.
+2. **Learn what the moon changed.** Press `K` to open the Werewolf Progression screen.
+   It is the in-game guide to your level, skill tree, abilities, forms, and the Moon-Oath
+   ritual.
+3. **Master the transformation.** Press `J` to transform or return to human form when
+   the current rules allow it. A full moon can take that choice away.
+4. **Challenge the old Alpha.** Build the moon-oath shown in the progression screen,
+   survive its Watchers, and earn the right to awaken Beast Form.
 
 ## Requirements
 
@@ -19,14 +44,12 @@ other project and is not affiliated with or endorsed by their creators.
 | Java | 17 |
 | Howling Werewolf | 1.0.0 |
 
-No GeckoLib installation is required. Multiplayer installations need the same Mod
-version on both the client and dedicated server.
-
-## Features
+## What the bloodline brings
 
 - Infection, delayed awakening, voluntary transformation, and forced full-moon shifts.
 - Normal Werewolf, quadruped wolf, and Alpha-unlocked Beast forms.
-- A level-based progression screen with separate tree skills and unlockable abilities.
+- A progression screen that serves as both character sheet and in-game guide, with
+  separate tree skills, learnable abilities, form information, and Moon-Oath guidance.
 - Empty-claw combat, scaling damage and defense, lifesteal, long claws, fire claws,
   tool-like claws, Bloody Bite, and Moonblood Surge.
 - Wild Feral Werewolves, neutral Hunters, persistent village patrols, Silver equipment,
@@ -34,22 +57,20 @@ version on both the client and dedicated server.
 - A complete single-player Alpha Trial with ritual construction, a Hunter phase, a
   multi-stage boss fight, repeat rewards, and permanent Beast Form progression.
 - English and Simplified Chinese localization.
-- Configurable infection, experience gain, maximum level, world generation, Alpha
-  damage timing, badge consumption, equipment display, and Beast damage behavior.
+- Infection chance, experience gain, maximum level, and many other values can be tuned
+  to suit the experience you want.
 - Datapack tags for compatible silver weapons and werewolf food.
 
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16.
 2. Place `howlingwerewolf-1.0.0.jar` in the instance's `mods` directory.
-3. For multiplayer, install the same JAR on the dedicated server and every connecting
-   client.
-4. Start the game. Silver ore, Wolfsbane, and natural entities appear in newly generated
+3. Start the game. Silver ore, Wolfsbane, and natural entities appear in newly generated
    eligible chunks according to the server configuration.
 
 Back up important worlds before adding or updating any Mod.
 
-## Getting started
+## Your first nights
 
 There are two main ways to enter the bloodline:
 
@@ -57,10 +78,16 @@ There are two main ways to enter the bloodline:
   infection chance is configurable and awakening occurs on a later night.
 - Brew or obtain a Werewolf Potion to awaken immediately.
 
-Once awakened, press `K` to open the progression screen. A full moon forces a shift in
-the Overworld, while `J` controls voluntary transformation when the current rules allow
-it. Hunt creatures while transformed to gain werewolf experience and spend the resulting
-points on tree skills and abilities.
+Once awakened, press `J` to transform or return to human form whenever the bloodline's
+current rules permit it. In the Overworld, a full moon can force the transformation even
+if you would rather remain human. Hunt creatures while transformed to gain werewolf
+experience and turn that experience into levels and new choices.
+
+Press `K` whenever you need to understand those choices. The Werewolf Progression
+screen is the central guide for the Mod: it shows your current growth, the skill tree,
+learnable active and passive abilities, form requirements, and the Moon-Oath ritual used
+to begin the Alpha Trial. You do not need to discover the trial structure from an
+external wiki before playing.
 
 Wolfsbane represents the opposing path. A Wolfsbane Potion cures lycanthropy, while
 Hunters carry Silver Swords and provide a renewable source of Wolfsbane Flowers.
@@ -79,7 +106,7 @@ only in normal Werewolf form. Only equipment that provides positive armor value 
 the ability's natural-defense and movement bonuses; zero-armor equipment such as elytra
 does not apply that penalty.
 
-## Progression and abilities
+## Progression, skill tree, and abilities
 
 Werewolf levels increase base claw damage and natural damage reduction. The default
 maximum level is 20 and can be configured up to 25.
@@ -129,16 +156,18 @@ missing members can be replaced one at a time after a one-Minecraft-day cooldown
 Silver Sword attacks deal increased damage to werewolves and apply Weakness. Every
 ordinary Hunter drops at least one Wolfsbane Flower, with a chance for a second.
 
-Feral Werewolves naturally spawn only in eligible Overworld forests during a dark full-
-moon night. Their deliberately strict conditions make them dangerous encounters rather
-than routine hostile mobs.
+Feral Werewolves naturally spawn only in eligible Overworld forests during a dark
+full-moon night. Their deliberately strict conditions make them dangerous encounters
+rather than routine hostile mobs.
 
-## Alpha Trial
+## The Moon-Oath and Alpha Trial
 
-The Alpha Trial is the endgame of the first progression arc.
+The Alpha Trial is the end of the first progression arc. Its Moon-Oath page can be found
+at any time from the progression screen opened with `K`; the page includes the altar
+layout, entry conditions, costs, and rewards.
 
-1. Reach werewolf level 10 and prepare one central ritual altar, four ordinary ritual
-   altars, one Alpha Werewolf Badge, and four Moonbane Pearls.
+1. Reach werewolf level 10 and prepare one Central Moon-Oath Altar, four ordinary
+   Moon-Oath Altars, one Alpha Werewolf Badge, and four Moonbane Pearls.
 2. Place the ordinary altars at the four cardinal points, exactly three blocks from the
    central altar and at the same height.
 3. Offer the badge at the center and one pearl at each outer altar.
@@ -152,15 +181,10 @@ skill and tree points.
 
 ## Configuration and datapacks
 
-The common Forge configuration contains settings for:
-
-- Wolf and Feral Werewolf infection chance;
-- werewolf experience multiplier and maximum level;
-- Silver Ore and Wolfsbane world generation;
-- Beast Form void-damage behavior;
-- Alpha Trial damage-frequency limit;
-- whether badge revival consumes the badge;
-- whether equipment is rendered on the normal Werewolf model.
+The common Forge configuration exposes infection chance, experience multiplier, maximum
+level, and many other values. Adjust them to fit the kind of werewolf journey you want
+to play. World-specific changes should be made carefully, and important saves should be
+backed up before large configuration changes.
 
 Datapacks can extend these item tags:
 
@@ -186,15 +210,25 @@ Linux or macOS:
 The reobfuscated release JAR is written to `build/libs/`. Forge and Minecraft development
 dependencies may need to be downloaded during the first build.
 
-## Support and compatibility
+## Testing and compatibility
 
 Version 1.0.0 was validated through a normal single-player survival progression from a
 new start through defeating the Ender Dragon and obtaining elytra, followed by targeted
 tests for transformations, death/respawn, Peaceful mode, shaders, village Hunter
 replacement, natural spawning, and the three playable forms.
 
+**Multiplayer has not yet completed a full test pass.** Version 1.0.0 should therefore
+be treated as unverified for long-running multiplayer worlds. Keep backups and include
+the server log when reporting multiplayer problems.
+
 When reporting a problem, include the Minecraft version, Forge version, Howling Werewolf
 version, relevant configuration, installed Mod list, and the latest log or crash report.
+
+## Future plans
+
+The current release target remains Forge for Minecraft 1.20.1. Future development is
+planned to explore NeoForge editions for Minecraft 1.21.1 and Minecraft 26.1. These are
+roadmap intentions rather than announced release dates.
 
 ## License and copyright
 
