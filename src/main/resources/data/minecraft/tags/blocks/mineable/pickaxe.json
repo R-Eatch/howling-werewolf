@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "howlingwerewolf:silver_ore",
+    "howlingwerewolf:deepslate_silver_ore",
+    "howlingwerewolf:ritual_altar",
+    "howlingwerewolf:central_ritual_altar"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/obtain_alpha_badge",
+  "display": {
+    "icon": { "item": "howlingwerewolf:silver_sword" },
+    "title": { "translate": "advancement.howlingwerewolf.defeat_alpha.title" },
+    "description": { "translate": "advancement.howlingwerewolf.defeat_alpha.desc" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}

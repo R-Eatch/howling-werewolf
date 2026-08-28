@@ -1,0 +1,10 @@
+{
+  "feature": "howlingwerewolf:wolfsbane",
+  "placement": [
+    { "type": "howlingwerewolf:config_enabled", "feature": "wolfsbane" },
+    { "type": "minecraft:rarity_filter", "chance": 22 },
+    { "type": "minecraft:in_square" },
+    { "type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING" },
+    { "type": "minecraft:biome" }
+  ]
+}

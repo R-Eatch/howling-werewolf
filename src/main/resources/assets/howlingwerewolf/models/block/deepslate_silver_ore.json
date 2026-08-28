@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "howlingwerewolf:block/deepslate_silver_ore_top",
+    "down": "howlingwerewolf:block/deepslate_silver_ore_top",
+    "north": "howlingwerewolf:block/deepslate_silver_ore_side",
+    "south": "howlingwerewolf:block/deepslate_silver_ore_side",
+    "east": "howlingwerewolf:block/deepslate_silver_ore_side",
+    "west": "howlingwerewolf:block/deepslate_silver_ore_side",
+    "particle": "howlingwerewolf:block/deepslate_silver_ore_side"
+  }
+}

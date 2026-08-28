@@ -1,0 +1,23 @@
+{
+  "parent": "howlingwerewolf:guide/first_point",
+  "display": {
+    "icon": { "item": "howlingwerewolf:central_ritual_altar" },
+    "title": { "translate": "advancement.howlingwerewolf.obtain_alpha_badge.title" },
+    "description": { "translate": "advancement.howlingwerewolf.obtain_alpha_badge.desc" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_badge": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["howlingwerewolf:alpha_werewolf_badge"] }
+        ]
+      }
+    }
+  },
+  "requirements": [["has_badge"]]
+}

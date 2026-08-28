@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "available": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [["available"]],
+  "rewards": {
+    "recipes": ["howlingwerewolf:alpha_werewolf_badge"]
+  }
+}

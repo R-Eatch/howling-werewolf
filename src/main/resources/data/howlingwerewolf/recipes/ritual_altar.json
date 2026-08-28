@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["SSS", "SWS", "SSS"],
+  "key": {
+    "S": { "item": "minecraft:stone_bricks" },
+    "W": { "item": "howlingwerewolf:wolfsbane" }
+  },
+  "result": { "item": "howlingwerewolf:ritual_altar", "count": 1 }
+}

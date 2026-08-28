@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "howlingwerewolf:item/alpha_werewolf_badge" }
+}
