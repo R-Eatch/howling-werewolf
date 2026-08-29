@@ -12,6 +12,6 @@ All notable public releases of Howling Werewolf are documented here.
 - Corrected wild Hunter spawning, village Hunter replacement, werewolf elytra alignment, and the quadruped tail center.
 - Clarified that Armored Instinct counts only equipment with positive armor value.
 - Clarified the Alpha Werewolf Badge's separate hotbar XP and transformed fatal-hit protection requirements.
-- Added English and Simplified Chinese localization, configurable progression/world rules, public build files, copyright metadata, and the custom community license.
+- Added English and Simplified Chinese localization, configurable progression/world rules, public build files, and consistent MPL-2.0 code and CC-BY-SA-4.0 art licensing metadata.
 
-Copyright © 2026 R_Eatch. All Rights Reserved.
+Copyright © 2026 R_Eatch.

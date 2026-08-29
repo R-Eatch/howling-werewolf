@@ -1,13 +1,18 @@
 # Howling Werewolf asset provenance
 
-Copyright © 2026 R_Eatch. All Rights Reserved. Original project assets are governed by
-[LICENSE.md](LICENSE.md).
+Copyright © 2026 R_Eatch.
+
+Original art assets are governed by [LICENSE-ASSETS.md](LICENSE-ASSETS.md)
+(`CC-BY-SA-4.0`), except for the official logo and project branding identified there.
+Original source code is governed by [LICENSE.md](LICENSE.md) (`MPL-2.0`). Third-party
+materials retain their own terms.
 
 ## Runtime assets
 
-The runtime textures, icons, model geometry, interface copy, and branding under
-`src/main/resources/assets/howlingwerewolf/` and the corresponding compiled model classes
-were created for Howling Werewolf.
+The runtime textures, non-branding icons, and visual model geometry under
+`src/main/resources/assets/howlingwerewolf/` were created for Howling Werewolf. The
+corresponding Java model classes are source code and are covered by `MPL-2.0` rather than
+the art license.
 
 - Normal Werewolf and Beast textures use original 128×128 atlases designed for this
   project's independent player-model geometry.

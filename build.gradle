@@ -181,6 +181,10 @@ tasks.named('jar', Jar).configure {
         into 'META-INF'
         rename { "LICENSE_${mod_id}.md" }
     }
+    from('LICENSE-ASSETS.md') {
+        into 'META-INF'
+        rename { "LICENSE-ASSETS_${mod_id}.md" }
+    }
     from('ASSET_PROVENANCE.md') {
         into 'META-INF'
         rename { "ASSET_PROVENANCE_${mod_id}.md" }
@@ -194,8 +198,8 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Title'    : mod_name,
                 'Implementation-Version'  : project.jar.archiveVersion,
                 'Implementation-Vendor'   : mod_authors,
-                'Copyright'               : 'Copyright (c) 2026 R_Eatch. All Rights Reserved.',
-                'License'                 : 'All Rights Reserved; see META-INF/LICENSE_howlingwerewolf.md',
+                'Copyright'               : 'Copyright (c) 2026 R_Eatch.',
+                'License'                 : 'MPL-2.0 (code); CC-BY-SA-4.0 (original assets)',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

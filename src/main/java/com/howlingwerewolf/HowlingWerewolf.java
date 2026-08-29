@@ -1,7 +1,4 @@
-/*
- * Copyright © 2026 R_Eatch. All Rights Reserved.
- * Use and redistribution are governed by the repository's LICENSE.md.
- */
+/* SPDX-License-Identifier: MPL-2.0 */
 package com.howlingwerewolf;
 
 import com.howlingwerewolf.content.ModBlocks;
