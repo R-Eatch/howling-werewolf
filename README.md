@@ -1,6 +1,19 @@
-# Howling Werewolf / 月厄狼人
+# Howling Werewolf
 
-[简体中文](README-zh.md)
+<p align="center">
+  <img src="src/main/resources/logo.png" alt="Howling Werewolf logo" width="128">
+</p>
+
+<p align="center">
+  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
+  <img src="https://img.shields.io/badge/Forge-47.4.16-E04E14?style=flat-square" alt="Forge 47.4.16">
+  <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
+  <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="Asset license: CC BY-SA 4.0"></a>
+</p>
+
+<p align="center"><a href="README-zh.md">简体中文</a></p>
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -12,7 +25,7 @@ At first, becoming a werewolf is an ordeal to survive. Only later does it become
 
 Once you are strong enough, begin the Moon-Oath ritual and enter the Alpha Trial. The Alpha will decide whether you are worthy of awakening the Beast buried deep within your bloodline.
 
-**Howling Werewolf (月厄狼人)** is an independently developed werewolf transformation and progression Mod for Minecraft Java Edition. It connects infection, awakening, lunar transformations, levels, a skill tree, learnable skills, three werewolf forms, Hunters and Silver weapons, Wolfsbane, and the final Alpha Trial into a complete survival journey.
+**Howling Werewolf** is an independently developed werewolf transformation and progression Mod for Minecraft Java Edition. It connects infection, awakening, lunar transformations, levels, a skill tree, learnable skills, three werewolf forms, Hunters and Silver weapons, Wolfsbane, and the final Alpha Trial into a complete survival journey.
 
 The Mod was inspired by several outstanding werewolf Mods created by the Minecraft community, but its code, gameplay systems, and project content were all developed independently. It is not a port, fork, official continuation, or official remake of any other project, nor is it affiliated with or acting on behalf of their creators.
 
@@ -197,7 +210,7 @@ Future development is planned to explore NeoForge editions for **Minecraft 1.21.
 
 Copyright © 2026 R_Eatch.
 
-Unless otherwise stated, the original source code of **Howling Werewolf (月厄狼人)** is open source under the Mozilla Public License 2.0 (`MPL-2.0`).
+Unless otherwise stated, the original source code of **Howling Werewolf** is open source under the Mozilla Public License 2.0 (`MPL-2.0`).
 
 Subject to the MPL-2.0, you may use, study, modify, distribute, port, and continue developing the project, including for commercial purposes, without obtaining prior permission from the author.
 
@@ -205,7 +218,7 @@ Unless otherwise stated, the project's original art assets are licensed under th
 
 Forks, ports, and continued development are welcome and do not require prior authorization. If you publish a port, fork, or significant derivative project, you are also welcome to let me know through GitHub or email.
 
-The official logo and the Howling Werewolf / 月厄狼人 project branding are not automatically included within the scope of the CC BY-SA 4.0 license. Third-party code and materials remain subject to their original licenses. See [LICENSE.md](LICENSE.md), [LICENSE-ASSETS.md](LICENSE-ASSETS.md), and [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) for details.
+The official logo and the Howling Werewolf project branding are not automatically included within the scope of the CC BY-SA 4.0 license. Third-party code and materials remain subject to their original licenses. See [LICENSE.md](LICENSE.md), [LICENSE-ASSETS.md](LICENSE-ASSETS.md), and [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) for details.
 
 ## Project independence
 

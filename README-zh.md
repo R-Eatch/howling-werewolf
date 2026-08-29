@@ -1,6 +1,19 @@
 # 月厄狼人 / Howling Werewolf
 
-[English](README.md)
+<p align="center">
+  <img src="src/main/resources/logo.png" alt="月厄狼人 Logo" width="128">
+</p>
+
+<p align="center">
+  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="最新版本"></a>
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
+  <img src="https://img.shields.io/badge/Forge-47.4.16-E04E14?style=flat-square" alt="Forge 47.4.16">
+  <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证：MPL-2.0"></a>
+  <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="美术资源许可证：CC BY-SA 4.0"></a>
+</p>
+
+<p align="center"><a href="README.md">English</a></p>
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
