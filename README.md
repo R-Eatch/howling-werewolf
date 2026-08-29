@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
-  <img src="https://img.shields.io/badge/Forge-47.4.16-E04E14?style=flat-square" alt="Forge 47.4.16">
+  <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="Asset license: CC BY-SA 4.0"></a>
@@ -41,11 +41,11 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Component | Version |
 |---|---|
 | Minecraft Java Edition | 1.20.1 |
-| Mod loader | Forge 47.4.16 recommended |
+| Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
 | Howling Werewolf | 1.0.0 |
 
-Other compatible Forge 47.x versions may work, but Forge 47.4.16 is the primary test target for the current official release.
+Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
 ## What the bloodline brings
 
@@ -62,7 +62,7 @@ Other compatible Forge 47.x versions may work, but Forge 47.4.16 is the primary 
 
 ## Installation
 
-1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16.
+1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
 2. Place `howlingwerewolf-1.0.0.jar` in the game's `mods` directory.
 3. Start the game.
 

@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="最新版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
-  <img src="https://img.shields.io/badge/Forge-47.4.16-E04E14?style=flat-square" alt="Forge 47.4.16">
+  <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 或更高版本">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证：MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="美术资源许可证：CC BY-SA 4.0"></a>
@@ -41,11 +41,11 @@
 | 项目 | 版本 |
 |---|---|
 | Minecraft Java 版 | 1.20.1 |
-| Mod 加载器 | 推荐 Forge 47.4.16 |
+| Mod 加载器 | 推荐 Forge 47.4.16 或更高版本 |
 | Java | 17 |
 | 月厄狼人 | 1.0.0 |
 
-其他兼容的 Forge 47.x 版本可能可以运行，但 Forge 47.4.16 是当前正式发布的主要测试目标。
+推荐使用 Forge 47.4.16 或更高的兼容 Forge 47.x 版本；Forge 47.4.16 仍是当前正式发布的主要测试目标。
 
 ## 狼人血脉带来了什么
 
@@ -62,7 +62,7 @@
 
 ## 安装
 
-1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16。
+1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
 2. 将 `howlingwerewolf-1.0.0.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
