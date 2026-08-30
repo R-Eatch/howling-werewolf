@@ -63,7 +63,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.4.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.0.4-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.

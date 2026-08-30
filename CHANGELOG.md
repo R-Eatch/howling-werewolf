@@ -9,6 +9,7 @@ All notable public releases of Howling Werewolf are documented here.
 - Gives Beast Form practical clearance in one-block-wide, three-block-high passages with a `0.95 × 2.95` standing collision box.
 - Audits all 15 `/werewolf` administrator commands and fixes incomplete state transitions, dimension refreshes, stale spirit-wolf cleanup, and the sixth Damage tree rank.
 - Adds a Simplified Chinese administrator command guide with syntax, parameters, examples, and diagnostic notes.
+- Names Forge artifacts `howlingwerewolf-<version>-forge.jar` to distinguish them from NeoForge builds.
 - Updates the public source and release metadata to version 1.0.4.
 
 ## Howling Werewolf 1.0.2

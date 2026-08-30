@@ -63,7 +63,7 @@
 ## 安装
 
 1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
-2. 将 `howlingwerewolf-1.0.4.jar` 放入游戏的 `mods` 目录。
+2. 将 `howlingwerewolf-1.0.4-forge.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
 添加或更新任何 Mod 前，建议先备份重要世界。

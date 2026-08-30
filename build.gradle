@@ -177,6 +177,9 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
+    // Keep Forge artifacts distinguishable from the NeoForge distribution.
+    archiveClassifier = 'forge'
+
     from('LICENSE.md') {
         into 'META-INF'
         rename { "LICENSE_${mod_id}.md" }
