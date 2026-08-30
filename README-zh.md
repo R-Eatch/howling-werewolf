@@ -15,6 +15,8 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
+> 当前分支提供 Minecraft 1.20.1 的 Forge 版本；Minecraft 1.21.1 的 NeoForge 源码维护在 [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) 分支。
+
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
 ## 当第一声嚎叫尚未响起

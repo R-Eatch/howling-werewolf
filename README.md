@@ -15,6 +15,8 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
+> This branch contains the Forge edition for Minecraft 1.20.1. The NeoForge 1.21.1 source is maintained on the [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) branch.
+
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
 ## Before the first howl
