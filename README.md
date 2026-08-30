@@ -43,7 +43,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.0.2 |
+| Howling Werewolf | 1.0.4 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -63,7 +63,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.2.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.0.4.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -92,7 +92,7 @@ Wolfsbane represents the path opposed to the werewolf bloodline. A Wolfsbane Pot
 | Quadruped Wolf | Learn **Wildstride Form**, then press `G` | Greatly increased movement speed and jump height, but slightly lower attack damage; cannot wear equipment. |
 | Beast | Complete the Alpha Trial for the first time, then press `H` | Greatly enhanced combat, speed, jumping, and defense, but faster hunger drain; cannot wear equipment. |
 
-Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are not hidden by default; this can be changed in the configuration.
+Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are hidden by default; this can be changed in the configuration.
 
 Only equipment with a positive armor value weakens the natural damage reduction and movement bonuses provided by this ability. Zero-armor equipment such as elytra does not trigger this penalty.
 
@@ -189,9 +189,9 @@ Datapacks can extend the following item tags:
 
 ## Testing and compatibility
 
-Version 1.0.2 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+Version 1.0.4 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.2.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.4.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 

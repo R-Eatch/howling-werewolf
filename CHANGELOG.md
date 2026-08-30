@@ -2,6 +2,15 @@
 
 All notable public releases of Howling Werewolf are documented here.
 
+## Howling Werewolf 1.0.4
+
+- Corrects Quadruped Wolf body and upper-body Box UV generation while preserving the accepted 1.0.2 texture and final model outline.
+- Prevents the Quadruped Wolf from applying an incorrect land-crawl rotation in one-block-high passages.
+- Gives Beast Form practical clearance in one-block-wide, three-block-high passages with a `0.95 × 2.95` standing collision box.
+- Audits all 15 `/werewolf` administrator commands and fixes incomplete state transitions, dimension refreshes, stale spirit-wolf cleanup, and the sixth Damage tree rank.
+- Adds a Simplified Chinese administrator command guide with syntax, parameters, examples, and diagnostic notes.
+- Updates the public source and release metadata to version 1.0.4.
+
 ## Howling Werewolf 1.0.2
 
 - Centers and aligns the four legs of the Quadruped Wolf model.

@@ -43,7 +43,8 @@ public final class WerewolfCommands {
                 .then(Commands.literal("settreepoints").then(pointsArgument(true)))
                 .then(Commands.literal("settree").then(Commands.argument("target", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
-                                .then(Commands.argument("rank", IntegerArgumentType.integer(0, 5))
+                                .then(Commands.argument("rank", IntegerArgumentType.integer(0,
+                                                WerewolfTreeSkill.maximumRank()))
                                         .executes(ctx -> setTree(ctx, player(ctx), StringArgumentType.getString(ctx, "skill"),
                                                 IntegerArgumentType.getInteger(ctx, "rank")))))))
                 .then(Commands.literal("setability").then(Commands.argument("target", EntityArgument.player())
@@ -77,7 +78,10 @@ public final class WerewolfCommands {
     }
 
     private static int infect(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
-        return mutate(ctx, player, data -> WerewolfGameplayEvents.infect(player, data), "infected");
+        return mutate(ctx, player, data -> {
+            WerewolfGameplayEvents.removeSpiritWolves(player, data);
+            WerewolfGameplayEvents.infect(player, data);
+        }, "infected");
     }
 
     private static int awaken(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
@@ -89,16 +93,15 @@ public final class WerewolfCommands {
             WerewolfGameplayEvents.removeSpiritWolves(player, data);
             WerewolfGameplayEvents.removeWerewolfModifiers(player);
             data.reset();
-            player.refreshDimensions();
         }, "cured");
     }
 
     private static int transform(CommandContext<CommandSourceStack> ctx, ServerPlayer player, Boolean desired) {
         return mutate(ctx, player, data -> {
-            if (!data.isWerewolf()) data.setWerewolf(true);
-            data.setTransformed(desired == null ? !data.isTransformed() : desired);
+            boolean transforming = desired == null ? !data.isTransformed() : desired;
+            if (transforming) prepareWerewolf(data);
+            data.setTransformed(transforming);
             data.setMoonForced(false);
-            player.refreshDimensions();
         }, "transformation changed");
     }
 
@@ -108,11 +111,11 @@ public final class WerewolfCommands {
                     + WerewolfData.getMaxLevel() + "."));
             return 0;
         }
-        return mutate(ctx, player, data -> { data.setWerewolf(true); data.setLevel(level); }, "level=" + level);
+        return mutate(ctx, player, data -> { prepareWerewolf(data); data.setLevel(level); }, "level=" + level);
     }
 
     private static int addExperience(CommandContext<CommandSourceStack> ctx, ServerPlayer player, int amount) {
-        return mutate(ctx, player, data -> { data.setWerewolf(true); data.addExperience(amount); }, "xp+=" + amount);
+        return mutate(ctx, player, data -> { prepareWerewolf(data); data.addExperience(amount); }, "xp+=" + amount);
     }
 
     private static int setPoints(CommandContext<CommandSourceStack> ctx, ServerPlayer player, int amount, boolean tree) {
@@ -123,6 +126,11 @@ public final class WerewolfCommands {
     private static int setTree(CommandContext<CommandSourceStack> ctx, ServerPlayer player, String name, int rank) {
         WerewolfTreeSkill skill = WerewolfTreeSkill.byName(name);
         if (skill == null) { ctx.getSource().sendFailure(Component.literal("Unknown tree skill.")); return 0; }
+        if (rank > skill.maxRank()) {
+            ctx.getSource().sendFailure(Component.literal(skill.id() + " maximum rank is "
+                    + skill.maxRank() + "."));
+            return 0;
+        }
         return mutate(ctx, player, data -> data.setTreeSkillRank(skill, rank), skill.id() + "=" + rank);
     }
 
@@ -137,12 +145,23 @@ public final class WerewolfCommands {
             WerewolfGameplayEvents.removeSpiritWolves(player, data);
             WerewolfGameplayEvents.removeWerewolfModifiers(player);
             data.reset();
-            player.refreshDimensions();
         }, "all data reset");
     }
 
     private static int forceMoon(CommandContext<CommandSourceStack> ctx, ServerPlayer player, boolean state) {
-        return mutate(ctx, player, data -> { data.setWerewolf(true); data.setMoonForced(state); if (state) data.setTransformed(true); player.refreshDimensions(); }, "moonForced=" + state);
+        return mutate(ctx, player, data -> {
+            if (state) {
+                prepareWerewolf(data);
+                data.setTransformed(true);
+            }
+            data.setMoonForced(state);
+        }, "moonForced=" + state);
+    }
+
+    private static void prepareWerewolf(WerewolfData data) {
+        data.setInfected(false);
+        data.setAwakeningDayTime(-1L);
+        data.setWerewolf(true);
     }
 
     private static int status(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
@@ -180,6 +199,7 @@ public final class WerewolfCommands {
         }
         optional.ifPresent(data -> {
             action.accept(data);
+            player.refreshDimensions();
             WerewolfGameplayEvents.refreshWerewolfModifiers(player, data);
             ModNetwork.sync(player, data);
         });

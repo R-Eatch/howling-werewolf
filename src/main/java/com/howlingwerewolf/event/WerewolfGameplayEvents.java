@@ -556,7 +556,9 @@ public final class WerewolfGameplayEvents {
         WerewolfApi.get(player).ifPresent(data -> {
             if (data.isTransformed() && data.isBeastMode()) {
                 boolean crouching = event.getPose() == net.minecraft.world.entity.Pose.CROUCHING;
-                event.setNewSize(EntityDimensions.scalable(1.0F, crouching ? 2.0F : 3.0F), true);
+                // Keep a small clearance inside exact 1x3 (or crouched 1x2) block openings.
+                // A hitbox equal to the opening leaves no tolerance for centering or collision math.
+                event.setNewSize(EntityDimensions.scalable(0.95F, crouching ? 1.95F : 2.95F), true);
                 event.setNewEyeHeight(crouching ? 1.8F : 2.7F);
             } else if (data.isTransformed() && data.isQuadrupedMode()) {
                 event.setNewSize(EntityDimensions.scalable(0.6F, 0.85F), true);

@@ -14,6 +14,12 @@ public enum WerewolfTreeSkill {
     public String id() { return name().toLowerCase(Locale.ROOT); }
     public String translationKey() { return "tree_skill.howlingwerewolf." + id(); }
 
+    public static int maximumRank() {
+        int maximum = 0;
+        for (WerewolfTreeSkill skill : values()) maximum = Math.max(maximum, skill.maxRank());
+        return maximum;
+    }
+
     public static WerewolfTreeSkill byName(String value) {
         for (WerewolfTreeSkill skill : values()) {
             if (skill.name().equalsIgnoreCase(value)) return skill;

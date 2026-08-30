@@ -22,7 +22,7 @@ public final class QuadrupedWerewolfRenderer
     protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
                                   float rotationYaw, float partialTick) {
         super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
-        WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
+        WerewolfRenderTransforms.applyQuadrupedTravelPose(player, poseStack, partialTick);
     }
 
     @Override

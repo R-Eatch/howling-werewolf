@@ -9,6 +9,19 @@ import net.minecraft.world.phys.Vec3;
 /** Shared whole-body transforms that a PlayerRenderer normally supplies. */
 final class WerewolfRenderTransforms {
     static void applyPlayerTravelPose(AbstractClientPlayer player, PoseStack poseStack, float partialTick) {
+        applyPlayerTravelPose(player, poseStack, partialTick, true);
+    }
+
+    static void applyQuadrupedTravelPose(AbstractClientPlayer player, PoseStack poseStack,
+                                         float partialTick) {
+        // A quadruped already fits its 0.85-block-tall collision box. Vanilla still marks a player
+        // forced through a one-block gap as visually swimming; applying that land-crawl rotation
+        // would tip the already-horizontal wolf onto an incorrect second horizontal axis.
+        applyPlayerTravelPose(player, poseStack, partialTick, player.isInWater());
+    }
+
+    private static void applyPlayerTravelPose(AbstractClientPlayer player, PoseStack poseStack,
+                                              float partialTick, boolean applySwimmingPose) {
         if (player.getFallFlyingTicks() > 4) {
             float flyingTicks = player.getFallFlyingTicks() + partialTick;
             float blend = Mth.clamp((flyingTicks * flyingTicks) / 100.0F, 0.0F, 1.0F);
@@ -29,6 +42,8 @@ final class WerewolfRenderTransforms {
             }
             return;
         }
+
+        if (!applySwimmingPose) return;
 
         float swimAmount = player.getSwimAmount(partialTick);
         if (swimAmount <= 0.0F) return;
