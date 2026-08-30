@@ -228,8 +228,6 @@ public final class WerewolfProgressionScreen extends Screen {
             boolean unlocked = data.hasAbility(ability);
             graphics.drawString(font, Component.translatable(ability.translationKey()), left + 16, y, unlocked ? TEXT : DIM, false);
             graphics.drawString(font, Component.translatable("screen.howlingwerewolf.cost", ability.cost()), left + 16, y + 11, GOLD, false);
-            if (ability == WerewolfAbility.NIGHT_VISION && unlocked)
-                graphics.drawString(font, Component.translatable(data.isNightVisionEnabled() ? "screen.howlingwerewolf.auto_on" : "screen.howlingwerewolf.auto_off"), left + 99, y + 11, ACCENT, false);
             if (ability == WerewolfAbility.QUADRUPED_FORM && unlocked)
                 graphics.drawString(font, Component.translatable(data.isQuadrupedMode() ? "screen.howlingwerewolf.active" : "screen.howlingwerewolf.inactive"), left + 99, y + 11, ACCENT, false);
             if (ability == WerewolfAbility.EMPTY_CLAW_SLOT && unlocked)

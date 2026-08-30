@@ -43,7 +43,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.0.0 |
+| Howling Werewolf | 1.0.2 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -63,7 +63,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.0.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.0.2.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -73,7 +73,7 @@ Back up important worlds before adding or updating any Mod.
 There are two main ways to acquire the werewolf bloodline:
 
 - Become infected while being attacked by a wild wolf or Feral Werewolf in the forest. The default infection chance is configurable, and an infected player will awaken on a later night.
-- Brew or obtain a Werewolf Potion to awaken immediately.
+- Brew or obtain a Werewolf Potion, then drink it to awaken immediately.
 
 Once awakened, press `J` to transform or return to human form whenever the bloodline's rules allow it. In the Overworld, a full moon will force a werewolf to transform, even if you would rather keep your bestial nature hidden that night.
 
@@ -92,7 +92,7 @@ Wolfsbane represents the path opposed to the werewolf bloodline. A Wolfsbane Pot
 | Quadruped Wolf | Learn **Wildstride Form**, then press `G` | Greatly increased movement speed and jump height, but slightly lower attack damage; cannot wear equipment. |
 | Beast | Complete the Alpha Trial for the first time, then press `H` | Greatly enhanced combat, speed, jumping, and defense, but faster hunger drain; cannot wear equipment. |
 
-Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form.
+Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are not hidden by default; this can be changed in the configuration.
 
 Only equipment with a positive armor value weakens the natural damage reduction and movement bonuses provided by this ability. Zero-armor equipment such as elytra does not trigger this penalty.
 
@@ -146,15 +146,19 @@ All key bindings can be changed in Minecraft's Controls settings.
 | `B` | Use Bloody Bite |
 | `R` | Release Moonblood Surge |
 
-## Hunters, Silver, and wild encounters
+## Hunters, Silver, Wolfsbane, Moonbane Pearls, and wild encounters
 
 Hunters are neutral toward ordinary humans and hostile toward transformed werewolves.
 
 They can appear alone at a very low weight in forest biomes and can also form persistent patrols of **4–6 Hunters** around villages visited by players. Once a village first reaches its target patrol size, each Hunter lost can be replaced individually after a cooldown of one Minecraft day.
 
-Silver Sword attacks deal additional damage to werewolves and inflict Weakness. Every ordinary Hunter drops at least one Wolfsbane Flower, with a chance to drop one more.
+Silver Sword attacks deal additional damage to werewolves and inflict Weakness. Every ordinary Hunter drops at least one Wolfsbane Flower, with a chance to drop one more and a low chance to drop a Silver Ingot.
+
+Wolfsbane Flowers generate naturally in forest biomes. Village Hunter patrols remain the most reliable renewable source.
 
 Feral Werewolves naturally spawn only in eligible Overworld forests on dark full-moon nights. Their strict spawning conditions make them dangerous and uncommon encounters.
+
+A Moonbane Pearl is crafted from an Ender Pearl and Wolfsbane Flowers. It is used in the Moon-Oath and can also be used to craft an Alpha Werewolf Badge.
 
 ## The Moon-Oath and Alpha Trial
 
@@ -185,9 +189,9 @@ Datapacks can extend the following item tags:
 
 ## Testing and compatibility
 
-Version 1.0.0 has been tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+Version 1.0.2 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.0.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.2.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 

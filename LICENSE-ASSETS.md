@@ -27,7 +27,8 @@ The following are not licensed under CC BY-SA 4.0 by this file:
 
 - the official Howling Werewolf / 月厄狼人 logo, including `src/main/resources/logo.png`;
 - the Howling Werewolf / 月厄狼人 names and other project branding identifiers;
-- source code, which is governed by [LICENSE.md](LICENSE.md) (`MPL-2.0`);
+- source code, whose scope is declared in [LICENSE-CODE.md](LICENSE-CODE.md) and whose full
+  `MPL-2.0` text is in [LICENSE.md](LICENSE.md);
 - Minecraft, Minecraft Forge, Gradle, mappings, and all other third-party code or
   materials, which remain under their respective terms.
 

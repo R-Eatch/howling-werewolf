@@ -64,13 +64,13 @@ public final class QuadrupedWerewolfModel extends EntityModel<AbstractClientPlay
         CubeListBuilder leg = CubeListBuilder.create().texOffs(0, 18)
                 .addBox(-1.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
         root.addOrReplaceChild("right_hind_leg", leg,
-                PartPose.offset(-2.5F, 16.0F, 7.0F));
+                PartPose.offset(-1.5F, 16.0F, 7.0F));
         root.addOrReplaceChild("left_hind_leg", leg,
-                PartPose.offset(0.5F, 16.0F, 7.0F));
+                PartPose.offset(1.5F, 16.0F, 7.0F));
         root.addOrReplaceChild("right_front_leg", leg,
-                PartPose.offset(-2.5F, 16.0F, -4.0F));
+                PartPose.offset(-1.5F, 16.0F, -4.0F));
         root.addOrReplaceChild("left_front_leg", leg,
-                PartPose.offset(0.5F, 16.0F, -4.0F));
+                PartPose.offset(1.5F, 16.0F, -4.0F));
         PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create(),
                 PartPose.offset(0.0F, 12.0F, 8.0F));
         tail.addOrReplaceChild("real_tail", CubeListBuilder.create()
@@ -89,10 +89,10 @@ public final class QuadrupedWerewolfModel extends EntityModel<AbstractClientPlay
         body.xRot = Mth.HALF_PI;
         upperBody.setPos(-1.0F, 14.0F, -3.0F);
         upperBody.xRot = body.xRot;
-        rightHindLeg.setPos(-2.5F, 16.0F, 7.0F);
-        leftHindLeg.setPos(0.5F, 16.0F, 7.0F);
-        rightFrontLeg.setPos(-2.5F, 16.0F, -4.0F);
-        leftFrontLeg.setPos(0.5F, 16.0F, -4.0F);
+        rightHindLeg.setPos(-1.5F, 16.0F, 7.0F);
+        leftHindLeg.setPos(1.5F, 16.0F, 7.0F);
+        rightFrontLeg.setPos(-1.5F, 16.0F, -4.0F);
+        leftFrontLeg.setPos(1.5F, 16.0F, -4.0F);
         tail.setPos(0.0F, 12.0F, 8.0F);
 
         float speed = Mth.clamp(limbAmount, 0.0F, 1.0F);

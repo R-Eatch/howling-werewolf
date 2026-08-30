@@ -181,6 +181,10 @@ tasks.named('jar', Jar).configure {
         into 'META-INF'
         rename { "LICENSE_${mod_id}.md" }
     }
+    from('LICENSE-CODE.md') {
+        into 'META-INF'
+        rename { "LICENSE-CODE_${mod_id}.md" }
+    }
     from('LICENSE-ASSETS.md') {
         into 'META-INF'
         rename { "LICENSE-ASSETS_${mod_id}.md" }

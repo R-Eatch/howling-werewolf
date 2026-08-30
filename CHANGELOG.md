@@ -2,6 +2,15 @@
 
 All notable public releases of Howling Werewolf are documented here.
 
+## Howling Werewolf 1.0.2
+
+- Centers and aligns the four legs of the Quadruped Wolf model.
+- Updates the owner-authored Hunter and Quadruped Wolf textures.
+- Shortens overlapping Skills-page status text, removes the redundant Night Vision state label, and keeps Empty Claw status slot-only.
+- Adds an explicit code-license scope document and packages it in the Mod JAR.
+- Updates and aligns the English and Simplified Chinese release documentation.
+- Keeps the 1.0.0 gameplay and balance baseline unchanged.
+
 ## Howling Werewolf 1.0.0
 
 **Howling Werewolf 1.0.0 is the first public stable release of the project.**
