@@ -1,22 +1,22 @@
 package com.howlingwerewolf;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class HWConfig {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue FERAL_WEREWOLF_INFECTION_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue WEREWOLF_EXPERIENCE_GAIN_MULTIPLIER;
-    public static final ForgeConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
-    public static final ForgeConfigSpec.BooleanValue GENERATE_SILVER;
-    public static final ForgeConfigSpec.BooleanValue GENERATE_WOLFSBANE;
-    public static final ForgeConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
-    public static final ForgeConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
-    public static final ForgeConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
-    public static final ForgeConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;
+    public static final ModConfigSpec.DoubleValue FERAL_WEREWOLF_INFECTION_CHANCE;
+    public static final ModConfigSpec.DoubleValue WEREWOLF_EXPERIENCE_GAIN_MULTIPLIER;
+    public static final ModConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
+    public static final ModConfigSpec.BooleanValue GENERATE_SILVER;
+    public static final ModConfigSpec.BooleanValue GENERATE_WOLFSBANE;
+    public static final ModConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
+    public static final ModConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
+    public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
+    public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("gameplay");
         WOLF_INFECTION_CHANCE = builder.comment(
                         "Chance that damage from an untamed vanilla wolf infects a human player. Default is 10%.")

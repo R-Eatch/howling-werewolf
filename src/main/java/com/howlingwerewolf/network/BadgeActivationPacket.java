@@ -1,19 +1,25 @@
 package com.howlingwerewolf.network;
 
+import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.client.ClientPacketHandlers;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record BadgeActivationPacket() implements CustomPacketPayload {
+    public static final Type<BadgeActivationPacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "badge_activation"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, BadgeActivationPacket> STREAM_CODEC =
+            StreamCodec.unit(new BadgeActivationPacket());
 
-public final class BadgeActivationPacket {
-    public static void encode(BadgeActivationPacket packet, FriendlyByteBuf buf) {}
-    public static BadgeActivationPacket decode(FriendlyByteBuf buf) { return new BadgeActivationPacket(); }
+    @Override
+    public Type<BadgeActivationPacket> type() {
+        return TYPE;
+    }
 
-    public static void handle(BadgeActivationPacket packet, Supplier<NetworkEvent.Context> context) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientPacketHandlers::showBadgeActivation);
-        context.get().setPacketHandled(true);
+    public static void handle(BadgeActivationPacket packet, IPayloadContext context) {
+        ClientPacketHandlers.showBadgeActivation();
     }
 }

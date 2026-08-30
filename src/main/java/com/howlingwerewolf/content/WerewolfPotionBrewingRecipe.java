@@ -2,7 +2,7 @@ package com.howlingwerewolf.content;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.brewing.IBrewingRecipe;
+import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
 
 public final class WerewolfPotionBrewingRecipe implements IBrewingRecipe {
     @Override

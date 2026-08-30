@@ -4,7 +4,6 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.capability.WerewolfApi;
-import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.network.RequestWerewolfSyncPacket;
 import com.howlingwerewolf.network.TransformRequestPacket;
 import com.howlingwerewolf.network.ToggleBeastModePacket;
@@ -19,14 +18,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.RenderArmEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT)
 public final class ClientForgeEvents {
     private static WerewolfPlayerRenderer renderer;
     private static BeastPlayerRenderer beastRenderer;
@@ -37,8 +37,7 @@ public final class ClientForgeEvents {
     private static int secondDimensionResyncTicks = -1;
 
     @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void clientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
@@ -58,33 +57,33 @@ public final class ClientForgeEvents {
             secondDimensionResyncTicks = 20;
         }
         if (dimensionResyncTicks >= 0 && --dimensionResyncTicks == 0) {
-            ModNetwork.CHANNEL.sendToServer(new RequestWerewolfSyncPacket());
+            PacketDistributor.sendToServer(new RequestWerewolfSyncPacket());
         }
         if (secondDimensionResyncTicks >= 0 && --secondDimensionResyncTicks == 0) {
-            ModNetwork.CHANNEL.sendToServer(new RequestWerewolfSyncPacket());
+            PacketDistributor.sendToServer(new RequestWerewolfSyncPacket());
         }
         ClientPacketHandlers.applyPendingSyncs();
         while (ClientModEvents.OPEN_PROGRESSION.consumeClick()) {
             minecraft.setScreen(new WerewolfProgressionScreen());
         }
         while (ClientModEvents.TRANSFORM.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new TransformRequestPacket());
+            PacketDistributor.sendToServer(new TransformRequestPacket());
         }
         while (ClientModEvents.BEAST_MODE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleBeastModePacket());
+            PacketDistributor.sendToServer(new ToggleBeastModePacket());
         }
         while (ClientModEvents.QUADRUPED_MODE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleQuadrupedModePacket());
+            PacketDistributor.sendToServer(new ToggleQuadrupedModePacket());
         }
         while (ClientModEvents.NIGHT_VISION.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleNightVisionPacket());
+            PacketDistributor.sendToServer(new ToggleNightVisionPacket());
         }
         while (ClientModEvents.SUMMON_WOLF_SPIRIT.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
+            PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
+            PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }
     }
 
@@ -92,7 +91,7 @@ public final class ClientForgeEvents {
         Minecraft minecraft = Minecraft.getInstance();
         int targetId = minecraft.hitResult instanceof EntityHitResult hit
                 && hit.getEntity() instanceof LivingEntity ? hit.getEntity().getId() : -1;
-        ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.BLOODY_BITE, targetId));
+        PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.BLOODY_BITE, targetId));
     }
 
     @SubscribeEvent

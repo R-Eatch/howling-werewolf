@@ -8,6 +8,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.HolderLookup;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public final class WerewolfData {
+public final class WerewolfData implements INBTSerializable<CompoundTag> {
     public static final int CURRENT_DATA_VERSION = 2;
     public static final int DEFAULT_MAX_LEVEL = 20;
     public static final int MAX_LEVEL_LIMIT = 25;
@@ -350,6 +352,11 @@ public final class WerewolfData {
         return tag;
     }
 
+    @Override
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        return serializeNBT();
+    }
+
     public void deserializeNBT(CompoundTag tag) {
         tag = migrateData(tag);
         syncedMaxLevel = tag.contains("NetworkMaxLevel", Tag.TAG_INT)
@@ -401,6 +408,11 @@ public final class WerewolfData {
             form = WerewolfForm.WEREWOLF;
         }
         if (form == WerewolfForm.BEAST && !alphaDefeated) form = WerewolfForm.WEREWOLF;
+    }
+
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+        deserializeNBT(tag);
     }
 
     private static CompoundTag migrateData(CompoundTag source) {

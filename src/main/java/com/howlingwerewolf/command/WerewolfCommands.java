@@ -14,14 +14,15 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
@@ -43,12 +44,16 @@ public final class WerewolfCommands {
                 .then(Commands.literal("settreepoints").then(pointsArgument(true)))
                 .then(Commands.literal("settree").then(Commands.argument("target", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(WerewolfTreeSkill.values()).map(WerewolfTreeSkill::id), builder))
                                 .then(Commands.argument("rank", IntegerArgumentType.integer(0,
                                                 WerewolfTreeSkill.maximumRank()))
                                         .executes(ctx -> setTree(ctx, player(ctx), StringArgumentType.getString(ctx, "skill"),
                                                 IntegerArgumentType.getInteger(ctx, "rank")))))))
                 .then(Commands.literal("setability").then(Commands.argument("target", EntityArgument.player())
                         .then(Commands.argument("ability", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(WerewolfAbility.values()).map(WerewolfAbility::id), builder))
                                 .then(Commands.argument("unlocked", BoolArgumentType.bool())
                                         .executes(ctx -> setAbility(ctx, player(ctx), StringArgumentType.getString(ctx, "ability"),
                                                 BoolArgumentType.getBool(ctx, "unlocked")))))))
@@ -165,7 +170,7 @@ public final class WerewolfCommands {
     }
 
     private static int status(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> optional = WerewolfApi.get(player);
+        java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
                     + player.getGameProfile().getName() + ". Reconnect and check the server log."));
@@ -191,7 +196,7 @@ public final class WerewolfCommands {
 
     private static int mutate(CommandContext<CommandSourceStack> ctx, ServerPlayer player,
                               java.util.function.Consumer<WerewolfData> action, String result) {
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> optional = WerewolfApi.get(player);
+        java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
                     + player.getGameProfile().getName() + ". Reconnect and check the server log."));

@@ -7,19 +7,19 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT)
 public final class ClientModEvents {
     public static final ModelLayerLocation HUNTER_LAYER = new ModelLayerLocation(
-            new ResourceLocation(HowlingWerewolf.MOD_ID, "hunter"), "main");
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter"), "main");
     public static final ModelLayerLocation QUADRUPED_WEREWOLF_LAYER = new ModelLayerLocation(
-            new ResourceLocation(HowlingWerewolf.MOD_ID, "quadruped_werewolf"), "main");
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "quadruped_werewolf"), "main");
     public static final KeyMapping OPEN_PROGRESSION = new KeyMapping(
             "key.howlingwerewolf.open_progression", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K,
             "key.categories.howlingwerewolf");

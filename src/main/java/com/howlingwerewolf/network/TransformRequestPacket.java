@@ -1,21 +1,26 @@
 package com.howlingwerewolf.network;
 
+import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record TransformRequestPacket() implements CustomPacketPayload {
+    public static final Type<TransformRequestPacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "transform_request"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, TransformRequestPacket> STREAM_CODEC =
+            StreamCodec.unit(new TransformRequestPacket());
 
-public final class TransformRequestPacket {
-    public static void encode(TransformRequestPacket packet, FriendlyByteBuf buf) {}
-    public static TransformRequestPacket decode(FriendlyByteBuf buf) { return new TransformRequestPacket(); }
+    @Override
+    public Type<TransformRequestPacket> type() {
+        return TYPE;
+    }
 
-    public static void handle(TransformRequestPacket packet, Supplier<NetworkEvent.Context> context) {
-        ServerPlayer sender = context.get().getSender();
-        if (sender != null) {
-            WerewolfGameplayEvents.requestTransform(sender);
-        }
-        context.get().setPacketHandled(true);
+    public static void handle(TransformRequestPacket packet, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer sender) WerewolfGameplayEvents.requestTransform(sender);
     }
 }

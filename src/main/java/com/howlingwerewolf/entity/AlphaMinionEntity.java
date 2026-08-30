@@ -72,7 +72,8 @@ public final class AlphaMinionEntity extends Wolf {
     }
 
     @Override
-    protected net.minecraft.resources.ResourceLocation getDefaultLootTable() {
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
         return net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY;
     }
 

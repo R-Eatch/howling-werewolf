@@ -33,8 +33,8 @@ public final class WerewolfEquipmentRenderer
 
     @Override
     protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
+                                  float rotationYaw, float partialTick, float scale) {
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
         WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
     }
 
@@ -97,7 +97,7 @@ public final class WerewolfEquipmentRenderer
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return player.getSkinTextureLocation();
+        return player.getSkin().texture();
     }
 
     @Override
@@ -112,7 +112,7 @@ public final class WerewolfEquipmentRenderer
 
         @Override
         public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int packedLight,
-                                   int packedOverlay, float red, float green, float blue, float alpha) {
+                                   int packedOverlay, int color) {
             // The custom werewolf renderer draws the body. Only this renderer's layers are visible.
         }
     }

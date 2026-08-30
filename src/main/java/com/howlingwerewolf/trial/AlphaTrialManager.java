@@ -68,7 +68,7 @@ public final class AlphaTrialManager {
             return;
         }
 
-        WerewolfData data = WerewolfApi.get(player).resolve().orElse(null);
+        WerewolfData data = WerewolfApi.get(player).orElse(null);
         if (data == null || !data.isWerewolf() || data.getLevel() < 10) {
             reject(player, "message.howlingwerewolf.trial.level_required");
             return;

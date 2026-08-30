@@ -1,8 +1,0 @@
-{
-  "type": "minecraft:blasting",
-  "category": "misc",
-  "ingredient": { "item": "howlingwerewolf:deepslate_silver_ore" },
-  "result": "howlingwerewolf:silver_ingot",
-  "experience": 0.7,
-  "cookingtime": 100
-}

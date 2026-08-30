@@ -1,0 +1,23 @@
+{
+  "parent": "howlingwerewolf:guide/obtain_wolfsbane_potion",
+  "display": {
+    "icon": { "id": "howlingwerewolf:werewolf_potion" },
+    "title": { "translate": "advancement.howlingwerewolf.obtain_werewolf_potion.title" },
+    "description": { "translate": "advancement.howlingwerewolf.obtain_werewolf_potion.desc" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_werewolf_potion": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["howlingwerewolf:werewolf_potion"] }
+        ]
+      }
+    }
+  },
+  "requirements": [["has_werewolf_potion"]]
+}

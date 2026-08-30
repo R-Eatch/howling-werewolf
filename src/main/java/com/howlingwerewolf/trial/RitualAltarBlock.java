@@ -1,11 +1,15 @@
 package com.howlingwerewolf.trial;
 
 import com.howlingwerewolf.content.ModItems;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +26,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class RitualAltarBlock extends BaseEntityBlock {
+    public static final MapCodec<RitualAltarBlock> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                    Codec.BOOL.fieldOf("central").forGetter(block -> block.central),
+                    propertiesCodec()
+            ).apply(instance, (central, properties) -> new RitualAltarBlock(properties, central)));
     private static final VoxelShape SHAPE = box(1.0D, 0.0D, 1.0D, 15.0D, 12.0D, 15.0D);
     private final boolean central;
 
@@ -32,6 +41,11 @@ public final class RitualAltarBlock extends BaseEntityBlock {
 
     public boolean isCentral() {
         return central;
+    }
+
+    @Override
+    protected MapCodec<RitualAltarBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -46,15 +60,12 @@ public final class RitualAltarBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
-                                 InteractionHand hand, BlockHitResult hit) {
+    protected ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level,
+                                              BlockPos pos, Player player, InteractionHand hand,
+                                              BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof RitualAltarBlockEntity altar)) {
-            return InteractionResult.PASS;
-        }
-        ItemStack held = player.getItemInHand(hand);
-        if (player.isShiftKeyDown() && held.isEmpty() && !altar.getOffering().isEmpty()) {
-            if (!level.isClientSide) altar.returnOffering(player);
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return held.isEmpty() ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                    : ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
 
         boolean validOffering = central
@@ -67,10 +78,27 @@ public final class RitualAltarBlock extends BaseEntityBlock {
                 level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME,
                         SoundSource.BLOCKS, 0.8F, central ? 0.72F : 1.15F);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (central && held.isEmpty() && altar.hasExpectedOffering()
+        // In 1.21 PASS_TO_DEFAULT_BLOCK_INTERACTION invokes useWithoutItem even when this main-hand
+        // stack is non-empty. Preserve the 1.20.1 contract: retrieval and trial start are empty-hand
+        // actions, while unrelated held items may still run their own useOn behavior.
+        return held.isEmpty() ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                : ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                                Player player, BlockHitResult hit) {
+        if (!(level.getBlockEntity(pos) instanceof RitualAltarBlockEntity altar)) {
+            return InteractionResult.PASS;
+        }
+        if (player.isShiftKeyDown() && !altar.getOffering().isEmpty()) {
+            if (!level.isClientSide) altar.returnOffering(player);
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (central && altar.hasExpectedOffering()
                 && player instanceof ServerPlayer serverPlayer && !level.isClientSide) {
             AlphaTrialManager.tryStart(serverPlayer, pos);
             return InteractionResult.CONSUME;

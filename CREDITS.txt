@@ -6,10 +6,10 @@ by several outstanding werewolf mods created by the Minecraft community, but it 
 a port, fork, official continuation, or official remake and is not affiliated with or
 endorsed by their creators.
 
-Original source code is licensed under MPL-2.0 as declared in LICENSE-CODE.md, with the full
-license text in LICENSE.md. Original art assets are licensed under CC-BY-SA-4.0 as defined in
-LICENSE-ASSETS.md, except for the official logo and project branding. Minecraft Forge and other
-third-party materials retain their own licenses and credits below.
+Original source code is licensed under MPL-2.0 in LICENSE.md. Original art assets are
+licensed under CC-BY-SA-4.0 as defined in LICENSE-ASSETS.md, except for the official logo
+and project branding. Minecraft Forge and other third-party materials retain their own
+licenses and credits below.
 
 =========================================================================
 

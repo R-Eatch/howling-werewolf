@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public final class HunterRenderer extends HumanoidMobRenderer<HunterEntity, HunterModel> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/hunter.png");
 
     public HunterRenderer(EntityRendererProvider.Context context) {

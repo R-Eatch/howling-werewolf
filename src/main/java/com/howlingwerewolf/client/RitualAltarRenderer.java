@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 
 /** Renders offerings and the twelve-second badge/pearl convergence sequence. */
 public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAltarBlockEntity> {
@@ -19,6 +20,14 @@ public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAlta
 
     public RitualAltarRenderer(BlockEntityRendererProvider.Context context) {
         itemRenderer = context.getItemRenderer();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(RitualAltarBlockEntity altar) {
+        // The activation renderer draws the four pearls up to three blocks from the center.
+        return altar.isCentral() && altar.isTrialActive()
+                ? new AABB(altar.getBlockPos()).inflate(4.0D, 4.0D, 4.0D)
+                : BlockEntityRenderer.super.getRenderBoundingBox(altar);
     }
 
     @Override

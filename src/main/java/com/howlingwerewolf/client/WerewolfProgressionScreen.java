@@ -4,7 +4,6 @@ import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
-import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.network.SetClawSlotPacket;
 import com.howlingwerewolf.network.ToggleBeastModePacket;
 import com.howlingwerewolf.network.ToggleNightVisionPacket;
@@ -16,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -76,7 +76,7 @@ public final class WerewolfProgressionScreen extends Screen {
         int row = 0;
         for (WerewolfTreeSkill skill : WerewolfTreeSkill.values()) {
             Button button = Button.builder(Component.literal("+"), clicked -> {
-                        ModNetwork.CHANNEL.sendToServer(new UpgradeTreeSkillPacket(skill));
+                        PacketDistributor.sendToServer(new UpgradeTreeSkillPacket(skill));
                         clicked.active = false;
                     }).bounds(left + PANEL_WIDTH - 35, top + 78 + row * TREE_ROW_HEIGHT, 20, 15).build();
             button.active = canUpgrade(data, skill);
@@ -90,7 +90,7 @@ public final class WerewolfProgressionScreen extends Screen {
         int row = 0;
         for (WerewolfAbility ability : WerewolfAbility.values()) {
             Button button = Button.builder(Component.translatable("screen.howlingwerewolf.unlock"), clicked -> {
-                        ModNetwork.CHANNEL.sendToServer(new UnlockAbilityPacket(ability));
+                        PacketDistributor.sendToServer(new UnlockAbilityPacket(ability));
                         clicked.active = false;
                     }).bounds(left + PANEL_WIDTH - 84, abilityControlY(top, ability), 69, 18).build();
             button.active = canUnlock(data, ability);
@@ -98,13 +98,13 @@ public final class WerewolfProgressionScreen extends Screen {
             row++;
         }
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.use"), button ->
-                        ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT)))
+                        PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT)))
                 .bounds(left + 160, abilityControlY(top, WerewolfAbility.SUMMON_WOLF_SPIRIT), 58, 18).build());
         addRenderableWidget(Button.builder(Component.literal("G"), button ->
-                        ModNetwork.CHANNEL.sendToServer(new com.howlingwerewolf.network.ToggleQuadrupedModePacket()))
+                        PacketDistributor.sendToServer(new com.howlingwerewolf.network.ToggleQuadrupedModePacket()))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.QUADRUPED_FORM), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("V"), button ->
-                        ModNetwork.CHANNEL.sendToServer(new ToggleNightVisionPacket()))
+                        PacketDistributor.sendToServer(new ToggleNightVisionPacket()))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.NIGHT_VISION), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("<"), button -> changeClawSlot(-1))
                 .bounds(left + 160, abilityControlY(top, WerewolfAbility.EMPTY_CLAW_SLOT), 24, 18).build());
@@ -113,13 +113,13 @@ public final class WerewolfProgressionScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("B"), button -> ClientForgeEvents.useBloodyBite())
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.BLOODY_BITE), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("R"), button ->
-                        ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE)))
+                        PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE)))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.MOONBLOOD_SURGE), 24, 18).build());
     }
 
     private void initTrial(int left, int top) {
         beastButton = addRenderableWidget(Button.builder(Component.literal("H"), button ->
-                        ModNetwork.CHANNEL.sendToServer(new ToggleBeastModePacket()))
+                        PacketDistributor.sendToServer(new ToggleBeastModePacket()))
                 .bounds(left + PANEL_WIDTH - 54, top + 43, 36, 18).build());
         WerewolfData data = getData();
         beastButton.active = data != null && data.isTransformed() && data.hasDefeatedAlpha();
@@ -130,7 +130,7 @@ public final class WerewolfProgressionScreen extends Screen {
         if (data == null || !data.hasAbility(WerewolfAbility.EMPTY_CLAW_SLOT)) return;
         int slot = Math.floorMod(data.getClawHotbarSlot() + delta, 9);
         data.setClawHotbarSlot(slot);
-        ModNetwork.CHANNEL.sendToServer(new SetClawSlotPacket(slot));
+        PacketDistributor.sendToServer(new SetClawSlotPacket(slot));
     }
 
     private void switchPage(Page target) {
@@ -157,7 +157,7 @@ public final class WerewolfProgressionScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
+        renderTransparentBackground(graphics);
         int logicalMouseX = toLogical(mouseX);
         int logicalMouseY = toLogical(mouseY);
         int left = (logicalWidth() - PANEL_WIDTH) / 2;
@@ -182,6 +182,12 @@ public final class WerewolfProgressionScreen extends Screen {
         }
         super.render(graphics, logicalMouseX, logicalMouseY, partialTick);
         graphics.pose().popPose();
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // Screen#render invokes this again from super.render; the explicit transparent pass above
+        // preserves the 1.20.1 dimming without 1.21.1's world blur or a second overlay.
     }
 
     private void renderHeader(GuiGraphics graphics, WerewolfData data, int left, int top) {
@@ -228,6 +234,8 @@ public final class WerewolfProgressionScreen extends Screen {
             boolean unlocked = data.hasAbility(ability);
             graphics.drawString(font, Component.translatable(ability.translationKey()), left + 16, y, unlocked ? TEXT : DIM, false);
             graphics.drawString(font, Component.translatable("screen.howlingwerewolf.cost", ability.cost()), left + 16, y + 11, GOLD, false);
+            if (ability == WerewolfAbility.NIGHT_VISION && unlocked)
+                graphics.drawString(font, Component.translatable(data.isNightVisionEnabled() ? "screen.howlingwerewolf.auto_on" : "screen.howlingwerewolf.auto_off"), left + 99, y + 11, ACCENT, false);
             if (ability == WerewolfAbility.QUADRUPED_FORM && unlocked)
                 graphics.drawString(font, Component.translatable(data.isQuadrupedMode() ? "screen.howlingwerewolf.active" : "screen.howlingwerewolf.inactive"), left + 99, y + 11, ACCENT, false);
             if (ability == WerewolfAbility.EMPTY_CLAW_SLOT && unlocked)
@@ -399,13 +407,13 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        return super.mouseScrolled(mouseX / uiScale, mouseY / uiScale, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return super.mouseScrolled(mouseX / uiScale, mouseY / uiScale, scrollX, scrollY);
     }
 
     private static WerewolfData getData() {
         Minecraft minecraft = Minecraft.getInstance();
-        return minecraft.player == null ? null : WerewolfApi.get(minecraft.player).resolve().orElse(null);
+        return minecraft.player == null ? null : WerewolfApi.get(minecraft.player).orElse(null);
     }
 
     @Override public boolean isPauseScreen() { return false; }

@@ -3,35 +3,21 @@ package com.howlingwerewolf.event;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
-import com.howlingwerewolf.capability.WerewolfProvider;
 import com.howlingwerewolf.capability.WerewolfPersistence;
 import com.howlingwerewolf.network.ModNetwork;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfCapabilityEvents {
-    @SubscribeEvent
-    public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        // Attach exactly one provider to every newly constructed Player object. Forge 1.20.1
-        // keeps the same ServerPlayer object for ordinary dimension travel; WerewolfProvider
-        // therefore owns a revivable LazyOptional so the attached provider survives that
-        // invalidate/revive lifecycle without losing its WerewolfData instance.
-        if (event.getObject() instanceof Player) {
-            WerewolfProvider provider = new WerewolfProvider();
-            event.addCapability(WerewolfProvider.ID, provider);
-            event.addListener(provider::invalidate);
-        }
-    }
-
-    /** Persist the live capability before Forge/Minecraft begins replacing the player. */
+    /** Keep the legacy player-NBT mirror current before a dimension transition. */
     @SubscribeEvent
     public static void beforeDimensionTravel(EntityTravelToDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -39,60 +25,32 @@ public final class WerewolfCapabilityEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void clonePlayer(PlayerEvent.Clone event) {
         Player original = event.getOriginal();
         Player replacement = event.getEntity();
 
-        // First preserve the Forge persistent root. It is available even if the capability
-        // on the old player has already been invalidated by the lifecycle.
+        // NeoForge copies serializable attachments before this lowest-priority listener. Preserve
+        // the Forge 1.20.1 PlayerPersisted mirror as an additional old-world recovery route.
         WerewolfPersistence.copyPersistentRoot(original, replacement);
-        CompoundTag snapshot = WerewolfPersistence.readSnapshot(original);
-
-        // Forge invalidates original player capabilities around cloning. Temporarily revive
-        // them and prefer the live state over the NBT mirror whenever possible.
-        original.reviveCaps();
-        CompoundTag liveSnapshot = WerewolfApi.get(original)
-                .map(WerewolfData::serializeNBT)
-                .orElse(null);
-        if (liveSnapshot != null) {
-            snapshot = liveSnapshot;
-        } else if (original instanceof ServerPlayer serverOriginal) {
-            HowlingWerewolf.LOGGER.warn(
-                    "Original werewolf capability unavailable while cloning {}; using PlayerPersisted fallback.",
-                    serverOriginal.getGameProfile().getName());
+        WerewolfData newData = replacement.getData(com.howlingwerewolf.capability.ModAttachments.WEREWOLF);
+        if (newData.isDefaultState()) {
+            CompoundTag legacySnapshot = WerewolfPersistence.readSnapshot(original);
+            if (legacySnapshot != null) newData.deserializeNBT(legacySnapshot);
         }
 
-        final CompoundTag finalSnapshot = snapshot;
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> replacementOptional = WerewolfApi.get(replacement);
-        if (!replacementOptional.isPresent()) {
-            HowlingWerewolf.LOGGER.error(
-                    "Replacement Player is missing the werewolf capability during Clone. Player={}",
-                    replacement.getGameProfile().getName());
-            original.invalidateCaps();
-            return;
-        }
-        replacementOptional.ifPresent(newData -> {
-            if (finalSnapshot != null) {
-                newData.deserializeNBT(finalSnapshot);
+        if (event.isWasDeath()) {
+            if (replacement instanceof ServerPlayer serverPlayer) {
+                WerewolfGameplayEvents.removeSpiritWolves(serverPlayer, newData);
             } else {
-                WerewolfPersistence.load(replacement, newData);
+                newData.getSpiritWolfIds().clear();
+                newData.setWolfSpiritExpireTime(0L);
             }
+            newData.prepareAfterDeath();
+            replacement.refreshDimensions();
+        }
 
-            if (event.isWasDeath()) {
-                if (replacement instanceof ServerPlayer serverPlayer) {
-                    WerewolfGameplayEvents.removeSpiritWolves(serverPlayer, newData);
-                } else {
-                    newData.getSpiritWolfIds().clear();
-                    newData.setWolfSpiritExpireTime(0L);
-                }
-                newData.prepareAfterDeath();
-                replacement.refreshDimensions();
-            }
-
-            WerewolfPersistence.save(replacement, newData);
-        });
-        original.invalidateCaps();
+        WerewolfPersistence.save(replacement, newData);
     }
 
     @SubscribeEvent
@@ -135,16 +93,16 @@ public final class WerewolfCapabilityEvents {
     @SubscribeEvent
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getEntity() instanceof ServerPlayer observer && event.getTarget() instanceof ServerPlayer target) {
-            WerewolfApi.get(target).ifPresent(data -> ModNetwork.CHANNEL.send(
-                    net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> observer),
-                    new com.howlingwerewolf.network.SyncWerewolfDataPacket(target.getId(), data.serializeNBT())));
+            WerewolfApi.get(target).ifPresent(data -> PacketDistributor.sendToPlayer(observer,
+                    new com.howlingwerewolf.network.SyncWerewolfDataPacket(
+                            target.getId(), data.serializeNBT())));
         }
     }
 
     private static void restoreAndSync(Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) return;
 
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> optional = WerewolfApi.get(serverPlayer);
+        java.util.Optional<WerewolfData> optional = WerewolfApi.get(serverPlayer);
         if (!optional.isPresent()) {
             HowlingWerewolf.LOGGER.error(
                     "Werewolf capability missing for {} after player lifecycle event. Dimension state cannot be restored.",

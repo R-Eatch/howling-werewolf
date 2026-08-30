@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/first_full_moon",
+  "display": {
+    "icon": { "id": "howlingwerewolf:silver_ingot" },
+    "title": { "translate": "advancement.howlingwerewolf.first_point.title" },
+    "description": { "translate": "advancement.howlingwerewolf.first_point.desc" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}

@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 /** Reuses the player's normal werewolf rig for the biped mob. / 双足生物复用玩家普通狼人骨架。 */
 public final class WerewolfEntityRenderer
         extends LivingEntityRenderer<WerewolfEntity, WerewolfPlayerModel<WerewolfEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/werewolf_entity.png");
 
     public WerewolfEntityRenderer(EntityRendererProvider.Context context) {

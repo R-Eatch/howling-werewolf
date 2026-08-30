@@ -4,20 +4,16 @@ Copyright © 2026 R_Eatch.
 
 Original art assets are governed by `LICENSE-ASSETS.md` (`CC-BY-SA-4.0`), except for the
 official logo and project branding identified there. Original source code is governed by
-`LICENSE-CODE.md` and the full MPL-2.0 text in `LICENSE.md`. Third-party materials retain their
-own terms.
+`LICENSE.md` (`MPL-2.0`). Third-party materials retain their own terms.
 
 This file records the provenance policy for the public release branch.
 
 ## 1.0.2 owner-updated assets
 
-- `textures/entity/hunter.png` and `design/texture-masks/hunter_base.png`
-  - Updated by the project owner through the textured 1.0.2 Blockbench handoff, then copied byte-for-byte to the runtime texture.
-- `textures/entity/quadruped_werewolf.png` and `design/texture-masks/quadruped_werewolf_base.png`
-  - Updated by the project owner through the aligned 1.0.2 Blockbench handoff, then copied byte-for-byte to the runtime texture.
-- `design/blockbench/hunter_1.0.2-textured.bbmodel` and
-  `design/blockbench/quadruped_wolf_1.0.2-aligned.bbmodel`
-  - Owner-saved editable models with embedded copies of the matching runtime textures. The accepted 1.0.1 geometry remains unchanged.
+- `textures/entity/hunter.png`
+  - Updated by the project owner through the textured Forge 1.0.2 Blockbench handoff, then copied byte-for-byte to this port's runtime texture.
+- `textures/entity/quadruped_werewolf.png`
+  - Updated by the project owner through the aligned Forge 1.0.2 Blockbench handoff, then copied byte-for-byte to this port's runtime texture. The accepted 1.0.1 geometry remains unchanged.
 
 ## 0.3.2 current assets
 

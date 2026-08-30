@@ -5,9 +5,12 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -33,12 +36,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
 
 public final class HunterEntity extends PathfinderMob {
     private static final int TRIAL_EFFECT_DURATION = 20 * 60 * 30;
-    private static final ResourceLocation HUNTER_LOOT = new ResourceLocation(
-            HowlingWerewolf.MOD_ID, "entities/hunter");
+    private static final ResourceKey<LootTable> HUNTER_LOOT = ResourceKey.create(Registries.LOOT_TABLE,
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "entities/hunter"));
     private boolean trialHunter;
     private boolean villagePatrol;
     private long villageKey;
@@ -89,10 +93,10 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        MobSpawnType spawnType, @Nullable SpawnGroupData groupData,
-                                        @Nullable CompoundTag tag) {
-        SpawnGroupData result = super.finalizeSpawn(level, difficulty, spawnType, groupData, tag);
+                                        MobSpawnType spawnType, @Nullable SpawnGroupData groupData) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, spawnType, groupData);
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         return result;
@@ -138,13 +142,13 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     @Override
-    protected ResourceLocation getDefaultLootTable() {
+    protected ResourceKey<LootTable> getDefaultLootTable() {
         return trialHunter ? net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY : HUNTER_LOOT;
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int lootingLevel, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, lootingLevel, recentlyHit);
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
         spawnAtLocation(ModBlocks.WOLFSBANE.get());
         if (random.nextFloat() < 0.50F) spawnAtLocation(ModBlocks.WOLFSBANE.get());
     }

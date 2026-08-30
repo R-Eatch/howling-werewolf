@@ -2,13 +2,13 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
-import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.network.ResetProgressionPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class WerewolfResetConfirmScreen extends Screen {
     private static final int PANEL_WIDTH = 320;
@@ -39,13 +39,13 @@ public final class WerewolfResetConfirmScreen extends Screen {
     }
 
     private void confirmReset() {
-        ModNetwork.CHANNEL.sendToServer(new ResetProgressionPacket());
+        PacketDistributor.sendToServer(new ResetProgressionPacket());
         minecraft.setScreen(parent);
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
+        renderTransparentBackground(graphics);
         int left = (width - PANEL_WIDTH) / 2;
         int top = (height - PANEL_HEIGHT) / 2;
         graphics.fill(left, top, left + PANEL_WIDTH, top + PANEL_HEIGHT, BACKGROUND);
@@ -74,13 +74,19 @@ public final class WerewolfResetConfirmScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // Screen#render invokes this from super.render. The reset dialog already drew the intended
+        // dim overlay above, so suppress 1.21.1's world blur and a duplicate background pass.
+    }
+
+    @Override
     public void onClose() {
         minecraft.setScreen(parent);
     }
 
     private static WerewolfData getData() {
         Minecraft minecraft = Minecraft.getInstance();
-        return minecraft.player == null ? null : WerewolfApi.get(minecraft.player).resolve().orElse(null);
+        return minecraft.player == null ? null : WerewolfApi.get(minecraft.player).orElse(null);
     }
 
     @Override public boolean isPauseScreen() { return false; }

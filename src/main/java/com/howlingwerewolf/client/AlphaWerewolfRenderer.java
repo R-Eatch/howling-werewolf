@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 /** Reuses the Beast geometry and attack animation for the trial's final opponent. */
 public final class AlphaWerewolfRenderer
         extends LivingEntityRenderer<AlphaWerewolfEntity, BeastPlayerModel<AlphaWerewolfEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/alpha_werewolf.png");
 
     public AlphaWerewolfRenderer(EntityRendererProvider.Context context) {

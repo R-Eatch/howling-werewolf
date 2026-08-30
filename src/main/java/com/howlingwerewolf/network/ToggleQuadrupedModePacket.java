@@ -1,22 +1,26 @@
 package com.howlingwerewolf.network;
 
+import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record ToggleQuadrupedModePacket() implements CustomPacketPayload {
+    public static final Type<ToggleQuadrupedModePacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "toggle_quadruped_mode"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ToggleQuadrupedModePacket> STREAM_CODEC =
+            StreamCodec.unit(new ToggleQuadrupedModePacket());
 
-public final class ToggleQuadrupedModePacket {
-    public static void encode(ToggleQuadrupedModePacket packet, FriendlyByteBuf buf) {}
-    public static ToggleQuadrupedModePacket decode(FriendlyByteBuf buf) {
-        return new ToggleQuadrupedModePacket();
+    @Override
+    public Type<ToggleQuadrupedModePacket> type() {
+        return TYPE;
     }
 
-    public static void handle(ToggleQuadrupedModePacket packet,
-                              Supplier<NetworkEvent.Context> context) {
-        ServerPlayer sender = context.get().getSender();
-        if (sender != null) WerewolfGameplayEvents.toggleQuadrupedMode(sender);
-        context.get().setPacketHandled(true);
+    public static void handle(ToggleQuadrupedModePacket packet, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer sender) WerewolfGameplayEvents.toggleQuadrupedMode(sender);
     }
 }

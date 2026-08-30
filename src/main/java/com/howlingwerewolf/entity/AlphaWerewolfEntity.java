@@ -6,6 +6,7 @@ import com.howlingwerewolf.content.ModEntities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -93,10 +96,10 @@ public final class AlphaWerewolfEntity extends Monster {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        MobSpawnType reason, @Nullable SpawnGroupData groupData,
-                                        @Nullable CompoundTag tag) {
-        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData, tag);
+                                        MobSpawnType reason, @Nullable SpawnGroupData groupData) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData);
         applyDifficultyScaling(level.getDifficulty());
         return result;
     }
@@ -112,7 +115,7 @@ public final class AlphaWerewolfEntity extends Monster {
         addPermanentCombatEffects();
     }
 
-    private void setAttributeBase(net.minecraft.world.entity.ai.attributes.Attribute attribute, double value) {
+    private void setAttributeBase(Holder<Attribute> attribute, double value) {
         AttributeInstance instance = getAttribute(attribute);
         if (instance != null) instance.setBaseValue(value);
     }
@@ -289,6 +292,8 @@ public final class AlphaWerewolfEntity extends Monster {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         int damageFrequencyLimitTicks = HWConfig.ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS.get();
+        // Normal-form claw attacks and their additive skill damage retain PLAYER_ATTACK and must
+        // pass this server-side gate. Only the documented forced-cleanup and Beast void sources bypass it.
         boolean limitedTrialDamage = !level().isClientSide
                 && trialOwner != null
                 && damageFrequencyLimitTicks > 0
@@ -314,7 +319,13 @@ public final class AlphaWerewolfEntity extends Monster {
     protected void actuallyHurt(DamageSource source, float amount) {
         // Ordinary damage is reduced by 70%; invulnerability-bypassing damage keeps its full value.
         // 普通伤害固定减免 70%；绕过无敌的伤害保持完整数值。
-        if (!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) amount *= 0.30F;
+        if (!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            amount *= 0.30F;
+            // Since NeoForge 1.21, LivingEntity#actuallyHurt reads its DamageContainer instead of
+            // the method argument. Keep that source of truth in sync with the Forge-era override.
+            DamageContainer damage = damageContainers.peek();
+            damage.setNewDamage(amount);
+        }
         super.actuallyHurt(source, amount);
     }
 
@@ -371,7 +382,8 @@ public final class AlphaWerewolfEntity extends Monster {
     }
 
     @Override
-    protected net.minecraft.resources.ResourceLocation getDefaultLootTable() {
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
         return net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY;
     }
 

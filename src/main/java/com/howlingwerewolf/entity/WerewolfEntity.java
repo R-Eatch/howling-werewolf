@@ -30,6 +30,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -80,10 +81,10 @@ public final class WerewolfEntity extends Monster {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        MobSpawnType reason, @Nullable SpawnGroupData groupData,
-                                        @Nullable CompoundTag tag) {
-        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData, tag);
+                                        MobSpawnType reason, @Nullable SpawnGroupData groupData) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData);
         applyDifficultyDamage(level.getDifficulty());
         setHealth(getMaxHealth());
         return result;
@@ -141,6 +142,9 @@ public final class WerewolfEntity extends Monster {
         if (summonedByAlpha
                 && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             amount *= 0.90F;
+            // NeoForge 1.21 applies damage from the container, not from this method argument.
+            DamageContainer damage = damageContainers.peek();
+            damage.setNewDamage(amount);
         }
         super.actuallyHurt(source, amount);
     }
@@ -160,7 +164,8 @@ public final class WerewolfEntity extends Monster {
     }
 
     @Override
-    protected net.minecraft.resources.ResourceLocation getDefaultLootTable() {
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
         return summonedByAlpha ? BuiltInLootTables.EMPTY : super.getDefaultLootTable();
     }
 

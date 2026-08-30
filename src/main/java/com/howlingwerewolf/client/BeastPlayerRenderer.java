@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public final class BeastPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, BeastPlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation BEAST_TEXTURE = new ResourceLocation(
+    private static final ResourceLocation BEAST_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
 
     public BeastPlayerRenderer(EntityRendererProvider.Context context) {
@@ -19,8 +19,8 @@ public final class BeastPlayerRenderer extends LivingEntityRenderer<AbstractClie
 
     @Override
     protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
+                                  float rotationYaw, float partialTick, float scale) {
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
         WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
     }
 

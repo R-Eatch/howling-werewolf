@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": ["minecraft:dark_forest", "minecraft:forest", "minecraft:birch_forest"],
-  "features": "howlingwerewolf:wolfsbane_rare",
-  "step": "vegetal_decoration"
-}

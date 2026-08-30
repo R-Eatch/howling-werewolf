@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class QuadrupedWerewolfRenderer
         extends LivingEntityRenderer<AbstractClientPlayer, QuadrupedWerewolfModel> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/quadruped_werewolf.png");
 
     public QuadrupedWerewolfRenderer(EntityRendererProvider.Context context) {
@@ -20,8 +20,8 @@ public final class QuadrupedWerewolfRenderer
 
     @Override
     protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
+                                  float rotationYaw, float partialTick, float scale) {
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
         WerewolfRenderTransforms.applyQuadrupedTravelPose(player, poseStack, partialTick);
     }
 

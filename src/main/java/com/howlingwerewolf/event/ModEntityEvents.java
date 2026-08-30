@@ -9,16 +9,17 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 public final class ModEntityEvents {
-    @Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
     public static final class ModBus {
         @SubscribeEvent
         public static void attributes(EntityAttributeCreationEvent event) {
@@ -31,11 +32,13 @@ public final class ModEntityEvents {
         }
     }
 
-    public static void registerSpawnPlacements() {
-        SpawnPlacements.register(ModEntities.HUNTER.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::hunterSpawnRules);
-        SpawnPlacements.register(ModEntities.WEREWOLF.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::werewolfSpawnRules);
+    public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        event.register(ModEntities.HUNTER.get(), SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::hunterSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(ModEntities.WEREWOLF.get(), SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::werewolfSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.OR);
     }
 
     /** Wild werewolves enter forests only beneath a full Overworld moon. / 野生狼人只在主世界满月的森林中出现。 */

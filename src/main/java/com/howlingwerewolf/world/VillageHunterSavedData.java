@@ -1,5 +1,6 @@
 package com.howlingwerewolf.world;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -17,16 +18,17 @@ import java.util.Set;
  */
 public final class VillageHunterSavedData extends SavedData {
     private static final String DATA_NAME = "howlingwerewolf_village_hunters";
+    private static final Factory<VillageHunterSavedData> FACTORY = new Factory<>(
+            VillageHunterSavedData::new, VillageHunterSavedData::load);
     private final Map<Long, Integer> patrolTargets = new HashMap<>();
     private final Set<Long> completedVillages = new HashSet<>();
     private final Map<Long, Long> nextReplenishmentTicks = new HashMap<>();
 
     public static VillageHunterSavedData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(VillageHunterSavedData::load,
-                VillageHunterSavedData::new, DATA_NAME);
+        return level.getDataStorage().computeIfAbsent(FACTORY, DATA_NAME);
     }
 
-    public static VillageHunterSavedData load(CompoundTag tag) {
+    public static VillageHunterSavedData load(CompoundTag tag, HolderLookup.Provider provider) {
         VillageHunterSavedData data = new VillageHunterSavedData();
         ListTag entries = tag.getList("Villages", Tag.TAG_COMPOUND);
         for (int i = 0; i < entries.size(); i++) {
@@ -73,7 +75,7 @@ public final class VillageHunterSavedData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         ListTag entries = new ListTag();
         for (Map.Entry<Long, Integer> village : patrolTargets.entrySet()) {
             CompoundTag entry = new CompoundTag();

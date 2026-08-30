@@ -3,6 +3,7 @@ package com.howlingwerewolf.trial;
 import com.howlingwerewolf.content.ModBlockEntities;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -15,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -133,9 +133,9 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        if (!offering.isEmpty()) tag.put("Offering", offering.save(new CompoundTag()));
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
+        if (!offering.isEmpty()) tag.put("Offering", offering.save(provider));
         if (trialOwner != null) tag.putUUID("TrialOwner", trialOwner);
         tag.putInt("TrialPhase", trialPhase);
         tag.putInt("RitualTicks", ritualTicks);
@@ -146,10 +146,11 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
         offering = tag.contains("Offering", Tag.TAG_COMPOUND)
-                ? ItemStack.of(tag.getCompound("Offering")) : ItemStack.EMPTY;
+                ? ItemStack.parse(provider, tag.getCompound("Offering")).orElse(ItemStack.EMPTY)
+                : ItemStack.EMPTY;
         trialOwner = tag.hasUUID("TrialOwner") ? tag.getUUID("TrialOwner") : null;
         trialPhase = tag.getInt("TrialPhase");
         ritualTicks = Math.max(0, tag.getInt("RitualTicks"));
@@ -163,16 +164,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
-    }
-
-    @Override
-    public AABB getRenderBoundingBox() {
-        // The activation renderer draws the four pearls up to three blocks from the center.
-        return isCentral() && isTrialActive()
-                ? new AABB(worldPosition).inflate(4.0D, 4.0D, 4.0D)
-                : super.getRenderBoundingBox();
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
     }
 
     @Nullable
@@ -182,8 +175,9 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet,
+                             HolderLookup.Provider provider) {
         CompoundTag tag = packet.getTag();
-        if (tag != null) load(tag);
+        if (tag != null) loadWithComponents(tag, provider);
     }
 }

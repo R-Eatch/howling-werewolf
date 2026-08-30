@@ -1,24 +1,23 @@
 package com.howlingwerewolf.content;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
-    public AlphaWerewolfBadgeRecipe(ResourceLocation id, CraftingBookCategory category) {
-        super(id, category);
+    public AlphaWerewolfBadgeRecipe(CraftingBookCategory category) {
+        super(category);
     }
 
     @Override
-    public boolean matches(CraftingContainer container, Level level) {
-        if (container.getWidth() != 3 || container.getHeight() != 3
+    public boolean matches(CraftingInput container, Level level) {
+        if (container.width() != 3 || container.height() != 3
                 || !container.getItem(4).is(ModItems.MOONBANE_PEARL.get())) {
             return false;
         }
@@ -39,7 +38,7 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+    public ItemStack assemble(CraftingInput container, HolderLookup.Provider registryAccess) {
         return new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get());
     }
 
@@ -49,14 +48,14 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess registryAccess) {
+    public ItemStack getResultItem(HolderLookup.Provider registryAccess) {
         return new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get());
     }
 
     /**
      * Exposes one deterministic arrangement to the vanilla recipe book and recipe viewers such as
      * JEI. Manual crafting still accepts any ordering of the four silver ingots and four wolfsbane
-     * flowers around the center pearl through {@link #matches(CraftingContainer, Level)}.
+     * flowers around the center pearl through {@link #matches(CraftingInput, Level)}.
      */
     @Override
     public NonNullList<Ingredient> getIngredients() {

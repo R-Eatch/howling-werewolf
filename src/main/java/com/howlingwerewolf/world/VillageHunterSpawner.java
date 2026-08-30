@@ -12,12 +12,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /** Maintains a persistent 4–6 hunter patrol per visited village. / 为每个被访问的村庄维持一支 4–6 人持久巡猎队。 */
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class VillageHunterSpawner {
     private static final int CHECK_INTERVAL = 100;
     private static final int VILLAGE_SEARCH_CHUNKS = 5;
@@ -26,8 +26,8 @@ public final class VillageHunterSpawner {
     private static final long FAILED_SPAWN_RETRY_INTERVAL = 1200L;
 
     @SubscribeEvent
-    public static void playerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
+    public static void playerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
                 || player.tickCount % CHECK_INTERVAL != 0) return;
         ServerLevel level = player.serverLevel();
         if (level.dimension() != Level.OVERWORLD) return;
@@ -93,7 +93,8 @@ public final class VillageHunterSpawner {
                 hunter.moveTo(x + 0.5D, y, z + 0.5D, level.random.nextFloat() * 360.0F, 0.0F);
                 if (!level.noCollision(hunter)) continue;
                 DifficultyInstance difficulty = level.getCurrentDifficultyAt(pos);
-                hunter.finalizeSpawn(level, difficulty, MobSpawnType.EVENT, null, null);
+                net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(
+                        hunter, level, difficulty, MobSpawnType.EVENT, null);
                 hunter.configureForVillagePatrol(villageKey);
                 if (level.addFreshEntity(hunter)) {
                     spawned++;

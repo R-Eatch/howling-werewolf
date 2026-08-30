@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,12 +33,12 @@ public final class WolfsbanePotionItem extends Item {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 32;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc")
                 .withStyle(ChatFormatting.DARK_GREEN));
         tooltip.add(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc2")
@@ -54,7 +53,7 @@ public final class WolfsbanePotionItem extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity living) {
         if (!level.isClientSide && living instanceof ServerPlayer player) {
-            net.minecraftforge.common.util.LazyOptional<com.howlingwerewolf.capability.WerewolfData> optional = WerewolfApi.get(player);
+            java.util.Optional<com.howlingwerewolf.capability.WerewolfData> optional = WerewolfApi.get(player);
             if (!optional.isPresent()) {
                 player.sendSystemMessage(Component.translatable("message.howlingwerewolf.data_unavailable")
                         .withStyle(ChatFormatting.RED));

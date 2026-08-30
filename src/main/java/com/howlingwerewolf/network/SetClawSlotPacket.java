@@ -1,24 +1,35 @@
 package com.howlingwerewolf.network;
 
+import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.capability.WerewolfApi;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record SetClawSlotPacket(int slot) implements CustomPacketPayload {
+    public static final Type<SetClawSlotPacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "set_claw_slot"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetClawSlotPacket> STREAM_CODEC = StreamCodec.of(
+            (buf, packet) -> buf.writeByte(packet.slot()),
+            buf -> new SetClawSlotPacket(buf.readByte()));
 
-public record SetClawSlotPacket(int slot) {
-    public static void encode(SetClawSlotPacket packet, FriendlyByteBuf buf) { buf.writeByte(packet.slot); }
-    public static SetClawSlotPacket decode(FriendlyByteBuf buf) { return new SetClawSlotPacket(buf.readByte()); }
-    public static void handle(SetClawSlotPacket packet, Supplier<NetworkEvent.Context> context) {
-        ServerPlayer sender = context.get().getSender();
-        if (sender != null && packet.slot >= 0 && packet.slot < 9) WerewolfApi.get(sender).ifPresent(data -> {
+    @Override
+    public Type<SetClawSlotPacket> type() {
+        return TYPE;
+    }
+
+    public static void handle(SetClawSlotPacket packet, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer sender && packet.slot() >= 0 && packet.slot() < 9) {
+            WerewolfApi.get(sender).ifPresent(data -> {
             if (data.hasAbility(WerewolfAbility.EMPTY_CLAW_SLOT)) {
-                data.setClawHotbarSlot(packet.slot);
+                data.setClawHotbarSlot(packet.slot());
                 ModNetwork.sync(sender, data);
             }
         });
-        context.get().setPacketHandled(true);
+        }
     }
 }

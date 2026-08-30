@@ -2,6 +2,7 @@ package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.capability.WerewolfApi;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * mining fatigue, with a stronger reaction while transformed.
  */
 public final class WolfsbaneFlowerBlock extends FlowerBlock {
-    public WolfsbaneFlowerBlock(MobEffect effect, int seconds, Properties properties) {
+    public WolfsbaneFlowerBlock(Holder<MobEffect> effect, float seconds, Properties properties) {
         super(effect, seconds, properties);
     }
 

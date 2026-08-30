@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 /** Standalone renderer for the original Howling Werewolf model. */
 public final class WerewolfPlayerRenderer
         extends LivingEntityRenderer<AbstractClientPlayer, WerewolfPlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
 
     public WerewolfPlayerRenderer(EntityRendererProvider.Context context) {
@@ -21,8 +21,8 @@ public final class WerewolfPlayerRenderer
 
     @Override
     protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
+                                  float rotationYaw, float partialTick, float scale) {
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
         WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
     }
 

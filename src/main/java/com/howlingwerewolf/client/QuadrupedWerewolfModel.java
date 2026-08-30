@@ -120,7 +120,7 @@ public final class QuadrupedWerewolfModel extends EntityModel<AbstractClientPlay
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int packedLight,
-                               int packedOverlay, float red, float green, float blue, float alpha) {
-        root.render(poseStack, consumer, packedLight, packedOverlay, red, green, blue, alpha);
+                               int packedOverlay, int color) {
+        root.render(poseStack, consumer, packedLight, packedOverlay, color);
     }
 }

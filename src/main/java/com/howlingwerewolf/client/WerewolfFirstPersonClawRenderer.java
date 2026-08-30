@@ -12,11 +12,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraftforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
 
 public final class WerewolfFirstPersonClawRenderer {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
-    private static final ResourceLocation BEAST_TEXTURE = new ResourceLocation(HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
+    private static final ResourceLocation BEAST_TEXTURE = ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
     private static final ModelPart ROOT = createLayer().bakeRoot();
     private static final ModelPart BEAST_ROOT = createBeastLayer().bakeRoot();
 
