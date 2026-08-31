@@ -23,7 +23,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 1.21.1 |
 | Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.0.4-beta |
+| Howling Werewolf | 1.0.5-beta |
 
 ## Build from source
 
@@ -33,7 +33,7 @@ The Gradle wrapper builds the Mod with a Java 21 toolchain:
 ./gradlew.bat clean build
 ```
 
-The distributable JAR is written to `build/libs/howlingwerewolf-1.0.4-neoforge-beta.jar`.
+The distributable JAR is written to `build/libs/howlingwerewolf-1.0.5-neoforge-beta.jar`.
 
 ## Release status
 

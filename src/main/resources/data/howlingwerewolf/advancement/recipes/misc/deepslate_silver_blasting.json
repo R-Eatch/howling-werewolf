@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_deepslate_silver_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["howlingwerewolf:deepslate_silver_ore"] }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": { "recipe": "howlingwerewolf:deepslate_silver_blasting" }
+    }
+  },
+  "requirements": [["has_deepslate_silver_ore", "has_the_recipe"]],
+  "rewards": { "recipes": ["howlingwerewolf:deepslate_silver_blasting"] }
+}

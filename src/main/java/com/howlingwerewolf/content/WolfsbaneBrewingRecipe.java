@@ -5,24 +5,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.brewing.BrewingRecipe;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 
-public final class WolfsbaneBrewingRecipe implements IBrewingRecipe {
+public final class WolfsbaneBrewingRecipe extends BrewingRecipe {
+    public WolfsbaneBrewingRecipe() {
+        super(DataComponentIngredient.of(false,
+                        PotionContents.createItemStack(Items.POTION, Potions.AWKWARD)),
+                Ingredient.of(ModBlocks.WOLFSBANE.get()),
+                new ItemStack(ModItems.WOLFSBANE_POTION.get()));
+    }
+
     @Override
     public boolean isInput(ItemStack input) {
         PotionContents contents = input.get(DataComponents.POTION_CONTENTS);
         return input.is(Items.POTION) && contents != null && contents.is(Potions.AWKWARD);
-    }
-
-    @Override
-    public boolean isIngredient(ItemStack ingredient) {
-        return ingredient.is(ModBlocks.WOLFSBANE.get().asItem());
-    }
-
-    @Override
-    public ItemStack getOutput(ItemStack input, ItemStack ingredient) {
-        return isInput(input) && isIngredient(ingredient)
-                ? new ItemStack(ModItems.WOLFSBANE_POTION.get())
-                : ItemStack.EMPTY;
     }
 }
