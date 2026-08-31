@@ -1,11 +1,22 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "available": {
-      "trigger": "minecraft:tick"
+    "has_moonbane_pearl": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["howlingwerewolf:moonbane_pearl"] }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "howlingwerewolf:alpha_werewolf_badge"
+      }
     }
   },
-  "requirements": [["available"]],
+  "requirements": [["has_moonbane_pearl", "has_the_recipe"]],
   "rewards": {
     "recipes": ["howlingwerewolf:alpha_werewolf_badge"]
   }

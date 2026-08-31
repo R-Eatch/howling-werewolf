@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_wolfsbane": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["howlingwerewolf:wolfsbane"] }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": { "recipe": "howlingwerewolf:ritual_altar" }
+    }
+  },
+  "requirements": [["has_wolfsbane", "has_the_recipe"]],
+  "rewards": { "recipes": ["howlingwerewolf:ritual_altar"] }
+}

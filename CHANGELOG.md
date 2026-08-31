@@ -2,6 +2,13 @@
 
 All notable public releases of Howling Werewolf are documented here.
 
+## Howling Werewolf 1.0.5
+
+- Exposes the Wolfsbane Potion and Werewolf Potion brewing paths to compatible recipe viewers while preserving their existing ingredients and effects.
+- Adds progression-based vanilla Recipe Book unlocks for every crafting, smelting, and blasting recipe.
+- Unlocks the Alpha Werewolf Badge recipe after obtaining a Moonbane Pearl instead of revealing it immediately on world entry.
+- Keeps the 1.0.4 gameplay and balance baseline unchanged.
+
 ## Howling Werewolf 1.0.4
 
 - Corrects Quadruped Wolf body and upper-body Box UV generation while preserving the accepted 1.0.2 texture and final model outline.
