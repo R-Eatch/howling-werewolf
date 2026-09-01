@@ -1,19 +1,10 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_ritual_altar": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          { "items": ["howlingwerewolf:ritual_altar"] }
-        ]
-      }
-    },
-    "has_the_recipe": {
-      "trigger": "minecraft:recipe_unlocked",
-      "conditions": { "recipe": "howlingwerewolf:central_ritual_altar" }
+    "available": {
+      "trigger": "minecraft:tick"
     }
   },
-  "requirements": [["has_ritual_altar", "has_the_recipe"]],
+  "requirements": [["available"]],
   "rewards": { "recipes": ["howlingwerewolf:central_ritual_altar"] }
 }

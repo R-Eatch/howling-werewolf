@@ -21,5 +21,8 @@ build
 eclipse
 run
 
+# Repository-local documentation
+/CHANGELOG.md
+
 # Files from Forge MDK
 forge*changelog.txt

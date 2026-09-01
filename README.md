@@ -189,6 +189,8 @@ Datapacks can extend the following item tags:
 - `howlingwerewolf:silver_weapons`
 - `howlingwerewolf:werewolf_meat`
 
+Server operators and testers can consult the [administrator command guide](ADMIN_COMMANDS.md), also available in [Simplified Chinese](ADMIN_COMMANDS-zh.md).
+
 ## Testing and compatibility
 
 Version 1.0.5 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.

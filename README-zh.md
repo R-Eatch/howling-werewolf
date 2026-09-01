@@ -189,6 +189,8 @@ Alpha 试炼是狼人养成的终局挑战。
 - `howlingwerewolf:silver_weapons`
 - `howlingwerewolf:werewolf_meat`
 
+服务器管理员与测试人员可以查阅[管理员命令指南](ADMIN_COMMANDS-zh.md)，该文档也提供[英文版本](ADMIN_COMMANDS.md)。
+
 ## 测试与兼容性
 
 1.0.5 延续了从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程测试基线。

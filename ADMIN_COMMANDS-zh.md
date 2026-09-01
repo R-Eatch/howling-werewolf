@@ -1,6 +1,8 @@
 # 月厄狼人管理员命令指南
 
-本文适用于 Howling Werewolf 1.0.4（Minecraft 1.20.1 / Forge 47.4.16）。这些命令主要用于开发、验收、服务器管理和存档诊断。
+[English](ADMIN_COMMANDS.md)
+
+本文适用于 Howling Werewolf 1.0.5（Minecraft 1.20.1 / Forge 47.4.16）。这些命令主要用于开发、验收、服务器管理和存档诊断。
 
 ## 使用条件
 
