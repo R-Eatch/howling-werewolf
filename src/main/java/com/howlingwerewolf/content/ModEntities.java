@@ -16,7 +16,7 @@ public final class ModEntities {
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, HowlingWerewolf.MOD_ID);
 
     public static final RegistryObject<EntityType<HunterEntity>> HUNTER = ENTITIES.register("hunter",
-            () -> EntityType.Builder.of(HunterEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.of(HunterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
                     .build("hunter"));

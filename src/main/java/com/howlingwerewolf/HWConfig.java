@@ -54,11 +54,11 @@ public final class HWConfig {
                         "Generate wolfsbane flowers in newly generated chunks. Existing chunks are not changed. Default is true.")
                 .define("generateWolfsbane", true);
         HUNTER_SPAWN_WEIGHT = builder.comment(
-                        "Relative Hunter spawn weight in forest creature spawn lists. 0 disables natural Hunter spawns; common passive mobs usually use weights from 8 to 12. Default is 20.")
-                .defineInRange("hunterSpawnWeight", 20, 0, 200);
+                        "Relative Hunter spawn weight in forest, taiga and cherry grove monster spawn lists. 0 disables natural Hunter spawns; common monsters usually use weights around 95 to 100. Default is 100.")
+                .defineInRange("hunterSpawnWeight", 100, 0, 500);
         FERAL_WEREWOLF_SPAWN_WEIGHT = builder.comment(
-                        "Relative Feral Werewolf spawn weight in forest monster spawn lists. 0 disables natural Feral Werewolf spawns; common monsters usually use weights around 95 to 100. Full-moon, night and darkness rules still apply. Default is 70.")
-                .defineInRange("feralWerewolfSpawnWeight", 70, 0, 200);
+                        "Relative Feral Werewolf spawn weight in forest, taiga and cherry grove monster spawn lists. 0 disables natural Feral Werewolf spawns; common monsters usually use weights around 95 to 100. Full-moon, night and darkness rules still apply. Default is 150.")
+                .defineInRange("feralWerewolfSpawnWeight", 150, 0, 500);
         WOLFSBANE_GENERATION_WEIGHT = builder.comment(
                         "Wolfsbane generation weight relative to the 1.0.5 rate. 0 disables generation, 100 preserves the old rate (1 attempt per 8 taiga chunks or 22 forest chunks), and 200 doubles those attempt rates. Default is 100.")
                 .defineInRange("wolfsbaneGenerationWeight", 100, 0, 200);
