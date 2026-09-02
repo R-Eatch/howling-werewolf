@@ -16,7 +16,7 @@
 
 > **Development warning:** The NeoForge edition for Minecraft 1.21.1 is still under development and testing. Back up your worlds before playing.
 
-This branch contains the in-development NeoForge edition of Howling Werewolf for Minecraft 1.21.1. You can download the source and build the `1.0.5-beta` version yourself. The maintained Forge 1.20.1 source is available on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
+This branch contains the in-development NeoForge edition of Howling Werewolf for Minecraft 1.21.1. You can download the source and build the `1.0.6-beta` version yourself. The maintained Forge 1.20.1 source is available on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
 Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -27,7 +27,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 1.21.1 |
 | Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.0.5-beta |
+| Howling Werewolf | 1.0.6-beta |
 
 ## Build from source
 
@@ -37,7 +37,7 @@ Download or clone this branch, then use the Gradle wrapper with a Java 21 toolch
 ./gradlew.bat clean build
 ```
 
-The distributable JAR is written to `build/libs/howlingwerewolf-1.0.5-neoforge-beta.jar`.
+The distributable JAR is written to `build/libs/howlingwerewolf-1.0.6-neoforge-beta.jar`.
 
 ## Release status
 

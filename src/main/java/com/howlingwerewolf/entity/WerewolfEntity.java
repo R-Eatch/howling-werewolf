@@ -73,11 +73,17 @@ public final class WerewolfEntity extends Monster {
         targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(WerewolfEntity.class));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, HunterEntity.class, true));
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10,
-                true, false, WerewolfEntity::isAttackablePlayer));
+                true, false, this::isAttackablePlayer));
     }
 
-    private static boolean isAttackablePlayer(@Nullable LivingEntity entity) {
-        return entity instanceof Player player && !player.isCreative() && !player.isSpectator();
+    private boolean isAttackablePlayer(@Nullable LivingEntity entity) {
+        if (!(entity instanceof Player player) || player.isCreative() || player.isSpectator()) {
+            return false;
+        }
+        if (summonedByAlpha) return true;
+        return WerewolfApi.get(player)
+                .map(data -> !data.isInfected() && !data.isWerewolf())
+                .orElse(true);
     }
 
     @Override

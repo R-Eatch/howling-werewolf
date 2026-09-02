@@ -10,6 +10,9 @@ public final class HWConfig {
     public static final ModConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
     public static final ModConfigSpec.BooleanValue GENERATE_SILVER;
     public static final ModConfigSpec.BooleanValue GENERATE_WOLFSBANE;
+    public static final ModConfigSpec.IntValue HUNTER_SPAWN_WEIGHT;
+    public static final ModConfigSpec.IntValue FERAL_WEREWOLF_SPAWN_WEIGHT;
+    public static final ModConfigSpec.IntValue WOLFSBANE_GENERATION_WEIGHT;
     public static final ModConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
     public static final ModConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
     public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
@@ -50,6 +53,15 @@ public final class HWConfig {
         GENERATE_WOLFSBANE = builder.comment(
                         "Generate wolfsbane flowers in newly generated chunks. Existing chunks are not changed. Default is true.")
                 .define("generateWolfsbane", true);
+        HUNTER_SPAWN_WEIGHT = builder.comment(
+                        "Relative Hunter spawn weight in forest creature spawn lists. 0 disables natural Hunter spawns; common passive mobs usually use weights from 8 to 12. Default is 20.")
+                .defineInRange("hunterSpawnWeight", 20, 0, 200);
+        FERAL_WEREWOLF_SPAWN_WEIGHT = builder.comment(
+                        "Relative Feral Werewolf spawn weight in forest monster spawn lists. 0 disables natural Feral Werewolf spawns; common monsters usually use weights around 95 to 100. Full-moon, night and darkness rules still apply. Default is 70.")
+                .defineInRange("feralWerewolfSpawnWeight", 70, 0, 200);
+        WOLFSBANE_GENERATION_WEIGHT = builder.comment(
+                        "Wolfsbane generation weight relative to the 1.0.5 rate. 0 disables generation, 100 preserves the old rate (1 attempt per 8 taiga chunks or 22 forest chunks), and 200 doubles those attempt rates. Default is 100.")
+                .defineInRange("wolfsbaneGenerationWeight", 100, 0, 200);
         builder.pop();
         SPEC = builder.build();
     }

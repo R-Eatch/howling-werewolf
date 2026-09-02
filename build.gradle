@@ -163,7 +163,7 @@ def neoForgeArchiveName = packagedVersionParts.length == 2
         ? "${neoForgeArchiveStem}-${packagedVersionParts[1]}.jar"
         : "${neoForgeArchiveStem}.jar"
 tasks.named('jar', Jar).configure {
-    // Keep the loader before the release channel: howlingwerewolf-1.0.5-neoforge-beta.jar.
+    // Keep the loader before the release channel: howlingwerewolf-1.0.6-neoforge-beta.jar.
     archiveFileName = neoForgeArchiveName
 
     from('LICENSE.md') {

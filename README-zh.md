@@ -16,7 +16,7 @@
 
 > **开发版本警告：** Minecraft 1.21.1 的 NeoForge 版本目前仍在开发和测试中。游玩前请务必备份存档。
 
-此分支为 Howling Werewolf 的 Minecraft 1.21.1 NeoForge 开发版本。你可以下载源码并自行构建 `1.0.5-beta` 版本。仍在维护的 Forge 1.20.1 源码位于 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
+此分支为 Howling Werewolf 的 Minecraft 1.21.1 NeoForge 开发版本。你可以下载源码并自行构建 `1.0.6-beta` 版本。仍在维护的 Forge 1.20.1 源码位于 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
 
 Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围绕感染、月相变身、两套成长系统、三种狼人形态、猎人与银制品、狼毒草以及 Alpha 试炼展开。
 
@@ -27,7 +27,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 1.21.1 |
 | Mod 加载器 | NeoForge 21.1.248 或兼容的更高 21.1.x 版本 |
 | Java | 21 |
-| Howling Werewolf | 1.0.5-beta |
+| Howling Werewolf | 1.0.6-beta |
 
 ## 从源码构建
 
@@ -37,7 +37,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 ./gradlew.bat clean build
 ```
 
-构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.0.5-neoforge-beta.jar`。
+构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.0.6-neoforge-beta.jar`。
 
 ## 发布状态
 
