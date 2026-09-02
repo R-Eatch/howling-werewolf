@@ -16,7 +16,7 @@ public final class ModEntities {
             DeferredRegister.create(Registries.ENTITY_TYPE, HowlingWerewolf.MOD_ID);
 
     public static final DeferredHolder<EntityType<?>, EntityType<HunterEntity>> HUNTER = ENTITIES.register("hunter",
-            () -> EntityType.Builder.of(HunterEntity::new, MobCategory.CREATURE)
+            () -> EntityType.Builder.of(HunterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
                     .build("hunter"));
