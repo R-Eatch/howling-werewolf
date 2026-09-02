@@ -45,7 +45,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.0.5 |
+| Howling Werewolf | 1.0.6 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -65,7 +65,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.5-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.0.6-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -193,9 +193,9 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.0.5 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+Version 1.0.6 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.5.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.6.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 

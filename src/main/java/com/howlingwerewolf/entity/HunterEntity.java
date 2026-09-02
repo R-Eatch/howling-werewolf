@@ -64,13 +64,17 @@ public final class HunterEntity extends PathfinderMob {
         goalSelector.addGoal(6, new RandomStrollGoal(this, 0.85D));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-        targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(HunterEntity.class));
+        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10,
+                true, false, HunterEntity::isWerewolfTarget));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
-        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, WerewolfEntity.class, true));
-        targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AlphaWerewolfEntity.class, true));
-        targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, AlphaMinionEntity.class, true));
-        targetSelector.addGoal(6, new NearestAttackableTargetGoal<>(this, Player.class, 10,
-                true, false, HunterEntity::isWerewolfPlayer));
+        targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers(HunterEntity.class));
+    }
+
+    private static boolean isWerewolfTarget(@Nullable LivingEntity entity) {
+        return entity instanceof WerewolfEntity
+                || entity instanceof AlphaWerewolfEntity
+                || entity instanceof AlphaMinionEntity
+                || isWerewolfPlayer(entity);
     }
 
     private static boolean isWerewolfPlayer(@Nullable LivingEntity entity) {
@@ -101,7 +105,7 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     public int getMaxSpawnClusterSize() {
         return level() instanceof net.minecraft.server.level.ServerLevel serverLevel
-                && serverLevel.isVillage(blockPosition()) ? 6 : 1;
+                && serverLevel.isVillage(blockPosition()) ? 6 : 3;
     }
 
     public boolean isTrialHunter() {
