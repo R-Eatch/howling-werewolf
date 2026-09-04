@@ -68,6 +68,7 @@ public final class HowlingWerewolf {
         TABS.register(modBus);
         modBus.addListener(ModEntityEvents::registerSpawnPlacements);
         modBus.addListener(ModNetwork::register);
+        NeoForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
         NeoForge.EVENT_BUS.addListener(HowlingWerewolf::registerBrewingRecipes);
         modContainer.registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC);
     }

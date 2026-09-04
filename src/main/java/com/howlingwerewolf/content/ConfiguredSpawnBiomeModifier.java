@@ -25,13 +25,13 @@ public record ConfiguredSpawnBiomeModifier(String spawn) implements BiomeModifie
                 && !biome.is(Biomes.CHERRY_GROVE))) return;
 
         if ("hunter".equals(spawn)) {
-            int weight = HWConfig.HUNTER_SPAWN_WEIGHT.get();
+            int weight = HWConfig.hunterSpawnWeight();
             if (weight > 0) {
                 builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER,
                         new MobSpawnSettings.SpawnerData(ModEntities.HUNTER.get(), weight, 2, 3));
             }
         } else if ("werewolf".equals(spawn)) {
-            int weight = HWConfig.FERAL_WEREWOLF_SPAWN_WEIGHT.get();
+            int weight = HWConfig.feralWerewolfSpawnWeight();
             if (weight > 0) {
                 builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER,
                         new MobSpawnSettings.SpawnerData(ModEntities.WEREWOLF.get(), weight, 1, 1));

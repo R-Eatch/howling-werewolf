@@ -16,7 +16,7 @@
 
 > **开发版本警告：** Minecraft 1.21.1 的 NeoForge 版本目前仍在开发和测试中。游玩前请务必备份存档。
 
-此分支为 Howling Werewolf 的 Minecraft 1.21.1 NeoForge 开发版本。你可以下载源码并自行构建 `1.0.6-beta` 版本。仍在维护的 Forge 1.20.1 源码位于 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
+此分支为 Howling Werewolf 的 Minecraft 1.21.1 NeoForge 开发版本。你可以下载源码并自行构建 `1.0.7-beta` 版本。仍在维护的 Forge 1.20.1 源码位于 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
 
 Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围绕感染、月相变身、两套成长系统、三种狼人形态、猎人与银制品、狼毒草以及 Alpha 试炼展开。
 
@@ -27,7 +27,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 1.21.1 |
 | Mod 加载器 | NeoForge 21.1.248 或兼容的更高 21.1.x 版本 |
 | Java | 21 |
-| Howling Werewolf | 1.0.6-beta |
+| Howling Werewolf | 1.0.7-beta |
 
 ## 从源码构建
 
@@ -37,7 +37,19 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 ./gradlew.bat clean build
 ```
 
-构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.0.6-neoforge-beta.jar`。
+构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.0.7-neoforge-beta.jar`。
+
+## 生成配置
+
+自然生成权重在 `config/howlingwerewolf-common.toml` 中设置：
+
+```toml
+[worldGeneration]
+hunterSpawnWeightMultiplier = 1.0
+feralWerewolfSpawnWeightMultiplier = 1.0
+```
+
+倍率范围为 0–10。倍率 1.0 使用当前基准：猎人 50、野生失控狼人 200；0 关闭自然生成。正倍率的结果四舍五入为整数，最小为 1。这是相对抽选权重，不是百分比或最终种群比例，修改后需重启世界。升级到 1.0.7 时，旧键 `hunterSpawnWeight`、`feralWerewolfSpawnWeight` 及其注释会自动移除；缺失的新倍率设为 1.0，已有的新倍率及其他配置保留。因此，未来修改代码中的基准权重时，玩家无需删除配置文件。主世界满月夜间之外，野生狼人会在加权抽选前从候选列表移除，不再消耗一次必然失败的物种选择。有效时段内仍须满足黑暗条件，但不再接受原有的额外光照随机淘汰。
 
 ## 发布状态
 
