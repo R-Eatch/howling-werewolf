@@ -69,6 +69,7 @@ public final class HowlingWerewolf {
         TABS.register(modBus);
         modBus.addListener(this::commonSetup);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC);
+        MinecraftForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
         MinecraftForge.EVENT_BUS.register(this);
     }
 

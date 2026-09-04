@@ -45,7 +45,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.0.6 |
+| Howling Werewolf | 1.0.7 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -65,7 +65,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.6-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.0.7-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -182,6 +182,16 @@ Repeat victories award Moonbane Pearls based on difficulty. On Hard difficulty, 
 
 The common Forge configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
 
+Natural-spawn weights are configured in `config/howlingwerewolf-common.toml`:
+
+```toml
+[worldGeneration]
+hunterSpawnWeightMultiplier = 1.0
+feralWerewolfSpawnWeightMultiplier = 1.0
+```
+
+The multipliers range from 0 to 10. At 1.0, the current weights are Hunter 50 and Feral Werewolf 200; 0 disables natural spawns. Positive results are rounded to an integer with a minimum of 1. These are relative selection weights, not percentages or guaranteed population ratios. Restart the world after changing them. On upgrading to 1.0.7, the old `hunterSpawnWeight` and `feralWerewolfSpawnWeight` keys and their comments are removed automatically; missing multipliers start at 1.0, while existing multipliers and other settings are retained. Future base-weight updates therefore apply without deleting the config. Outside a full-moon Overworld night, Feral Werewolves are removed from the weighted candidate list instead of consuming a failed selection. Darkness is still required during their valid window, without the former additional random light rejection.
+
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
 Datapacks can extend the following item tags:
@@ -195,7 +205,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 Version 1.0.6 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.6.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.7.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 

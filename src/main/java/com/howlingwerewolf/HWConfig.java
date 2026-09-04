@@ -3,6 +3,8 @@ package com.howlingwerewolf;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public final class HWConfig {
+    private static final int HUNTER_BASE_WEIGHT = 50;
+    private static final int FERAL_WEREWOLF_BASE_WEIGHT = 200;
     public static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;
     public static final ForgeConfigSpec.DoubleValue FERAL_WEREWOLF_INFECTION_CHANCE;
@@ -10,8 +12,8 @@ public final class HWConfig {
     public static final ForgeConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
     public static final ForgeConfigSpec.BooleanValue GENERATE_SILVER;
     public static final ForgeConfigSpec.BooleanValue GENERATE_WOLFSBANE;
-    public static final ForgeConfigSpec.IntValue HUNTER_SPAWN_WEIGHT;
-    public static final ForgeConfigSpec.IntValue FERAL_WEREWOLF_SPAWN_WEIGHT;
+    public static final ForgeConfigSpec.DoubleValue HUNTER_SPAWN_WEIGHT_MULTIPLIER;
+    public static final ForgeConfigSpec.DoubleValue FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER;
     public static final ForgeConfigSpec.IntValue WOLFSBANE_GENERATION_WEIGHT;
     public static final ForgeConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
     public static final ForgeConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
@@ -53,17 +55,30 @@ public final class HWConfig {
         GENERATE_WOLFSBANE = builder.comment(
                         "Generate wolfsbane flowers in newly generated chunks. Existing chunks are not changed. Default is true.")
                 .define("generateWolfsbane", true);
-        HUNTER_SPAWN_WEIGHT = builder.comment(
-                        "Relative Hunter spawn weight in forest, taiga and cherry grove monster spawn lists. 0 disables natural Hunter spawns; common monsters usually use weights around 95 to 100. Default is 100.")
-                .defineInRange("hunterSpawnWeight", 100, 0, 500);
-        FERAL_WEREWOLF_SPAWN_WEIGHT = builder.comment(
-                        "Relative Feral Werewolf spawn weight in forest, taiga and cherry grove monster spawn lists. 0 disables natural Feral Werewolf spawns; common monsters usually use weights around 95 to 100. Full-moon, night and darkness rules still apply. Default is 150.")
-                .defineInRange("feralWerewolfSpawnWeight", 150, 0, 500);
+        // ConfigSpec removes obsolete keys and their comments when loading the config.
+        HUNTER_SPAWN_WEIGHT_MULTIPLIER = builder.comment(
+                        "Multiplier for the current default Hunter spawn weight (" + HUNTER_BASE_WEIGHT + "). 1.0 follows the mod default; 0 disables natural spawns. This is a relative weight, not a spawn probability. Restart the world after changing it.")
+                .worldRestart().defineInRange("hunterSpawnWeightMultiplier", 1.0D, 0.0D, 10.0D);
+        FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER = builder.comment(
+                        "Multiplier for the current default Feral Werewolf spawn weight (" + FERAL_WEREWOLF_BASE_WEIGHT + "). 1.0 follows the mod default; 0 disables natural spawns. Full-moon, night and darkness rules still apply. This is a relative weight, not a spawn probability. Restart the world after changing it.")
+                .worldRestart().defineInRange("feralWerewolfSpawnWeightMultiplier", 1.0D, 0.0D, 10.0D);
         WOLFSBANE_GENERATION_WEIGHT = builder.comment(
                         "Wolfsbane generation weight relative to the 1.0.5 rate. 0 disables generation, 100 preserves the old rate (1 attempt per 8 taiga chunks or 22 forest chunks), and 200 doubles those attempt rates. Default is 100.")
                 .defineInRange("wolfsbaneGenerationWeight", 100, 0, 200);
         builder.pop();
         SPEC = builder.build();
+    }
+
+    public static int hunterSpawnWeight() {
+        return scaledSpawnWeight(HUNTER_BASE_WEIGHT, HUNTER_SPAWN_WEIGHT_MULTIPLIER.get());
+    }
+
+    public static int feralWerewolfSpawnWeight() {
+        return scaledSpawnWeight(FERAL_WEREWOLF_BASE_WEIGHT, FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER.get());
+    }
+
+    private static int scaledSpawnWeight(int baseWeight, double multiplier) {
+        return multiplier == 0.0D ? 0 : Math.max(1, (int) Math.round(baseWeight * multiplier));
     }
 
     private HWConfig() {}
