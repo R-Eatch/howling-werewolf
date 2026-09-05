@@ -15,7 +15,7 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> 当前分支提供 Minecraft 1.20.1 的 Forge 版本；Minecraft 1.21.1 的 NeoForge 源码维护在 [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) 分支。
+> 当前分支提供 Minecraft 1.20.1 的 Forge 正式版；Minecraft 1.21.1 的 NeoForge 正式版维护在 [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) 分支。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
@@ -203,7 +203,7 @@ feralWerewolfSpawnWeightMultiplier = 1.0
 
 ## 测试与兼容性
 
-1.0.6 延续了从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程测试基线。
+1.0.7 延续了从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程测试基线。
 
 **本 Mod 尚未完成完整的多人游戏测试。** 因此，1.0.7 在长期多人存档中的表现仍属于未完全验证范围。
 
@@ -220,9 +220,9 @@ feralWerewolfSpawnWeightMultiplier = 1.0
 
 ## 后续计划
 
-当前正式发布目标仍为 **Minecraft 1.20.1 Forge**。
+当前正式发布版本支持 **Minecraft 1.20.1 Forge** 与 **Minecraft 1.21.1 NeoForge**。
 
-后续计划探索 **Minecraft 1.21.1** 与 **Minecraft 26.1** 的 NeoForge 版本。这些内容目前属于开发方向，并不代表已经确定发布日期。
+后续计划探索 **Minecraft 26.1** 的 NeoForge 版本。该内容目前属于开发方向，并不代表已经确定发布日期。
 
 ## 许可与版权
 

@@ -15,7 +15,7 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> This branch contains the Forge edition for Minecraft 1.20.1. The NeoForge 1.21.1 source is maintained on the [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) branch.
+> This branch contains the official Forge edition for Minecraft 1.20.1. The official NeoForge edition for Minecraft 1.21.1 is maintained on the [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) branch.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -203,7 +203,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.0.6 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+Version 1.0.7 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.7.
 
@@ -220,9 +220,9 @@ When reporting an issue, provide:
 
 ## Future plans
 
-The current official release target remains **Forge for Minecraft 1.20.1**.
+Current official releases support **Forge for Minecraft 1.20.1** and **NeoForge for Minecraft 1.21.1**.
 
-Future development is planned to explore NeoForge editions for **Minecraft 1.21.1** and **Minecraft 26.1**. These are development directions, not confirmed release dates.
+Future development is planned to explore a NeoForge edition for **Minecraft 26.1**. This is a development direction, not a confirmed release date.
 
 ## License and copyright
 
