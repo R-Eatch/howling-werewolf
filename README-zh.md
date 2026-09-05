@@ -222,8 +222,6 @@ Copyright © 2026 R_Eatch.
 
 除另有说明外，《月厄狼人（Howling Werewolf）》的原创源代码采用 Mozilla Public License 2.0（MPL-2.0）开源。
 
-在遵守 MPL-2.0 的前提下，你可以自由使用、研究、修改、分发、移植和继续开发本项目，包括商业用途，无需事先取得作者许可。
-
 除另有说明外，本项目原创美术资源采用 Creative Commons Attribution-ShareAlike 4.0 International（CC BY-SA 4.0）授权。
 
 欢迎创建分支、移植版本以及继续开发，无需事先获得授权。如果你发布了移植版、分支或重要衍生项目，也欢迎通过 GitHub 或邮件告诉我。

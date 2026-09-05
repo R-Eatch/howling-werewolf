@@ -222,8 +222,6 @@ Copyright © 2026 R_Eatch.
 
 Unless otherwise stated, the original source code of **Howling Werewolf** is open source under the Mozilla Public License 2.0 (`MPL-2.0`).
 
-Subject to the MPL-2.0, you may use, study, modify, distribute, port, and continue developing the project, including for commercial purposes, without obtaining prior permission from the author.
-
 Unless otherwise stated, the project's original art assets are licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (`CC BY-SA 4.0`).
 
 Forks, ports, and continued development are welcome and do not require prior authorization. If you publish a port, fork, or significant derivative project, you are also welcome to let me know through GitHub or email.
