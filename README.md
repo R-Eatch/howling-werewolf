@@ -182,15 +182,7 @@ Repeat victories award Moonbane Pearls based on difficulty. On Hard difficulty, 
 
 The common Forge configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
 
-Natural-spawn weights are configured in `config/howlingwerewolf-common.toml`:
-
-```toml
-[worldGeneration]
-hunterSpawnWeightMultiplier = 1.0
-feralWerewolfSpawnWeightMultiplier = 1.0
-```
-
-The multipliers range from 0 to 10. At 1.0, the current weights are Hunter 50 and Feral Werewolf 200; 0 disables natural spawns. Positive results are rounded to an integer with a minimum of 1. These are relative selection weights, not percentages or guaranteed population ratios. Restart the world after changing them. On upgrading to 1.0.7, the old `hunterSpawnWeight` and `feralWerewolfSpawnWeight` keys and their comments are removed automatically; missing multipliers start at 1.0, while existing multipliers and other settings are retained. Future base-weight updates therefore apply without deleting the config. Outside a full-moon Overworld night, Feral Werewolves are removed from the weighted candidate list instead of consuming a failed selection. Darkness is still required during their valid window, without the former additional random light rejection.
+Configuration file: `config/howlingwerewolf-common.toml`.
 
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 

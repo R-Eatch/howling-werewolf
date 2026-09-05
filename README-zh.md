@@ -182,15 +182,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 通用 Forge 配置中可以调整感染率、经验倍率、最高等级等多个参数，你可以根据自己的喜好来改变整段狼人旅程的节奏。
 
-自然生成权重在 `config/howlingwerewolf-common.toml` 中设置：
-
-```toml
-[worldGeneration]
-hunterSpawnWeightMultiplier = 1.0
-feralWerewolfSpawnWeightMultiplier = 1.0
-```
-
-倍率范围为 0–10。倍率 1.0 使用当前基准：猎人 50、野生失控狼人 200；0 关闭自然生成。正倍率的结果四舍五入为整数，最小为 1。这是相对抽选权重，不是百分比或最终种群比例，修改后需重启世界。升级到 1.0.7 时，旧键 `hunterSpawnWeight`、`feralWerewolfSpawnWeight` 及其注释会自动移除；缺失的新倍率设为 1.0，已有的新倍率及其他配置保留。因此，未来修改代码中的基准权重时，玩家无需删除配置文件。主世界满月夜间之外，野生狼人会在加权抽选前从候选列表移除，不再消耗一次必然失败的物种选择。有效时段内仍须满足黑暗条件，但不再接受原有的额外光照随机淘汰。
+配置文件：`config/howlingwerewolf-common.toml`。
 
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
