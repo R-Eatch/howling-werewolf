@@ -11,9 +11,11 @@ This file records the provenance policy for the public release branch.
 
 ## 1.1.3 coat refinements
 
-- Ashen, Onyx, and Ivory now use one matching iris color for both eyes in all
-  three forms. Beast forearms use a consistent fur palette with subtle shading;
-  the contrasting palm-like patches have been removed.
+- Ashen, Onyx, and Ivory now have matching eyes in all three forms. Werewolf
+  eyes have darker inner pixels mirrored around the nose; each Beast eye has
+  a darker center between lighter edges. Beast
+  forearms use a consistent fur palette with subtle, varied markings on each
+  arm; the contrasting palm-like patches have been removed.
 - These are local pixel edits to the project's 1.1.2 textures using the existing
   programmatic painting workflow. All other pixels, original Adrian textures,
   alpha channels, geometry, UVs, and claw details are preserved.
