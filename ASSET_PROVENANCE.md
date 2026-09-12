@@ -9,6 +9,17 @@ own terms.
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.3 coat refinements
+
+- Ashen, Onyx, and Ivory now use one matching iris color for both eyes in all
+  three forms. Beast forearms use a consistent fur palette with subtle shading;
+  the contrasting palm-like patches have been removed.
+- These are local pixel edits to the project's 1.1.2 textures using the existing
+  programmatic painting workflow. All other pixels, original Adrian textures,
+  alpha channels, geometry, UVs, and claw details are preserved.
+- The internal `design/skins-1.1.3/` archive retains the correction script,
+  matching editable models, before/after swatches, and texture manifest.
+
 ## 1.1.2 player coats and public painting templates
 
 - Ashen and Onyx were repainted, and Ivory was added, for all three forms. New

@@ -19,9 +19,9 @@
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
-## Custom skins in 1.1.2
+## Skins and customization
 
-Four built-in coats cover all three forms: the original brown **Adrian**, gray **Ashen**, black **Onyx**, and red-eyed white **Ivory**. Ashen and Onyx have newly painted facial markings, chest/back patterns, guard hairs and eye colors.
+Four built-in coats cover all three forms: the original brown **Adrian**, gray **Ashen** with amber eyes, black **Onyx** with golden eyes, and white **Ivory** with red eyes.
 
 Open **K → Skins** to preview forms, rotate the model and show equipment. **Create Template** exports three PNGs and editable Blockbench painting templates. Enable your creation through **Resource Packs**, then select and apply it. Friends need the same resource pack to see your custom coat.
 
@@ -53,7 +53,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.1.2 |
+| Howling Werewolf | 1.1.3 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -73,7 +73,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.1.2-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.1.3-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -209,7 +209,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-The Mod has passed in-game testing by the project owner. Testing has also included a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+Previous versions have passed in-game testing by the project owner, including a complete normal-survival playthrough on a new world, defeating the Ender Dragon and obtaining elytra.
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 

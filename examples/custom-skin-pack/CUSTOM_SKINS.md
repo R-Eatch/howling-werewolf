@@ -1,6 +1,6 @@
 # Make your own werewolf skin
 
-For **Howling Werewolf 1.1.2 · Minecraft 1.20.1 Forge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
+For **Howling Werewolf 1.1.3 · Minecraft 1.20.1 Forge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
 
 ## Start in the game
 
@@ -20,7 +20,7 @@ In-game exports replace `mywolf` with a unique `wolfskin_…` namespace to keep 
 
 ## Sharing and troubleshooting
 
-- Zip the pack with `pack.mcmeta` and `assets` directly at the ZIP root. Friends put it in `resourcepacks` and enable it with version 1.1.2 of this mod. A server can also distribute it through Minecraft's standard server resource-pack feature.
+- Zip the pack with `pack.mcmeta` and `assets` directly at the ZIP root. Friends put it in `resourcepacks` and enable it with version 1.1.3 of this mod. A server can also distribute it through Minecraft's standard server resource-pack feature.
 - Multiplayer synchronizes only the skin ID; it does not upload artwork. A viewer missing the pack sees Adrian. Your selected ID remains saved and works again when the pack is enabled. Keep the namespace folder and JSON filename stable after sharing: together they define the skin ID.
 - Regular 64 × 64 human player skins cannot be used directly. Supply all three PNGs at the base sizes above or an exact **2×, 3× or 4×** scale, with each file at most **1 MiB**.
 - Skin JSON is limited to 16 KiB: name and author at most 48 characters each, description at most 160. The `howlingwerewolf` namespace is reserved. Invalid entries are skipped; see `logs/latest.log` for the reason.
