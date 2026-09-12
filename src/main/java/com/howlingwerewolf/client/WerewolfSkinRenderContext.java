@@ -2,6 +2,7 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
+import com.howlingwerewolf.WerewolfSkinIds;
 import com.howlingwerewolf.capability.WerewolfApi;
 import net.minecraft.client.player.AbstractClientPlayer;
 
@@ -13,9 +14,14 @@ public final class WerewolfSkinRenderContext {
 
     public static void withPreview(AbstractClientPlayer player, WerewolfForm form,
                                    WerewolfSkin skin, Runnable render) {
+        withPreview(player, form, "howlingwerewolf:" + skin.getId(), render);
+    }
+
+    public static void withPreview(AbstractClientPlayer player, WerewolfForm form,
+                                   String skinId, Runnable render) {
         Preview previous = PREVIEW.get();
         PREVIEW.set(new Preview(Objects.requireNonNull(player), Objects.requireNonNull(form),
-                Objects.requireNonNull(skin)));
+                Objects.requireNonNull(skinId)));
         try {
             render.run();
         } finally {
@@ -35,11 +41,15 @@ public final class WerewolfSkinRenderContext {
     }
 
     public static WerewolfSkin getSkin(AbstractClientPlayer player) {
-        if (isPreview(player)) return PREVIEW.get().skin();
-        return WerewolfApi.get(player).map(data -> data.getSkin()).orElse(WerewolfSkin.ADRIAN);
+        return WerewolfSkin.byId(getSkinId(player));
     }
 
-    private record Preview(AbstractClientPlayer player, WerewolfForm form, WerewolfSkin skin) {}
+    public static String getSkinId(AbstractClientPlayer player) {
+        if (isPreview(player)) return PREVIEW.get().skinId();
+        return WerewolfApi.get(player).map(data -> data.getSkinId()).orElse(WerewolfSkinIds.DEFAULT_ID);
+    }
+
+    private record Preview(AbstractClientPlayer player, WerewolfForm form, String skinId) {}
 
     private WerewolfSkinRenderContext() {}
 }

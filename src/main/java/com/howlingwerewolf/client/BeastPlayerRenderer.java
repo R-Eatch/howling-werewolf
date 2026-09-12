@@ -23,7 +23,7 @@ public final class BeastPlayerRenderer extends LivingEntityRenderer<AbstractClie
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkin(player), WerewolfForm.BEAST);
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.BEAST);
     }
 
     @Override

@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "9";
+    private static final String PROTOCOL = "10";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(HowlingWerewolf.MOD_ID, "main"))
             .networkProtocolVersion(() -> PROTOCOL)

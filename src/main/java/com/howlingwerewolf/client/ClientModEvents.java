@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
@@ -44,6 +45,11 @@ public final class ClientModEvents {
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R,
             "key.categories.howlingwerewolf");
+
+    @SubscribeEvent
+    public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new WerewolfSkinCatalog());
+    }
 
     @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {

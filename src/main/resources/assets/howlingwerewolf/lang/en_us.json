@@ -245,7 +245,16 @@
   "skin.howlingwerewolf.adrian": "Adrian",
   "skin.howlingwerewolf.adrian.desc": "Original warm brown coat.",
   "skin.howlingwerewolf.ashen": "Ashen",
-  "skin.howlingwerewolf.ashen.desc": "Silver-gray fur, pale muzzle, dark back.",
+  "skin.howlingwerewolf.ashen.desc": "Gray mask, pale chest, amber eyes.",
   "skin.howlingwerewolf.onyx": "Onyx",
-  "skin.howlingwerewolf.onyx.desc": "Charcoal-black fur with soft gray highlights."
+  "skin.howlingwerewolf.onyx.desc": "Black fur, gray guard hairs, gold eyes.",
+  "skin.howlingwerewolf.ivory": "Ivory",
+  "skin.howlingwerewolf.ivory.desc": "Cool white fur with crimson eyes.",
+  "screen.howlingwerewolf.skins.packs": "Resource Packs",
+  "screen.howlingwerewolf.skins.template": "Create Template",
+  "screen.howlingwerewolf.skins.template_created": "Template created. Paint the PNGs, then enable its resource pack.",
+  "screen.howlingwerewolf.skins.template_failed": "Could not create the template. See latest.log for details.",
+  "screen.howlingwerewolf.skins.missing": "This skin pack is missing. Showing Adrian until the pack is enabled.",
+  "screen.howlingwerewolf.skins.invalid_packs": "Skipped %s invalid skins. Details: latest.log",
+  "screen.howlingwerewolf.skins.author": "By %s"
 }

@@ -4,7 +4,8 @@ package com.howlingwerewolf;
 public enum WerewolfSkin {
     ADRIAN("adrian"),
     ASHEN("ashen"),
-    ONYX("onyx");
+    ONYX("onyx"),
+    IVORY("ivory");
 
     private final String id;
 
@@ -19,7 +20,7 @@ public enum WerewolfSkin {
     /** Older saves and unknown IDs retain the original Adrian appearance. */
     public static WerewolfSkin byId(String id) {
         for (WerewolfSkin skin : values()) {
-            if (skin.id.equals(id)) return skin;
+            if (skin.id.equals(id) || (HowlingWerewolf.MOD_ID + ":" + skin.id).equals(id)) return skin;
         }
         return ADRIAN;
     }

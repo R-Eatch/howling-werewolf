@@ -19,6 +19,14 @@
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
+## Custom skins in 1.1.2
+
+Four built-in coats cover all three forms: the original brown **Adrian**, gray **Ashen**, black **Onyx**, and red-eyed white **Ivory**. Ashen and Onyx have newly painted facial markings, chest/back patterns, guard hairs and eye colors.
+
+Open **K → Skins** to preview forms, rotate the model and show equipment. **Create Template** exports three PNGs and editable Blockbench painting templates. Enable your creation through **Resource Packs**, then select and apply it. Friends need the same resource pack to see your custom coat.
+
+See the [simple custom-skin guide](CUSTOM_SKINS.md) or [简体中文教程](CUSTOM_SKINS-zh.md).
+
 ## Before the first howl
 
 A claw wound left in the forest may seem no different from any other injury at first. Then another night falls, the dormant bloodline begins to awaken, and the moon makes its first choice for you.
@@ -45,7 +53,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.1.0 |
+| Howling Werewolf | 1.1.2 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -65,7 +73,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.1.0-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.1.2-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -100,7 +108,7 @@ Only equipment with a positive armor value weakens the natural damage reduction 
 
 ## Skins
 
-Press `K` and choose **Skins** to preview **Adrian** (the original brown coat), **Ashen** (gray wolf), or **Onyx** (black wolf). Each coat includes normal Werewolf, Quadruped Wolf, and Beast appearances. Choose a form to inspect it, move the mouse to look around, drag to rotate, and scroll to zoom. **Apply** saves the selected coat for all three forms.
+Press `K` and choose **Skins** to preview **Adrian** (the original brown coat), **Ashen** (gray wolf), **Onyx** (black wolf), **Ivory** (red-eyed white wolf), or an enabled custom skin. Each coat includes normal Werewolf, Quadruped Wolf, and Beast appearances. Choose a form to inspect it, move the mouse to look around, drag to rotate, and scroll to zoom. **Apply** saves the selected coat for all three forms.
 
 Previewing a form does not unlock or activate it. Your coat survives death, dimension changes, progression resets, and curing/reawakening. **Level Reset** is now below the skill list on the Skill Tree page and still requires confirmation.
 
@@ -201,9 +209,9 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-The previous 1.0.7 gameplay baseline was tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. The new 1.1.0 skins and preview interface await in-game validation.
+The previous 1.0.7 gameplay baseline was tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. The 1.1.2 coat artwork, custom resource-pack skins and preview interface await in-game validation.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.1.0. Update both server and clients to 1.1.0; the skin synchronization protocol is incompatible with 1.0.7.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.1.2. Update both server and clients to 1.1.2; the skin synchronization protocol is incompatible with 1.1.0 and earlier versions.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 

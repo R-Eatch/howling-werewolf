@@ -25,7 +25,7 @@ public final class WerewolfPlayerRenderer
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkin(player), WerewolfForm.WEREWOLF);
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.WEREWOLF);
     }
 
     @Override

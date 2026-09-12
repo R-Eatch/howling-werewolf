@@ -9,6 +9,26 @@ own terms.
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.2 player coats and public painting templates
+
+- Ashen and Onyx were repainted, and Ivory was added, for all three forms. New
+  face/body material masks, surface-space pixel clusters and guard-hair strokes
+  define the fur independently of the original pixel brightness. Ashen has a gray
+  facial mask and pale chest; Onyx has dark guard hairs and gold eyes; Ivory has
+  cold white fur and stylized crimson eyes. Original Adrian files are byte-identical.
+- Minecraft's newer wolf variants (introduced in Java 1.20.5 and present in 1.21.1)
+  informed broad marking placement and pixel density. No Mojang wolf texture pixels,
+  third-party photographs or other mods' assets are copied into the distributed art.
+- The owner's explicit programmatic painting authorization covers this UV-preserving
+  implementation. Original dimensions, alpha, geometry and UVs are retained, while
+  eye colors and new fur markings are intentional design changes.
+- `examples/custom-skin-pack/` publishes sanitized painting copies of this project's
+  original three model geometries, embedding the matching Adrian PNGs. These are
+  CC BY-SA 4.0 authoring templates, not a runtime model importer. Internal concept
+  images, tools and third-party style references are not included.
+- The internal `design/skins-1.1.2/` archive contains the reproducible painter,
+  material masks, nine matching Blockbench copies and a texture SHA256 manifest.
+
 ## 1.1.0 player coats
 
 - `textures/entity/skins/ashen/{werewolf,beast,quadruped_werewolf}.png`

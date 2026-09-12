@@ -245,7 +245,16 @@
   "skin.howlingwerewolf.adrian": "Adrian",
   "skin.howlingwerewolf.adrian.desc": "原有的暖棕色毛皮。",
   "skin.howlingwerewolf.ashen": "Ashen",
-  "skin.howlingwerewolf.ashen.desc": "银灰毛皮、浅色口鼻与深色背毛。",
+  "skin.howlingwerewolf.ashen.desc": "灰色面罩、浅色喉胸与琥珀眼睛。",
   "skin.howlingwerewolf.onyx": "Onyx",
-  "skin.howlingwerewolf.onyx.desc": "炭黑毛皮，带柔和的灰色层次。"
+  "skin.howlingwerewolf.onyx.desc": "深黑背毛、灰色护毛与金色眼睛。",
+  "skin.howlingwerewolf.ivory": "Ivory",
+  "skin.howlingwerewolf.ivory.desc": "冷白毛皮与绯红眼睛。",
+  "screen.howlingwerewolf.skins.packs": "资源包",
+  "screen.howlingwerewolf.skins.template": "创建模板",
+  "screen.howlingwerewolf.skins.template_created": "已创建模板。绘制 PNG 后，在资源包中启用它。",
+  "screen.howlingwerewolf.skins.template_failed": "无法创建模板，详情请查看 latest.log。",
+  "screen.howlingwerewolf.skins.missing": "未启用此皮肤资源包，暂时显示 Adrian；启用后即可恢复。",
+  "screen.howlingwerewolf.skins.invalid_packs": "已跳过 %s 个无效皮肤，详情见 latest.log。",
+  "screen.howlingwerewolf.skins.author": "作者：%s"
 }

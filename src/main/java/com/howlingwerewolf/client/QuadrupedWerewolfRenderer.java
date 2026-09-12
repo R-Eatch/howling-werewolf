@@ -24,7 +24,7 @@ public final class QuadrupedWerewolfRenderer
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkin(player), WerewolfForm.QUADRUPED);
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.QUADRUPED);
     }
 
     @Override

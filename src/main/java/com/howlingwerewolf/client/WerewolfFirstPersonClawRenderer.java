@@ -25,7 +25,7 @@ public final class WerewolfFirstPersonClawRenderer {
         pose.pushPose();
         VertexConsumer consumer = event.getMultiBufferSource().getBuffer(
                 RenderType.entityCutoutNoCull(WerewolfSkinTextures.get(
-                        WerewolfSkinRenderContext.getSkin(event.getPlayer()),
+                        WerewolfSkinRenderContext.getSkinId(event.getPlayer()),
                         beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)));
         arm.render(pose, consumer, event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
