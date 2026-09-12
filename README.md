@@ -209,9 +209,9 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.1.2 has passed in-game testing by the project owner. The previous 1.0.7 gameplay baseline was also tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+The Mod has passed in-game testing by the project owner. Testing has also included a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.1.2. Update both server and clients to 1.1.2; the skin synchronization protocol is incompatible with 1.1.0 and earlier versions.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 
