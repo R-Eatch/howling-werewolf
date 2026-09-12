@@ -16,7 +16,7 @@
 | `blockbench/quadruped.bbmodel` | `assets/mywolf/textures/entity/quadruped_werewolf.png` | 64 × 32 |
 | `blockbench/beast.bbmodel` | `assets/mywolf/textures/entity/beast.png` | 128 × 128 |
 
-游戏内创建的模板会把上述 `mywolf` 自动换成唯一的 `wolfskin_…` 文件夹名，以免多个作品互相覆盖。请使用你文件夹中实际存在的路径。可以编辑 `assets/<该文件夹名>/werewolf_skins/custom.json` 中的 `name`、`description`、`author`；资源包列表名称在 `pack.mcmeta` 中修改。
+游戏内创建的模板会把上述 `mywolf` 自动换成唯一的 `wolfskin_…` 文件夹名，以免多个作品互相覆盖。请使用你文件夹中实际存在的路径。可以编辑 `assets/<该文件夹名>/werewolf_skins/custom.json` 中的 `name`、`description`、`author`。`pack.mcmeta` 中的 `description` 用于修改资源包描述；资源包列表中的标题来自文件夹或 ZIP 文件名。
 
 ## 分享与常见问题
 

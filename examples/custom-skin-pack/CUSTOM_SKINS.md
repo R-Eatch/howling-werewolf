@@ -16,7 +16,7 @@ For **Howling Werewolf 1.1.2 · Minecraft 1.20.1 Forge**. No extra mod is requir
 | `blockbench/quadruped.bbmodel` | `assets/mywolf/textures/entity/quadruped_werewolf.png` | 64 × 32 |
 | `blockbench/beast.bbmodel` | `assets/mywolf/textures/entity/beast.png` | 128 × 128 |
 
-In-game exports replace `mywolf` with a unique `wolfskin_…` namespace to keep creations separate. Use the paths in your actual folder. Edit `name`, `description` and `author` in `assets/<your namespace>/werewolf_skins/custom.json`; edit `pack.mcmeta` to rename the pack in the resource-pack list.
+In-game exports replace `mywolf` with a unique `wolfskin_…` namespace to keep creations separate. Use the paths in your actual folder. Edit `name`, `description` and `author` in `assets/<your namespace>/werewolf_skins/custom.json`. Edit `description` in `pack.mcmeta` to change the pack's description; its title in the resource-pack list comes from the folder or ZIP filename.
 
 ## Sharing and troubleshooting
 
