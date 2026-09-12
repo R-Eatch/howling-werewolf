@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "8";
+    private static final String PROTOCOL = "9";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(HowlingWerewolf.MOD_ID, "main"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -62,6 +62,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(RequestWerewolfSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(RequestWerewolfSyncPacket::encode).decoder(RequestWerewolfSyncPacket::decode)
                 .consumerMainThread(RequestWerewolfSyncPacket::handle).add();
+        CHANNEL.messageBuilder(SetWerewolfSkinPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SetWerewolfSkinPacket::encode).decoder(SetWerewolfSkinPacket::decode)
+                .consumerMainThread(SetWerewolfSkinPacket::handle).add();
     }
 
     public static void sync(ServerPlayer player, WerewolfData data) {

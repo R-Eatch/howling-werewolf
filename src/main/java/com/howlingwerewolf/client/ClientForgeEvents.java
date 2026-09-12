@@ -3,6 +3,7 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
+import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.network.RequestWerewolfSyncPacket;
@@ -98,8 +99,8 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void renderWerewolfPlayer(RenderPlayerEvent.Pre event) {
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
-        boolean transformed = WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false);
-        if (!transformed) return;
+        WerewolfForm form = WerewolfSkinRenderContext.getForm(player);
+        if (form == WerewolfForm.HUMAN) return;
 
         event.setCanceled(true);
         if (renderer == null || beastRenderer == null || quadrupedRenderer == null
@@ -117,26 +118,27 @@ public final class ClientForgeEvents {
 
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
-        boolean beast = WerewolfApi.get(player).map(data -> data.isBeastMode()).orElse(false);
-        boolean quadruped = WerewolfApi.get(player).map(data -> data.isQuadrupedMode()).orElse(false);
-        if (beast) {
-            beastRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-        } else if (quadruped) {
-            quadrupedRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-        } else {
-            renderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-            boolean armoredInstinct = WerewolfApi.get(player)
-                    .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false);
-            if (armoredInstinct && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
-                equipmentRenderer.prepare(player, event.getRenderer(), event.getPartialTick());
-                equipmentRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
+        try {
+            if (form == WerewolfForm.BEAST) {
+                beastRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
                         event.getMultiBufferSource(), event.getPackedLight());
+            } else if (form == WerewolfForm.QUADRUPED) {
+                quadrupedRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
+                        event.getMultiBufferSource(), event.getPackedLight());
+            } else {
+                renderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
+                        event.getMultiBufferSource(), event.getPackedLight());
+                boolean armoredInstinct = WerewolfSkinRenderContext.isPreview(player) || WerewolfApi.get(player)
+                        .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false);
+                if (armoredInstinct && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
+                    equipmentRenderer.prepare(player, event.getRenderer(), event.getPartialTick());
+                    equipmentRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
+                            event.getMultiBufferSource(), event.getPackedLight());
+                }
             }
+        } finally {
+            poseStack.popPose();
         }
-        poseStack.popPose();
     }
 
     @SubscribeEvent

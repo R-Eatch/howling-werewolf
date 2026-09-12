@@ -9,6 +9,22 @@ own terms.
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.0 player coats
+
+- `textures/entity/skins/ashen/{werewolf,beast,quadruped_werewolf}.png`
+  and `textures/entity/skins/onyx/{werewolf,beast,quadruped_werewolf}.png`
+  - Original gray-wolf and black-wolf coat variants of this project's owner-edited player textures.
+  - The built-in OpenAI image-generation workflow established the Ashen silver/charcoal/pale-muzzle
+    and Onyx near-black/charcoal/gray-guard-hair design directions. Its generated concept atlases
+    are internal references only; they are not distributed as runtime textures.
+  - With the owner's explicit approval, deterministic, face-aware palette mapping and sparse
+    guard-hair pixels realize those directions on the original UV grids. Texture dimensions,
+    alpha, eye pixels, dark nose/pupil/claw pixels, geometry and UV positions are preserved.
+  - The original brown `werewolf.png`, `beast.png`, and `quadruped_werewolf.png` are unchanged
+    and remain the Adrian coat. No third-party wolf photographs or mod textures are bundled.
+  - Generation prompts, concept masters, the reproducible exporter, SHA256 manifest and six
+    matching editable Blockbench copies are retained in the project's internal design archive.
+
 ## 1.0.2 owner-updated assets
 
 - `textures/entity/hunter.png` and `design/texture-masks/hunter_base.png`

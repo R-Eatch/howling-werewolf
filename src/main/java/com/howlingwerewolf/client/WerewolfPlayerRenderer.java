@@ -1,7 +1,7 @@
 package com.howlingwerewolf.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.WerewolfForm;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -11,9 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 /** Standalone renderer for the original Howling Werewolf model. */
 public final class WerewolfPlayerRenderer
         extends LivingEntityRenderer<AbstractClientPlayer, WerewolfPlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(
-            HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
-
     public WerewolfPlayerRenderer(EntityRendererProvider.Context context) {
         super(context, new WerewolfPlayerModel<>(WerewolfPlayerModel.createBodyLayer().bakeRoot()), 0.55F);
         addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
@@ -28,6 +25,11 @@ public final class WerewolfPlayerRenderer
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return TEXTURE;
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkin(player), WerewolfForm.WEREWOLF);
+    }
+
+    @Override
+    protected boolean shouldShowName(AbstractClientPlayer player) {
+        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player);
     }
 }

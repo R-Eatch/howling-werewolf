@@ -49,6 +49,7 @@ public final class WerewolfProgressionScreen extends Screen {
         clearWidgets();
         treeButtons.clear();
         abilityButtons.clear();
+        resetButton = null;
         beastButton = null;
         uiScale = Math.min(0.82F, Math.min((width - 12.0F) / PANEL_WIDTH, (height - 12.0F) / PANEL_HEIGHT));
         uiScale = Math.max(0.1F, uiScale);
@@ -62,10 +63,9 @@ public final class WerewolfProgressionScreen extends Screen {
                 .bounds(left + 128, top + PANEL_HEIGHT - 29, 52, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.tab.trial"), button -> switchPage(Page.TRIAL))
                 .bounds(left + 184, top + PANEL_HEIGHT - 29, 66, 20).build());
-        resetButton = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.reset"), button ->
-                        minecraft.setScreen(new WerewolfResetConfirmScreen(this)))
+        addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.tab.skins"), button ->
+                        minecraft.setScreen(new WerewolfSkinScreen(this)))
                 .bounds(left + 254, top + PANEL_HEIGHT - 29, 64, 20).build());
-        resetButton.active = canReset(getData());
         if (page == Page.TREE) initTree(left, top);
         else if (page == Page.ABILITIES) initAbilities(left, top);
         else if (page == Page.TRIAL) initTrial(left, top);
@@ -83,6 +83,10 @@ public final class WerewolfProgressionScreen extends Screen {
             treeButtons.put(skill, addRenderableWidget(button));
             row++;
         }
+        resetButton = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.reset"), button ->
+                        minecraft.setScreen(new WerewolfResetConfirmScreen(this)))
+                .bounds(left + PANEL_WIDTH - 102, top + 371, 86, 20).build());
+        resetButton.active = canReset(data);
     }
 
     private void initAbilities(int left, int top) {
@@ -218,6 +222,9 @@ public final class WerewolfProgressionScreen extends Screen {
             }
             row++;
         }
+        graphics.fill(left + 15, top + 352, left + PANEL_WIDTH - 15, top + 353, BORDER);
+        drawWrapped(graphics, Component.translatable("screen.howlingwerewolf.reset.summary"),
+                left + 16, top + 365, PANEL_WIDTH - 128, DIM);
         if (tooltip != null) renderWrappedTooltip(graphics, tooltip, mouseX, mouseY);
     }
 

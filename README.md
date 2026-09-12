@@ -45,7 +45,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.0.7 |
+| Howling Werewolf | 1.1.0 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -65,7 +65,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.7-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.1.0-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -97,6 +97,12 @@ Wolfsbane represents the path opposed to the werewolf bloodline. A Wolfsbane Pot
 Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are hidden by default; this can be changed in the configuration.
 
 Only equipment with a positive armor value weakens the natural damage reduction and movement bonuses provided by this ability. Zero-armor equipment such as elytra does not trigger this penalty.
+
+## Skins
+
+Press `K` and choose **Skins** to preview **Adrian** (the original brown coat), **Ashen** (gray wolf), or **Onyx** (black wolf). Each coat includes normal Werewolf, Quadruped Wolf, and Beast appearances. Choose a form to inspect it, move the mouse to look around, drag to rotate, and scroll to zoom. **Apply** saves the selected coat for all three forms.
+
+Previewing a form does not unlock or activate it. Your coat survives death, dimension changes, progression resets, and curing/reawakening. **Level Reset** is now below the skill list on the Skill Tree page and still requires confirmation.
 
 ## Levels, skill tree, and skills
 
@@ -195,9 +201,9 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.0.7 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+The previous 1.0.7 gameplay baseline was tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. The new 1.1.0 skins and preview interface await in-game validation.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.7.
+**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.1.0. Update both server and clients to 1.1.0; the skin synchronization protocol is incompatible with 1.0.7.
 
 Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
 
