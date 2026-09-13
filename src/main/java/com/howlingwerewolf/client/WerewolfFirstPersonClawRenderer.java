@@ -1,6 +1,6 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,13 +10,10 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 
 public final class WerewolfFirstPersonClawRenderer {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
-    private static final ResourceLocation BEAST_TEXTURE = ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
     private static final ModelPart ROOT = createLayer().bakeRoot();
     private static final ModelPart BEAST_ROOT = createBeastLayer().bakeRoot();
 
@@ -27,7 +24,9 @@ public final class WerewolfFirstPersonClawRenderer {
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         VertexConsumer consumer = event.getMultiBufferSource().getBuffer(
-                RenderType.entityCutoutNoCull(beastMode ? BEAST_TEXTURE : TEXTURE));
+                RenderType.entityCutoutNoCull(WerewolfSkinTextures.get(
+                        WerewolfSkinRenderContext.getSkinId(event.getPlayer()),
+                        beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)));
         arm.render(pose, consumer, event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
         event.setCanceled(true);

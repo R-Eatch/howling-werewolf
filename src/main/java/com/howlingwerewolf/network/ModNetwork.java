@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "8";
+    private static final String PROTOCOL = "10";
 
     /** Registers all gameplay payloads; handlers run on the main game thread by default. */
     public static void register(RegisterPayloadHandlersEvent event) {
@@ -39,6 +39,8 @@ public final class ModNetwork {
                 ResetProgressionPacket::handle);
         registrar.playToServer(RequestWerewolfSyncPacket.TYPE, RequestWerewolfSyncPacket.STREAM_CODEC,
                 RequestWerewolfSyncPacket::handle);
+        registrar.playToServer(SetWerewolfSkinPacket.TYPE, SetWerewolfSkinPacket.STREAM_CODEC,
+                SetWerewolfSkinPacket::handle);
     }
 
     public static void sync(ServerPlayer player, WerewolfData data) {

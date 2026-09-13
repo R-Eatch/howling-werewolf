@@ -3,6 +3,8 @@ package com.howlingwerewolf.capability;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
+import com.howlingwerewolf.WerewolfSkin;
+import com.howlingwerewolf.WerewolfSkinIds;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,6 +31,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     private boolean infected;
     private boolean moonForced;
     private WerewolfForm form = WerewolfForm.HUMAN;
+    private String skinId = WerewolfSkinIds.DEFAULT_ID;
     private boolean alphaDefeated;
     private boolean nightVisionEnabled = true;
     private int level = 1;
@@ -55,6 +58,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     public boolean isInfected() { return infected; }
     public boolean isMoonForced() { return moonForced; }
     public WerewolfForm getForm() { return form; }
+    public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
+    public String getSkinId() { return skinId; }
     public boolean isBeastMode() { return form == WerewolfForm.BEAST; }
     public boolean isQuadrupedMode() { return form == WerewolfForm.QUADRUPED; }
     public boolean hasDefeatedAlpha() { return alphaDefeated; }
@@ -81,6 +86,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     }
     public void setInfected(boolean value) { infected = value; }
     public void setMoonForced(boolean value) { moonForced = value; }
+    public void setSkin(WerewolfSkin value) { setSkinId(value == null ? null : value.getId()); }
+    public void setSkinId(String value) { skinId = WerewolfSkinIds.normalize(value); }
     public void setForm(WerewolfForm value) {
         WerewolfForm requested = value == null ? WerewolfForm.HUMAN : value;
         if (!werewolf || requested == WerewolfForm.HUMAN) {
@@ -251,9 +258,10 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     }
     public void prepareAfterDeath() { form = WerewolfForm.HUMAN; moonForced = false; moonbloodCrashTime = 0L; }
 
-    /** Returns true only for a newly-created / fully cured default state. */
+    /** Returns true only for a fully default state, including cosmetic preferences. */
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
+                && skinId.equals(WerewolfSkinIds.DEFAULT_ID)
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -265,6 +273,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     }
 
     public void reset() {
+        // The chosen coat is a player preference; curing and reawakening preserve it.
         werewolf = false;
         infected = false;
         moonForced = false;
@@ -295,6 +304,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         infected = other.infected;
         moonForced = other.moonForced;
         form = other.form;
+        skinId = other.skinId;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
         level = other.level;
@@ -323,6 +333,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         tag.putBoolean("Infected", infected);
         tag.putBoolean("MoonForced", moonForced);
         tag.putString("Form", form.id());
+        tag.putString("Skin", skinId);
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
         tag.putInt("Level", level);
@@ -365,6 +376,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         infected = tag.getBoolean("Infected");
         moonForced = tag.getBoolean("MoonForced");
         form = WerewolfForm.byName(tag.getString("Form"));
+        setSkinId(tag.getString("Skin"));
         alphaDefeated = tag.getBoolean("AlphaDefeated");
         nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBoolean("NightVisionEnabled");
         level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getInt("Level")));

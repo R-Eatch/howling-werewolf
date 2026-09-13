@@ -12,6 +12,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT)
@@ -44,6 +45,11 @@ public final class ClientModEvents {
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R,
             "key.categories.howlingwerewolf");
+
+    @SubscribeEvent
+    public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new WerewolfSkinCatalog());
+    }
 
     @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {

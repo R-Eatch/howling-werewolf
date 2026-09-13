@@ -14,6 +14,9 @@ geometry, and other original visual art distributed under
 `src/main/resources/assets/howlingwerewolf/`, except for any material specifically listed
 as excluded or third-party.
 
+The public PNG textures and Blockbench visual geometry in `examples/custom-skin-pack/`
+are also covered by this asset license.
+
 The preferred attribution is:
 
 > Howling Werewolf / 月厄狼人 art by R_Eatch — CC BY-SA 4.0

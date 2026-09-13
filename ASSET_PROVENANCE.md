@@ -8,6 +8,56 @@ official logo and project branding identified there. Original source code is gov
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.3 coat refinements
+
+- Ashen, Onyx, and Ivory now have matching eyes in all three forms. Werewolf
+  eyes have darker inner pixels mirrored around the nose; each Beast eye has
+  a darker center between lighter edges. Beast
+  forearms use a consistent fur palette with the denser pixel clusters and
+  five-tone shading of the 1.1.2 non-palm fur, with distinct markings on each
+  arm. The contrasting palm-like patches have been removed.
+- These are byte-for-byte copies of Forge 1.1.3 pixel edits to the project's 1.1.2 textures using the existing
+  programmatic painting workflow. All other pixels, original Adrian textures,
+  alpha channels, geometry, UVs, and claw details are preserved.
+- The internal Forge `design/skins-1.1.3/` archive retains the correction script,
+  matching editable models, before/after swatches, and texture manifest.
+
+## 1.1.2 player coats and public painting templates
+
+- Ashen and Onyx were repainted, and Ivory was added, for all three forms. New
+  face/body material masks, surface-space pixel clusters and guard-hair strokes
+  define the fur independently of the original pixel brightness. Ashen has a gray
+  facial mask and pale chest; Onyx has dark guard hairs and gold eyes; Ivory has
+  cold white fur and stylized crimson eyes. Original Adrian files are byte-identical.
+- Minecraft's newer wolf variants (introduced in Java 1.20.5 and present in 1.21.1)
+  informed broad marking placement and pixel density. No Mojang wolf texture pixels,
+  third-party photographs or other mods' assets are copied into the distributed art.
+- The owner's explicit programmatic painting authorization covers this UV-preserving
+  implementation. Original dimensions, alpha, geometry and UVs are retained, while
+  eye colors and new fur markings are intentional design changes.
+- `examples/custom-skin-pack/` publishes sanitized painting copies of this project's
+  original three model geometries, embedding the matching Adrian PNGs. These are
+  CC BY-SA 4.0 authoring templates, not a runtime model importer. Internal concept
+  images, tools and third-party style references are not included.
+- The internal `design/skins-1.1.2/` archive contains the reproducible painter,
+  material masks, nine matching Blockbench copies and a texture SHA256 manifest.
+
+## 1.1.0 player coats
+
+- `textures/entity/skins/ashen/{werewolf,beast,quadruped_werewolf}.png`
+  and `textures/entity/skins/onyx/{werewolf,beast,quadruped_werewolf}.png`
+  - Original gray-wolf and black-wolf coat variants of this project's owner-edited player textures.
+  - The built-in OpenAI image-generation workflow established the Ashen silver/charcoal/pale-muzzle
+    and Onyx near-black/charcoal/gray-guard-hair design directions. Its generated concept atlases
+    are internal references only; they are not distributed as runtime textures.
+  - With the owner's explicit approval, deterministic, face-aware palette mapping and sparse
+    guard-hair pixels realize those directions on the original UV grids. Texture dimensions,
+    alpha, eye pixels, dark nose/pupil/claw pixels, geometry and UV positions are preserved.
+  - The original brown `werewolf.png`, `beast.png`, and `quadruped_werewolf.png` are unchanged
+    and remain the Adrian coat. No third-party wolf photographs or mod textures are bundled.
+  - Generation prompts, concept masters, the reproducible exporter, SHA256 manifest and six
+    matching editable Blockbench copies are retained in the project's internal design archive.
+
 ## 1.0.2 owner-updated assets
 
 - `textures/entity/hunter.png`

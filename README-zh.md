@@ -15,9 +15,9 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> 当前分支提供 Minecraft 1.21.1 的 NeoForge 正式版；Minecraft 1.20.1 的 Forge 正式版维护在 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
+> 当前分支提供 Minecraft 1.21.1 的 NeoForge 版；Minecraft 1.20.1 的 Forge 版维护在 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
 
-Minecraft 1.21.1 NeoForge 版现在已经发布，当前更新进度与forge分支一致
+当前内容已同步至 Forge 1.1.3，皮肤功能及本次双眼、野兽前臂纹理调整等待 NeoForge 实机测试。
 
 Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围绕感染、月相变身、两套成长系统、三种狼人形态、猎人与银制品、狼毒草以及 Alpha 试炼展开。
 
@@ -28,7 +28,16 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 1.21.1 |
 | Mod 加载器 | NeoForge 21.1.248 或兼容的更高 21.1.x 版本 |
 | Java | 21 |
-| Howling Werewolf | 1.0.7 |
+| Howling Werewolf | 1.1.3 |
+
+## 狼人皮肤
+
+- 默认 **K** 打开狼人菜单 → **皮肤**，可选择原棕色 Adrian、琥珀眼灰狼 Ashen、金眼黑狼 Onyx、红眼白狼 Ivory；每套覆盖双足、四足和野兽三种形态。
+- 预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关，点击应用后保存。预览不会解锁或切换实际形态。等级重置入口位于技能树列表下方。
+- 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
+- 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
+
+联机时服务端与客户端都需更新至 1.1.3。自定义皮肤只同步 ID，观察者需要启用相同资源包；缺少资源包时显示 Adrian，保存的选择仍保留。
 
 ## 从源码构建
 
@@ -38,11 +47,11 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 ./gradlew.bat clean build
 ```
 
-构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.0.7-neoforge.jar`。
+构建生成的可分发 JAR 位于 `build/libs/howlingwerewolf-1.1.3-neoforge.jar`。
 
 ## 发布状态
 
-1.0.7 是正式发布版本。Minecraft 1.21.1 NeoForge 版已经完成全套实机测试
+此前发布的 NeoForge 版已完成全套实机测试。本轮新增皮肤功能的界面、渲染、存档和联机表现由维护者继续实机验证。
 
 添加或更新任何 Mod 前，请备份所有重要存档。
 

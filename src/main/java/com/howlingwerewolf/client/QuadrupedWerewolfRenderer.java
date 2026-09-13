@@ -1,6 +1,6 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -9,9 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class QuadrupedWerewolfRenderer
         extends LivingEntityRenderer<AbstractClientPlayer, QuadrupedWerewolfModel> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            HowlingWerewolf.MOD_ID, "textures/entity/quadruped_werewolf.png");
-
     public QuadrupedWerewolfRenderer(EntityRendererProvider.Context context) {
         super(context, new QuadrupedWerewolfModel(
                 context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F);
@@ -27,6 +24,11 @@ public final class QuadrupedWerewolfRenderer
 
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return TEXTURE;
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.QUADRUPED);
+    }
+
+    @Override
+    protected boolean shouldShowName(AbstractClientPlayer player) {
+        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player);
     }
 }
