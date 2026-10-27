@@ -49,6 +49,7 @@ public final class HowlingWerewolf {
                         output.accept(ModItems.ALPHA_WEREWOLF_BADGE.get());
                         output.accept(ModItems.WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModItems.HUNTER_SPAWN_EGG.get());
+                        output.accept(ModItems.ALPHA_WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModBlocks.SILVER_ORE.get());
                         output.accept(ModBlocks.DEEPSLATE_SILVER_ORE.get());
                         output.accept(ModBlocks.WOLFSBANE.get());
@@ -70,7 +71,7 @@ public final class HowlingWerewolf {
         modBus.addListener(ModNetwork::register);
         NeoForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
         NeoForge.EVENT_BUS.addListener(HowlingWerewolf::registerBrewingRecipes);
-        modContainer.registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC, MOD_ID + "-common.toml");
     }
 
     private static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {

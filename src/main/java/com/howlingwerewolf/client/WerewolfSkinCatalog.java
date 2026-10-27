@@ -7,7 +7,7 @@ import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -36,7 +36,7 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
     private static volatile Snapshot snapshot = snapshot(builtins(), 0, 0);
 
     public record Entry(String id, String name, String description, String author,
-                        Map<WerewolfForm, ResourceLocation> textures, boolean builtin) {
+                        Map<WerewolfForm, Identifier> textures, boolean builtin) {
         public Entry { textures = Map.copyOf(textures); }
     }
 
@@ -48,7 +48,7 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
     public static int errorCount() { return snapshot.errors(); }
     public static Entry find(String id) { return snapshot.byId().get(WerewolfSkinIds.normalize(id)); }
 
-    public static ResourceLocation texture(String id, WerewolfForm form) {
+    public static Identifier texture(String id, WerewolfForm form) {
         Snapshot current = snapshot;
         Entry skin = current.byId().getOrDefault(WerewolfSkinIds.normalize(id),
                 current.byId().get(WerewolfSkinIds.DEFAULT_ID));
@@ -59,10 +59,10 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
         List<Entry> result = new ArrayList<>();
         for (WerewolfSkin skin : WerewolfSkin.values()) {
             String base = "textures/entity/" + (skin == WerewolfSkin.ADRIAN ? "" : "skins/" + skin.getId() + "/");
-            Map<WerewolfForm, ResourceLocation> textures = new EnumMap<>(WerewolfForm.class);
-            textures.put(WerewolfForm.WEREWOLF, ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "werewolf.png"));
-            textures.put(WerewolfForm.QUADRUPED, ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "quadruped_werewolf.png"));
-            textures.put(WerewolfForm.BEAST, ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "beast.png"));
+            Map<WerewolfForm, Identifier> textures = new EnumMap<>(WerewolfForm.class);
+            textures.put(WerewolfForm.WEREWOLF, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "werewolf.png"));
+            textures.put(WerewolfForm.QUADRUPED, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "quadruped_werewolf.png"));
+            textures.put(WerewolfForm.BEAST, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "beast.png"));
             String name = skin.getId().substring(0, 1).toUpperCase(java.util.Locale.ROOT) + skin.getId().substring(1);
             result.add(new Entry(HowlingWerewolf.MOD_ID + ":" + skin.getId(), name, "", "R_Eatch", textures, true));
         }
@@ -89,7 +89,7 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
             }
             var file = files.get(index);
             try {
-                ResourceLocation location = file.getKey();
+                Identifier location = file.getKey();
                 String path = location.getPath();
                 String id = location.getNamespace() + ":" + path.substring(DIRECTORY.length(), path.length() - 5);
                 if (location.getNamespace().equals(HowlingWerewolf.MOD_ID)
@@ -104,10 +104,10 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
                 String description = text(json, "description", "", 160);
                 String author = text(json, "author", "", 48);
                 JsonObject definitions = GsonHelper.getAsJsonObject(json, "textures");
-                Map<WerewolfForm, ResourceLocation> textures = new EnumMap<>(WerewolfForm.class);
+                Map<WerewolfForm, Identifier> textures = new EnumMap<>(WerewolfForm.class);
                 for (WerewolfForm form : List.of(WerewolfForm.WEREWOLF, WerewolfForm.QUADRUPED, WerewolfForm.BEAST)) {
                     String reference = GsonHelper.getAsString(definitions, form.id());
-                    ResourceLocation texture = ResourceLocation.tryParse(reference);
+                    Identifier texture = Identifier.tryParse(reference);
                     if (reference.length() > 256 || texture == null || !texture.toString().equals(reference)
                             || !texture.getPath().startsWith("textures/") || !texture.getPath().endsWith(".png")
                             || !WerewolfSkinIds.validPath(texture.getPath())) {

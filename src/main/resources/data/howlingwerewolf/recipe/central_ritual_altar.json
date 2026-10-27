@@ -1,10 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": ["DGD", "GAG", "DGD"],
+  "pattern": [
+    "DGD",
+    "GAG",
+    "DGD"
+  ],
   "key": {
-    "D": { "item": "minecraft:diamond" },
-    "G": { "item": "minecraft:gold_block" },
-    "A": { "item": "howlingwerewolf:ritual_altar" }
+    "D": "minecraft:diamond",
+    "G": "minecraft:gold_block",
+    "A": "howlingwerewolf:ritual_altar"
   },
-  "result": { "id": "howlingwerewolf:central_ritual_altar", "count": 1 }
+  "result": {
+    "id": "howlingwerewolf:central_ritual_altar",
+    "count": 1
+  }
 }

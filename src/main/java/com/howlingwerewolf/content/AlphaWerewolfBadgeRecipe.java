@@ -1,9 +1,12 @@
 package com.howlingwerewolf.content;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import java.util.List;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -11,8 +14,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
-    public AlphaWerewolfBadgeRecipe(CraftingBookCategory category) {
-        super(category);
+    public AlphaWerewolfBadgeRecipe() {
+        super();
     }
 
     @Override
@@ -38,28 +41,19 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput container, HolderLookup.Provider registryAccess) {
+    public ItemStack assemble(CraftingInput container) {
         return new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get());
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width == 3 && height == 3;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.create(ingredients());
     }
 
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registryAccess) {
-        return new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get());
-    }
-
-    /**
-     * Exposes one deterministic arrangement to the vanilla recipe book and recipe viewers such as
-     * JEI. Manual crafting still accepts any ordering of the four silver ingots and four wolfsbane
-     * flowers around the center pearl through {@link #matches(CraftingInput, Level)}.
-     */
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.of(Ingredient.EMPTY,
+    // The recipe book displays one layout; matching still permits every arrangement of
+    // four silver ingots and four wolfsbane flowers around the central pearl.
+    private List<Ingredient> ingredients() {
+        return List.of(
                 Ingredient.of(ModItems.SILVER_INGOT.get()),
                 Ingredient.of(ModBlocks.WOLFSBANE.get()),
                 Ingredient.of(ModItems.SILVER_INGOT.get()),
@@ -72,12 +66,20 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     }
 
     @Override
+    public List<RecipeDisplay> display() {
+        return List.of(new ShapedCraftingRecipeDisplay(3, 3,
+                ingredients().stream().map(Ingredient::display).toList(),
+                new SlotDisplay.ItemSlotDisplay(ModItems.ALPHA_WEREWOLF_BADGE.get()),
+                new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
+    }
+
+    @Override
     public boolean isSpecial() {
         return false;
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<AlphaWerewolfBadgeRecipe> getSerializer() {
         return ModRecipes.ALPHA_WEREWOLF_BADGE.get();
     }
 }

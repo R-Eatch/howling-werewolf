@@ -26,7 +26,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 public final class WerewolfCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("werewolf").requires(source -> source.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("werewolf").requires(source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("infect").then(target(ctx -> infect(ctx, player(ctx)))))
                 .then(Commands.literal("awaken").then(target(ctx -> awaken(ctx, player(ctx)))))
                 .then(Commands.literal("cure").then(target(ctx -> cure(ctx, player(ctx)))))
@@ -173,7 +173,7 @@ public final class WerewolfCommands {
         java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
-                    + player.getGameProfile().getName() + ". Reconnect and check the server log."));
+                    + player.getScoreboardName() + ". Reconnect and check the server log."));
             return 0;
         }
         optional.ifPresent(data -> {
@@ -183,12 +183,12 @@ public final class WerewolfCommands {
             liveForCompare.remove("TotemExperienceTicks");
             boolean mirrorMatches = mirror != null && mirror.equals(liveForCompare);
             ctx.getSource().sendSuccess(() -> Component.literal(
-                    "Werewolf " + player.getGameProfile().getName() + ": werewolf=" + data.isWerewolf()
+                    "Werewolf " + player.getScoreboardName() + ": werewolf=" + data.isWerewolf()
                             + ", infected=" + data.isInfected() + ", form=" + data.getForm().id()
                             + ", alphaDefeated=" + data.hasDefeatedAlpha() + ", level=" + data.getLevel()
                             + ", xp=" + data.getExperience() + "/" + WerewolfData.experienceForNextLevel(data.getLevel())
                             + ", skillPoints=" + data.getAvailableSkillPoints() + ", treePoints=" + data.getAvailableTreePoints()
-                            + ", dimension=" + player.level().dimension().location()
+                            + ", dimension=" + player.level().dimension().identifier()
                             + ", persistedMirror=" + (mirror == null ? "missing" : mirrorMatches ? "match" : "DIFF")), false);
         });
         return 1;
@@ -199,7 +199,7 @@ public final class WerewolfCommands {
         java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
-                    + player.getGameProfile().getName() + ". Reconnect and check the server log."));
+                    + player.getScoreboardName() + ". Reconnect and check the server log."));
             return 0;
         }
         optional.ifPresent(data -> {
@@ -208,7 +208,7 @@ public final class WerewolfCommands {
             WerewolfGameplayEvents.refreshWerewolfModifiers(player, data);
             ModNetwork.sync(player, data);
         });
-        ctx.getSource().sendSuccess(() -> Component.literal(player.getGameProfile().getName() + ": " + result), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(player.getScoreboardName() + ": " + result), true);
         return 1;
     }
 

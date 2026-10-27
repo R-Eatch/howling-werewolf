@@ -198,3 +198,11 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
   - Chest, abdomen, forearms, lower legs and tail are intentionally more separated now.
 - `WerewolfPlayerModel.java` / `BeastPlayerModel.java`
   - Head presentation simplified: smaller cube ears and a clearer protruding muzzle volume.
+
+## 1.1.5 spawn egg artwork for Minecraft 26.1.2
+
+- `textures/item/werewolf_spawn_egg.png`, `hunter_spawn_egg.png`, and `alpha_werewolf_spawn_egg.png` are new original, mob-specific inventory sprites created for this mod with the built-in OpenAI image-generation workflow and exported as transparent 16×16 PNGs.
+- Installed Minecraft 26.1.2 spawn eggs informed only the broad oval silhouette, pixel density, and mob-specific visual style. No vanilla texture pixels are copied into these three distributed sprites.
+- Werewolf artwork uses brown fur and a pale muzzle; Hunter artwork uses charcoal, forest green, leather and silver; the Alpha uses dark red-brown fur and a gold forehead marking.
+- The two legacy Minecraft 1.21.1 generic egg layers previously bundled for compatibility have been removed. The new item model definitions reference only the mod's own dedicated textures and do not apply legacy color tints.
+- Generated masters, prompts, reference previews and export metadata are retained locally as authoring material; only the final sprites and their documentation preview are distributed with the source tree. The new artwork follows the project's asset license.

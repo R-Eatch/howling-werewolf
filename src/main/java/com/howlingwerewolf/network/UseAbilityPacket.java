@@ -6,13 +6,13 @@ import com.howlingwerewolf.event.WerewolfGameplayEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UseAbilityPacket(WerewolfAbility ability, int targetId) implements CustomPacketPayload {
     public static final Type<UseAbilityPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "use_ability"));
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "use_ability"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UseAbilityPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> {
                 buf.writeEnum(packet.ability());

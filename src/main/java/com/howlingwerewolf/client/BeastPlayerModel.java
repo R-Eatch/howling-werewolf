@@ -1,11 +1,11 @@
 package com.howlingwerewolf.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.effects.SpearAnimations;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -15,10 +15,10 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 
 /**
  * Original high-tier Beast form for Howling Werewolf.
@@ -26,10 +26,11 @@ import net.minecraft.world.item.UseAnim;
  * The established animation rig uses the hand-edited Blockbench ear tilt/inflate and
  * its synchronized entity texture.
  */
-public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<T>
-        implements ArmedModel, HeadedModel {
+public final class BeastPlayerModel<S extends HumanoidRenderState> extends EntityModel<S>
+        implements ArmedModel<S>, HeadedModel {
     private static final float DEG = Mth.DEG_TO_RAD;
 
+    private float attackTime;
     private final ModelPart root;
     private final ModelPart torso;
     private final ModelPart head;
@@ -47,6 +48,7 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
     private final ModelPart tailTip;
 
     public BeastPlayerModel(ModelPart root) {
+        super(root);
         this.root = root;
         this.torso = root.getChild("torso");
         this.head = torso.getChild("head");
@@ -163,13 +165,18 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
     }
 
     @Override
-    public void setupAnim(T player, float limbSwing, float limbAmount,
-                          float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(S player) {
+        float limbSwing = player.walkAnimationPos;
+        float limbAmount = player.walkAnimationSpeed;
+        float ageInTicks = player.ageInTicks;
+        float netHeadYaw = player.yRot;
+        float headPitch = player.xRot;
+        attackTime = player.attackTime;
         root.getAllParts().forEach(ModelPart::resetPose);
 
-        boolean fallFlying = player.getFallFlyingTicks() > 4;
-        boolean swimming = player.isVisuallySwimming();
-        float swimAmount = player.getSwimAmount(0.0F);
+        boolean fallFlying = player.isFallFlying;
+        boolean swimming = player.isVisuallySwimming;
+        float swimAmount = player.swimAmount;
 
         head.yRot = netHeadYaw * DEG;
         head.xRot = fallFlying ? -Mth.PI / 5.0F : headPitch * DEG;
@@ -186,14 +193,14 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         rightShin.xRot = Math.max(0.0F, -rightThigh.xRot) * 0.45F;
         leftShin.xRot = Math.max(0.0F, -leftThigh.xRot) * 0.45F;
 
-        if (player.isPassenger()) {
+        if (player.isPassenger) {
             rightThigh.xRot = -1.2F;
             leftThigh.xRot = -1.2F;
             rightThigh.yRot = 0.35F;
             leftThigh.yRot = -0.35F;
         }
 
-        if (player.isCrouching()) {
+        if (player.isCrouching) {
             // Heavy Beast crouch: lower the hips and bend the limbs without tipping the
             // whole creature forward. This keeps the torso connected to the upper legs.
             torso.xRot += 6.0F * DEG;
@@ -212,7 +219,7 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
             tailBase.xRot += 6.0F * DEG;
         }
 
-        if (player.isSprinting() && !player.isCrouching()) {
+        if (WerewolfRenderData.get(player).sprinting() && !player.isCrouching) {
             torso.xRot += 10.0F * DEG;
             head.xRot -= 6.0F * DEG;
             rightUpperArm.xRot *= 1.20F;
@@ -233,13 +240,13 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         torso.xRot += breathe;
         jaw.xRot = Math.max(0.0F, Mth.sin(ageInTicks * 0.055F)) * 0.05F;
         float wag = Mth.sin(ageInTicks * 0.10F) * (0.11F + speed * 0.09F);
-        if (player.isCrouching()) wag *= 0.65F;
+        if (player.isCrouching) wag *= 0.65F;
         tailBase.yRot = wag;
         tailMid.yRot = wag * 1.35F;
         tailTip.yRot = wag * 1.7F;
     }
 
-    private void applySpecialMovementPose(T player, float ageInTicks, float swimAmount,
+    private void applySpecialMovementPose(S player, float ageInTicks, float swimAmount,
                                           boolean fallFlying, boolean swimming) {
         if (fallFlying) {
             torso.xRot += 8.0F * DEG;
@@ -267,37 +274,37 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         if (swimming) torso.xRot += 6.0F * DEG;
     }
 
-    private void applyHeldItemRestPose(T player) {
-        if (player.isUsingItem()) return;
-        if (!player.getMainHandItem().isEmpty()) {
-            ModelPart upper = player.getMainArm() == HumanoidArm.RIGHT ? rightUpperArm : leftUpperArm;
-            ModelPart fore = player.getMainArm() == HumanoidArm.RIGHT ? rightForearm : leftForearm;
+    private void applyHeldItemRestPose(S player) {
+        if (player.isUsingItem) return;
+        if (!player.getMainHandItemStack().isEmpty()) {
+            ModelPart upper = player.mainArm == HumanoidArm.RIGHT ? rightUpperArm : leftUpperArm;
+            ModelPart fore = player.mainArm == HumanoidArm.RIGHT ? rightForearm : leftForearm;
             upper.xRot = upper.xRot * 0.5F - Mth.PI / 10.0F;
             fore.xRot -= 0.10F;
             upper.yRot = 0.0F;
         }
-        if (!player.getOffhandItem().isEmpty()) {
-            ModelPart upper = player.getMainArm() == HumanoidArm.RIGHT ? leftUpperArm : rightUpperArm;
-            ModelPart fore = player.getMainArm() == HumanoidArm.RIGHT ? leftForearm : rightForearm;
+        if (!(player.mainArm == HumanoidArm.RIGHT ? player.leftHandItemStack : player.rightHandItemStack).isEmpty()) {
+            ModelPart upper = player.mainArm == HumanoidArm.RIGHT ? leftUpperArm : rightUpperArm;
+            ModelPart fore = player.mainArm == HumanoidArm.RIGHT ? leftForearm : rightForearm;
             upper.xRot = upper.xRot * 0.5F - Mth.PI / 10.0F;
             fore.xRot -= 0.10F;
             upper.yRot = 0.0F;
         }
     }
 
-    private void applyUseItemPose(T player) {
-        if (!player.isUsingItem()) return;
-        HumanoidArm mainArm = player.getMainArm();
-        boolean useRight = player.getUsedItemHand() == InteractionHand.MAIN_HAND
+    private void applyUseItemPose(S player) {
+        if (!player.isUsingItem) return;
+        HumanoidArm mainArm = player.mainArm;
+        boolean useRight = player.useItemHand == InteractionHand.MAIN_HAND
                 ? mainArm == HumanoidArm.RIGHT
                 : mainArm == HumanoidArm.LEFT;
         poseArm(useRight ? rightUpperArm : leftUpperArm,
                 useRight ? rightForearm : leftForearm,
-                useRight, player.getUseItem());
+                useRight, player.getUseItemStackForArm(useRight ? HumanoidArm.RIGHT : HumanoidArm.LEFT), player);
     }
 
-    private static void poseArm(ModelPart upper, ModelPart forearm, boolean right, ItemStack stack) {
-        UseAnim anim = stack.getUseAnimation();
+    private void poseArm(ModelPart upper, ModelPart forearm, boolean right, ItemStack stack, S player) {
+        ItemUseAnimation anim = stack.getUseAnimation();
         switch (anim) {
             case BLOCK -> {
                 upper.xRot = upper.xRot * 0.5F - 0.85F;
@@ -309,9 +316,14 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
                 upper.xRot = -1.35F;
                 forearm.xRot = -0.45F;
             }
-            case SPEAR -> {
+            case TRIDENT -> {
                 upper.xRot = upper.xRot * 0.5F - Mth.PI;
                 forearm.xRot = -0.45F;
+            }
+            case SPEAR -> {
+                SpearAnimations.thirdPersonHandUse(upper, head, right, stack, player);
+                // The native spear pose rotates one arm; keep this rig's child forearm aligned.
+                forearm.xRot = 0.0F;
             }
             case DRINK, EAT -> {
                 upper.xRot = upper.xRot * 0.5F - 1.0F;
@@ -323,10 +335,10 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         }
     }
 
-    private void animateAttack(T player) {
-        if (attackTime <= 0.0F || player.isUsingItem()) return;
+    private void animateAttack(S player) {
+        if (attackTime <= 0.0F || player.isUsingItem) return;
 
-        boolean left = player.getMainArm() == HumanoidArm.LEFT;
+        boolean left = player.mainArm == HumanoidArm.LEFT;
         ModelPart upper = left ? leftUpperArm : rightUpperArm;
         ModelPart fore = left ? leftForearm : rightForearm;
 
@@ -349,11 +361,6 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         jaw.xRot += Mth.sin(attackTime * Mth.PI) * 0.08F;
     }
 
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int packedLight,
-                               int packedOverlay, int color) {
-        root.render(poseStack, consumer, packedLight, packedOverlay, color);
-    }
 
     @Override
     public ModelPart getHead() {
@@ -361,7 +368,7 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
     }
 
     @Override
-    public void translateToHand(HumanoidArm arm, PoseStack poseStack) {
+    public void translateToHand(S state, HumanoidArm arm, PoseStack poseStack) {
         torso.translateAndRotate(poseStack);
         ModelPart upper = arm == HumanoidArm.RIGHT ? rightUpperArm : leftUpperArm;
         ModelPart forearm = arm == HumanoidArm.RIGHT ? rightForearm : leftForearm;

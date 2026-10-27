@@ -1,119 +1,36 @@
 package com.howlingwerewolf.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.HumanoidArmorModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 
-/**
- * Renders vanilla armor and elytra layers over the transformed werewolf body while keeping the
- * vanilla player body itself invisible. The hidden parent model is manually aligned to the custom
- * werewolf torso/legs so armor and elytra follow the custom model more closely, especially in
- * crouch and fall-flying poses.
- */
-public final class WerewolfEquipmentRenderer
-        extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-
+/** Vanilla equipment layers, aligned to the original werewolf body without a second player body. */
+public final class WerewolfEquipmentRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
     public WerewolfEquipmentRenderer(EntityRendererProvider.Context context) {
-        super(context, new HiddenPlayerModel(context), 0.0F);
+        super(context, new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false), 0.0F, AvatarRenderState::new);
         addLayer(new HumanoidArmorLayer<>(this,
-                new HumanoidArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
-                new HumanoidArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
-                context.getModelManager()));
-        addLayer(new ElytraLayer<>(this, context.getModelSet()));
+                ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(), WerewolfArmorModel::new),
+                context.getEquipmentRenderer()));
+        addLayer(new WingsLayer<>(this, context.getModelSet(), context.getEquipmentRenderer()));
     }
-
-    @Override
-    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick, float scale) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
-        WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
+    @Override protected RenderType getRenderType(AvatarRenderState state, boolean body, boolean translucent, boolean glowing) {
+        return null;
     }
-
-    public void prepare(AbstractClientPlayer player, PlayerRenderer vanillaRenderer, float partialTick) {
-        PlayerModel<AbstractClientPlayer> vanilla = vanillaRenderer.getModel();
-        vanilla.copyPropertiesTo(model);
-        model.leftArmPose = vanilla.leftArmPose;
-        model.rightArmPose = vanilla.rightArmPose;
-        model.crouching = player.isCrouching();
-        model.swimAmount = player.getSwimAmount(partialTick);
-        model.attackTime = vanilla.attackTime;
-        model.riding = vanilla.riding;
-        model.young = vanilla.young;
-
-        // Default vanilla player baseline.
-        model.head.y = 0.0F;
-        model.hat.y = 0.0F;
-        model.body.y = 0.0F;
-        model.rightArm.y = 2.0F;
-        model.leftArm.y = 2.0F;
-        model.rightLeg.y = 12.0F;
-        model.leftLeg.y = 12.0F;
-        model.rightLeg.z = 0.0F;
-        model.leftLeg.z = 0.0F;
-
-        // Werewolf custom model torso is one pixel lower and visually broader. Align the armor and
-        // elytra carrier body to that lower torso anchor.
-        model.body.y = 1.0F;
-        model.rightArm.y = 3.0F;
-        model.leftArm.y = 3.0F;
-        model.head.y = 1.0F;
-        model.hat.y = 1.0F;
-
-        if (player.isCrouching()) {
-            // Mirror vanilla Steve crouch, but keep the equipment anchored slightly lower to the
-            // werewolf torso. This greatly reduces armor/elytra separation in sneak pose.
-            model.body.xRot = 0.5F;
-            model.body.y = 4.2F;
-            model.head.y = 5.2F;
-            model.hat.y = 5.2F;
-            model.rightArm.y = 6.2F;
-            model.leftArm.y = 6.2F;
-            model.rightLeg.z = 4.0F;
-            model.leftLeg.z = 4.0F;
-            model.rightLeg.y = 12.2F;
-            model.leftLeg.y = 12.2F;
-        }
-
-        if (player.getFallFlyingTicks() > 4) {
-            // Elytra layer is driven from the hidden model's body transform. Pull that transform
-            // into the same travel lane as the custom renderer.
-            model.body.y = 1.0F;
-            model.head.y = 1.0F;
-            model.hat.y = 1.0F;
-            model.rightArm.y = 3.0F;
-            model.leftArm.y = 3.0F;
-            model.body.xRot = 0.08F;
-        }
+    @Override protected void setupRotations(AvatarRenderState state, PoseStack pose, float bodyRot, float scale) {
+        super.setupRotations(state, pose, bodyRot, scale);
+        WerewolfRenderTransforms.applyPlayerTravelPose(state, pose);
     }
-
-    @Override
-    public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return player.getSkin().texture();
-    }
-
-    @Override
-    protected boolean shouldShowName(AbstractClientPlayer player) {
-        return false;
-    }
-
-    private static final class HiddenPlayerModel extends PlayerModel<AbstractClientPlayer> {
-        private HiddenPlayerModel(EntityRendererProvider.Context context) {
-            super(context.bakeLayer(ModelLayers.PLAYER), false);
-        }
-
-        @Override
-        public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int packedLight,
-                                   int packedOverlay, int color) {
-            // The custom werewolf renderer draws the body. Only this renderer's layers are visible.
-        }
-    }
+    @Override public Identifier getTextureLocation(AvatarRenderState state) { return state.skin.body().texturePath(); }
+    @Override protected boolean shouldShowName(AbstractClientPlayer player, double distance) { return false; }
+    @Override protected void submitNameDisplay(AvatarRenderState state, PoseStack pose,
+            net.minecraft.client.renderer.SubmitNodeCollector collector,
+            net.minecraft.client.renderer.state.level.CameraRenderState camera) {}
 }

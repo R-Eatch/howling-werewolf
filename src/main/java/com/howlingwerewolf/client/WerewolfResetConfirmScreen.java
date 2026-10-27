@@ -4,11 +4,11 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.network.ResetProgressionPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public final class WerewolfResetConfirmScreen extends Screen {
     private static final int PANEL_WIDTH = 320;
@@ -39,44 +39,43 @@ public final class WerewolfResetConfirmScreen extends Screen {
     }
 
     private void confirmReset() {
-        PacketDistributor.sendToServer(new ResetProgressionPacket());
+        ClientPacketDistributor.sendToServer(new ResetProgressionPacket());
         minecraft.setScreen(parent);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderTransparentBackground(graphics);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractTransparentBackground(graphics);
         int left = (width - PANEL_WIDTH) / 2;
         int top = (height - PANEL_HEIGHT) / 2;
         graphics.fill(left, top, left + PANEL_WIDTH, top + PANEL_HEIGHT, BACKGROUND);
-        graphics.renderOutline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
-        graphics.drawCenteredString(font, title, left + PANEL_WIDTH / 2, top + 13, WARNING);
+        graphics.outline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
+        graphics.centeredText(font, title, left + PANEL_WIDTH / 2, top + 13, WARNING);
         WerewolfData data = getData();
         if (data == null || !data.canResetProgression()) {
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.unavailable"),
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.unavailable"),
                     left + PANEL_WIDTH / 2, top + 76, WARNING);
         } else {
             int newLevel = data.getLevel() - 5;
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.warning"),
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.warning"),
                     left + PANEL_WIDTH / 2, top + 38, WARNING);
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.levels",
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.levels",
                     data.getLevel(), newLevel), left + PANEL_WIDTH / 2, top + 59, GOLD);
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.clears"),
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.clears"),
                     left + PANEL_WIDTH / 2, top + 78, TEXT);
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.experience"),
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.experience"),
                     left + PANEL_WIDTH / 2, top + 96, TEXT);
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.reset.points",
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.reset.points",
                     WerewolfData.skillPointsForLevel(newLevel, data.getEffectiveMaxLevel()),
                     WerewolfData.treePointsForLevel(newLevel, data.getEffectiveMaxLevel())),
                     left + PANEL_WIDTH / 2, top + 116, GOLD);
         }
-        super.render(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Screen#render invokes this from super.render. The reset dialog already drew the intended
-        // dim overlay above, so suppress 1.21.1's world blur and a duplicate background pass.
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        // The dialog already extracted its dim overlay; suppress a duplicate background pass.
     }
 
     @Override

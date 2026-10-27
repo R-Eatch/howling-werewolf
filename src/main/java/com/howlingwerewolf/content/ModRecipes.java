@@ -3,7 +3,8 @@ package com.howlingwerewolf.content;
 import com.howlingwerewolf.HowlingWerewolf;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -13,7 +14,8 @@ public final class ModRecipes {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AlphaWerewolfBadgeRecipe>> ALPHA_WEREWOLF_BADGE =
             SERIALIZERS.register("alpha_werewolf_badge",
-                    () -> new SimpleCraftingRecipeSerializer<>(AlphaWerewolfBadgeRecipe::new));
+                    () -> new RecipeSerializer<>(MapCodec.unit(AlphaWerewolfBadgeRecipe::new),
+                            StreamCodec.unit(new AlphaWerewolfBadgeRecipe())));
 
     private ModRecipes() {}
 }

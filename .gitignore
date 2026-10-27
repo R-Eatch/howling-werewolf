@@ -41,3 +41,8 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Local migration and review files ###
+/PORTING.md
+/BUGFIX_*.md
+/build-local.ps1

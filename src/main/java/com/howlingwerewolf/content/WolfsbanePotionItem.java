@@ -7,7 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,20 +16,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
 
 public final class WolfsbanePotionItem extends Item {
-    public WolfsbanePotionItem() {
-        super(new Item.Properties().stacksTo(16));
+    public WolfsbanePotionItem(Item.Properties properties) {
+        super(properties.stacksTo(16));
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.DRINK;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.DRINK;
     }
 
     @Override
@@ -38,21 +37,21 @@ public final class WolfsbanePotionItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc")
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc")
                 .withStyle(ChatFormatting.DARK_GREEN));
-        tooltip.add(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc2")
+        tooltip.accept(Component.translatable("item.howlingwerewolf.wolfsbane_potion.desc2")
                 .withStyle(ChatFormatting.GRAY));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         return ItemUtils.startUsingInstantly(level, player, hand);
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity living) {
-        if (!level.isClientSide && living instanceof ServerPlayer player) {
+        if (!level.isClientSide() && living instanceof ServerPlayer player) {
             java.util.Optional<com.howlingwerewolf.capability.WerewolfData> optional = WerewolfApi.get(player);
             if (!optional.isPresent()) {
                 player.sendSystemMessage(Component.translatable("message.howlingwerewolf.data_unavailable")

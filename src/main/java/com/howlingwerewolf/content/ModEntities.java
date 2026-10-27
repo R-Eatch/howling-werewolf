@@ -6,6 +6,8 @@ import com.howlingwerewolf.entity.AlphaWerewolfEntity;
 import com.howlingwerewolf.entity.AlphaMinionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -19,25 +21,29 @@ public final class ModEntities {
             () -> EntityType.Builder.of(HunterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
-                    .build("hunter"));
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter"))));
     public static final DeferredHolder<EntityType<?>, EntityType<WerewolfEntity>> WEREWOLF = ENTITIES.register("werewolf",
             () -> EntityType.Builder.of(WerewolfEntity::new, MobCategory.MONSTER)
                     .sized(0.9F, 2.0F)
                     .clientTrackingRange(10)
-                    .build("werewolf"));
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf"))));
     public static final DeferredHolder<EntityType<?>, EntityType<AlphaWerewolfEntity>> ALPHA_WEREWOLF =
             ENTITIES.register("alpha_werewolf",
                     () -> EntityType.Builder.of(AlphaWerewolfEntity::new, MobCategory.MONSTER)
                             .sized(1.0F, 3.0F)
                             .fireImmune()
                             .clientTrackingRange(12)
-                            .build("alpha_werewolf"));
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "alpha_werewolf"))));
     public static final DeferredHolder<EntityType<?>, EntityType<AlphaMinionEntity>> ALPHA_MINION =
             ENTITIES.register("alpha_minion",
                     () -> EntityType.Builder.of(AlphaMinionEntity::new, MobCategory.MONSTER)
                             .sized(0.6F, 0.85F)
                             .clientTrackingRange(10)
-                            .build("alpha_minion"));
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "alpha_minion"))));
 
     private ModEntities() {}
 }

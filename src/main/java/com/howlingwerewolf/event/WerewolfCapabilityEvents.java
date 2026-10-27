@@ -94,8 +94,7 @@ public final class WerewolfCapabilityEvents {
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getEntity() instanceof ServerPlayer observer && event.getTarget() instanceof ServerPlayer target) {
             WerewolfApi.get(target).ifPresent(data -> PacketDistributor.sendToPlayer(observer,
-                    new com.howlingwerewolf.network.SyncWerewolfDataPacket(
-                            target.getId(), data.serializeNBT())));
+                    ModNetwork.createSyncPacket(target.getId(), data)));
         }
     }
 
@@ -106,7 +105,7 @@ public final class WerewolfCapabilityEvents {
         if (!optional.isPresent()) {
             HowlingWerewolf.LOGGER.error(
                     "Werewolf capability missing for {} after player lifecycle event. Dimension state cannot be restored.",
-                    serverPlayer.getGameProfile().getName());
+                    serverPlayer.getGameProfile().name());
             return;
         }
         optional.ifPresent(data -> {

@@ -8,13 +8,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ResetProgressionPacket() implements CustomPacketPayload {
     public static final Type<ResetProgressionPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "reset_progression"));
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "reset_progression"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ResetProgressionPacket> STREAM_CODEC =
             StreamCodec.unit(new ResetProgressionPacket());
 

@@ -11,11 +11,12 @@ import com.howlingwerewolf.network.UnlockAbilityPacket;
 import com.howlingwerewolf.network.UpgradeTreeSkillPacket;
 import com.howlingwerewolf.network.UseAbilityPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -76,7 +77,7 @@ public final class WerewolfProgressionScreen extends Screen {
         int row = 0;
         for (WerewolfTreeSkill skill : WerewolfTreeSkill.values()) {
             Button button = Button.builder(Component.literal("+"), clicked -> {
-                        PacketDistributor.sendToServer(new UpgradeTreeSkillPacket(skill));
+                        ClientPacketDistributor.sendToServer(new UpgradeTreeSkillPacket(skill));
                         clicked.active = false;
                     }).bounds(left + PANEL_WIDTH - 35, top + 78 + row * TREE_ROW_HEIGHT, 20, 15).build();
             button.active = canUpgrade(data, skill);
@@ -94,7 +95,7 @@ public final class WerewolfProgressionScreen extends Screen {
         int row = 0;
         for (WerewolfAbility ability : WerewolfAbility.values()) {
             Button button = Button.builder(Component.translatable("screen.howlingwerewolf.unlock"), clicked -> {
-                        PacketDistributor.sendToServer(new UnlockAbilityPacket(ability));
+                        ClientPacketDistributor.sendToServer(new UnlockAbilityPacket(ability));
                         clicked.active = false;
                     }).bounds(left + PANEL_WIDTH - 84, abilityControlY(top, ability), 69, 18).build();
             button.active = canUnlock(data, ability);
@@ -102,13 +103,13 @@ public final class WerewolfProgressionScreen extends Screen {
             row++;
         }
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.use"), button ->
-                        PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT)))
+                        ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT)))
                 .bounds(left + 160, abilityControlY(top, WerewolfAbility.SUMMON_WOLF_SPIRIT), 58, 18).build());
         addRenderableWidget(Button.builder(Component.literal("G"), button ->
-                        PacketDistributor.sendToServer(new com.howlingwerewolf.network.ToggleQuadrupedModePacket()))
+                        ClientPacketDistributor.sendToServer(new com.howlingwerewolf.network.ToggleQuadrupedModePacket()))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.QUADRUPED_FORM), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("V"), button ->
-                        PacketDistributor.sendToServer(new ToggleNightVisionPacket()))
+                        ClientPacketDistributor.sendToServer(new ToggleNightVisionPacket()))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.NIGHT_VISION), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("<"), button -> changeClawSlot(-1))
                 .bounds(left + 160, abilityControlY(top, WerewolfAbility.EMPTY_CLAW_SLOT), 24, 18).build());
@@ -117,13 +118,13 @@ public final class WerewolfProgressionScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("B"), button -> ClientForgeEvents.useBloodyBite())
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.BLOODY_BITE), 24, 18).build());
         addRenderableWidget(Button.builder(Component.literal("R"), button ->
-                        PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE)))
+                        ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE)))
                 .bounds(left + 194, abilityControlY(top, WerewolfAbility.MOONBLOOD_SURGE), 24, 18).build());
     }
 
     private void initTrial(int left, int top) {
         beastButton = addRenderableWidget(Button.builder(Component.literal("H"), button ->
-                        PacketDistributor.sendToServer(new ToggleBeastModePacket()))
+                        ClientPacketDistributor.sendToServer(new ToggleBeastModePacket()))
                 .bounds(left + PANEL_WIDTH - 54, top + 43, 36, 18).build());
         WerewolfData data = getData();
         beastButton.active = data != null && data.isTransformed() && data.hasDefeatedAlpha();
@@ -134,7 +135,7 @@ public final class WerewolfProgressionScreen extends Screen {
         if (data == null || !data.hasAbility(WerewolfAbility.EMPTY_CLAW_SLOT)) return;
         int slot = Math.floorMod(data.getClawHotbarSlot() + delta, 9);
         data.setClawHotbarSlot(slot);
-        PacketDistributor.sendToServer(new SetClawSlotPacket(slot));
+        ClientPacketDistributor.sendToServer(new SetClawSlotPacket(slot));
     }
 
     private void switchPage(Page target) {
@@ -160,45 +161,44 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderTransparentBackground(graphics);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractTransparentBackground(graphics);
         int logicalMouseX = toLogical(mouseX);
         int logicalMouseY = toLogical(mouseY);
         int left = (logicalWidth() - PANEL_WIDTH) / 2;
         int top = (logicalHeight() - PANEL_HEIGHT) / 2;
-        graphics.pose().pushPose();
-        graphics.pose().scale(uiScale, uiScale, 1.0F);
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(uiScale, uiScale);
         graphics.fill(left, top, left + PANEL_WIDTH, top + PANEL_HEIGHT, BACKGROUND);
-        graphics.renderOutline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
+        graphics.outline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
         graphics.fill(left + 7, top + 34, left + PANEL_WIDTH - 7, top + PANEL_HEIGHT - 36, INNER);
-        graphics.drawCenteredString(font, title, left + PANEL_WIDTH / 2, top + 9, ACCENT);
+        graphics.centeredText(font, title, left + PANEL_WIDTH / 2, top + 9, ACCENT);
         WerewolfData data = getData();
         if (page == Page.INFO) {
             renderInfo(graphics, data, left, top);
         } else if (page == Page.TRIAL) {
             renderTrial(graphics, data, left, top);
         } else if (data == null || !data.isWerewolf()) {
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.not_werewolf"), left + PANEL_WIDTH / 2, top + 130, TEXT);
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.not_werewolf"), left + PANEL_WIDTH / 2, top + 130, TEXT);
         } else {
             renderHeader(graphics, data, left, top);
             if (page == Page.TREE) renderTree(graphics, data, left, top, logicalMouseX, logicalMouseY);
             else if (page == Page.ABILITIES) renderAbilities(graphics, data, left, top, logicalMouseX, logicalMouseY);
         }
-        super.render(graphics, logicalMouseX, logicalMouseY, partialTick);
-        graphics.pose().popPose();
+        super.extractRenderState(graphics, logicalMouseX, logicalMouseY, partialTick);
+        graphics.pose().popMatrix();
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Screen#render invokes this again from super.render; the explicit transparent pass above
-        // preserves the 1.20.1 dimming without 1.21.1's world blur or a second overlay.
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        // The explicit transparent pass above already supplies this screen's dim overlay.
     }
 
-    private void renderHeader(GuiGraphics graphics, WerewolfData data, int left, int top) {
-        graphics.drawString(font, Component.translatable("screen.howlingwerewolf.level", data.getLevel(), data.getEffectiveMaxLevel()), left + 15, top + 42, TEXT, false);
+    private void renderHeader(GuiGraphicsExtractor graphics, WerewolfData data, int left, int top) {
+        graphics.text(font, Component.translatable("screen.howlingwerewolf.level", data.getLevel(), data.getEffectiveMaxLevel()), left + 15, top + 42, TEXT, false);
         int points = page == Page.TREE ? data.getAvailableTreePoints() : data.getAvailableSkillPoints();
         String key = page == Page.TREE ? "screen.howlingwerewolf.tree_points" : "screen.howlingwerewolf.skill_points";
-        graphics.drawString(font, Component.translatable(key, points), left + 190, top + 42, GOLD, false);
+        graphics.text(font, Component.translatable(key, points), left + 190, top + 42, GOLD, false);
         int needed = data.getExperienceForNextLevel();
         float ratio = needed == 0 ? 1.0F : Math.min(1.0F, (float) data.getExperience() / needed);
         graphics.fill(left + 15, top + 52, left + PANEL_WIDTH - 15, top + 62, 0xFF3A3035);
@@ -206,12 +206,12 @@ public final class WerewolfProgressionScreen extends Screen {
         Component xpText = needed == 0
                 ? Component.translatable("screen.howlingwerewolf.max_level")
                 : Component.translatable("screen.howlingwerewolf.xp", data.getExperience(), needed);
-        graphics.drawCenteredString(font, xpText, left + PANEL_WIDTH / 2, top + 53, 0xFFFFFFFF);
-        graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.kill_xp_rule"),
+        graphics.centeredText(font, xpText, left + PANEL_WIDTH / 2, top + 53, 0xFFFFFFFF);
+        graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.kill_xp_rule"),
                 left + PANEL_WIDTH / 2, top + 64, DIM);
     }
 
-    private void renderTree(GuiGraphics graphics, WerewolfData data, int left, int top, int mouseX, int mouseY) {
+    private void renderTree(GuiGraphicsExtractor graphics, WerewolfData data, int left, int top, int mouseX, int mouseY) {
         Component tooltip = null;
         int row = 0;
         for (WerewolfTreeSkill skill : WerewolfTreeSkill.values()) {
@@ -220,7 +220,7 @@ public final class WerewolfProgressionScreen extends Screen {
                 graphics.fill(left + 11, y - 4, left + PANEL_WIDTH - 11, y + 13, 0x553D2630);
                 tooltip = Component.translatable(skill.translationKey() + ".desc");
             }
-            graphics.drawString(font, Component.translatable(skill.translationKey()), left + 16, y, TEXT, false);
+            graphics.text(font, Component.translatable(skill.translationKey()), left + 16, y, TEXT, false);
             int rank = data.getTreeSkillRank(skill);
             for (int pip = 0; pip < skill.maxRank(); pip++) {
                 int x = left + 203 + pip * 13;
@@ -234,17 +234,17 @@ public final class WerewolfProgressionScreen extends Screen {
         if (tooltip != null) renderWrappedTooltip(graphics, tooltip, mouseX, mouseY);
     }
 
-    private void renderAbilities(GuiGraphics graphics, WerewolfData data, int left, int top, int mouseX, int mouseY) {
+    private void renderAbilities(GuiGraphicsExtractor graphics, WerewolfData data, int left, int top, int mouseX, int mouseY) {
         int row = 0;
         for (WerewolfAbility ability : WerewolfAbility.values()) {
             int y = top + 82 + row * ABILITY_ROW_HEIGHT;
             boolean unlocked = data.hasAbility(ability);
-            graphics.drawString(font, Component.translatable(ability.translationKey()), left + 16, y, unlocked ? TEXT : DIM, false);
-            graphics.drawString(font, Component.translatable("screen.howlingwerewolf.cost", ability.cost()), left + 16, y + 11, GOLD, false);
+            graphics.text(font, Component.translatable(ability.translationKey()), left + 16, y, unlocked ? TEXT : DIM, false);
+            graphics.text(font, Component.translatable("screen.howlingwerewolf.cost", ability.cost()), left + 16, y + 11, GOLD, false);
             if (ability == WerewolfAbility.QUADRUPED_FORM && unlocked)
-                graphics.drawString(font, Component.translatable(data.isQuadrupedMode() ? "screen.howlingwerewolf.active" : "screen.howlingwerewolf.inactive"), left + 99, y + 11, ACCENT, false);
+                graphics.text(font, Component.translatable(data.isQuadrupedMode() ? "screen.howlingwerewolf.active" : "screen.howlingwerewolf.inactive"), left + 99, y + 11, ACCENT, false);
             if (ability == WerewolfAbility.EMPTY_CLAW_SLOT && unlocked)
-                graphics.drawString(font, Component.translatable("screen.howlingwerewolf.claw_slot", data.getClawHotbarSlot() + 1), left + 99, y + 11, ACCENT, false);
+                graphics.text(font, Component.translatable("screen.howlingwerewolf.claw_slot", data.getClawHotbarSlot() + 1), left + 99, y + 11, ACCENT, false);
             row++;
         }
         for (WerewolfAbility ability : WerewolfAbility.values()) {
@@ -257,7 +257,7 @@ public final class WerewolfProgressionScreen extends Screen {
         }
     }
 
-    private void renderInfo(GuiGraphics graphics, WerewolfData data, int left, int top) {
+    private void renderInfo(GuiGraphicsExtractor graphics, WerewolfData data, int left, int top) {
         String statusKey;
         int statusColor;
         if (data != null && data.isBeastMode()) {
@@ -278,9 +278,9 @@ public final class WerewolfProgressionScreen extends Screen {
         }
 
         graphics.fill(left + 13, top + 43, left + PANEL_WIDTH - 13, top + 66, 0xFF30242B);
-        graphics.drawString(font, Component.translatable("screen.howlingwerewolf.info.status",
+        graphics.text(font, Component.translatable("screen.howlingwerewolf.info.status",
                 Component.translatable(statusKey)), left + 20, top + 50, statusColor, false);
-        graphics.drawString(font, Component.translatable("screen.howlingwerewolf.info.features"),
+        graphics.text(font, Component.translatable("screen.howlingwerewolf.info.features"),
                 left + 16, top + 76, GOLD, false);
 
         List<InfoFeature> features = List.of(
@@ -301,20 +301,20 @@ public final class WerewolfProgressionScreen extends Screen {
             List<net.minecraft.util.FormattedCharSequence> lines = font.split(
                     Component.literal("• ").append(feature.text()), PANEL_WIDTH - 38);
             for (net.minecraft.util.FormattedCharSequence line : lines) {
-                graphics.drawString(font, line, left + 19, y, feature.color(), false);
+                graphics.text(font, line, left + 19, y, feature.color(), false);
                 y += 10;
             }
             y += 4;
         }
     }
 
-    private void renderTrial(GuiGraphics graphics, WerewolfData data, int left, int top) {
-        graphics.drawString(font, Component.translatable("screen.howlingwerewolf.trial.title"),
+    private void renderTrial(GuiGraphicsExtractor graphics, WerewolfData data, int left, int top) {
+        graphics.text(font, Component.translatable("screen.howlingwerewolf.trial.title"),
                 left + 16, top + 45, GOLD, false);
         Component state = Component.translatable(data != null && data.hasDefeatedAlpha()
                 ? "screen.howlingwerewolf.trial.unlocked"
                 : "screen.howlingwerewolf.trial.locked");
-        graphics.drawString(font, state, left + 16, top + 57,
+        graphics.text(font, state, left + 16, top + 57,
                 data != null && data.hasDefeatedAlpha() ? ACCENT : DIM, false);
 
         int introBottom = drawWrapped(graphics, Component.translatable("screen.howlingwerewolf.trial.intro"),
@@ -347,28 +347,29 @@ public final class WerewolfProgressionScreen extends Screen {
                 left + 16, y, PANEL_WIDTH - 32, 0xFFFF7777);
     }
 
-    private void drawAltarNode(GuiGraphics graphics, int x, int y, String number, int color) {
+    private void drawAltarNode(GuiGraphicsExtractor graphics, int x, int y, String number, int color) {
         graphics.fill(x - 11, y - 11, x + 11, y + 11, 0xFF30242B);
-        graphics.renderOutline(x - 11, y - 11, 22, 22, color);
-        graphics.drawCenteredString(font, number, x, y - 4, color);
+        graphics.outline(x - 11, y - 11, 22, 22, color);
+        graphics.centeredText(font, number, x, y - 4, color);
     }
 
-    private void drawSpacingBlock(GuiGraphics graphics, int x, int y) {
+    private void drawSpacingBlock(GuiGraphicsExtractor graphics, int x, int y) {
         graphics.fill(x - 4, y - 4, x + 4, y + 4, 0xFF51494D);
-        graphics.renderOutline(x - 4, y - 4, 8, 8, DIM);
+        graphics.outline(x - 4, y - 4, 8, 8, DIM);
     }
 
-    private int drawWrapped(GuiGraphics graphics, Component text, int x, int y, int width, int color) {
+    private int drawWrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color) {
         for (net.minecraft.util.FormattedCharSequence line : font.split(text, width)) {
-            graphics.drawString(font, line, x, y, color, false);
+            graphics.text(font, line, x, y, color, false);
             y += 10;
         }
         return y;
     }
 
-    private void renderWrappedTooltip(GuiGraphics graphics, Component text, int mouseX, int mouseY) {
+    private void renderWrappedTooltip(GuiGraphicsExtractor graphics, Component text, int mouseX, int mouseY) {
         int maxWidth = Math.max(120, Math.min(320, logicalWidth() - 32));
-        graphics.renderTooltip(font, font.split(text, maxWidth), mouseX, mouseY);
+        graphics.setTooltipForNextFrame(font, font.split(text, Math.round(maxWidth * uiScale)),
+                Math.round(mouseX * uiScale), Math.round(mouseY * uiScale));
     }
 
     private static boolean canUpgrade(WerewolfData data, WerewolfTreeSkill skill) {
@@ -397,23 +398,27 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return super.mouseClicked(mouseX / uiScale, mouseY / uiScale, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return super.mouseClicked(logicalEvent(event), doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX / uiScale, mouseY / uiScale, button);
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return super.mouseReleased(logicalEvent(event));
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        return super.mouseDragged(mouseX / uiScale, mouseY / uiScale, button, dragX / uiScale, dragY / uiScale);
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        return super.mouseDragged(logicalEvent(event), dragX / uiScale, dragY / uiScale);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         return super.mouseScrolled(mouseX / uiScale, mouseY / uiScale, scrollX, scrollY);
+    }
+
+    private MouseButtonEvent logicalEvent(MouseButtonEvent event) {
+        return new MouseButtonEvent(event.x() / uiScale, event.y() / uiScale, event.buttonInfo());
     }
 
     private static WerewolfData getData() {

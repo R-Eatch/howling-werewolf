@@ -3,23 +3,25 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
+import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
-import net.minecraft.Util;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.network.SetWerewolfSkinPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -143,7 +145,7 @@ public final class WerewolfSkinScreen extends Screen {
         pendingSkin = selectedSkin;
         pendingTicks = 0;
         confirmationTimedOut = false;
-        PacketDistributor.sendToServer(new SetWerewolfSkinPacket(selectedSkin));
+        ClientPacketDistributor.sendToServer(new SetWerewolfSkinPacket(selectedSkin));
         updateButtons();
     }
 
@@ -188,7 +190,7 @@ public final class WerewolfSkinScreen extends Screen {
         }
         if (previewPlayer == null || previewPlayer.level() != minecraft.level
                 || !previewPlayer.getUUID().equals(minecraft.player.getUUID())) {
-            previewPlayer = new RemotePlayer(minecraft.level, minecraft.player.getGameProfile());
+            previewPlayer = createPreviewPlayer(minecraft.level, minecraft.player.getGameProfile());
         }
         previewPlayer.setMainArm(minecraft.player.getMainArm());
         previewPlayer.tickCount = minecraft.player.tickCount;
@@ -200,32 +202,41 @@ public final class WerewolfSkinScreen extends Screen {
         }
     }
 
+    static RemotePlayer createPreviewPlayer(ClientLevel level, GameProfile profile) {
+        RemotePlayer player = new RemotePlayer(level, profile);
+        // This GUI-only entity never receives a spawn packet, but item/avatar extraction
+        // still requires an ID.
+        // Keep it detached from the level and separate from the live player's positive ID.
+        player.setId(-1);
+        return player;
+    }
+
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderTransparentBackground(graphics);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractTransparentBackground(graphics);
         int left = panelLeft();
         int top = panelTop();
         int logicalMouseX = toLogical(mouseX);
         int logicalMouseY = toLogical(mouseY);
-        graphics.pose().pushPose();
+        graphics.pose().pushMatrix();
         try {
-            graphics.pose().scale(uiScale, uiScale, 1.0F);
+            graphics.pose().scale(uiScale, uiScale);
             graphics.fill(left, top, left + PANEL_WIDTH, top + PANEL_HEIGHT, BACKGROUND);
-            graphics.renderOutline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
-            graphics.drawCenteredString(font, title, left + PANEL_WIDTH / 2, top + 12, ACCENT);
-            graphics.drawCenteredString(font, Component.translatable(WerewolfSkinCatalog.errorCount() > 0
+            graphics.outline(left, top, PANEL_WIDTH, PANEL_HEIGHT, BORDER);
+            graphics.centeredText(font, title, left + PANEL_WIDTH / 2, top + 12, ACCENT);
+            graphics.centeredText(font, Component.translatable(WerewolfSkinCatalog.errorCount() > 0
                             ? "screen.howlingwerewolf.skins.invalid_packs" : "screen.howlingwerewolf.skins.subtitle",
                             WerewolfSkinCatalog.errorCount()),
                     left + PANEL_WIDTH / 2, top + 31, DIM);
             WerewolfData data = getData();
             Component current = data == null ? Component.translatable("screen.howlingwerewolf.skins.loading")
                     : Component.translatable("screen.howlingwerewolf.skins.current", skinName(data.getSkinId()));
-            graphics.drawString(font, font.plainSubstrByWidth(current.getString(), PANEL_WIDTH - 32), left + 16, top + 56, GOLD, false);
-            graphics.drawCenteredString(font, Component.literal((skinPage + 1) + " / " + pageCount()), left + 73, top + 313, TEXT);
+            graphics.text(font, font.plainSubstrByWidth(current.getString(), PANEL_WIDTH - 32), left + 16, top + 56, GOLD, false);
+            graphics.centeredText(font, Component.literal((skinPage + 1) + " / " + pageCount()), left + 73, top + 313, TEXT);
             graphics.fill(left + 144, top + 101, left + 408, top + 301, INNER);
-            graphics.renderOutline(left + 144, top + 101, 264, 200, BORDER);
+            graphics.outline(left + 144, top + 101, 264, 200, BORDER);
             renderPreview(graphics, left, top, logicalMouseX, logicalMouseY);
-            graphics.drawCenteredString(font, Component.translatable("screen.howlingwerewolf.skins.preview_controls"),
+            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.skins.preview_controls"),
                     left + 276, top + 287, DIM);
             Component status;
             int statusColor = DIM;
@@ -249,30 +260,30 @@ public final class WerewolfSkinScreen extends Screen {
             }
             int statusY = top + 332;
             for (var line : font.split(status, PANEL_WIDTH - 32).stream().limit(2).toList()) {
-                graphics.drawString(font, line, left + (PANEL_WIDTH - font.width(line)) / 2, statusY, statusColor, false);
+                graphics.text(font, line, left + (PANEL_WIDTH - font.width(line)) / 2, statusY, statusColor, false);
                 statusY += 10;
             }
-            super.render(graphics, logicalMouseX, logicalMouseY, partialTick);
+            super.extractRenderState(graphics, logicalMouseX, logicalMouseY, partialTick);
             for (var child : children()) {
                 if (child instanceof SkinChoiceButton button && button.isHovered()) {
                     Component detail = skinDescription(button.skin);
                     if (!button.skin.author().isBlank()) detail = detail.copy().append("\n").append(
                             Component.translatable("screen.howlingwerewolf.skins.author", button.skin.author()));
-                    graphics.renderTooltip(font, font.split(detail, 230), logicalMouseX, logicalMouseY);
+                    graphics.setTooltipForNextFrame(font, font.split(detail, Math.round(230 * uiScale)), mouseX, mouseY);
                     break;
                 }
             }
         } finally {
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // The explicit transparent pass in render keeps the existing menus' dimming without blur.
     }
 
-    private void renderPreview(GuiGraphics graphics, int left, int top, int mouseX, int mouseY) {
+    private void renderPreview(GuiGraphicsExtractor graphics, int left, int top, int mouseX, int mouseY) {
         if (previewPlayer == null) return;
         int centerX = left + 276;
         int baseline = top + 270;
@@ -293,14 +304,21 @@ public final class WerewolfSkinScreen extends Screen {
         previewPlayer.xRotO = previewPlayer.getXRot();
         Quaternionf camera = new Quaternionf().rotateX(vertical * 20.0F * Mth.DEG_TO_RAD);
         Quaternionf pose = new Quaternionf().rotateZ(Mth.PI).mul(camera);
-        // GuiGraphics scissor coordinates are in screen space, independent of PoseStack scaling.
-        graphics.enableScissor((int) Math.floor((left + 145) * uiScale),
-                (int) Math.floor((top + 102) * uiScale),
-                (int) Math.ceil((left + 407) * uiScale), (int) Math.ceil((top + 282) * uiScale));
+        // The scissor follows the GUI matrix; the deferred entity viewport uses screen coordinates.
+        graphics.enableScissor(left + 145, top + 102, left + 407, top + 282);
         try {
-            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, selectedSkin, () ->
-                    InventoryScreen.renderEntityInInventory(graphics, centerX, baseline, scale,
-                            new Vector3f(), pose, camera, previewPlayer));
+            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, selectedSkin, () -> {
+                var dispatcher = minecraft.getEntityRenderDispatcher();
+                var state = dispatcher.getRenderer(previewPlayer).createRenderState(previewPlayer, 1.0F);
+                state.shadowPieces.clear();
+                state.outlineColor = 0;
+                state.nameTag = null;
+                state.scoreText = null;
+                graphics.entity(state, scale * uiScale,
+                        new Vector3f(0.0F, (baseline - (top + 192.0F)) / scale, 0.0F), pose, camera,
+                        Math.round((left + 145) * uiScale), Math.round((top + 102) * uiScale),
+                        Math.round((left + 407) * uiScale), Math.round((top + 282) * uiScale));
+            });
         } finally {
             graphics.disableScissor();
         }
@@ -323,30 +341,35 @@ public final class WerewolfSkinScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && isOverPreview(mouseX / uiScale, mouseY / uiScale)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && isOverPreview(mouseX / uiScale, mouseY / uiScale)) {
             draggingPreview = true;
             return true;
         }
-        return super.mouseClicked(mouseX / uiScale, mouseY / uiScale, button);
+        return super.mouseClicked(logicalEvent(event), doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (button == 0 && draggingPreview) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        int button = event.button();
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && draggingPreview) {
             rotation = Mth.wrapDegrees(rotation + (float) (dragX / uiScale) * 1.5F);
             return true;
         }
-        return super.mouseDragged(mouseX / uiScale, mouseY / uiScale, button, dragX / uiScale, dragY / uiScale);
+        return super.mouseDragged(logicalEvent(event), dragX / uiScale, dragY / uiScale);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && draggingPreview) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        int button = event.button();
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && draggingPreview) {
             draggingPreview = false;
             return true;
         }
-        return super.mouseReleased(mouseX / uiScale, mouseY / uiScale, button);
+        return super.mouseReleased(logicalEvent(event));
     }
 
     @Override
@@ -402,7 +425,7 @@ public final class WerewolfSkinScreen extends Screen {
     private void createTemplate() {
         try {
             var directory = WerewolfSkinTemplate.export(minecraft.getResourcePackDirectory());
-            Util.getPlatform().openFile(directory.toFile());
+            net.minecraft.util.Util.getPlatform().openPath(directory);
             notice = Component.translatable("screen.howlingwerewolf.skins.template_created");
         } catch (IOException | RuntimeException error) {
             LogUtils.getLogger().warn("Unable to create werewolf skin template", error);
@@ -413,6 +436,10 @@ public final class WerewolfSkinScreen extends Screen {
 
     private static Component formName(WerewolfForm form) {
         return Component.translatable("screen.howlingwerewolf.skins.form." + form.id());
+    }
+
+    private MouseButtonEvent logicalEvent(MouseButtonEvent event) {
+        return new MouseButtonEvent(event.x() / uiScale, event.y() / uiScale, event.buttonInfo());
     }
 
     private static WerewolfData getData() {
@@ -429,15 +456,15 @@ public final class WerewolfSkinScreen extends Screen {
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             boolean selected = selectedSkin.equals(skin.id());
             graphics.fill(getX(), getY(), getX() + width, getY() + height,
                     selected ? 0xFF3D2630 : isHoveredOrFocused() ? 0xFF30242B : INNER);
-            graphics.renderOutline(getX(), getY(), width, height, selected ? ACCENT : isHoveredOrFocused() ? GOLD : BORDER);
-            graphics.drawString(font, font.plainSubstrByWidth(getMessage().getString(), width - 20), getX() + 10, getY() + 7, selected ? GOLD : TEXT, false);
+            graphics.outline(getX(), getY(), width, height, selected ? ACCENT : isHoveredOrFocused() ? GOLD : BORDER);
+            graphics.text(font, font.plainSubstrByWidth(getMessage().getString(), width - 20), getX() + 10, getY() + 7, selected ? GOLD : TEXT, false);
             int y = getY() + 21;
             for (var line : font.split(skinDescription(skin), width - 20).stream().limit(2).toList()) {
-                graphics.drawString(font, line, getX() + 10, y, DIM, false);
+                graphics.text(font, line, getX() + 10, y, DIM, false);
                 y += 10;
             }
             int color = !skin.builtin() ? 0xFF917EB3 : switch (WerewolfSkin.byId(skin.id())) {

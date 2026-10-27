@@ -62,7 +62,8 @@ public final class ClientPacketHandlers {
     }
 
     public static void showBadgeActivation() {
-        Minecraft.getInstance().gameRenderer.displayItemActivation(new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get()));
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player != null) minecraft.gameRenderer.displayItemActivation(new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get()));
     }
 
     private ClientPacketHandlers() {}

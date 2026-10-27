@@ -8,13 +8,13 @@ import com.howlingwerewolf.event.WerewolfGuide;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UpgradeTreeSkillPacket(WerewolfTreeSkill skill) implements CustomPacketPayload {
     public static final Type<UpgradeTreeSkillPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "upgrade_tree_skill"));
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "upgrade_tree_skill"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeTreeSkillPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> buf.writeEnum(packet.skill()),
             buf -> new UpgradeTreeSkillPacket(buf.readEnum(WerewolfTreeSkill.class)));

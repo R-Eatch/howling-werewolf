@@ -32,6 +32,12 @@ final class AlphaCombatGoal extends Goal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        // Cooldowns and the 60-tick prowl use the same game-tick clock as potion effects.
+        return true;
+    }
+
+    @Override
     public void stop() {
         alpha.getNavigation().stop();
         retreatTicks = 0;
@@ -76,10 +82,10 @@ final class AlphaCombatGoal extends Goal {
             alpha.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
             // A successful pre-revival hit has a 25% chance to begin a three-second Speed III prowl.
             // 复活前成功近战后有 25% 概率进入持续 3 秒、附带迅捷 III 的游猎。
-            if (alpha.doHurtTarget(target) && !alpha.hasRevived()
+            if (alpha.doHurtTarget((net.minecraft.server.level.ServerLevel) alpha.level(), target) && !alpha.hasRevived()
                     && alpha.getRandom().nextFloat() < 0.25F) {
                 retreatTicks = 60;
-                alpha.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
+                alpha.addEffect(new MobEffectInstance(MobEffects.SPEED,
                         retreatTicks, 2, true, true, true));
             }
             attackCooldown = 20;

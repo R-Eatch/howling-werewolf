@@ -12,9 +12,9 @@ public final class ModBlockEntities {
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, HowlingWerewolf.MOD_ID);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RitualAltarBlockEntity>> RITUAL_ALTAR =
-            BLOCK_ENTITIES.register("ritual_altar", () -> BlockEntityType.Builder.of(
+            BLOCK_ENTITIES.register("ritual_altar", () -> new BlockEntityType<>(
                     RitualAltarBlockEntity::new,
-                    ModBlocks.RITUAL_ALTAR.get(), ModBlocks.CENTRAL_RITUAL_ALTAR.get()).build(null));
+                    java.util.Set.of(ModBlocks.RITUAL_ALTAR.get(), ModBlocks.CENTRAL_RITUAL_ALTAR.get())));
 
     private ModBlockEntities() {}
 }

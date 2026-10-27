@@ -1,9 +1,10 @@
 package com.howlingwerewolf.world;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import com.mojang.serialization.Codec;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
@@ -18,26 +19,49 @@ import java.util.Set;
  */
 public final class VillageHunterSavedData extends SavedData {
     private static final String DATA_NAME = "howlingwerewolf_village_hunters";
-    private static final Factory<VillageHunterSavedData> FACTORY = new Factory<>(
-            VillageHunterSavedData::new, VillageHunterSavedData::load);
+    private static final Codec<VillageHunterSavedData> CODEC = CompoundTag.CODEC.xmap(
+            VillageHunterSavedData::load, VillageHunterSavedData::save);
+    private static final SavedDataType<VillageHunterSavedData> TYPE = new SavedDataType<>(
+            Identifier.fromNamespaceAndPath("howlingwerewolf", "village_hunters"),
+            VillageHunterSavedData::new, CODEC, null);
     private final Map<Long, Integer> patrolTargets = new HashMap<>();
     private final Set<Long> completedVillages = new HashSet<>();
     private final Map<Long, Long> nextReplenishmentTicks = new HashMap<>();
 
     public static VillageHunterSavedData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(FACTORY, DATA_NAME);
+        VillageHunterSavedData existing = level.getDataStorage().get(TYPE);
+        if (existing != null) return existing;
+        // 26.1 moved saved data into namespace directories. Import the 1.1.3 file
+        // once so existing village patrol targets and replenishment cooldowns survive.
+        java.nio.file.Path legacy = level.getServer().getWorldPath(
+                net.minecraft.world.level.storage.LevelResource.ROOT)
+                .resolve("data").resolve(DATA_NAME + ".dat");
+        if (java.nio.file.Files.isRegularFile(legacy)) {
+            try {
+                CompoundTag root = net.minecraft.nbt.NbtIo.readCompressed(legacy,
+                        net.minecraft.nbt.NbtAccounter.unlimitedHeap());
+                VillageHunterSavedData migrated = load(root.getCompoundOrEmpty("data"));
+                migrated.setDirty();
+                level.getDataStorage().set(TYPE, migrated);
+                return migrated;
+            } catch (java.io.IOException exception) {
+                com.howlingwerewolf.HowlingWerewolf.LOGGER.warn(
+                        "Could not import legacy village hunter data {}", legacy, exception);
+            }
+        }
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public static VillageHunterSavedData load(CompoundTag tag, HolderLookup.Provider provider) {
+    public static VillageHunterSavedData load(CompoundTag tag) {
         VillageHunterSavedData data = new VillageHunterSavedData();
-        ListTag entries = tag.getList("Villages", Tag.TAG_COMPOUND);
+        ListTag entries = tag.getListOrEmpty("Villages");
         for (int i = 0; i < entries.size(); i++) {
-            CompoundTag entry = entries.getCompound(i);
-            long key = entry.getLong("Key");
-            data.patrolTargets.put(key, entry.getInt("Target"));
-            if (entry.getBoolean("Complete")) data.completedVillages.add(key);
-            if (entry.contains("NextReplenishmentTick", Tag.TAG_LONG)) {
-                long nextTick = entry.getLong("NextReplenishmentTick");
+            CompoundTag entry = entries.getCompoundOrEmpty(i);
+            long key = entry.getLongOr("Key", 0L);
+            data.patrolTargets.put(key, entry.getIntOr("Target", 0));
+            if (entry.getBooleanOr("Complete", false)) data.completedVillages.add(key);
+            if (entry.getLong("NextReplenishmentTick").isPresent()) {
+                long nextTick = entry.getLongOr("NextReplenishmentTick", 0L);
                 if (nextTick > 0L) data.nextReplenishmentTicks.put(key, nextTick);
             }
         }
@@ -74,8 +98,8 @@ public final class VillageHunterSavedData extends SavedData {
         if (nextReplenishmentTicks.remove(villageKey) != null) setDirty();
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    private CompoundTag save() {
+        CompoundTag tag = new CompoundTag();
         ListTag entries = new ListTag();
         for (Map.Entry<Long, Integer> village : patrolTargets.entrySet()) {
             CompoundTag entry = new CompoundTag();

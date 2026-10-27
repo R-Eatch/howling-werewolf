@@ -2,7 +2,7 @@ package com.howlingwerewolf.event;
 
 import com.howlingwerewolf.HowlingWerewolf;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class WerewolfGuide {
@@ -33,8 +33,8 @@ public final class WerewolfGuide {
     }
 
     private static void award(ServerPlayer player, String path) {
-        AdvancementHolder advancement = player.getServer().getAdvancements()
-                .get(ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path));
+        AdvancementHolder advancement = player.level().getServer().getAdvancements()
+                .get(Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path));
         if (advancement == null) {
             HowlingWerewolf.LOGGER.warn("Missing werewolf guide advancement {}", path);
             return;

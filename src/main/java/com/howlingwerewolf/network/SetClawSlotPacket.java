@@ -6,13 +6,13 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SetClawSlotPacket(int slot) implements CustomPacketPayload {
     public static final Type<SetClawSlotPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "set_claw_slot"));
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "set_claw_slot"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SetClawSlotPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> buf.writeByte(packet.slot()),
             buf -> new SetClawSlotPacket(buf.readByte()));

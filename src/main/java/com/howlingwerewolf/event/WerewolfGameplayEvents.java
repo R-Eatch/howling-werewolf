@@ -3,6 +3,7 @@ package com.howlingwerewolf.event;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.WerewolfAbility;
+import com.howlingwerewolf.WerewolfCombatRules;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import com.howlingwerewolf.capability.WerewolfApi;
@@ -19,7 +20,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -40,7 +41,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.InteractionHand;
@@ -56,7 +57,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -65,8 +65,8 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.enchanting.GetEnchantmentLevelEvent;
-import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.enchanting.EnchantedEntityLootEvent;
+import net.minecraft.util.TriState;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -80,14 +80,14 @@ import org.joml.Vector3f;
 
 @EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfGameplayEvents {
-    private static final ResourceLocation CLAW_DAMAGE_ID = modifierId("claw_damage");
-    private static final ResourceLocation WEREWOLF_SPEED_ID = modifierId("werewolf_speed");
-    private static final ResourceLocation KNOCKBACK_RESISTANCE_ID = modifierId("knockback_resistance");
-    private static final ResourceLocation BEAST_SPEED_ID = modifierId("beast_speed");
-    private static final ResourceLocation QUADRUPED_SPEED_ID = modifierId("quadruped_speed");
-    private static final ResourceLocation BEAST_MAX_HEALTH_ID = modifierId("beast_max_health");
-    private static final ResourceLocation CLAW_BLOCK_REACH_ID = modifierId("claw_block_reach");
-    private static final ResourceLocation CLAW_ENTITY_REACH_ID = modifierId("claw_entity_reach");
+    private static final Identifier CLAW_DAMAGE_ID = modifierId("claw_damage");
+    private static final Identifier WEREWOLF_SPEED_ID = modifierId("werewolf_speed");
+    private static final Identifier KNOCKBACK_RESISTANCE_ID = modifierId("knockback_resistance");
+    private static final Identifier BEAST_SPEED_ID = modifierId("beast_speed");
+    private static final Identifier QUADRUPED_SPEED_ID = modifierId("quadruped_speed");
+    private static final Identifier BEAST_MAX_HEALTH_ID = modifierId("beast_max_health");
+    private static final Identifier CLAW_BLOCK_REACH_ID = modifierId("claw_block_reach");
+    private static final Identifier CLAW_ENTITY_REACH_ID = modifierId("claw_entity_reach");
     private static final int SPIRIT_DURATION_TICKS = 20 * 60 * 4;
     private static final int SPIRIT_COOLDOWN_TICKS = 20 * 60;
     private static final int BLOODY_BITE_COOLDOWN_TICKS = 20 * 60;
@@ -108,8 +108,6 @@ public final class WerewolfGameplayEvents {
     private static final int NIGHT_VISION_DURATION_TICKS = 20 * 20;
     private static final int NIGHT_VISION_REFRESH_INTERVAL_TICKS = 20 * 3;
     private static final int TOTEM_XP_INTERVAL_TICKS = 20 * 60;
-    private static final float BEAST_ATTACK_MULTIPLIER = 2.0F;
-    private static final float QUADRUPED_ATTACK_MULTIPLIER = 0.75F;
     private static final double QUADRUPED_SPEED_MULTIPLIER = 1.75D;
     private static final double QUADRUPED_JUMP_MULTIPLIER = 1.50D;
     private static final float BLOODY_BITE_MULTIPLIER = 1.8F;
@@ -117,15 +115,16 @@ public final class WerewolfGameplayEvents {
     private static final float WEREWOLF_FIRE_MULTIPLIER = 1.5F;
     private static final ThreadLocal<Boolean> LONG_CLAW_SPLASH = ThreadLocal.withInitial(() -> false);
     private static final ThreadLocal<Boolean> BLOODY_BITE_DAMAGE = ThreadLocal.withInitial(() -> false);
-    private static final ThreadLocal<RawClawHit> RAW_CLAW_HIT = new ThreadLocal<>();
-    private static final ThreadLocal<Integer> CLAW_LOOTING = new ThreadLocal<>();
-    private static final ItemStack[] IRON_CLAW_SPEED_TOOLS = {
-            new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_SHOVEL),
-            new ItemStack(Items.IRON_HOE), new ItemStack(Items.SHEARS)
-    };
-    private static final ItemStack[] IRON_CLAW_HARVEST_TOOLS = {
-            new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_SHOVEL)
-    };
+    // Subscribers load before item components are bound. Defer comparison stacks until gameplay.
+    private static final class ClawTools {
+        private static final ItemStack[] SPEED = {
+                new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_SHOVEL),
+                new ItemStack(Items.IRON_HOE), new ItemStack(Items.SHEARS)
+        };
+        private static final ItemStack[] HARVEST = {
+                new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_SHOVEL)
+        };
+    }
     private static final Map<UUID, FoodSnapshot> FOOD_SNAPSHOTS = new HashMap<>();
     private static final Map<UUID, Float> LAST_EXHAUSTION = new HashMap<>();
     private static final Set<UUID> AUTOMATIC_NIGHT_VISION = new HashSet<>();
@@ -177,12 +176,12 @@ public final class WerewolfGameplayEvents {
     }
 
     private static void processAwakeningAndMoon(ServerPlayer player, WerewolfData data) {
-        ServerLevel overworld = player.getServer().overworld();
-        long absoluteDayTime = overworld.getDayTime();
+        ServerLevel overworld = player.level().getServer().overworld();
+        long absoluteDayTime = overworld.getOverworldClockTime();
         long timeOfDay = Math.floorMod(absoluteDayTime, 24000L);
         boolean night = timeOfDay >= 13000L && timeOfDay < 23000L;
-        boolean inOverworld = player.serverLevel().dimension() == Level.OVERWORLD;
-        boolean fullMoon = inOverworld && night && overworld.getMoonPhase() == 0;
+        boolean inOverworld = player.level().dimension() == Level.OVERWORLD;
+        boolean fullMoon = inOverworld && night && overworld.environmentAttributes().getDimensionValue(net.minecraft.world.attribute.EnvironmentAttributes.MOON_PHASE) == net.minecraft.world.level.MoonPhase.FULL_MOON;
 
         if (data.isInfected() && night && data.getAwakeningDayTime() >= 0L
                 && absoluteDayTime >= data.getAwakeningDayTime()) {
@@ -241,38 +240,10 @@ public final class WerewolfGameplayEvents {
             // damage processing and can be rejected or partially overwritten by the outer hit.
             event.setCanceled(true);
             Holder<DamageType> voidType = attacker.level().registryAccess()
-                    .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FELL_OUT_OF_WORLD);
-            float damage = event.getAmount() * BEAST_ATTACK_MULTIPLIER
+                    .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.FELL_OUT_OF_WORLD);
+            float damage = event.getAmount() * attackMultiplier(data)
                     + moonRendDamage(attacker, event.getEntity(), data);
-            event.getEntity().hurt(new DamageSource(voidType, attacker, attacker), damage);
-        });
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void captureRawClawDamage(LivingIncomingDamageEvent event) {
-        if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get()
-                || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
-                || event.getEntity() == attacker || !attacker.getMainHandItem().isEmpty()) return;
-        boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)
-                || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
-        if (!melee) return;
-        WerewolfApi.get(attacker).ifPresent(data -> {
-            if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
-            float rawAmount = event.getAmount();
-            if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) && data.isBeastMode()
-                    && HWConfig.BEAST_VOID_DAMAGE.get()) {
-                // The recursively-created void hit already includes Moonrend. Long Claws keeps
-                // using only the primary claw's ordinary raw damage, matching non-void forms.
-                rawAmount = Math.max(0.0F,
-                        rawAmount - moonRendDamage(attacker, event.getEntity(), data));
-            }
-            if (event.getSource().is(DamageTypes.PLAYER_ATTACK) && data.isBeastMode()
-                    && !HWConfig.BEAST_VOID_DAMAGE.get()) {
-                rawAmount *= BEAST_ATTACK_MULTIPLIER;
-            } else if (event.getSource().is(DamageTypes.PLAYER_ATTACK) && data.isQuadrupedMode()) {
-                rawAmount *= QUADRUPED_ATTACK_MULTIPLIER;
-            }
-            RAW_CLAW_HIT.set(new RawClawHit(attacker.getId(), event.getEntity().getId(), rawAmount));
+            event.getEntity().hurtServer(attacker.level(), new DamageSource(voidType, attacker, attacker), damage);
         });
     }
 
@@ -303,8 +274,8 @@ public final class WerewolfGameplayEvents {
                     && infectionChance >= 0.0D
                     && victim.getRandom().nextDouble() < infectionChance) {
                 infect(victim, data);
-                victim.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 160, 0));
-                victim.playNotifySound(SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.5F, 1.0F);
+                victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 160, 0));
+                notifySound(victim, SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.5F, 1.0F);
                 victim.sendSystemMessage(Component.translatable("message.howlingwerewolf.infected").withStyle(ChatFormatting.LIGHT_PURPLE));
                 ModNetwork.sync(victim, data);
             }
@@ -349,32 +320,32 @@ public final class WerewolfGameplayEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker) || event.getEntity() == attacker) return;
         boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
-        if (!melee || event.getNewDamage() <= 0.0F) return;
+        if (!melee || event.getHealthDamage() <= 0.0F) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
             if (!data.isWerewolf() || !data.isTransformed()) return;
             int rank = data.getTreeSkillRank(WerewolfTreeSkill.LIFESTEAL);
             float ratio = rank == 1 ? 0.10F : rank == 2 ? 0.15F : rank >= 3 ? 0.20F : 0.0F;
-            if (ratio > 0.0F) attacker.heal(event.getNewDamage() * ratio);
+            if (ratio > 0.0F) attacker.heal(event.getHealthDamage() * ratio);
         });
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void longClawSplash(LivingDamageEvent.Post event) {
-        if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get() || event.getNewDamage() <= 0.0F
+        if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get() || event.getHealthDamage() <= 0.0F
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || event.getEntity() == attacker) return;
         boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
         if (!melee || !attacker.getMainHandItem().isEmpty()) return;
-        RawClawHit rawHit = RAW_CLAW_HIT.get();
-        if (rawHit == null || rawHit.attackerId() != attacker.getId()
-                || rawHit.targetId() != event.getEntity().getId()) return;
-        RAW_CLAW_HIT.remove();
         WerewolfApi.get(attacker).ifPresent(data -> {
             if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
             // The secondary hit starts with half of the primary hit's pre-mitigation
             // damage. Each secondary target then applies its own armor and reductions.
-            float splashDamage = rawHit.amount() * 0.5F;
+            boolean convertedVoidHit = event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)
+                    && data.isBeastMode() && HWConfig.BEAST_VOID_DAMAGE.get();
+            float splashDamage = WerewolfCombatRules.longClawSplash(event.getOriginalDamage(),
+                    data.getForm(), convertedVoidHit,
+                    convertedVoidHit ? moonRendDamage(attacker, event.getEntity(), data) : 0.0F);
             if (splashDamage <= 0.0F) return;
             LivingEntity primaryTarget = event.getEntity();
             LONG_CLAW_SPLASH.set(true);
@@ -383,7 +354,7 @@ public final class WerewolfGameplayEvents {
                         primaryTarget.getBoundingBox().inflate(2.0D, 1.0D, 2.0D), entity ->
                                 entity != primaryTarget && entity != attacker && entity.isAlive()
                                         && !attacker.isAlliedTo(entity) && !isOwnedBy(entity, attacker))) {
-                    secondary.hurt(event.getSource(), splashDamage);
+                    secondary.hurtServer(attacker.level(), event.getSource(), splashDamage);
                 }
             } finally {
                 LONG_CLAW_SPLASH.set(false);
@@ -393,7 +364,7 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void fireClawAttack(LivingDamageEvent.Post event) {
-        if (BLOODY_BITE_DAMAGE.get() || event.getNewDamage() <= 0.0F
+        if (BLOODY_BITE_DAMAGE.get() || event.getHealthDamage() <= 0.0F
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || event.getEntity() == attacker || !attacker.getMainHandItem().isEmpty()) return;
         boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)
@@ -420,7 +391,7 @@ public final class WerewolfGameplayEvents {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
             player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1));
             player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1.0D, player.getZ(),
                     30, 0.5D, 1.0D, 0.5D, 0.1D);
             level.playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -533,7 +504,7 @@ public final class WerewolfGameplayEvents {
         if (event.canHarvest()) return;
         WerewolfApi.get(event.getEntity()).ifPresent(data -> {
             if (!canUseToolClaws(event.getEntity(), data)) return;
-            for (ItemStack tool : IRON_CLAW_HARVEST_TOOLS) {
+            for (ItemStack tool : ClawTools.HARVEST) {
                 if (tool.isCorrectToolForDrops(event.getTargetBlock())) {
                     event.setCanHarvest(true);
                     return;
@@ -542,38 +513,19 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void prepareClawLooting(LivingDeathEvent event) {
-        CLAW_LOOTING.remove();
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player)
+    /** Empty stacks never reach equipped-enchantment queries; modify the actual loot query. */
+    @SubscribeEvent
+    public static void provideClawLooting(EnchantedEntityLootEvent event) {
+        if (!event.getEnchantment().is(Enchantments.LOOTING)
+                || !(event.getDamageSource().getEntity() instanceof ServerPlayer player)
                 || !player.getMainHandItem().isEmpty()) return;
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed()) return;
             int rank = data.getTreeSkillRank(WerewolfTreeSkill.CLAW_EFFICIENCY);
-            if (rank > 0) CLAW_LOOTING.set(rank);
-        });
-    }
-
-    /**
-     * Minecraft 1.21 removed LootingLevelEvent. Death loot is generated synchronously after
-     * LivingDeathEvent, so expose the claw rank as a virtual Looting enchantment only for that
-     * empty-hand loot query, then clear it when the drop phase completes.
-     */
-    @SubscribeEvent
-    public static void provideClawLooting(GetEnchantmentLevelEvent event) {
-        Integer rank = CLAW_LOOTING.get();
-        if (rank == null || rank <= 0 || !event.getStack().isEmpty()
-                || !event.isTargetting(Enchantments.LOOTING)) return;
-        event.getHolder(Enchantments.LOOTING).ifPresent(looting -> {
-            if (rank > event.getEnchantments().getLevel(looting)) {
-                event.getEnchantments().set(looting, rank);
+            if (rank > event.getEnchantmentLevel()) {
+                event.setEnchantmentLevel(rank);
             }
         });
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void clearClawLooting(LivingDropsEvent event) {
-        CLAW_LOOTING.remove();
     }
 
     @SubscribeEvent
@@ -679,14 +631,14 @@ public final class WerewolfGameplayEvents {
                         .withStyle(ChatFormatting.GRAY));
                 return;
             }
-            long gameTime = player.serverLevel().getGameTime();
+            long gameTime = player.level().getGameTime();
             if (gameTime < data.getBloodyBiteCooldownEnd()) {
                 long seconds = (data.getBloodyBiteCooldownEnd() - gameTime + 19L) / 20L;
                 player.sendSystemMessage(Component.translatable("message.howlingwerewolf.bloody_bite_cooldown", seconds)
                         .withStyle(ChatFormatting.GRAY));
                 return;
             }
-            Entity entity = player.serverLevel().getEntity(targetId);
+            Entity entity = player.level().getEntity(targetId);
             if (!(entity instanceof LivingEntity target) || !target.isAlive() || target == player
                     || player.isAlliedTo(target) || isOwnedBy(target, player)) {
                 sendBloodyBiteTargetError(player);
@@ -706,7 +658,7 @@ public final class WerewolfGameplayEvents {
             DamageSource source;
             if (data.isBeastMode() && HWConfig.BEAST_VOID_DAMAGE.get()) {
                 Holder<DamageType> voidType = player.level().registryAccess()
-                        .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FELL_OUT_OF_WORLD);
+                        .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.FELL_OUT_OF_WORLD);
                 source = new DamageSource(voidType, player, player);
             } else {
                 source = player.damageSources().playerAttack(player);
@@ -715,19 +667,19 @@ public final class WerewolfGameplayEvents {
             boolean hurt;
             BLOODY_BITE_DAMAGE.set(true);
             try {
-                hurt = target.hurt(source, biteDamage);
+                hurt = target.hurtServer(player.level(), source, biteDamage);
             } finally {
                 BLOODY_BITE_DAMAGE.set(false);
             }
             if (!hurt) return;
 
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, BLOODY_BITE_EFFECT_TICKS, 1), player);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BLOODY_BITE_EFFECT_TICKS, 2), player);
+            target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, BLOODY_BITE_EFFECT_TICKS, 2), player);
             target.addEffect(new MobEffectInstance(MobEffects.HUNGER, BLOODY_BITE_EFFECT_TICKS, 0), player);
             target.addEffect(new MobEffectInstance(MobEffects.POISON, BLOODY_BITE_EFFECT_TICKS, 0), player);
             data.setBloodyBiteCooldownEnd(gameTime + BLOODY_BITE_COOLDOWN_TICKS);
             player.swing(InteractionHand.MAIN_HAND, true);
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + target.getBbHeight() * 0.6D,
                     target.getZ(), 12, 0.35D, 0.35D, 0.35D, 0.05D);
             level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT,
@@ -744,7 +696,7 @@ public final class WerewolfGameplayEvents {
     private static void summonWolfSpirits(ServerPlayer player) {
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.SUMMON_WOLF_SPIRIT)) return;
-            long gameTime = player.serverLevel().getGameTime();
+            long gameTime = player.level().getGameTime();
             if (gameTime < data.getWolfSpiritCooldownEnd()) {
                 long seconds = (data.getWolfSpiritCooldownEnd() - gameTime + 19L) / 20L;
                 player.sendSystemMessage(Component.translatable("message.howlingwerewolf.spirit_cooldown", seconds)
@@ -752,15 +704,15 @@ public final class WerewolfGameplayEvents {
                 return;
             }
             removeSpiritWolves(player, data);
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             for (int i = 0; i < 5; i++) {
-                Wolf wolf = EntityType.WOLF.create(level);
+                Wolf wolf = net.minecraft.world.entity.EntityType.WOLF.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
                 if (wolf == null) continue;
                 double angle = Math.PI * 2.0D * i / 5.0D;
-                wolf.moveTo(player.getX() + Math.cos(angle) * 2.0D, player.getY(),
+                wolf.snapTo(player.getX() + Math.cos(angle) * 2.0D, player.getY(),
                         player.getZ() + Math.sin(angle) * 2.0D, player.getYRot(), 0.0F);
                 wolf.tame(player);
-                wolf.setOwnerUUID(player.getUUID());
+                wolf.setOwner(player);
                 setWolfCollarColor(wolf, DyeColor.LIGHT_BLUE);
                 wolf.setGlowingTag(true);
                 wolf.setPersistenceRequired();
@@ -779,18 +731,13 @@ public final class WerewolfGameplayEvents {
     }
 
     private static void setWolfCollarColor(Wolf wolf, DyeColor color) {
-        // Vanilla 1.21.1 made Wolf#setCollarColor private. Round-trip the complete subclass data
-        // through its stable CollarColor NBT key so the spirit keeps its tame/owner state.
-        CompoundTag wolfData = new CompoundTag();
-        wolf.addAdditionalSaveData(wolfData);
-        wolfData.putByte("CollarColor", (byte) color.getId());
-        wolf.readAdditionalSaveData(wolfData);
+        wolf.setComponent(DataComponents.WOLF_COLLAR, color);
     }
 
     private static void useMoonbloodSurge(ServerPlayer player) {
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.MOONBLOOD_SURGE)) return;
-            long gameTime = player.serverLevel().getGameTime();
+            long gameTime = player.level().getGameTime();
             if (gameTime < data.getMoonbloodSurgeCooldownEnd()) {
                 long seconds = (data.getMoonbloodSurgeCooldownEnd() - gameTime + 19L) / 20L;
                 player.sendSystemMessage(Component.translatable(
@@ -807,23 +754,23 @@ public final class WerewolfGameplayEvents {
             // hidden-effect chain counts all durations down together, yielding 10s III, 15s II,
             // then 35s I without custom timers. / 从弱到强叠加隐藏效果，得到 10 秒 III、
             // 15 秒 II、35 秒 I 的连续递减抗性。
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+            player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
                     MOONBLOOD_RESISTANCE_I_TICKS, 0));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+            player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
                     MOONBLOOD_RESISTANCE_II_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+            player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
                     MOONBLOOD_RESISTANCE_III_TICKS, 2));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
+            player.addEffect(new MobEffectInstance(MobEffects.STRENGTH,
                     MOONBLOOD_SURGE_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
+            player.addEffect(new MobEffectInstance(MobEffects.SPEED,
                     MOONBLOOD_SURGE_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.JUMP,
+            player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST,
                     MOONBLOOD_SURGE_TICKS, 0));
             player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,
                     MOONBLOOD_SURGE_TICKS, 0));
             data.setMoonbloodCrashTime(gameTime + MOONBLOOD_SURGE_TICKS);
             data.setMoonbloodSurgeCooldownEnd(gameTime + MOONBLOOD_COOLDOWN_TICKS);
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             level.sendParticles(ParticleTypes.CRIMSON_SPORE, player.getX(), player.getY() + 1.0D,
                     player.getZ(), 48, 0.55D, 0.8D, 0.55D, 0.025D);
             level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0D,
@@ -838,18 +785,18 @@ public final class WerewolfGameplayEvents {
 
     private static void processMoonbloodCrash(ServerPlayer player, WerewolfData data) {
         long crashTime = data.getMoonbloodCrashTime();
-        if (crashTime <= 0L || player.serverLevel().getGameTime() < crashTime) return;
+        if (crashTime <= 0L || player.level().getGameTime() < crashTime) return;
         data.setMoonbloodCrashTime(0L);
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
                 MOONBLOOD_CRASH_TICKS, 1));
-        player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
+        player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE,
                 MOONBLOOD_CRASH_TICKS, 2));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
+        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
                 MOONBLOOD_CRASH_TICKS, 0));
         removeResistedEffects(player, data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE));
-        player.serverLevel().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0D,
+        player.level().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0D,
                 player.getZ(), 42, 0.5D, 0.7D, 0.5D, 0.02D);
-        player.playNotifySound(SoundEvents.WOLF_WHINE, SoundSource.PLAYERS, 1.0F, 0.65F);
+        notifySound(player, classicWolfSounds().whineSound().value(), SoundSource.PLAYERS, 1.0F, 0.65F);
         player.sendSystemMessage(Component.translatable("message.howlingwerewolf.moonblood_crash")
                 .withStyle(ChatFormatting.DARK_GRAY));
         ModNetwork.sync(player, data);
@@ -860,7 +807,7 @@ public final class WerewolfGameplayEvents {
         data.setTransformed(false);
         data.setMoonForced(false);
         data.setInfected(true);
-        data.setAwakeningDayTime(calculateNextNight(player.getServer().overworld().getDayTime()));
+        data.setAwakeningDayTime(calculateNextNight(player.level().getServer().overworld().getOverworldClockTime()));
         WerewolfGuide.infection(player);
     }
 
@@ -935,7 +882,7 @@ public final class WerewolfGameplayEvents {
     public static void removeSpiritWolves(ServerPlayer player, WerewolfData data) {
         if (data.getSpiritWolfIds().isEmpty()) return;
         for (UUID id : data.getSpiritWolfIds()) {
-            for (ServerLevel level : player.getServer().getAllLevels()) {
+            for (ServerLevel level : player.level().getServer().getAllLevels()) {
                 Entity entity = level.getEntity(id);
                 if (entity != null) {
                     entity.discard();
@@ -957,7 +904,7 @@ public final class WerewolfGameplayEvents {
 
     private static void processSpiritWolves(ServerPlayer player, WerewolfData data) {
         if (player.tickCount % 20 != 0 || data.getSpiritWolfIds().isEmpty()) return;
-        if (!data.isTransformed() || player.serverLevel().getGameTime() >= data.getWolfSpiritExpireTime()) {
+        if (!data.isTransformed() || player.level().getGameTime() >= data.getWolfSpiritExpireTime()) {
             removeSpiritWolves(player, data);
             ModNetwork.sync(player, data);
         }
@@ -984,9 +931,7 @@ public final class WerewolfGameplayEvents {
     }
 
     private static float attackMultiplier(WerewolfData data) {
-        if (data.isBeastMode()) return BEAST_ATTACK_MULTIPLIER;
-        if (data.isQuadrupedMode()) return QUADRUPED_ATTACK_MULTIPLIER;
-        return 1.0F;
+        return WerewolfCombatRules.attackMultiplier(data.getForm());
     }
 
     private static float moonRendDamage(ServerPlayer attacker, LivingEntity target, WerewolfData data) {
@@ -1098,10 +1043,10 @@ public final class WerewolfGameplayEvents {
         float multiplier = hungerMultiplier(player);
         Float previous = LAST_EXHAUSTION.get(id);
         if (previous != null && multiplier > 1.0F) {
-            float outsideTick = food.getExhaustionLevel() - previous;
+            float outsideTick = food.exhaustionLevel - previous;
             if (outsideTick > 0.0F) food.addExhaustion(outsideTick * (multiplier - 1.0F));
         }
-        FOOD_SNAPSHOTS.put(id, new FoodSnapshot(food.getExhaustionLevel(),
+        FOOD_SNAPSHOTS.put(id, new FoodSnapshot(food.exhaustionLevel,
                 food.getSaturationLevel(), food.getFoodLevel(), multiplier));
     }
 
@@ -1116,10 +1061,10 @@ public final class WerewolfGameplayEvents {
         if (start.multiplier > 1.0F) {
             float thresholdUse = Math.max(0.0F, start.saturation - food.getSaturationLevel())
                     + Math.max(0, start.food - food.getFoodLevel());
-            float added = food.getExhaustionLevel() - start.exhaustion + thresholdUse * 4.0F;
+            float added = food.exhaustionLevel - start.exhaustion + thresholdUse * 4.0F;
             if (added > 0.0F) food.addExhaustion(added * (start.multiplier - 1.0F));
         }
-        LAST_EXHAUSTION.put(id, food.getExhaustionLevel());
+        LAST_EXHAUSTION.put(id, food.exhaustionLevel);
     }
 
     private static float hungerMultiplier(ServerPlayer player) {
@@ -1152,12 +1097,12 @@ public final class WerewolfGameplayEvents {
         return height;
     }
 
-    private static void setTransientModifier(AttributeInstance instance, ResourceLocation id, String name,
+    private static void setTransientModifier(AttributeInstance instance, Identifier id, String name,
                                              double amount) {
         setTransientModifier(instance, id, name, amount, AttributeModifier.Operation.ADD_VALUE);
     }
 
-    private static void setTransientModifier(AttributeInstance instance, ResourceLocation id, String name,
+    private static void setTransientModifier(AttributeInstance instance, Identifier id, String name,
                                              double amount,
                                              AttributeModifier.Operation operation) {
         if (instance == null) return;
@@ -1169,12 +1114,12 @@ public final class WerewolfGameplayEvents {
                 new AttributeModifier(id, amount, operation));
     }
 
-    private static void removeModifier(AttributeInstance instance, ResourceLocation id) {
+    private static void removeModifier(AttributeInstance instance, Identifier id) {
         if (instance != null) instance.removeModifier(id);
     }
 
-    private static ResourceLocation modifierId(String path) {
-        return ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path);
+    private static Identifier modifierId(String path) {
+        return Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path);
     }
 
     private static void clampHealthToMaximum(ServerPlayer player) {
@@ -1227,7 +1172,7 @@ public final class WerewolfGameplayEvents {
         boolean gainedExperience = data.getLevel() < WerewolfData.getMaxLevel();
         int levels = data.addScaledExperience(10);
         if (gainedExperience) {
-            player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.45F, 1.25F);
+            notifySound(player, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.45F, 1.25F);
         }
         if (levels > 0) {
             player.sendSystemMessage(Component.translatable("message.howlingwerewolf.level_up",
@@ -1244,15 +1189,13 @@ public final class WerewolfGameplayEvents {
 
     private static float bestIronToolSpeed(BlockState state) {
         float speed = 1.0F;
-        for (ItemStack tool : IRON_CLAW_SPEED_TOOLS) speed = Math.max(speed, tool.getDestroySpeed(state));
+        for (ItemStack tool : ClawTools.SPEED) speed = Math.max(speed, tool.getDestroySpeed(state));
         return speed;
     }
 
     private static boolean isOwnedBy(LivingEntity entity, ServerPlayer player) {
-        return entity instanceof TamableAnimal tameable && player.getUUID().equals(tameable.getOwnerUUID());
+        return entity instanceof TamableAnimal tameable && tameable.isOwnedBy(player);
     }
-
-    private record RawClawHit(int attackerId, int targetId, float amount) {}
 
     private static long calculateNextNight(long dayTime) {
         long timeOfDay = Math.floorMod(dayTime, 24000L);
@@ -1263,9 +1206,9 @@ public final class WerewolfGameplayEvents {
     private static void removeResistedEffects(ServerPlayer player, int rank) {
         if (rank >= 1) player.removeEffect(MobEffects.WEAKNESS);
         if (rank >= 2) player.removeEffect(MobEffects.POISON);
-        if (rank >= 3) player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        if (rank >= 3) player.removeEffect(MobEffects.SLOWNESS);
         if (rank >= 4) {
-            player.removeEffect(MobEffects.DIG_SLOWDOWN);
+            player.removeEffect(MobEffects.MINING_FATIGUE);
             player.removeEffect(MobEffects.BLINDNESS);
         }
         if (rank >= 5) {
@@ -1277,35 +1220,35 @@ public final class WerewolfGameplayEvents {
     private static void applyHumanWerewolfTransitionEffects(ServerPlayer player, WerewolfData data,
                                                              boolean enteringWerewolfForm) {
         if (enteringWerewolfForm) {
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
+            player.addEffect(new MobEffectInstance(MobEffects.STRENGTH,
                     HUMAN_TO_WEREWOLF_STRENGTH_TICKS, 0));
             return;
         }
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
                 WEREWOLF_TO_HUMAN_WEAKNESS_TICKS, 0));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
+        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
                 WEREWOLF_TO_HUMAN_SLOWNESS_TICKS, 0));
-        player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
+        player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE,
                 WEREWOLF_TO_HUMAN_MINING_FATIGUE_TICKS, 0));
         int resistance = data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE);
         if (resistance >= 1) player.removeEffect(MobEffects.WEAKNESS);
-        if (resistance >= 3) player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
-        if (resistance >= 4) player.removeEffect(MobEffects.DIG_SLOWDOWN);
+        if (resistance >= 3) player.removeEffect(MobEffects.SLOWNESS);
+        if (resistance >= 4) player.removeEffect(MobEffects.MINING_FATIGUE);
     }
 
     public static void playBeastTransformation(ServerPlayer player, boolean enteringBeastForm) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         double x = player.getX();
         double y = player.getY() + 1.35D;
         double z = player.getZ();
         if (enteringBeastForm) {
             DustParticleOptions bloodDust = new DustParticleOptions(
-                    new Vector3f(0.34F, 0.025F, 0.015F), 1.35F);
+                    0x570604, 1.35F);
             level.sendParticles(bloodDust, x, y, z, 48, 0.5D, 1.05D, 0.5D, 0.035D);
             level.sendParticles(ParticleTypes.POOF, x, y, z, 42, 0.65D, 0.95D, 0.65D, 0.09D);
             level.sendParticles(ParticleTypes.CRIT, x, y + 0.25D, z, 28,
                     0.55D, 0.8D, 0.55D, 0.16D);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_GROWL,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().growlSound().value(),
                     SoundSource.PLAYERS, 1.35F, 0.55F);
             level.playSound(null, player.blockPosition(), SoundEvents.RAVAGER_ROAR,
                     SoundSource.PLAYERS, 0.95F, 0.72F);
@@ -1314,15 +1257,15 @@ public final class WerewolfGameplayEvents {
                     0.55D, 0.9D, 0.55D, 0.045D);
             level.sendParticles(ParticleTypes.POOF, x, y, z, 24,
                     0.45D, 0.75D, 0.45D, 0.035D);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_WHINE,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().whineSound().value(),
                     SoundSource.PLAYERS, 1.0F, 0.82F);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_AMBIENT,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().ambientSound().value(),
                     SoundSource.PLAYERS, 0.75F, 0.92F);
         }
     }
 
     public static void playQuadrupedTransformation(ServerPlayer player, boolean enteringQuadrupedForm) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         double x = player.getX();
         double y = player.getY() + 0.65D;
         double z = player.getZ();
@@ -1332,28 +1275,40 @@ public final class WerewolfGameplayEvents {
                 x, y, z, enteringQuadrupedForm ? 18 : 14,
                 0.35D, 0.35D, 0.35D, 0.07D);
         level.playSound(null, player.blockPosition(), enteringQuadrupedForm
-                        ? SoundEvents.WOLF_GROWL : SoundEvents.WOLF_AMBIENT,
+                        ? classicWolfSounds().growlSound().value() : classicWolfSounds().ambientSound().value(),
                 SoundSource.PLAYERS, 1.0F, enteringQuadrupedForm ? 0.78F : 0.96F);
     }
 
     public static void playTransformation(ServerPlayer player, boolean transforming) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         double x = player.getX();
         double y = player.getY() + 1.0D;
         double z = player.getZ();
         if (transforming) {
             level.sendParticles(ParticleTypes.POOF, x, y, z, 36, 0.45D, 0.75D, 0.45D, 0.08D);
             level.sendParticles(ParticleTypes.CRIT, x, y + 0.25D, z, 18, 0.35D, 0.55D, 0.35D, 0.12D);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_GROWL,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().growlSound().value(),
                     SoundSource.PLAYERS, 1.25F, 0.72F);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_AMBIENT,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().ambientSound().value(),
                     SoundSource.PLAYERS, 1.0F, 0.58F);
         } else {
             level.sendParticles(ParticleTypes.HAPPY_VILLAGER, x, y, z, 24, 0.45D, 0.7D, 0.45D, 0.04D);
             level.sendParticles(ParticleTypes.POOF, x, y, z, 18, 0.35D, 0.6D, 0.35D, 0.04D);
-            level.playSound(null, player.blockPosition(), SoundEvents.WOLF_WHINE,
+            level.playSound(null, player.blockPosition(), classicWolfSounds().whineSound().value(),
                     SoundSource.PLAYERS, 0.9F, 1.08F);
         }
+    }
+
+    private static void notifySound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
+                                    SoundSource source, float volume, float pitch) {
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                Holder.direct(sound), source, player.getX(), player.getY(), player.getZ(),
+                volume, pitch, player.getRandom().nextLong()));
+    }
+
+    private static net.minecraft.world.entity.animal.wolf.WolfSoundVariant.WolfSoundSet classicWolfSounds() {
+        return SoundEvents.WOLF_SOUNDS.get(
+                net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds();
     }
 
     private record FoodSnapshot(float exhaustion, float saturation, int food, float multiplier) {}

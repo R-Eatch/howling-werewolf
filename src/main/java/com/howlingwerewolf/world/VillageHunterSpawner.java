@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -29,7 +29,7 @@ public final class VillageHunterSpawner {
     public static void playerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
                 || player.tickCount % CHECK_INTERVAL != 0) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
 
         BlockPos village = level.findNearestMapStructure(
@@ -40,7 +40,7 @@ public final class VillageHunterSpawner {
 
         VillageHunterSavedData data = VillageHunterSavedData.get(level);
         long villageKey = anchor.asLong();
-        int target = data.getOrCreateTarget(villageKey, level.random);
+        int target = data.getOrCreateTarget(villageKey, level.getRandom());
 
         AABB villageArea = new AABB(anchor).inflate(64.0D, 32.0D, 64.0D);
         int existing = level.getEntitiesOfClass(HunterEntity.class, villageArea,
@@ -80,21 +80,21 @@ public final class VillageHunterSpawner {
         int spawned = 0;
         for (int member = 0; member < count; member++) {
             for (int attempt = 0; attempt < 32; attempt++) {
-                double angle = level.random.nextDouble() * Math.PI * 2.0D;
-                double radius = 5.0D + level.random.nextDouble() * 15.0D;
+                double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
+                double radius = 5.0D + level.getRandom().nextDouble() * 15.0D;
                 int x = anchor.getX() + (int)Math.round(Math.cos(angle) * radius);
                 int z = anchor.getZ() + (int)Math.round(Math.sin(angle) * radius);
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
                 BlockPos pos = new BlockPos(x, y, z);
                 if (!hasGroundAndSpace(level, pos)) continue;
 
-                HunterEntity hunter = ModEntities.HUNTER.get().create(level);
+                HunterEntity hunter = ModEntities.HUNTER.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (hunter == null) break;
-                hunter.moveTo(x + 0.5D, y, z + 0.5D, level.random.nextFloat() * 360.0F, 0.0F);
+                hunter.snapTo(x + 0.5D, y, z + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
                 if (!level.noCollision(hunter)) continue;
                 DifficultyInstance difficulty = level.getCurrentDifficultyAt(pos);
                 net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(
-                        hunter, level, difficulty, MobSpawnType.EVENT, null);
+                        hunter, level, difficulty, EntitySpawnReason.EVENT, null);
                 hunter.configureForVillagePatrol(villageKey);
                 if (level.addFreshEntity(hunter)) {
                     spawned++;
