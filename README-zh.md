@@ -210,11 +210,11 @@ Alpha 试炼是狼人养成的终局挑战。
 - 已安装 Mod 列表；
 - 最新日志或崩溃报告。
 
-## 后续计划
+## 支持版本
 
-当前正式发布版本支持 **Minecraft 1.20.1 Forge** 与 **Minecraft 1.21.1 NeoForge**。
+项目支持 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**。
 
-后续计划探索 **Minecraft 26.1** 的 NeoForge 版本。该内容目前属于开发方向，并不代表已经确定发布日期。
+Minecraft 26.1.2 的移植已完成，源码维护在 [`26.1.2-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) 分支。
 
 ## 许可与版权
 
