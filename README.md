@@ -224,11 +224,11 @@ When reporting an issue, provide:
 - the list of installed Mods;
 - the latest log or crash report.
 
-## Future plans
+## Supported editions
 
-Current official releases support **Forge for Minecraft 1.20.1** and **NeoForge for Minecraft 1.21.1**.
+The project supports **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**.
 
-Future development is planned to explore a NeoForge edition for **Minecraft 26.1**. This is a development direction, not a confirmed release date.
+The Minecraft 26.1.2 port is complete. Its source is maintained on the [`26.1.2-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) branch.
 
 ## License and copyright
 
