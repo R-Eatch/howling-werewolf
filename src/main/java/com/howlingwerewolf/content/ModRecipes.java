@@ -14,8 +14,10 @@ public final class ModRecipes {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<AlphaWerewolfBadgeRecipe>> ALPHA_WEREWOLF_BADGE =
             SERIALIZERS.register("alpha_werewolf_badge",
-                    () -> new RecipeSerializer<>(MapCodec.unit(AlphaWerewolfBadgeRecipe::new),
-                            StreamCodec.unit(new AlphaWerewolfBadgeRecipe())));
+                    // This stateless recipe must use the same instance for JSON loading and
+                    // network sync: StreamCodec.unit rejects other recipe instances.
+                    () -> new RecipeSerializer<>(MapCodec.unit(AlphaWerewolfBadgeRecipe.INSTANCE),
+                            StreamCodec.unit(AlphaWerewolfBadgeRecipe.INSTANCE)));
 
     private ModRecipes() {}
 }

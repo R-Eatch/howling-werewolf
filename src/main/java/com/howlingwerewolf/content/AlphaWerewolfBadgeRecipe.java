@@ -14,7 +14,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
-    public AlphaWerewolfBadgeRecipe() {
+    public static final AlphaWerewolfBadgeRecipe INSTANCE = new AlphaWerewolfBadgeRecipe();
+
+    private AlphaWerewolfBadgeRecipe() {
         super();
     }
 
