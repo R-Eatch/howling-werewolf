@@ -87,6 +87,7 @@ public final class WerewolfGameplayEvents {
     private static final UUID BEAST_MAX_HEALTH_ID = UUID.fromString("de30fb17-6f01-4db0-8f8c-df1ecab4283d");
     private static final UUID CLAW_BLOCK_REACH_ID = UUID.fromString("217fc7ae-27cf-4f43-b1d2-d48574740755");
     private static final UUID CLAW_ENTITY_REACH_ID = UUID.fromString("acc23f02-b013-45fe-9453-ef0a7e3d20b1");
+    private static final UUID AUTO_STEP_HEIGHT_ID = UUID.fromString("2c930f25-b9d7-48d6-8aa4-84c1196385fb");
     private static final int SPIRIT_DURATION_TICKS = 20 * 60 * 4;
     private static final int SPIRIT_COOLDOWN_TICKS = 20 * 60;
     private static final int BLOODY_BITE_COOLDOWN_TICKS = 20 * 60;
@@ -848,6 +849,14 @@ public final class WerewolfGameplayEvents {
             return;
         }
         double mobilityFactor = armorMobilityFactor(player, data);
+        if (HWConfig.ENABLE_WEREWOLF_AUTO_STEP.get()) {
+            double stepHeight = data.isBeastMode() ? 2.0D : data.isQuadrupedMode() ? 1.0D : 1.5D;
+            // ServerPlayer starts at 1.0, but client movement starts at 0.6; base the shared bonus on the client.
+            setTransientModifier(player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get()), AUTO_STEP_HEIGHT_ID,
+                    "howlingwerewolf auto step", Math.max(0.0D, stepHeight - 0.6F));
+        } else {
+            removeModifier(player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get()), AUTO_STEP_HEIGHT_ID);
+        }
         setTransientModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), WEREWOLF_SPEED_ID,
                 "howlingwerewolf speed", data.getTreeSkillRank(WerewolfTreeSkill.SPEED) * 0.02D
                         * mobilityFactor);
@@ -885,6 +894,7 @@ public final class WerewolfGameplayEvents {
     }
 
     public static void removeWerewolfModifiers(ServerPlayer player) {
+        removeModifier(player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get()), AUTO_STEP_HEIGHT_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), WEREWOLF_SPEED_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), BEAST_SPEED_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), QUADRUPED_SPEED_ID);

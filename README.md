@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="Current mod version: 1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Current mod version: 1.1.8"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,7 +21,7 @@
 
 ## Current version and updates
 
-The latest mod version is **1.1.7**. **v1.1.3** completed the owner's full in-game survival playthrough, including defeating the Ender Dragon and obtaining elytra. **v1.1.7 has not yet been tested in game**; compilation and package checks do not replace that testing. See the [1.1.7 changelog](docs/CHANGELOG-1.1.7.md) and [GitHub main](https://github.com/R-Eatch/howling-werewolf) for current updates and supported editions.
+The latest mod version is **1.1.8**. **v1.1.3** completed the owner's full in-game survival playthrough, including defeating the Ender Dragon and obtaining elytra. **The changes introduced in v1.1.8 have been tested.** See the [1.1.8 changelog](docs/CHANGELOG-1.1.8.md) and [GitHub main](https://github.com/R-Eatch/howling-werewolf) for current updates and supported editions.
 
 ## New spawn eggs
 
@@ -61,7 +61,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.1.7 |
+| Howling Werewolf | 1.1.8 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -81,7 +81,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.1.7-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.1.8-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -206,6 +206,8 @@ The common Forge configuration allows you to adjust infection chance, experience
 
 Configuration file: `config/howlingwerewolf-common.toml`.
 
+`gameplay.enableWerewolfAutoStep` defaults to **true**. Fixed Auto Step heights are **1.0 block for Quadruped Wolf**, **1.5 blocks for Werewolf**, and **2.0 blocks for Beast**. Skills, armor and potions do not change these values. Set it to **false** to restore normal stepping; manual jumping retains its existing rules.
+
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
 Datapacks can extend the following item tags:
@@ -217,7 +219,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **v1.1.7 has not yet been tested in game.**
+**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **The changes introduced in v1.1.8 have been tested.**
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 

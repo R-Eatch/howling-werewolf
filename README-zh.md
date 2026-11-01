@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="当前 Mod 版本：1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="当前 Mod 版本：1.1.8"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 或更高版本">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,7 +21,7 @@
 
 ## 当前版本与更新
 
-当前最新 Mod 版本为 **1.1.7**。**v1.1.3** 已由作者完成全流程实机生存测试，包括击败末影龙并取得鞘翅；**v1.1.7 尚未实机测试**，编译与包内容核查不能代替实机测试。更新内容见 [1.1.7 更新日志](docs/CHANGELOG-1.1.7.md)；最新消息、支持版本与版本说明以 [GitHub main](https://github.com/R-Eatch/howling-werewolf) 为准。
+当前最新 Mod 版本为 **1.1.8**。**v1.1.3** 已由作者完成全流程实机生存测试，包括击败末影龙并取得鞘翅；**当前版本 1.1.8 对更新内容已经完成测试**。更新内容见 [1.1.8 更新日志](docs/CHANGELOG-1.1.8.md)；最新消息、支持版本与版本说明以 [GitHub main](https://github.com/R-Eatch/howling-werewolf) 为准。
 
 ## 新的刷怪蛋
 
@@ -61,7 +61,7 @@
 | Minecraft Java 版 | 1.20.1 |
 | Mod 加载器 | 推荐 Forge 47.4.16 或更高版本 |
 | Java | 17 |
-| 月厄狼人 | 1.1.7 |
+| 月厄狼人 | 1.1.8 |
 
 推荐使用 Forge 47.4.16 或更高的兼容 Forge 47.x 版本；Forge 47.4.16 仍是当前正式发布的主要测试目标。
 
@@ -81,7 +81,7 @@
 ## 安装
 
 1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
-2. 将 `howlingwerewolf-1.1.7-forge.jar` 放入游戏的 `mods` 目录。
+2. 将 `howlingwerewolf-1.1.8-forge.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -206,6 +206,8 @@ Alpha 试炼是狼人养成的终局挑战。
 
 配置文件：`config/howlingwerewolf-common.toml`。
 
+`gameplay.enableWerewolfAutoStep` 默认 **true**：四足狼自动跨步高度为 **1.0 格**，普通狼人为 **1.5 格**，野兽为 **2.0 格**。这些数值固定，不随技能、护甲或药水变化。设为 **false** 恢复普通跨步；手动跳跃保持原有规则。
+
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
 数据包可以扩展以下物品标签：
@@ -217,7 +219,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 测试与兼容性
 
-**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**v1.1.7 尚未实机测试。**
+**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**当前版本 1.1.8 对更新内容已经完成测试。**
 
 **本 Mod 尚未完成完整的多人游戏测试。** 因此，在长期多人存档中的表现仍属于未完全验证范围。服务器和客户端应使用相同的 Mod 版本，更新前请查阅对应版本的更新日志，确认兼容性说明。
 
