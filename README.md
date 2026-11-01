@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.7-blue?style=flat-square" alt="Latest source: 1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.8-blue?style=flat-square" alt="Latest source: 1.1.8"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
@@ -15,25 +15,9 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all three supported editions below; switch to the matching branch when developing or building another edition.
+> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all three supported editions.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
-
-## Current version and supported editions
-
-**The latest Mod source version is 1.1.7.** GitHub Releases and Modrinth / CurseForge files are published separately by the maintainer. Check each download page for the versions actually available.
-
-| Minecraft Java Edition | Loader baseline | Java | Latest Mod version | Source and changelog |
-|---|---|---|---|---|
-| 1.20.1 | Forge 47.4.16 | 17 | **1.1.7** | [1.20.1-forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/1.20.1-forge/docs/CHANGELOG-1.1.7.md) |
-| 1.21.1 | NeoForge 21.1.248 | 21 | **1.1.7** | [1.21.1-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/1.21.1-neoforge/docs/CHANGELOG-1.1.7.md) |
-| 26.1.2 | NeoForge 26.1.2.122 | 25 | **1.1.7** | [26.1.2-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/26.1.2-neoforge/docs/CHANGELOG-1.1.7.md) |
-
-Newer compatible loader releases for the same Minecraft version may be used. Do not mix JARs for different Minecraft versions or loaders. Building `main` requires **Java 25**.
-
-**Testing status: the maintainer confirms that 1.1.3 completed a full in-game gameplay test pass; 1.1.7 has not yet been tested in-game.** This does not mean that every loader combination or multiplayer scenario across all three editions has been tested.
-
-**Combined platform downloads: 2,713** — 750 on [Modrinth](https://modrinth.com/mod/howling-werewolf) + 1,963 on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf). Snapshot: **2026-11-01 00:12:17, Asia/Shanghai (UTC+08:00)**, using the [official Modrinth API](https://api.modrinth.com/v2/project/WMXcBjen) and the [CFWidget public CurseForge mirror](https://api.cfwidget.com/1672944). The mirror may lag behind CurseForge; downloads are not a count of unique players.
 
 ## Before the first howl
 
@@ -75,33 +59,17 @@ Press **K** → **Skins** to choose the original brown **Adrian**, amber-eyed gr
 
 The preview supports mouse tracking, drag rotation, scroll zoom, and equipment visibility. Apply a selection to save it; previewing a form does not unlock or switch your actual form. Your choice persists through death, dimension travel, level resets, and curing followed by reawakening. Third-person rendering, inventory previews, and first-person claws use the same skin.
 
-Choose **Create Template** on the skin page to export PNGs, Blockbench drawing templates, and resource-pack instructions. Export your own PNGs, enable the resource pack, and press **F3 + T** to reload resources. Your work can then be selected in the skin screen without another Mod.
+Choose **Create Template** on the skin page to export PNGs, Blockbench drawing templates, and resource-pack instructions. Export your own PNGs, enable the resource pack, and press **F3 + T** to reload resources. Your work can then be selected in the skin screen.
 
 Multiplayer synchronizes skin IDs rather than uploading images. Other players need the same resource pack; missing resources fall back to Adrian while preserving the saved choice. Resource-pack formats differ between Minecraft editions, so use templates from the matching branch.
 
 See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chinese](CUSTOM_SKINS-zh.md).
 
-## New spawn eggs and item textures
-
-![Werewolf, Hunter, and Moon-Crowned Alpha Werewolf spawn eggs](docs/spawn-eggs.png)
-
-Werewolf and Hunter spawn eggs now have dedicated **16×16** mob-themed icons, joined by a new **Moon-Crowned Alpha Werewolf spawn egg**. All item and block textures are now **16×16** as well.
-
-The Alpha egg is available in the Mod's creative tab as `howlingwerewolf:alpha_werewolf_spawn_egg`. It spawns the same boss entity used by the Alpha Trial. Using an egg alone does not bind a ritual or grant trial-completion rewards; permanently unlocking Beast Form still requires completing the Alpha Trial.
-
 ## Installation
 
-1. Choose a Minecraft edition from the matrix above and install its matching loader and Java version.
+1. Choose the Minecraft version you want to play, then install its matching Forge or NeoForge loader and Java version.
 2. Download the matching Mod JAR from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf), then place it in the game's `mods` directory.
 3. Start the game. Clients and servers should use the same Mod version for their Minecraft edition.
-
-The 1.1.7 build filenames are listed below; consult the download page to see which files have been published:
-
-| Minecraft / loader | Matching JAR |
-|---|---|
-| 1.20.1 Forge | `howlingwerewolf-1.1.7-forge.jar` |
-| 1.21.1 NeoForge | `howlingwerewolf-1.1.7-neoforge.jar` |
-| 26.1.2 NeoForge | `howlingwerewolf-1.1.7-neoforge-26.1.2.jar` |
 
 Back up important worlds before adding or updating any Mod.
 
@@ -213,6 +181,47 @@ Your first victory permanently unlocks Beast Form and grants its corresponding p
 
 Repeat victories award Moonbane Pearls based on difficulty. On Hard difficulty, they also grant additional Skill Points and Skill-tree Points.
 
+## Struggling with the Alpha Trial? Here is the author's reference guide:
+
+The Alpha Trial opens at werewolf **level 10**, but Beast Form is a powerful reward, so the challenge is demanding. Boss health and combat phases vary with the game difficulty. Your first victory on any difficulty unlocks Beast Form.
+
+### The Alpha's moves
+
+1. **Melee attacks:** The Alpha attacks targets within melee reach.
+2. **Summoning:** It periodically calls minions that inflict negative effects. Additional summons are queued when it first reaches half health and after revival. The Alpha pauses its attacks while channeling a summon, giving you an opening to deal damage, but existing minions still need your attention.
+3. **Blink strike:** It teleports behind you and attempts a heavy strike that also applies a negative effect. Keep enough health in reserve to survive this burst.
+4. **Prowling:** This occurs only before revival. Each successful melee hit has a **25%** chance to trigger a retreat intended to evade your attacks. These retreats give you some breathing room and reduce the pressure of continuous melee combat.
+5. **Revival:** This occurs only on Normal and Hard, with the restored health depending on difficulty. The revived Alpha no longer prowls, making the final phase more relentless.
+
+### Easy and Normal: levels and build
+
+Consider reaching **level 15 on Easy** or **level 18 on Normal** before attempting the trial, with the following build:
+
+- **Skill tree:** Max out Claw Damage, Moonrend Claws, Natural Defense, Regeneration, and Lifesteal. Raise Speed, Knockback Resistance, Resistance, and Claw Efficiency as far as you can.
+- **Skills:** Learn Night Vision, Moonblood Surge, Bloody Bite, Empty Claw, and Long Claws.
+
+### Hard: recommended at level 20
+
+Hard is intended for late-game progression, with stronger boss bonuses and a more dangerous revival phase. The following approach also works on Easy and Normal:
+
+1. **Hunter phase:** Use Long Claws' area damage while moving around the group to avoid being surrounded.
+2. **Open against the Alpha:** Apply Weakness II with Bloody Bite, then focus on damage while the debuff lasts. Aim to remove roughly one fifth to one quarter of the boss's health during this opening.
+3. **Follow with Moonblood Surge:** Depending on your health, activate Moonblood Surge as the bite's debuff is about to expire. Use its strong healing, absorption, and resistance to keep attacking, and try to finish the fight during the buff.
+4. **Prepare another opening:** If the boss survives, stabilize your health and keep moving. Once Bloody Bite's cooldown finishes, reapply the debuff and look for another opening. Practice the attack rhythm, and try falling critical hits: when vanilla critical-hit conditions are met, base melee damage receives a **1.5×** multiplier.
+
+You can also make use of Lifesteal by keeping other attackable creatures in the arena and attacking or killing them when you need health. Golden Apples, Totems of Undying, Alpha Werewolf Badges, and other healing supplies can provide more room for error. A badge must be in your hotbar, and its fatal-hit protection requires you to be transformed.
+
+I have tested these recommended levels and builds in actual in-game fights on all three difficulties and defeated the Alpha. With practice, you can overcome the challenge too. Good luck defeating the Alpha!
+
+### **Cheese strat**
+
+I do not recommend the following methods, since they skip part of the gameplay experience, but I have included some strategies for players who want them.
+
+- **Unlock the form first:** Defeat the Alpha on Easy, then use the unlocked Beast Form for Normal or Hard attempts.
+- **Experiment with the arena:** Try a shelter with only two blocks of vertical clearance and fight beneath it, using a similar idea to an Enderman shelter. Adjust the layout around the Alpha's blink positions and movement.
+- **Use a boat:** Trap the Alpha in a boat, just as you would force an Enderman into one. (Poor Alpha, stuck in a boat and toyed with at your leisure—how humiliating. I left the Alpha able to ride boats partly to give some players a cheese option, though I might prevent it from being trapped in boats in a future update :>)
+- **Tune the challenge to your pace:** The configuration includes powerful optional settings that are disabled by default, such as keeping a badge after revival. Some settings can substantially reduce the challenge, making them useful for a relaxed playthrough or practicing the fight.
+
 ## Configuration and datapacks
 
 Each edition's common configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
@@ -230,7 +239,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**The maintainer confirms that 1.1.3 completed a full in-game gameplay test pass; the latest version, 1.1.7, has not yet been tested in-game.** Compilation, source inspection, and resource checks do not replace gameplay validation. The 1.1.3 result does not automatically cover 1.1.7 or every loader combination across all three editions.
+**Version 1.1.3 has completed a full in-game playthrough; the changes introduced in the current version, 1.1.8, have been tested.** Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 The full-playthrough testing baseline includes starting normal survival in a new world, defeating the Ender Dragon, and obtaining elytra.
 
@@ -247,15 +256,7 @@ When reporting an issue, provide:
 
 ## Source, changelogs, and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. Find each edition's source and 1.1.7 changelog in the matrix above. Edition-specific fixes are documented on their respective branches.
-
-`main` currently uses the 26.1.2 source. Install a **Java 25 JDK**, then run from the repository root:
-
-```sh
-./gradlew build -x test
-```
-
-On Windows, use `gradlew.bat build -x test`. The output is `build/libs/howlingwerewolf-1.1.7-neoforge-26.1.2.jar`. This command skips tests; a successful build is not an in-game test pass. Build the other editions from their own branches with the Java version listed above.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

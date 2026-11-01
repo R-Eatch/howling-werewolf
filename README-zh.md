@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.7-blue?style=flat-square" alt="最新源码： 1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.8-blue?style=flat-square" alt="最新源码： 1.1.8"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
@@ -15,25 +15,10 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖下列三个受支持版本；开发或构建其他版本时，请切换到对应分支。
+> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖项目支持的三个版本。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
-## 当前版本与支持版本
-
-**当前最新 Mod 源码版本为 1.1.7。** GitHub Release 与 Modrinth、CurseForge 的模组文件由维护者另行发布，实际可下载的文件版本请以各下载页面为准。
-
-| Minecraft Java 版 | 加载器基线 | Java | 最新 Mod 版本 | 源码与更新日志 |
-|---|---|---|---|---|
-| 1.20.1 | Forge 47.4.16 | 17 | **1.1.7** | [1.20.1-forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) · [1.1.7 日志](https://github.com/R-Eatch/howling-werewolf/blob/1.20.1-forge/docs/CHANGELOG-1.1.7.md) |
-| 1.21.1 | NeoForge 21.1.248 | 21 | **1.1.7** | [1.21.1-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) · [1.1.7 日志](https://github.com/R-Eatch/howling-werewolf/blob/1.21.1-neoforge/docs/CHANGELOG-1.1.7.md) |
-| 26.1.2 | NeoForge 26.1.2.122 | 25 | **1.1.7** | [26.1.2-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) · [1.1.7 日志](https://github.com/R-Eatch/howling-werewolf/blob/26.1.2-neoforge/docs/CHANGELOG-1.1.7.md) |
-
-可以使用同一 Minecraft 版本下兼容的较新加载器版本；请勿混用不同游戏版本或加载器的 JAR。`main` 的源码构建环境为 **Java 25**。
-
-**实测状态：1.1.3 已由维护者确认完成全流程实机测试；1.1.7 尚未实机测试。** 这不代表三个版本的所有加载器组合或多人场景都已完成测试。
-
-**两平台累计下载 2,713 次**：[Modrinth](https://modrinth.com/mod/howling-werewolf) 750 次 + [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 1,963 次。查询快照：**2026-11-01 00:12:17（Asia/Shanghai）**；计数来源为 [Modrinth 官方 API](https://api.modrinth.com/v2/project/WMXcBjen) 与 [CFWidget 的 CurseForge 公共镜像](https://api.cfwidget.com/1672944)。镜像可能存在延迟；下载次数不等于独立玩家人数。
 
 ## 当第一声嚎叫尚未响起
 
@@ -75,33 +60,17 @@
 
 预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关。点击应用后保存选择；预览不会解锁或切换实际形态。皮肤选择会随玩家数据保存，死亡、换维度、重置等级以及治愈后再觉醒均保留，第三人称、背包预览与第一人称爪使用同一套皮肤。
 
-在皮肤页选择 **创建模板**，即可获得 PNG、Blockbench 绘画模板和资源包说明。导出自己的 PNG，启用对应资源包，再按 **F3 + T** 重载资源，就能在皮肤界面选择作品；无需额外 Mod。
+在皮肤页选择 **创建模板**，即可获得 PNG、Blockbench 绘画模板和资源包说明。导出自己的 PNG，启用对应资源包，再按 **F3 + T** 重载资源，就能在皮肤界面选择作品。
 
 联机只同步皮肤 ID，不会自动上传图片。其他玩家需要启用相同资源包；缺少资源时会显示 Adrian，保存的选择仍然保留。各游戏版本的资源包格式不同，请使用对应分支的模板。
 
 完整教程见[自定义皮肤指南](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-## 新刷怪蛋与物品贴图
-
-![狼人、猎人与月冠 Alpha 狼人刷怪蛋](docs/spawn-eggs.png)
-
-狼人和猎人刷怪蛋现在使用独立的 **16×16** 生物主题图标，并新增 **月冠 Alpha 狼人刷怪蛋**；全部物品与方块贴图也统一为 **16×16**。
-
-Alpha 刷怪蛋位于模组创造栏，物品 ID 为 `howlingwerewolf:alpha_werewolf_spawn_egg`。它会生成 Alpha 试炼中的同一首领实体；单独使用刷怪蛋不会绑定仪式，也不会发放仪式通关奖励。正常解锁野兽形态仍需完成 Alpha 试炼。
-
 ## 安装
 
-1. 从上方支持矩阵选择 Minecraft 版本，安装对应加载器及所需 Java。
+1. 选择所需的 Minecraft 版本，安装对应的 Forge 或 NeoForge 加载器及所需 Java。
 2. 从 [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases)、[Modrinth](https://modrinth.com/mod/howling-werewolf) 或 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 下载与该版本对应的 Mod JAR，放入游戏的 `mods` 目录。
 3. 启动游戏。联机时客户端与服务端应安装对应游戏版本的相同 Mod 版本。
-
-1.1.7 的构建产物命名如下；文件是否已发布，请以下载页为准：
-
-| Minecraft / 加载器 | 对应 JAR |
-|---|---|
-| 1.20.1 Forge | `howlingwerewolf-1.1.7-forge.jar` |
-| 1.21.1 NeoForge | `howlingwerewolf-1.1.7-neoforge.jar` |
-| 26.1.2 NeoForge | `howlingwerewolf-1.1.7-neoforge-26.1.2.jar` |
 
 添加或更新任何 Mod 前，建议先备份重要世界。
 
@@ -213,6 +182,47 @@ Alpha 试炼是狼人养成的终局挑战。
 
 重复胜利会根据难度奖励月厄珍珠；困难难度下还会提供额外技能点与技能树点。
 
+## 打不过Alpha试炼？ 这是作者的参考攻略：
+
+Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大，因此挑战难度也相应较高。不同游戏难度下，Boss 的生命值和战斗阶段会有所不同；首次在任意难度完成试炼，都能解锁野兽形态。
+
+### Alpha 的招式
+
+1. **普通攻击：** 对近身目标发动近战攻击。
+2. **召唤：** 周期性召来会施加减益效果的随从；首次降至半血和复活后，还会安排额外召唤。Alpha 在召唤吟唱时暂停攻击，是集中输出的机会，但仍需留意场上的随从。
+3. **瞬闪步：** 瞬移到玩家身后，尝试发动附带减益效果的高伤害突袭。不要把血量压得过低，要为这次攻击留出余量。
+4. **游猎：** 仅在复活前存在。Alpha 每次成功近战命中后，有 **25%** 的概率向后走位，尝试避开玩家的攻击。这段后撤会留出喘息时间，也能减轻持续近战带来的血量压力。
+5. **复活：** 仅普通和困难难度存在，恢复的血量随难度变化。复活后不再游猎，战斗压力会进一步上升。
+
+### 简单与普通难度：等级和配点
+
+建议达到 **15 级（简单）**或 **18 级（普通）**后再挑战，并提前做好以下配点：
+
+- **技能树：** 将利爪伤害、裂月利爪、自然防御、再生和吸血升满；速度、击退抗性、抗性和狼爪效率尽量提高。
+- **技能：** 学会夜视、月血沸腾、血腥撕咬、狼爪为空和长爪。
+
+### 困难难度：建议 20 级后挑战
+
+困难难度面向后期成长，Boss 的加成和复活阶段都更具威胁。以下打法也同样适配简单和普通难度：
+
+1. **猎人阶段：** 利用长爪的范围伤害，配合移动处理成群猎人，减少被围攻的机会。
+2. **Alpha 阶段起手：** 先用血腥撕咬施加虚弱 II，趁减益生效时集中输出，争取先削去约五分之一到四分之一的 Boss 血量。
+3. **衔接月血沸腾：** 根据自己的血量，在血腥撕咬的减益即将结束时开启月血沸腾，利用强力恢复、伤害吸收和抗性增益继续进攻，争取在增益期间结束战斗。
+4. **准备下一轮：** 如果增益结束后 Boss 仍然存活，先稳住血量和走位，待血腥撕咬冷却完成后再补上减益，寻找下一次输出机会。多练习招式节奏，也可以尝试下落暴击：满足原版暴击条件时，基础近战伤害有 **1.5 倍**加成。
+
+还可以灵活运用吸血，在场地内预留一些可攻击的生物，必要时通过攻击或击杀它们补充生命。准备金苹果、不死图腾、Alpha 狼人徽章及其他恢复道具，也能增加容错；徽章需要放在快捷栏中，并在狼人变身状态下才能抵挡致命伤害。
+
+三个难度的推荐等级和配点我已经在游戏里完成过实际的战斗测试，并击败了Alpha，各位玩家可以通过多加练习来通过挑战，祝各位玩家顺利击败Alpha !
+
+### 逃课打法
+
+虽然我不建议大家使用如下方式，这会丢失部分游戏体验，但我也提供了相对应的作战策略
+
+- **先解锁，再挑战高难度：** 先在简单难度击败 Alpha，解锁野兽形态后，再用野兽形态挑战普通或困难难度。
+- **尝试利用场地：** 搭建仅容两格高通行的遮挡平台，站在下面限制 Boss 的近身空间，思路类似应对末影人。可以根据瞬闪位置和场地布局继续调整。
+- **使用船** 使用船控制住 Alpha ，正如强迫末影人坐在船上一样（可怜的Alpha被羞辱般的困在船上肆意玩弄，我没有禁止Alpha乘坐船也是考虑了部分玩家的逃课需求，不过也许我会在后续更新中让Alpha不能再被船困住 :> ）
+- **按自己的节奏调整配置：** 配置中提供了默认关闭的强力可选参数，例如复活保留徽章。部分参数可以明显降低挑战压力，适合希望轻松体验或练习打法的玩家。
+
 ## 配置与数据包
 
 各版本的通用配置中可以调整感染率、经验倍率、最高等级等多个参数，你可以根据自己的喜好来改变整段狼人旅程的节奏。
@@ -230,7 +240,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 测试与兼容性
 
-**1.1.3 已由维护者确认完成全流程实机测试；当前最新 1.1.7 尚未实机测试。** 编译打包、源码检查或资源核对不能替代游戏内验证。上述 1.1.3 测试结论不自动覆盖 1.1.7，也不代表三个版本的所有加载器组合都已完成验证。
+**1.1.3 已完成全流程实机测试；当前版本 1.1.8 对更新内容已经完成测试。** 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 完整流程测试基线包括从新存档进行常规生存、击败末影龙并取得鞘翅。
 
@@ -247,15 +257,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 源码、更新日志与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**。各版本的源码和 1.1.7 日志见顶部支持矩阵；版本相关的修复以各分支日志为准。
-
-`main` 当前使用 26.1.2 源码。安装 **Java 25 JDK** 后在仓库根目录运行：
-
-```sh
-./gradlew build -x test
-```
-
-Windows 使用 `gradlew.bat build -x test`。产物位于 `build/libs/howlingwerewolf-1.1.7-neoforge-26.1.2.jar`。该命令跳过测试，构建成功不表示完成实机验收。其他两个版本请从各自分支构建，并使用顶部矩阵中的 Java 版本。
+项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 
