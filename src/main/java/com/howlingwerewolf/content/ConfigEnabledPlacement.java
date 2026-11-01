@@ -2,6 +2,7 @@ package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HWConfig;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
 /** A data-driven placement gate backed by the common world-generation config. */
 public final class ConfigEnabledPlacement extends PlacementFilter {
-    public static final Codec<ConfigEnabledPlacement> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<ConfigEnabledPlacement> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.STRING.fieldOf("feature").forGetter(placement -> placement.feature),
                     Codec.INT.optionalFieldOf("base_chance", 1)

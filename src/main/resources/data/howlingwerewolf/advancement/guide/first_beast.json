@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/defeat_alpha",
+  "display": {
+    "icon": { "id": "howlingwerewolf:moonbane_pearl" },
+    "title": { "translate": "advancement.howlingwerewolf.first_beast.title" },
+    "description": { "translate": "advancement.howlingwerewolf.first_beast.desc" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}

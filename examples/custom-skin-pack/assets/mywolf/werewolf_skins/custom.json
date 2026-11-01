@@ -1,0 +1,10 @@
+{
+  "name": "My Wolf",
+  "description": "My own werewolf coat.",
+  "author": "YourName",
+  "textures": {
+    "werewolf": "mywolf:textures/entity/werewolf.png",
+    "quadruped": "mywolf:textures/entity/quadruped_werewolf.png",
+    "beast": "mywolf:textures/entity/beast.png"
+  }
+}

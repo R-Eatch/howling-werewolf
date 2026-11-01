@@ -1,13 +1,13 @@
 package com.howlingwerewolf.entity;
 
-import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -15,7 +15,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -28,7 +28,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -37,8 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class HunterEntity extends PathfinderMob {
     private static final int TRIAL_EFFECT_DURATION = 20 * 60 * 30;
-    private static final ResourceLocation HUNTER_LOOT = new ResourceLocation(
-            HowlingWerewolf.MOD_ID, "entities/hunter");
     private boolean trialHunter;
     private boolean villagePatrol;
     private long villageKey;
@@ -65,7 +63,7 @@ public final class HunterEntity extends PathfinderMob {
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10,
-                true, false, HunterEntity::isWerewolfTarget));
+                true, false, (entity, level) -> isWerewolfTarget(entity)));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
         targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers(HunterEntity.class));
     }
@@ -83,20 +81,20 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     @Override
-    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
-        boolean hurt = super.doHurtTarget(target);
+    public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
+        boolean hurt = super.doHurtTarget(level, target);
         if (hurt && target instanceof Player player && isWerewolfPlayer(player)) {
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 0), this);
-            player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20 * 10, 0), this);
+            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20 * 10, 0), this);
+            player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 20 * 10, 0), this);
         }
         return hurt;
     }
 
     @Override
+    @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        MobSpawnType spawnType, @Nullable SpawnGroupData groupData,
-                                        @Nullable CompoundTag tag) {
-        SpawnGroupData result = super.finalizeSpawn(level, difficulty, spawnType, groupData, tag);
+                                        EntitySpawnReason spawnType, @Nullable SpawnGroupData groupData) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, spawnType, groupData);
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         return result;
@@ -120,10 +118,10 @@ public final class HunterEntity extends PathfinderMob {
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         setHealth(getMaxHealth());
-        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, TRIAL_EFFECT_DURATION, 0));
-        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, TRIAL_EFFECT_DURATION, 0));
+        addEffect(new MobEffectInstance(MobEffects.STRENGTH, TRIAL_EFFECT_DURATION, 0));
+        addEffect(new MobEffectInstance(MobEffects.SPEED, TRIAL_EFFECT_DURATION, 0));
         addEffect(new MobEffectInstance(MobEffects.REGENERATION, TRIAL_EFFECT_DURATION, 0));
-        addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, TRIAL_EFFECT_DURATION, 0));
+        addEffect(new MobEffectInstance(MobEffects.RESISTANCE, TRIAL_EFFECT_DURATION, 0));
         addEffect(new MobEffectInstance(MobEffects.GLOWING, TRIAL_EFFECT_DURATION, 0));
     }
 
@@ -131,7 +129,7 @@ public final class HunterEntity extends PathfinderMob {
     public void configureForVillagePatrol(long villageKey) {
         villagePatrol = true;
         this.villageKey = villageKey;
-        restrictTo(BlockPos.of(villageKey), 48);
+        setHomeTo(BlockPos.of(villageKey), 48);
         setPersistenceRequired();
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
@@ -142,19 +140,20 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     @Override
-    protected ResourceLocation getDefaultLootTable() {
-        return trialHunter ? net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY : HUNTER_LOOT;
+    protected void dropFromLootTable(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,
+                                     boolean recentlyHit) {
+        if (!trialHunter) super.dropFromLootTable(level, source, recentlyHit);
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int lootingLevel, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, lootingLevel, recentlyHit);
-        spawnAtLocation(ModBlocks.WOLFSBANE.get());
-        if (random.nextFloat() < 0.50F) spawnAtLocation(ModBlocks.WOLFSBANE.get());
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+        spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
+        if (random.nextFloat() < 0.50F) spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(ValueOutput tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("TrialHunter", trialHunter);
         tag.putBoolean("VillagePatrol", villagePatrol);
@@ -162,11 +161,11 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput tag) {
         super.readAdditionalSaveData(tag);
-        trialHunter = tag.getBoolean("TrialHunter");
-        villagePatrol = tag.getBoolean("VillagePatrol");
-        villageKey = tag.getLong("VillageKey");
-        if (villagePatrol) restrictTo(BlockPos.of(villageKey), 48);
+        trialHunter = tag.getBooleanOr("TrialHunter", false);
+        villagePatrol = tag.getBooleanOr("VillagePatrol", false);
+        villageKey = tag.getLongOr("VillageKey", 0L);
+        if (villagePatrol) setHomeTo(BlockPos.of(villageKey), 48);
     }
 }

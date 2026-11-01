@@ -2,97 +2,40 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf 1.0.5 for Minecraft 1.20.1 / Forge 47.4.16. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf `1.1.7` for Minecraft 26.1.2 / NeoForge 26.1.2.122. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
-## Requirements and notation
+## Requirements
 
 - The root command is `/werewolf`.
 - The command source needs permission level 2, normally an operator, a command block, or a single-player world with cheats enabled.
 - `<target>` must resolve to one online player. A player name or a single-target selector such as `@s` or `@p` can be used.
 - `true` enables a state and `false` disables it.
 - State-changing commands run on the server, then refresh player dimensions and werewolf modifiers and synchronize the result to the client.
+- `settree` and `setability` provide completion suggestions for valid IDs.
 
-## State and transformation commands
+## Command reference
 
-### `/werewolf infect <target>`
+| Command | Behavior and notes |
+|---|---|
+| `/werewolf infect <target>` | Places the target in the infected-human stage, schedules awakening for a later night, and removes existing summoned spirit wolves. |
+| `/werewolf awaken <target>` | Awakens immediately, clears infection, and enters normal Werewolf form. |
+| `/werewolf cure <target>` | Clears werewolf identity, infection, form, progression, skills, abilities, cooldowns, and spirit wolves. Its current result matches `reset`, but it remains as the administrator-facing cure action. |
+| `/werewolf transform <target> [state]` | Omitting `state` toggles transformation; `true` enters normal Werewolf form and `false` returns to human form. The command clears the full-moon lock. |
+| `/werewolf setlevel <target> <level>` | Sets werewolf level and resets experience within that level. Syntax accepts 1–25, but the value cannot exceed the configured server maximum. |
+| `/werewolf addxp <target> <amount>` | Adds 1–100000 raw werewolf experience and can trigger level-ups. The normal experience multiplier is not applied. |
+| `/werewolf setskillpoints <target> <amount>` | Sets currently available ability points to 0–100; it does not add a delta. |
+| `/werewolf settreepoints <target> <amount>` | Sets currently available skill-tree points to 0–100; it does not add a delta. |
+| `/werewolf settree <target> <skill> <rank>` | Sets a skill-tree rank without spending points. Rank `0` clears it, and the value cannot exceed that skill's maximum. |
+| `/werewolf setability <target> <ability> <unlocked>` | Unlocks or removes an ability without spending points. Removing Quadruped form exits that form. |
+| `/werewolf resettree <target>` | Clears all skill-tree ranks while retaining identity, level, and abilities. |
+| `/werewolf resetabilities <target>` | Clears all abilities while retaining identity, level, and the skill tree. |
+| `/werewolf reset <target>` | Restores all werewolf data to new-player defaults. |
+| `/werewolf forcemoon <target> <state>` | `true` forces and locks Werewolf form; `false` only removes the lock and neither returns to human form nor grants the bloodline to an ordinary human. |
+| `/werewolf status [target]` | Shows identity, infection, form, Alpha state, level, experience, available points, dimension, and persistent-mirror state. Players may omit the target; the console must provide one. |
 
-Forces the target into the infected-human stage, removes existing summoned spirit wolves, and schedules awakening for a later night.
+## Skill-tree IDs and maximum ranks
 
-Example: `/werewolf infect Steve`
-
-### `/werewolf awaken <target>`
-
-Immediately completes awakening, clears infection state, grants the werewolf bloodline, and enters normal Werewolf form.
-
-Example: `/werewolf awaken Steve`
-
-### `/werewolf cure <target>`
-
-Completely cures the target and restores default human state. This clears werewolf identity, infection, form, progression, abilities, cooldowns, Alpha completion, modifiers, and summoned spirit wolves. Its current result is the same as `reset`, but it remains as the administrator-facing cure action.
-
-Example: `/werewolf cure Steve`
-
-### `/werewolf transform <target> [state]`
-
-- Omit `[state]` to toggle between the current transformed state and human form.
-- `true` grants the werewolf bloodline if needed, clears infection, and enters normal Werewolf form.
-- `false` returns to human form without granting the bloodline to an ordinary human.
-- Every form of this command clears the `forcemoon` lock.
-
-Examples:
-
-```mcfunction
-/werewolf transform Steve
-/werewolf transform Steve true
-/werewolf transform Steve false
-```
-
-### `/werewolf forcemoon <target> <state>`
-
-- `true` grants the werewolf bloodline if needed, clears infection, transforms the target, and enables the full-moon lock.
-- `false` only removes the lock. It does not grant the bloodline and does not automatically return an already transformed player to human form.
-
-Example: `/werewolf forcemoon Steve true`
-
-### `/werewolf reset <target>`
-
-Restores all werewolf data to new-player defaults, including identity, progression, skills, abilities, cooldowns, forms, modifiers, and summoned spirit wolves.
-
-Example: `/werewolf reset Steve`
-
-## Levels and points
-
-### `/werewolf setlevel <target> <level>`
-
-Sets the werewolf level and resets experience within that level to zero. The syntax accepts levels 1–25, but the value cannot exceed the server's configured maximum. The command grants the werewolf bloodline and clears infection.
-
-Example: `/werewolf setlevel Steve 20`
-
-### `/werewolf addxp <target> <amount>`
-
-Adds 1–100000 raw werewolf experience and can trigger normal level-ups. The administrator value is not multiplied by the normal experience-gain configuration.
-
-Example: `/werewolf addxp Steve 500`
-
-### `/werewolf setskillpoints <target> <amount>`
-
-Sets currently available ability points to a value from 0–100. This sets the displayed available total; it does not add a delta.
-
-Example: `/werewolf setskillpoints Steve 20`
-
-### `/werewolf settreepoints <target> <amount>`
-
-Sets currently available skill-tree points to a value from 0–100. This sets the displayed available total; it does not add a delta.
-
-Example: `/werewolf settreepoints Steve 30`
-
-## Skill-tree commands
-
-### `/werewolf settree <target> <skill> <rank>`
-
-Sets one skill-tree rank without spending points. Rank `0` removes the skill. The command validates the selected skill's actual maximum and rejects an excessive value.
-
-| Skill ID | Maximum rank | Skill ID | Maximum rank |
+| ID | Maximum rank | ID | Maximum rank |
 |---|---:|---|---:|
 | `damage` | 6 | `moon_rend` | 3 |
 | `defense` | 5 | `speed` | 5 |
@@ -102,65 +45,27 @@ Sets one skill-tree rank without spending points. Rank `0` removes the skill. Th
 | `satiety` | 3 | `claw_efficiency` | 3 |
 | `hunting_mastery` | 2 |  |  |
 
-Example: `/werewolf settree Steve damage 6`
+## Ability IDs
 
-### `/werewolf resettree <target>`
-
-Clears all skill-tree ranks without resetting werewolf level or unlocked abilities.
-
-Example: `/werewolf resettree Steve`
-
-## Ability commands
-
-### `/werewolf setability <target> <ability> <unlocked>`
-
-Unlocks or removes one ability without spending points. Valid ability IDs are:
-
-- `night_vision`
-- `summon_wolf_spirit`
-- `quadruped_form`
-- `moonblood_surge`
-- `armored_instinct`
-- `hard_life`
-- `empty_claw_slot`
-- `long_claws`
-- `tool_claws`
-- `fire_claws`
-- `bloody_bite`
-
-Removing `quadruped_form` while it is active returns the target to normal Werewolf form and refreshes player dimensions.
-
-Example: `/werewolf setability Steve quadruped_form true`
-
-### `/werewolf resetabilities <target>`
-
-Removes every unlocked ability without resetting level or the skill tree. An active Quadruped form is exited automatically.
-
-Example: `/werewolf resetabilities Steve`
+`night_vision`, `summon_wolf_spirit`, `quadruped_form`, `moonblood_surge`, `armored_instinct`, `hard_life`, `empty_claw_slot`, `long_claws`, `tool_claws`, `fire_claws`, and `bloody_bite`.
 
 ## Status diagnostics
 
-### `/werewolf status [target]`
-
-Displays werewolf identity, infection, current form, Alpha completion, level, experience, available points, dimension, and persistent-mirror state.
-
-A player can omit the target with `/werewolf status`. The server console and command blocks must provide an explicit target.
-
-The `persistedMirror` field means:
+The `persistedMirror` field reported by `/werewolf status [target]` means:
 
 - `match`: live server data and the persistent recovery mirror agree.
-- `DIFF`: the two snapshots differ; inspect saving, dimension changes, or synchronization.
+- `DIFF`: the snapshots differ; inspect saving, dimension changes, or synchronization.
 - `missing`: no persistent recovery mirror was found yet.
 
 ## Common test flow
 
 ```mcfunction
-/werewolf awaken Steve
-/werewolf setlevel Steve 20
-/werewolf settreepoints Steve 50
-/werewolf setskillpoints Steve 30
-/werewolf settree Steve damage 6
-/werewolf setability Steve quadruped_form true
-/werewolf status Steve
-/werewolf reset Steve
+/werewolf awaken @s
+/werewolf setlevel @s 20
+/werewolf settreepoints @s 50
+/werewolf setskillpoints @s 30
+/werewolf settree @s damage 6
+/werewolf setability @s quadruped_form true
+/werewolf status @s
+/werewolf reset @s
 ```

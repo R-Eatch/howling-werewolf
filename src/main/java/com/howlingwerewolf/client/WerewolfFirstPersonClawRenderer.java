@@ -1,34 +1,32 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraftforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
 
 public final class WerewolfFirstPersonClawRenderer {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(HowlingWerewolf.MOD_ID, "textures/entity/werewolf.png");
-    private static final ResourceLocation BEAST_TEXTURE = new ResourceLocation(HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
     private static final ModelPart ROOT = createLayer().bakeRoot();
     private static final ModelPart BEAST_ROOT = createBeastLayer().bakeRoot();
 
-    public static void render(RenderArmEvent event, boolean beastMode) {
+    public static void render(RenderArmEvent event, WerewolfRenderData data) {
+        boolean beastMode = data.form() == WerewolfForm.BEAST;
         ModelPart modelRoot = beastMode ? BEAST_ROOT : ROOT;
         ModelPart arm = modelRoot.getChild(event.getArm() == HumanoidArm.RIGHT ? "right_arm" : "left_arm");
         arm.resetPose();
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
-        VertexConsumer consumer = event.getMultiBufferSource().getBuffer(
-                RenderType.entityCutoutNoCull(beastMode ? BEAST_TEXTURE : TEXTURE));
-        arm.render(pose, consumer, event.getPackedLight(), OverlayTexture.NO_OVERLAY);
+        event.getSubmitNodeCollector().submitModelPart(arm, pose,
+                RenderTypes.entityCutout(WerewolfSkinTextures.get(data.skinId(),
+                        beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)),
+                event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
         pose.popPose();
         event.setCanceled(true);
     }

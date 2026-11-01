@@ -5,19 +5,35 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
-  <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
-  <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.7-blue?style=flat-square" alt="Latest source: 1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
+  <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="Asset license: CC BY-SA 4.0"></a>
 </p>
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> This branch contains the official Forge edition for Minecraft 1.20.1. The official NeoForge edition for Minecraft 1.21.1 is maintained on the [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) branch.
+> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all three supported editions below; switch to the matching branch when developing or building another edition.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
+
+## Current version and supported editions
+
+**The latest Mod source version is 1.1.7.** GitHub Releases and Modrinth / CurseForge files are published separately by the maintainer. Check each download page for the versions actually available.
+
+| Minecraft Java Edition | Loader baseline | Java | Latest Mod version | Source and changelog |
+|---|---|---|---|---|
+| 1.20.1 | Forge 47.4.16 | 17 | **1.1.7** | [1.20.1-forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/1.20.1-forge/docs/CHANGELOG-1.1.7.md) |
+| 1.21.1 | NeoForge 21.1.248 | 21 | **1.1.7** | [1.21.1-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/1.21.1-neoforge/docs/CHANGELOG-1.1.7.md) |
+| 26.1.2 | NeoForge 26.1.2.122 | 25 | **1.1.7** | [26.1.2-neoforge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) · [1.1.7 changelog](https://github.com/R-Eatch/howling-werewolf/blob/26.1.2-neoforge/docs/CHANGELOG-1.1.7.md) |
+
+Newer compatible loader releases for the same Minecraft version may be used. Do not mix JARs for different Minecraft versions or loaders. Building `main` requires **Java 25**.
+
+**Testing status: the maintainer confirms that 1.1.3 completed a full in-game gameplay test pass; 1.1.7 has not yet been tested in-game.** This does not mean that every loader combination or multiplayer scenario across all three editions has been tested.
+
+**Combined platform downloads: 2,713** — 750 on [Modrinth](https://modrinth.com/mod/howling-werewolf) + 1,963 on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf). Snapshot: **2026-11-01 00:12:17, Asia/Shanghai (UTC+08:00)**, using the [official Modrinth API](https://api.modrinth.com/v2/project/WMXcBjen) and the [CFWidget public CurseForge mirror](https://api.cfwidget.com/1672944). The mirror may lag behind CurseForge; downloads are not a count of unique players.
 
 ## Before the first howl
 
@@ -38,17 +54,6 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 3. **Learn to control the transformation.** When the current rules allow it, press `J` to transform or return to human form. Under a full moon, your werewolf blood will leave you unable to control your form.
 4. **Challenge the Alpha of old.** Build the Moon-Oath ritual shown in the progression screen, defeat the Silver-Oath Watchers and the Moon-Crowned Alpha Werewolf, and finally awaken Beast Form.
 
-## Requirements
-
-| Component | Version |
-|---|---|
-| Minecraft Java Edition | 1.20.1 |
-| Mod loader | Forge 47.4.16 or later recommended |
-| Java | 17 |
-| Howling Werewolf | 1.0.7 |
-
-Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
-
 ## What the bloodline brings
 
 - Infection, delayed awakening, voluntary transformation, and forced full-moon transformations.
@@ -59,14 +64,44 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 - Lifesteal, Long Claws, Fire Claws, Tool Claws, Bloody Bite, and Moonblood Surge.
 - Wild Feral Werewolves, neutral Hunters, village patrols, Silver equipment, Wolfsbane, and two opposing potions.
 - A complete single-player Alpha Trial: altar construction, a Hunter phase, a multi-stage boss fight, repeat rewards, and permanent Beast Form progression.
+- Built-in werewolf skins, in-game previews, and resource-pack custom skins with drawing templates.
+- Dedicated Werewolf, Hunter, and Moon-Crowned Alpha Werewolf spawn egg icons.
 - Complete English and Simplified Chinese localization.
 - Configurable infection chance, experience multiplier, maximum level, and many other gameplay values.
 
+## Werewolf skins and custom skins
+
+Press **K** → **Skins** to choose the original brown **Adrian**, amber-eyed gray **Ashen**, gold-eyed black **Onyx**, or red-eyed white **Ivory** coat. Each covers the biped, quadruped, and Beast forms.
+
+The preview supports mouse tracking, drag rotation, scroll zoom, and equipment visibility. Apply a selection to save it; previewing a form does not unlock or switch your actual form. Your choice persists through death, dimension travel, level resets, and curing followed by reawakening. Third-person rendering, inventory previews, and first-person claws use the same skin.
+
+Choose **Create Template** on the skin page to export PNGs, Blockbench drawing templates, and resource-pack instructions. Export your own PNGs, enable the resource pack, and press **F3 + T** to reload resources. Your work can then be selected in the skin screen without another Mod.
+
+Multiplayer synchronizes skin IDs rather than uploading images. Other players need the same resource pack; missing resources fall back to Adrian while preserving the saved choice. Resource-pack formats differ between Minecraft editions, so use templates from the matching branch.
+
+See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chinese](CUSTOM_SKINS-zh.md).
+
+## New spawn eggs and item textures
+
+![Werewolf, Hunter, and Moon-Crowned Alpha Werewolf spawn eggs](docs/spawn-eggs.png)
+
+Werewolf and Hunter spawn eggs now have dedicated **16×16** mob-themed icons, joined by a new **Moon-Crowned Alpha Werewolf spawn egg**. All item and block textures are now **16×16** as well.
+
+The Alpha egg is available in the Mod's creative tab as `howlingwerewolf:alpha_werewolf_spawn_egg`. It spawns the same boss entity used by the Alpha Trial. Using an egg alone does not bind a ritual or grant trial-completion rewards; permanently unlocking Beast Form still requires completing the Alpha Trial.
+
 ## Installation
 
-1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.0.7-forge.jar` in the game's `mods` directory.
-3. Start the game.
+1. Choose a Minecraft edition from the matrix above and install its matching loader and Java version.
+2. Download the matching Mod JAR from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf), then place it in the game's `mods` directory.
+3. Start the game. Clients and servers should use the same Mod version for their Minecraft edition.
+
+The 1.1.7 build filenames are listed below; consult the download page to see which files have been published:
+
+| Minecraft / loader | Matching JAR |
+|---|---|
+| 1.20.1 Forge | `howlingwerewolf-1.1.7-forge.jar` |
+| 1.21.1 NeoForge | `howlingwerewolf-1.1.7-neoforge.jar` |
+| 26.1.2 NeoForge | `howlingwerewolf-1.1.7-neoforge-26.1.2.jar` |
 
 Back up important worlds before adding or updating any Mod.
 
@@ -94,7 +129,7 @@ Wolfsbane represents the path opposed to the werewolf bloodline. A Wolfsbane Pot
 | Quadruped Wolf | Learn **Wildstride Form**, then press `G` | Greatly increased movement speed and jump height, but slightly lower attack damage; cannot wear equipment. |
 | Beast | Complete the Alpha Trial for the first time, then press `H` | Greatly enhanced combat, speed, jumping, and defense, but faster hunger drain; cannot wear equipment. |
 
-Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are hidden by default; this can be changed in the configuration.
+Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are shown by default (`showWerewolfEquipment=true`); their display can be disabled in the configuration.
 
 Only equipment with a positive armor value weakens the natural damage reduction and movement bonuses provided by this ability. Zero-armor equipment such as elytra does not trigger this penalty.
 
@@ -180,7 +215,7 @@ Repeat victories award Moonbane Pearls based on difficulty. On Hard difficulty, 
 
 ## Configuration and datapacks
 
-The common Forge configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
+Each edition's common configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
 
 Configuration file: `config/howlingwerewolf-common.toml`.
 
@@ -195,26 +230,34 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.0.7 retains the gameplay baseline tested through a complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra.
+**The maintainer confirms that 1.1.3 completed a full in-game gameplay test pass; the latest version, 1.1.7, has not yet been tested in-game.** Compilation, source inspection, and resource checks do not replace gameplay validation. The 1.1.3 result does not automatically cover 1.1.7 or every loader combination across all three editions.
 
-**The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified for version 1.0.7.
+The full-playthrough testing baseline includes starting normal survival in a new world, defeating the Ender Dragon, and obtaining elytra.
 
-Keep backups when using the Mod in multiplayer worlds, and include the server log when reporting multiplayer issues.
+**The Mod has not yet completed comprehensive multiplayer testing.** Long-running multiplayer worlds still need further validation. Keep backups and include the server log when reporting multiplayer issues.
 
 When reporting an issue, provide:
 
 - the Minecraft version;
-- the Forge version;
+- the loader name and version (Forge or NeoForge);
 - the Howling Werewolf version;
 - the relevant configuration;
 - the list of installed Mods;
 - the latest log or crash report.
 
-## Supported editions
+## Source, changelogs, and building
 
-The project supports **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. Find each edition's source and 1.1.7 changelog in the matrix above. Edition-specific fixes are documented on their respective branches.
 
-The Minecraft 26.1.2 port is complete. Its source is maintained on the [`26.1.2-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) branch.
+`main` currently uses the 26.1.2 source. Install a **Java 25 JDK**, then run from the repository root:
+
+```sh
+./gradlew build -x test
+```
+
+On Windows, use `gradlew.bat build -x test`. The output is `build/libs/howlingwerewolf-1.1.7-neoforge-26.1.2.jar`. This command skips tests; a successful build is not an in-game test pass. Build the other editions from their own branches with the Java version listed above.
+
+[GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 
 ## License and copyright
 

@@ -3,11 +3,16 @@ package com.howlingwerewolf.capability;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
+import com.howlingwerewolf.WerewolfSkin;
+import com.howlingwerewolf.WerewolfSkinIds;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -16,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public final class WerewolfData {
+public final class WerewolfData implements ValueIOSerializable {
+    private static final MapCodec<CompoundTag> PERSISTENCE_CODEC = MapCodec.assumeMapUnsafe(CompoundTag.CODEC);
     public static final int CURRENT_DATA_VERSION = 2;
     public static final int DEFAULT_MAX_LEVEL = 20;
     public static final int MAX_LEVEL_LIMIT = 25;
@@ -27,6 +33,7 @@ public final class WerewolfData {
     private boolean infected;
     private boolean moonForced;
     private WerewolfForm form = WerewolfForm.HUMAN;
+    private String skinId = WerewolfSkinIds.DEFAULT_ID;
     private boolean alphaDefeated;
     private boolean nightVisionEnabled = true;
     private int level = 1;
@@ -53,6 +60,8 @@ public final class WerewolfData {
     public boolean isInfected() { return infected; }
     public boolean isMoonForced() { return moonForced; }
     public WerewolfForm getForm() { return form; }
+    public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
+    public String getSkinId() { return skinId; }
     public boolean isBeastMode() { return form == WerewolfForm.BEAST; }
     public boolean isQuadrupedMode() { return form == WerewolfForm.QUADRUPED; }
     public boolean hasDefeatedAlpha() { return alphaDefeated; }
@@ -79,6 +88,8 @@ public final class WerewolfData {
     }
     public void setInfected(boolean value) { infected = value; }
     public void setMoonForced(boolean value) { moonForced = value; }
+    public void setSkin(WerewolfSkin value) { setSkinId(value == null ? null : value.getId()); }
+    public void setSkinId(String value) { skinId = WerewolfSkinIds.normalize(value); }
     public void setForm(WerewolfForm value) {
         WerewolfForm requested = value == null ? WerewolfForm.HUMAN : value;
         if (!werewolf || requested == WerewolfForm.HUMAN) {
@@ -249,9 +260,10 @@ public final class WerewolfData {
     }
     public void prepareAfterDeath() { form = WerewolfForm.HUMAN; moonForced = false; moonbloodCrashTime = 0L; }
 
-    /** Returns true only for a newly-created / fully cured default state. */
+    /** Returns true only for a fully default state, including cosmetic preferences. */
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
+                && skinId.equals(WerewolfSkinIds.DEFAULT_ID)
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -263,6 +275,7 @@ public final class WerewolfData {
     }
 
     public void reset() {
+        // The chosen coat is a player preference; curing and reawakening preserve it.
         werewolf = false;
         infected = false;
         moonForced = false;
@@ -293,6 +306,7 @@ public final class WerewolfData {
         infected = other.infected;
         moonForced = other.moonForced;
         form = other.form;
+        skinId = other.skinId;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
         level = other.level;
@@ -321,6 +335,7 @@ public final class WerewolfData {
         tag.putBoolean("Infected", infected);
         tag.putBoolean("MoonForced", moonForced);
         tag.putString("Form", form.id());
+        tag.putString("Skin", skinId);
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
         tag.putInt("Level", level);
@@ -350,46 +365,52 @@ public final class WerewolfData {
         return tag;
     }
 
+    @Override
+    public void serialize(ValueOutput output) {
+        output.store(PERSISTENCE_CODEC, serializeNBT());
+    }
+
     public void deserializeNBT(CompoundTag tag) {
         tag = migrateData(tag);
-        syncedMaxLevel = tag.contains("NetworkMaxLevel", Tag.TAG_INT)
-                ? Math.max(1, Math.min(MAX_LEVEL_LIMIT, tag.getInt("NetworkMaxLevel"))) : 0;
-        werewolf = tag.getBoolean("Werewolf");
-        infected = tag.getBoolean("Infected");
-        moonForced = tag.getBoolean("MoonForced");
-        form = WerewolfForm.byName(tag.getString("Form"));
-        alphaDefeated = tag.getBoolean("AlphaDefeated");
-        nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBoolean("NightVisionEnabled");
-        level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getInt("Level")));
-        experience = Math.max(0, tag.getInt("Experience"));
+        syncedMaxLevel = tag.contains("NetworkMaxLevel")
+                ? Math.max(1, Math.min(MAX_LEVEL_LIMIT, tag.getIntOr("NetworkMaxLevel", 0))) : 0;
+        werewolf = tag.getBooleanOr("Werewolf", false);
+        infected = tag.getBooleanOr("Infected", false);
+        moonForced = tag.getBooleanOr("MoonForced", false);
+        form = WerewolfForm.byName(tag.getStringOr("Form", ""));
+        setSkinId(tag.getStringOr("Skin", ""));
+        alphaDefeated = tag.getBooleanOr("AlphaDefeated", false);
+        nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBooleanOr("NightVisionEnabled", false);
+        level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getIntOr("Level", 0)));
+        experience = Math.max(0, tag.getIntOr("Experience", 0));
         double storedRemainder = tag.contains("ExperienceGainRemainder")
-                ? tag.getDouble("ExperienceGainRemainder") : 0.0D;
+                ? tag.getDoubleOr("ExperienceGainRemainder", 0.0D) : 0.0D;
         experienceGainRemainder = Double.isFinite(storedRemainder)
                 && storedRemainder >= 0.0D && storedRemainder < 1.0D ? storedRemainder : 0.0D;
-        bonusSkillPoints = tag.getInt("BonusSkillPoints");
-        bonusTreePoints = tag.getInt("BonusTreePoints");
+        bonusSkillPoints = tag.getIntOr("BonusSkillPoints", 0);
+        bonusTreePoints = tag.getIntOr("BonusTreePoints", 0);
         clawHotbarSlot = tag.contains("ClawHotbarSlot")
-                ? Math.max(0, Math.min(8, tag.getInt("ClawHotbarSlot"))) : 1;
-        awakeningDayTime = tag.contains("AwakeningDayTime") ? tag.getLong("AwakeningDayTime") : -1L;
-        wolfSpiritCooldownEnd = Math.max(0L, tag.getLong("WolfSpiritCooldownEnd"));
-        wolfSpiritExpireTime = Math.max(0L, tag.getLong("WolfSpiritExpireTime"));
-        bloodyBiteCooldownEnd = Math.max(0L, tag.getLong("BloodyBiteCooldownEnd"));
-        moonbloodSurgeCooldownEnd = Math.max(0L, tag.getLong("MoonbloodSurgeCooldownEnd"));
-        moonbloodCrashTime = Math.max(0L, tag.getLong("MoonbloodCrashTime"));
-        totemExperienceTicks = Math.max(0, Math.min(1200, tag.getInt("TotemExperienceTicks")));
+                ? Math.max(0, Math.min(8, tag.getIntOr("ClawHotbarSlot", 0))) : 1;
+        awakeningDayTime = tag.contains("AwakeningDayTime") ? tag.getLongOr("AwakeningDayTime", 0L) : -1L;
+        wolfSpiritCooldownEnd = Math.max(0L, tag.getLongOr("WolfSpiritCooldownEnd", 0L));
+        wolfSpiritExpireTime = Math.max(0L, tag.getLongOr("WolfSpiritExpireTime", 0L));
+        bloodyBiteCooldownEnd = Math.max(0L, tag.getLongOr("BloodyBiteCooldownEnd", 0L));
+        moonbloodSurgeCooldownEnd = Math.max(0L, tag.getLongOr("MoonbloodSurgeCooldownEnd", 0L));
+        moonbloodCrashTime = Math.max(0L, tag.getLongOr("MoonbloodCrashTime", 0L));
+        totemExperienceTicks = Math.max(0, Math.min(1200, tag.getIntOr("TotemExperienceTicks", 0)));
         treeSkills.clear();
-        CompoundTag treeTag = tag.getCompound("TreeSkills");
-        for (WerewolfTreeSkill skill : WerewolfTreeSkill.values()) setTreeSkillRank(skill, treeTag.getInt(skill.id()));
+        CompoundTag treeTag = tag.getCompoundOrEmpty("TreeSkills");
+        for (WerewolfTreeSkill skill : WerewolfTreeSkill.values()) setTreeSkillRank(skill, treeTag.getIntOr(skill.id(), 0));
         abilities.clear();
-        ListTag abilityTag = tag.getList("Abilities", Tag.TAG_STRING);
+        ListTag abilityTag = tag.getListOrEmpty("Abilities");
         for (int i = 0; i < abilityTag.size(); i++) {
-            WerewolfAbility ability = WerewolfAbility.byName(abilityTag.getString(i));
+            WerewolfAbility ability = WerewolfAbility.byName(abilityTag.getStringOr(i, ""));
             if (ability != null) abilities.add(ability);
         }
         spiritWolfIds.clear();
-        ListTag spiritTag = tag.getList("SpiritWolves", Tag.TAG_STRING);
+        ListTag spiritTag = tag.getListOrEmpty("SpiritWolves");
         for (int i = 0; i < spiritTag.size(); i++) {
-            try { spiritWolfIds.add(UUID.fromString(spiritTag.getString(i))); }
+            try { spiritWolfIds.add(UUID.fromString(spiritTag.getStringOr(i, ""))); }
             catch (IllegalArgumentException ignored) {}
         }
         if (!werewolf) {
@@ -403,9 +424,14 @@ public final class WerewolfData {
         if (form == WerewolfForm.BEAST && !alphaDefeated) form = WerewolfForm.WEREWOLF;
     }
 
+    @Override
+    public void deserialize(ValueInput input) {
+        deserializeNBT(input.read(PERSISTENCE_CODEC).orElseGet(CompoundTag::new));
+    }
+
     private static CompoundTag migrateData(CompoundTag source) {
-        int version = source.contains("DataVersion", Tag.TAG_INT)
-                ? Math.max(0, source.getInt("DataVersion")) : 0;
+        int version = source.contains("DataVersion")
+                ? Math.max(0, source.getIntOr("DataVersion", 0)) : 0;
         if (version >= CURRENT_DATA_VERSION) return source;
 
         CompoundTag migrated = source.copy();
@@ -415,11 +441,11 @@ public final class WerewolfData {
             version = 1;
         }
         if (version < 2) {
-            WerewolfForm legacyForm = migrated.getBoolean("BeastMode")
+            WerewolfForm legacyForm = migrated.getBooleanOr("BeastMode", false)
                     ? WerewolfForm.BEAST
-                    : migrated.getBoolean("Transformed") ? WerewolfForm.WEREWOLF : WerewolfForm.HUMAN;
+                    : migrated.getBooleanOr("Transformed", false) ? WerewolfForm.WEREWOLF : WerewolfForm.HUMAN;
             migrated.putString("Form", legacyForm.id());
-            migrated.putBoolean("AlphaDefeated", migrated.getBoolean("BeastMode"));
+            migrated.putBoolean("AlphaDefeated", migrated.getBooleanOr("BeastMode", false));
             migrated.remove("Transformed");
             migrated.remove("BeastMode");
             version = 2;

@@ -3,8 +3,8 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
+import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.capability.WerewolfApi;
-import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.network.RequestWerewolfSyncPacket;
 import com.howlingwerewolf.network.TransformRequestPacket;
 import com.howlingwerewolf.network.ToggleBeastModePacket;
@@ -19,15 +19,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.RenderArmEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT)
 public final class ClientForgeEvents {
+    private static net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;
     private static WerewolfPlayerRenderer renderer;
     private static BeastPlayerRenderer beastRenderer;
     private static QuadrupedWerewolfRenderer quadrupedRenderer;
@@ -37,8 +39,7 @@ public final class ClientForgeEvents {
     private static int secondDimensionResyncTicks = -1;
 
     @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void clientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
@@ -58,33 +59,33 @@ public final class ClientForgeEvents {
             secondDimensionResyncTicks = 20;
         }
         if (dimensionResyncTicks >= 0 && --dimensionResyncTicks == 0) {
-            ModNetwork.CHANNEL.sendToServer(new RequestWerewolfSyncPacket());
+            ClientPacketDistributor.sendToServer(new RequestWerewolfSyncPacket());
         }
         if (secondDimensionResyncTicks >= 0 && --secondDimensionResyncTicks == 0) {
-            ModNetwork.CHANNEL.sendToServer(new RequestWerewolfSyncPacket());
+            ClientPacketDistributor.sendToServer(new RequestWerewolfSyncPacket());
         }
         ClientPacketHandlers.applyPendingSyncs();
         while (ClientModEvents.OPEN_PROGRESSION.consumeClick()) {
             minecraft.setScreen(new WerewolfProgressionScreen());
         }
         while (ClientModEvents.TRANSFORM.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new TransformRequestPacket());
+            ClientPacketDistributor.sendToServer(new TransformRequestPacket());
         }
         while (ClientModEvents.BEAST_MODE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleBeastModePacket());
+            ClientPacketDistributor.sendToServer(new ToggleBeastModePacket());
         }
         while (ClientModEvents.QUADRUPED_MODE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleQuadrupedModePacket());
+            ClientPacketDistributor.sendToServer(new ToggleQuadrupedModePacket());
         }
         while (ClientModEvents.NIGHT_VISION.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ToggleNightVisionPacket());
+            ClientPacketDistributor.sendToServer(new ToggleNightVisionPacket());
         }
         while (ClientModEvents.SUMMON_WOLF_SPIRIT.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
+            ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
+            ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }
     }
 
@@ -92,60 +93,56 @@ public final class ClientForgeEvents {
         Minecraft minecraft = Minecraft.getInstance();
         int targetId = minecraft.hitResult instanceof EntityHitResult hit
                 && hit.getEntity() instanceof LivingEntity ? hit.getEntity().getId() : -1;
-        ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.BLOODY_BITE, targetId));
+        ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.BLOODY_BITE, targetId));
+    }
+
+    static void initializeRenderers(EntityRendererProvider.Context context) {
+        renderer = new WerewolfPlayerRenderer(context);
+        beastRenderer = new BeastPlayerRenderer(context);
+        quadrupedRenderer = new QuadrupedWerewolfRenderer(context);
+        equipmentRenderer = new WerewolfEquipmentRenderer(context);
+        itemModelResolver = context.getItemModelResolver();
+    }
+
+    static void extractMouthItem(AbstractClientPlayer player,
+                                 net.minecraft.client.renderer.item.ItemStackRenderState item) {
+        if (itemModelResolver != null) itemModelResolver.updateForLiving(item, player.getMainHandItem(),
+                net.minecraft.world.item.ItemDisplayContext.GROUND, player);
     }
 
     @SubscribeEvent
-    public static void renderWerewolfPlayer(RenderPlayerEvent.Pre event) {
-        if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
-        boolean transformed = WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false);
-        if (!transformed) return;
-
+    public static void renderWerewolfPlayer(RenderPlayerEvent.Pre<?> event) {
+        var state = event.getRenderState();
+        var data = WerewolfRenderData.get(state);
+        WerewolfForm form = data.form();
+        if (form == WerewolfForm.HUMAN || renderer == null) return;
         event.setCanceled(true);
-        if (renderer == null || beastRenderer == null || quadrupedRenderer == null
-                || equipmentRenderer == null) {
-            Minecraft minecraft = Minecraft.getInstance();
-            EntityRendererProvider.Context context = new EntityRendererProvider.Context(
-                    minecraft.getEntityRenderDispatcher(), minecraft.getItemRenderer(), minecraft.getBlockRenderer(),
-                    minecraft.getEntityRenderDispatcher().getItemInHandRenderer(), minecraft.getResourceManager(),
-                    minecraft.getEntityModels(), minecraft.font);
-            renderer = new WerewolfPlayerRenderer(context);
-            beastRenderer = new BeastPlayerRenderer(context);
-            quadrupedRenderer = new QuadrupedWerewolfRenderer(context);
-            equipmentRenderer = new WerewolfEquipmentRenderer(context);
-        }
-
-        PoseStack poseStack = event.getPoseStack();
-        poseStack.pushPose();
-        boolean beast = WerewolfApi.get(player).map(data -> data.isBeastMode()).orElse(false);
-        boolean quadruped = WerewolfApi.get(player).map(data -> data.isQuadrupedMode()).orElse(false);
-        if (beast) {
-            beastRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-        } else if (quadruped) {
-            quadrupedRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-        } else {
-            renderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
-            boolean armoredInstinct = WerewolfApi.get(player)
-                    .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false);
-            if (armoredInstinct && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
-                equipmentRenderer.prepare(player, event.getRenderer(), event.getPartialTick());
-                equipmentRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
-                        event.getMultiBufferSource(), event.getPackedLight());
+        var camera = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+        if (camera == null) camera = new net.minecraft.client.renderer.state.level.CameraRenderState();
+        PoseStack pose = event.getPoseStack();
+        pose.pushPose();
+        try {
+            switch (form) {
+                case BEAST -> beastRenderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
+                case QUADRUPED -> quadrupedRenderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
+                default -> {
+                    renderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
+                    if (data.armoredInstinct() && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
+                        equipmentRenderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
+                    }
+                }
             }
+        } finally {
+            pose.popPose();
         }
-        poseStack.popPose();
     }
 
     @SubscribeEvent
     public static void renderWerewolfArm(RenderArmEvent event) {
-        WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
-            if (!data.isTransformed()) return;
-            if (data.isQuadrupedMode()) event.setCanceled(true);
-            else WerewolfFirstPersonClawRenderer.render(event, data.isBeastMode());
-        });
+        var data = WerewolfRenderData.forEntity(event.getPlayer());
+        if (data.form() == WerewolfForm.HUMAN) return;
+        if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
+        else WerewolfFirstPersonClawRenderer.render(event, data);
     }
 
     private ClientForgeEvents() {}

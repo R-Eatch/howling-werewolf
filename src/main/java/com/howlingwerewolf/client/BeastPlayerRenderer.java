@@ -1,31 +1,29 @@
 package com.howlingwerewolf.client;
 
+import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.howlingwerewolf.HowlingWerewolf;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.resources.Identifier;
 
-public final class BeastPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, BeastPlayerModel<AbstractClientPlayer>> {
-    private static final ResourceLocation BEAST_TEXTURE = new ResourceLocation(
-            HowlingWerewolf.MOD_ID, "textures/entity/beast.png");
-
+public final class BeastPlayerRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, BeastPlayerModel<AvatarRenderState>> {
     public BeastPlayerRenderer(EntityRendererProvider.Context context) {
-        super(context, new BeastPlayerModel<>(BeastPlayerModel.createBodyLayer().bakeRoot()), 0.85F);
-        addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
+        super(context, new BeastPlayerModel<>(BeastPlayerModel.createBodyLayer().bakeRoot()), 0.85F, AvatarRenderState::new);
+        addLayer(new ItemInHandLayer<>(this));
     }
 
-    @Override
-    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTick) {
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
-        WerewolfRenderTransforms.applyPlayerTravelPose(player, poseStack, partialTick);
+    @Override protected void setupRotations(AvatarRenderState state, PoseStack pose, float bodyRot, float scale) {
+        super.setupRotations(state, pose, bodyRot, scale);
+        WerewolfRenderTransforms.applyPlayerTravelPose(state, pose);
     }
 
-    @Override
-    public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return BEAST_TEXTURE;
+    @Override public Identifier getTextureLocation(AvatarRenderState state) {
+        return WerewolfSkinTextures.get(WerewolfRenderData.get(state).skinId(), WerewolfForm.BEAST);
+    }
+
+    @Override protected boolean shouldShowName(AbstractClientPlayer player, double distance) {
+        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player, distance);
     }
 }

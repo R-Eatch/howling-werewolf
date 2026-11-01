@@ -1,12 +1,13 @@
 package com.howlingwerewolf.capability;
 
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.util.LazyOptional;
+
+import java.util.Optional;
 
 public final class WerewolfApi {
     private WerewolfApi() {}
 
-    public static LazyOptional<WerewolfData> get(Player player) {
-        return player.getCapability(WerewolfCapabilities.WEREWOLF);
+    public static Optional<WerewolfData> get(Player player) {
+        return Optional.of(player.getData(ModAttachments.WEREWOLF));
     }
 }

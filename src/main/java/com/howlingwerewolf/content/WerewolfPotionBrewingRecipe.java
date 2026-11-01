@@ -3,7 +3,7 @@ package com.howlingwerewolf.content;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 
 public final class WerewolfPotionBrewingRecipe extends BrewingRecipe {
     public WerewolfPotionBrewingRecipe() {

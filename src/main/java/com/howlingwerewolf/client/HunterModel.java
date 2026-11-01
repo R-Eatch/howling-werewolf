@@ -1,7 +1,9 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.entity.HunterEntity;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -11,9 +13,10 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /** Steve-proportioned hunter using the complete 64x64 player-skin UV plus a low hat brim. */
-public final class HunterModel extends PlayerModel<HunterEntity> {
+public final class HunterModel extends HumanoidModel<HumanoidRenderState> {
     public HunterModel(ModelPart root) {
-        super(root, false);
+        // Player-shaped mesh, including child overlays, without player-only render-state routing.
+        super(root, RenderTypes::entityTranslucent);
     }
 
     public static LayerDefinition createBodyLayer() {

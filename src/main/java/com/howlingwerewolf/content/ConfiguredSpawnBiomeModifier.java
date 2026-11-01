@@ -2,19 +2,20 @@ package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HWConfig;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.ModifiableBiomeInfo;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
 
 /** Adds forest, taiga and cherry grove spawns with weights supplied by the common config. */
 public record ConfiguredSpawnBiomeModifier(String spawn) implements BiomeModifier {
-    public static final Codec<ConfiguredSpawnBiomeModifier> CODEC = Codec.STRING.fieldOf("spawn")
-            .xmap(ConfiguredSpawnBiomeModifier::new, ConfiguredSpawnBiomeModifier::spawn).codec();
+    public static final MapCodec<ConfiguredSpawnBiomeModifier> CODEC = Codec.STRING.fieldOf("spawn")
+            .xmap(ConfiguredSpawnBiomeModifier::new, ConfiguredSpawnBiomeModifier::spawn);
 
     @Override
     public void modify(Holder<Biome> biome, Phase phase,
@@ -26,20 +27,20 @@ public record ConfiguredSpawnBiomeModifier(String spawn) implements BiomeModifie
         if ("hunter".equals(spawn)) {
             int weight = HWConfig.hunterSpawnWeight();
             if (weight > 0) {
-                builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER,
-                        new MobSpawnSettings.SpawnerData(ModEntities.HUNTER.get(), weight, 2, 3));
+                builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER, weight,
+                        new MobSpawnSettings.SpawnerData(ModEntities.HUNTER.get(), 2, 3));
             }
         } else if ("werewolf".equals(spawn)) {
             int weight = HWConfig.feralWerewolfSpawnWeight();
             if (weight > 0) {
-                builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER,
-                        new MobSpawnSettings.SpawnerData(ModEntities.WEREWOLF.get(), weight, 1, 1));
+                builder.getMobSpawnSettings().addSpawn(MobCategory.MONSTER, weight,
+                        new MobSpawnSettings.SpawnerData(ModEntities.WEREWOLF.get(), 1, 1));
             }
         }
     }
 
     @Override
-    public Codec<? extends BiomeModifier> codec() {
+    public MapCodec<? extends BiomeModifier> codec() {
         return ModBiomeModifiers.CONFIGURED_SPAWNS.get();
     }
 }

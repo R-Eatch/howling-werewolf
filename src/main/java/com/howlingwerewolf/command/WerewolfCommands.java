@@ -14,18 +14,19 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("werewolf").requires(source -> source.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("werewolf").requires(source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("infect").then(target(ctx -> infect(ctx, player(ctx)))))
                 .then(Commands.literal("awaken").then(target(ctx -> awaken(ctx, player(ctx)))))
                 .then(Commands.literal("cure").then(target(ctx -> cure(ctx, player(ctx)))))
@@ -43,12 +44,16 @@ public final class WerewolfCommands {
                 .then(Commands.literal("settreepoints").then(pointsArgument(true)))
                 .then(Commands.literal("settree").then(Commands.argument("target", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(WerewolfTreeSkill.values()).map(WerewolfTreeSkill::id), builder))
                                 .then(Commands.argument("rank", IntegerArgumentType.integer(0,
                                                 WerewolfTreeSkill.maximumRank()))
                                         .executes(ctx -> setTree(ctx, player(ctx), StringArgumentType.getString(ctx, "skill"),
                                                 IntegerArgumentType.getInteger(ctx, "rank")))))))
                 .then(Commands.literal("setability").then(Commands.argument("target", EntityArgument.player())
                         .then(Commands.argument("ability", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(WerewolfAbility.values()).map(WerewolfAbility::id), builder))
                                 .then(Commands.argument("unlocked", BoolArgumentType.bool())
                                         .executes(ctx -> setAbility(ctx, player(ctx), StringArgumentType.getString(ctx, "ability"),
                                                 BoolArgumentType.getBool(ctx, "unlocked")))))))
@@ -165,10 +170,10 @@ public final class WerewolfCommands {
     }
 
     private static int status(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> optional = WerewolfApi.get(player);
+        java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
-                    + player.getGameProfile().getName() + ". Reconnect and check the server log."));
+                    + player.getScoreboardName() + ". Reconnect and check the server log."));
             return 0;
         }
         optional.ifPresent(data -> {
@@ -178,12 +183,12 @@ public final class WerewolfCommands {
             liveForCompare.remove("TotemExperienceTicks");
             boolean mirrorMatches = mirror != null && mirror.equals(liveForCompare);
             ctx.getSource().sendSuccess(() -> Component.literal(
-                    "Werewolf " + player.getGameProfile().getName() + ": werewolf=" + data.isWerewolf()
+                    "Werewolf " + player.getScoreboardName() + ": werewolf=" + data.isWerewolf()
                             + ", infected=" + data.isInfected() + ", form=" + data.getForm().id()
                             + ", alphaDefeated=" + data.hasDefeatedAlpha() + ", level=" + data.getLevel()
                             + ", xp=" + data.getExperience() + "/" + WerewolfData.experienceForNextLevel(data.getLevel())
                             + ", skillPoints=" + data.getAvailableSkillPoints() + ", treePoints=" + data.getAvailableTreePoints()
-                            + ", dimension=" + player.level().dimension().location()
+                            + ", dimension=" + player.level().dimension().identifier()
                             + ", persistedMirror=" + (mirror == null ? "missing" : mirrorMatches ? "match" : "DIFF")), false);
         });
         return 1;
@@ -191,10 +196,10 @@ public final class WerewolfCommands {
 
     private static int mutate(CommandContext<CommandSourceStack> ctx, ServerPlayer player,
                               java.util.function.Consumer<WerewolfData> action, String result) {
-        net.minecraftforge.common.util.LazyOptional<WerewolfData> optional = WerewolfApi.get(player);
+        java.util.Optional<WerewolfData> optional = WerewolfApi.get(player);
         if (!optional.isPresent()) {
             ctx.getSource().sendFailure(Component.literal("Werewolf capability is unavailable for "
-                    + player.getGameProfile().getName() + ". Reconnect and check the server log."));
+                    + player.getScoreboardName() + ". Reconnect and check the server log."));
             return 0;
         }
         optional.ifPresent(data -> {
@@ -203,7 +208,7 @@ public final class WerewolfCommands {
             WerewolfGameplayEvents.refreshWerewolfModifiers(player, data);
             ModNetwork.sync(player, data);
         });
-        ctx.getSource().sendSuccess(() -> Component.literal(player.getGameProfile().getName() + ": " + result), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(player.getScoreboardName() + ": " + result), true);
         return 1;
     }
 

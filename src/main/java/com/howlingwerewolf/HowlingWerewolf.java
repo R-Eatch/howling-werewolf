@@ -10,23 +10,22 @@ import com.howlingwerewolf.content.ModPlacementModifiers;
 import com.howlingwerewolf.content.ModRecipes;
 import com.howlingwerewolf.content.WerewolfPotionBrewingRecipe;
 import com.howlingwerewolf.content.WolfsbaneBrewingRecipe;
-import com.howlingwerewolf.network.ModNetwork;
+import com.howlingwerewolf.capability.ModAttachments;
 import com.howlingwerewolf.event.ModEntityEvents;
+import com.howlingwerewolf.network.ModNetwork;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
 @Mod(HowlingWerewolf.MOD_ID)
@@ -37,7 +36,7 @@ public final class HowlingWerewolf {
     private static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
-    public static final RegistryObject<CreativeModeTab> MAIN_TAB = TABS.register("main", () ->
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = TABS.register("main", () ->
             CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.howlingwerewolf"))
                     .icon(() -> new ItemStack(ModItems.MOONBANE_PEARL.get()))
@@ -50,6 +49,7 @@ public final class HowlingWerewolf {
                         output.accept(ModItems.ALPHA_WEREWOLF_BADGE.get());
                         output.accept(ModItems.WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModItems.HUNTER_SPAWN_EGG.get());
+                        output.accept(ModItems.ALPHA_WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModBlocks.SILVER_ORE.get());
                         output.accept(ModBlocks.DEEPSLATE_SILVER_ORE.get());
                         output.accept(ModBlocks.WOLFSBANE.get());
@@ -57,8 +57,7 @@ public final class HowlingWerewolf {
                         output.accept(ModBlocks.CENTRAL_RITUAL_ALTAR.get());
                     }).build());
 
-    public HowlingWerewolf() {
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public HowlingWerewolf(IEventBus modBus, ModContainer modContainer) {
         ModItems.ITEMS.register(modBus);
         ModBlocks.BLOCKS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
@@ -66,19 +65,17 @@ public final class HowlingWerewolf {
         ModRecipes.SERIALIZERS.register(modBus);
         ModPlacementModifiers.PLACEMENT_MODIFIERS.register(modBus);
         ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(modBus);
+        ModAttachments.ATTACHMENT_TYPES.register(modBus);
         TABS.register(modBus);
-        modBus.addListener(this::commonSetup);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC);
-        MinecraftForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
-        MinecraftForge.EVENT_BUS.register(this);
+        modBus.addListener(ModEntityEvents::registerSpawnPlacements);
+        modBus.addListener(ModNetwork::register);
+        NeoForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
+        NeoForge.EVENT_BUS.addListener(HowlingWerewolf::registerBrewingRecipes);
+        modContainer.registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC, MOD_ID + "-common.toml");
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            ModNetwork.register();
-            ModEntityEvents.registerSpawnPlacements();
-            BrewingRecipeRegistry.addRecipe(new WolfsbaneBrewingRecipe());
-            BrewingRecipeRegistry.addRecipe(new WerewolfPotionBrewingRecipe());
-        });
+    private static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {
+        event.getBuilder().addRecipe(new WolfsbaneBrewingRecipe());
+        event.getBuilder().addRecipe(new WerewolfPotionBrewingRecipe());
     }
 }

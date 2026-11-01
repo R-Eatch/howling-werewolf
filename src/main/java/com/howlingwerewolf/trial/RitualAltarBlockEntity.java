@@ -3,10 +3,11 @@ package com.howlingwerewolf.trial;
 import com.howlingwerewolf.content.ModBlockEntities;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
@@ -15,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     public void dropOffering() {
-        if (offering.isEmpty() || level == null || level.isClientSide) return;
+        if (offering.isEmpty() || level == null || level.isClientSide()) return;
         Containers.dropItemStack(level, worldPosition.getX() + 0.5D,
                 worldPosition.getY() + 0.8D, worldPosition.getZ() + 0.5D, offering);
         offering = ItemStack.EMPTY;
@@ -133,46 +133,43 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        if (!offering.isEmpty()) tag.put("Offering", offering.save(new CompoundTag()));
-        if (trialOwner != null) tag.putUUID("TrialOwner", trialOwner);
-        tag.putInt("TrialPhase", trialPhase);
-        tag.putInt("RitualTicks", ritualTicks);
-        ListTag hunters = new ListTag();
-        for (UUID id : hunterIds) hunters.add(StringTag.valueOf(id.toString()));
-        tag.put("HunterIds", hunters);
-        if (alphaId != null) tag.putUUID("AlphaId", alphaId);
-    }
-
-    @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        offering = tag.contains("Offering", Tag.TAG_COMPOUND)
-                ? ItemStack.of(tag.getCompound("Offering")) : ItemStack.EMPTY;
-        trialOwner = tag.hasUUID("TrialOwner") ? tag.getUUID("TrialOwner") : null;
-        trialPhase = tag.getInt("TrialPhase");
-        ritualTicks = Math.max(0, tag.getInt("RitualTicks"));
-        hunterIds.clear();
-        ListTag hunters = tag.getList("HunterIds", Tag.TAG_STRING);
-        for (int i = 0; i < hunters.size(); i++) {
-            try { hunterIds.add(UUID.fromString(hunters.getString(i))); }
-            catch (IllegalArgumentException ignored) {}
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (level != null && !level.isClientSide()) {
+            if (isTrialActive()) {
+                AlphaTrialManager.fail(this, AlphaTrialManager.FailureReason.ALTAR_BROKEN);
+            }
+            dropOffering();
         }
-        alphaId = tag.hasUUID("AlphaId") ? tag.getUUID("AlphaId") : null;
+        super.preRemoveSideEffects(pos, state);
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        if (!offering.isEmpty()) output.store("Offering", ItemStack.CODEC, offering);
+        output.storeNullable("TrialOwner", UUIDUtil.CODEC, trialOwner);
+        output.putInt("TrialPhase", trialPhase);
+        output.putInt("RitualTicks", ritualTicks);
+        var hunters = output.list("HunterIds", UUIDUtil.STRING_CODEC);
+        hunterIds.forEach(hunters::add);
+        output.storeNullable("AlphaId", UUIDUtil.CODEC, alphaId);
     }
 
     @Override
-    public AABB getRenderBoundingBox() {
-        // The activation renderer draws the four pearls up to three blocks from the center.
-        return isCentral() && isTrialActive()
-                ? new AABB(worldPosition).inflate(4.0D, 4.0D, 4.0D)
-                : super.getRenderBoundingBox();
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        offering = input.read("Offering", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        trialOwner = input.read("TrialOwner", UUIDUtil.CODEC).orElse(null);
+        trialPhase = input.getIntOr("TrialPhase", PHASE_IDLE);
+        ritualTicks = Math.max(0, input.getIntOr("RitualTicks", 0));
+        hunterIds.clear();
+        input.listOrEmpty("HunterIds", UUIDUtil.STRING_CODEC).forEach(hunterIds::add);
+        alphaId = input.read("AlphaId", UUIDUtil.CODEC).orElse(null);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
     }
 
     @Nullable
@@ -182,8 +179,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-        CompoundTag tag = packet.getTag();
-        if (tag != null) load(tag);
+    public void onDataPacket(Connection net, ValueInput input) {
+        loadWithComponents(input);
     }
 }

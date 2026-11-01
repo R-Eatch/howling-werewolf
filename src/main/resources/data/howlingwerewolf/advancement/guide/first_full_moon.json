@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/infection",
+  "display": {
+    "icon": { "id": "howlingwerewolf:wolfsbane" },
+    "title": { "translate": "advancement.howlingwerewolf.first_full_moon.title" },
+    "description": { "translate": "advancement.howlingwerewolf.first_full_moon.desc" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}
