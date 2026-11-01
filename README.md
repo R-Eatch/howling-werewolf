@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="Latest mod version 1.1.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Latest mod version 1.1.8"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
   <img src="https://img.shields.io/badge/NeoForge-21.1.248%2B-E04E14?style=flat-square" alt="NeoForge 21.1.248 or later">
   <img src="https://img.shields.io/badge/Java-21-007396?style=flat-square" alt="Java 21">
@@ -17,7 +17,7 @@
 
 > This branch contains the NeoForge edition for Minecraft 1.21.1. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
-The latest version is **1.1.7**, with new spawn eggs, 16×16 item and block textures, an initial-observer level-limit sync fix, and a fix for Claw Efficiency's empty-hand Looting bonus. **The maintainer has completed a full gameplay test pass for 1.1.3; 1.1.7 has not yet been tested in game.** See the [version changelog](docs/CHANGELOG-1.1.7.md).
+The latest version is **1.1.8**, adding fixed-height automatic stepping in all three transformed forms. The spawn eggs, artwork, initial-observer synchronization and empty-hand Looting fixes from 1.1.7 are retained. **The maintainer has completed a full gameplay test pass for 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** See the [version changelog](docs/CHANGELOG-1.1.8.md).
 
 Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -28,7 +28,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 1.21.1 |
 | Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.1.7 |
+| Howling Werewolf | 1.1.8 |
 
 ## Werewolf skins and custom skins
 
@@ -37,7 +37,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to 1.1.7 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
+Update both server and clients to 1.1.8 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
 
 ## Spawn eggs and texture updates
 
@@ -47,9 +47,15 @@ Update both server and clients to 1.1.7 for multiplayer. Only custom skin IDs ar
 - The new **Moon-Crowned Alpha Werewolf Spawn Egg** is in the mod's creative tab as `howlingwerewolf:alpha_werewolf_spawn_egg`. It spawns the same boss used by the Alpha Trial; a separately spawned boss does not bind to a ritual or award trial-completion rewards.
 - The Alpha Badge, Moonbane Pearl, Wolfsbane flower, Silver Ore and Deepslate Silver Ore now use 16×16 artwork. All 18 runtime item and block textures use this size; existing werewolf coats and model appearances are retained.
 
+## Automatic stepping
+
+Automatic stepping uses fixed heights: **Werewolf 1.5 blocks**, **Quadruped Wolf 1 block**, and **Beast 2 blocks**. These heights do not scale with Jump rank, armor or potion effects; manual jumping retains its existing skill effects.
+
+In `config/howlingwerewolf-common.toml`, `[gameplay]` contains `enableWerewolfAutoStep = true` by default. Set it to `false` to disable the added step height. Returning to human form also removes this bonus.
+
 ## Supported versions
 
-Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**, with **1.1.7** as the latest mod version. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
+Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**, with **1.1.8** as the latest mod version. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
 
 ## Build from source
 
@@ -59,11 +65,11 @@ Download or clone this branch, then use the Gradle wrapper with a Java 21 toolch
 ./gradlew.bat clean build
 ```
 
-The distributable JAR is written to `build/libs/howlingwerewolf-1.1.7-neoforge.jar`.
+The distributable JAR is written to `build/libs/howlingwerewolf-1.1.8-neoforge.jar`.
 
 ## Release status
 
-**The maintainer has completed a full gameplay test pass for 1.1.3. Version 1.1.7 has not yet been tested in game**; this update has only been built and statically checked. Visuals, drops, multiplayer synchronization and save behavior await gameplay verification. Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) and [version changelog](docs/CHANGELOG-1.1.7.md) for the latest update news and notes.
+**The maintainer has completed a full gameplay test pass for 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) and [version changelog](docs/CHANGELOG-1.1.8.md) for the latest update news and notes.
 
 Back up every important world before adding or updating any Mod.
 

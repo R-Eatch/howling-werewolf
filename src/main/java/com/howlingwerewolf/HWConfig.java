@@ -19,6 +19,7 @@ public final class HWConfig {
     public static final ModConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
     public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
     public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
+    public static final ModConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -47,6 +48,9 @@ public final class HWConfig {
         SHOW_WEREWOLF_EQUIPMENT = builder.comment(
                         "Render worn armor and elytra on the normal transformed werewolf model. Held items are always rendered. Default is true.")
                 .define("showWerewolfEquipment", true);
+        ENABLE_WEREWOLF_AUTO_STEP = builder.comment(
+                        "Automatically step up obstacles in transformed forms: Werewolf 1.5 blocks, Quadruped Wolf 1 block, Beast 2 blocks. Default is true; false disables the added step height.")
+                .define("enableWerewolfAutoStep", true);
         builder.pop();
         builder.push("worldGeneration");
         GENERATE_SILVER = builder.comment(

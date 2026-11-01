@@ -79,6 +79,7 @@ import org.joml.Vector3f;
 public final class WerewolfGameplayEvents {
     private static final ResourceLocation CLAW_DAMAGE_ID = modifierId("claw_damage");
     private static final ResourceLocation WEREWOLF_SPEED_ID = modifierId("werewolf_speed");
+    private static final ResourceLocation AUTO_STEP_ID = modifierId("auto_step");
     private static final ResourceLocation KNOCKBACK_RESISTANCE_ID = modifierId("knockback_resistance");
     private static final ResourceLocation BEAST_SPEED_ID = modifierId("beast_speed");
     private static final ResourceLocation QUADRUPED_SPEED_ID = modifierId("quadruped_speed");
@@ -845,6 +846,7 @@ public final class WerewolfGameplayEvents {
             return;
         }
         double mobilityFactor = armorMobilityFactor(player, data);
+        refreshAutoStep(player, data);
         setTransientModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), WEREWOLF_SPEED_ID,
                 "howlingwerewolf speed", data.getTreeSkillRank(WerewolfTreeSkill.SPEED) * 0.02D
                         * mobilityFactor);
@@ -882,6 +884,7 @@ public final class WerewolfGameplayEvents {
     }
 
     public static void removeWerewolfModifiers(ServerPlayer player) {
+        removeModifier(player.getAttribute(Attributes.STEP_HEIGHT), AUTO_STEP_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), WEREWOLF_SPEED_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), BEAST_SPEED_ID);
         removeModifier(player.getAttribute(Attributes.MOVEMENT_SPEED), QUADRUPED_SPEED_ID);
@@ -1092,6 +1095,17 @@ public final class WerewolfGameplayEvents {
             result[0] = 1.5F - Math.min(3, rank) * (0.5F / 3.0F);
         });
         return result[0];
+    }
+
+    private static void refreshAutoStep(ServerPlayer player, WerewolfData data) {
+        AttributeInstance stepHeight = player.getAttribute(Attributes.STEP_HEIGHT);
+        if (!HWConfig.ENABLE_WEREWOLF_AUTO_STEP.get() || stepHeight == null) {
+            removeModifier(stepHeight, AUTO_STEP_ID);
+            return;
+        }
+        double height = data.isBeastMode() ? 2.0D : data.isQuadrupedMode() ? 1.0D : 1.5D;
+        setTransientModifier(stepHeight, AUTO_STEP_ID, "howlingwerewolf auto step",
+                Math.max(0.0D, height - stepHeight.getBaseValue()));
     }
 
     private static double velocityForJumpHeight(double desiredHeight) {
