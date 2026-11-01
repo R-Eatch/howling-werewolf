@@ -48,7 +48,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -56,7 +55,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -65,7 +63,6 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.enchanting.GetEnchantmentLevelEvent;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -118,7 +115,6 @@ public final class WerewolfGameplayEvents {
     private static final ThreadLocal<Boolean> LONG_CLAW_SPLASH = ThreadLocal.withInitial(() -> false);
     private static final ThreadLocal<Boolean> BLOODY_BITE_DAMAGE = ThreadLocal.withInitial(() -> false);
     private static final ThreadLocal<RawClawHit> RAW_CLAW_HIT = new ThreadLocal<>();
-    private static final ThreadLocal<Integer> CLAW_LOOTING = new ThreadLocal<>();
     private static final ItemStack[] IRON_CLAW_SPEED_TOOLS = {
             new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_SHOVEL),
             new ItemStack(Items.IRON_HOE), new ItemStack(Items.SHEARS)
@@ -540,40 +536,6 @@ public final class WerewolfGameplayEvents {
                 }
             }
         });
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void prepareClawLooting(LivingDeathEvent event) {
-        CLAW_LOOTING.remove();
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player)
-                || !player.getMainHandItem().isEmpty()) return;
-        WerewolfApi.get(player).ifPresent(data -> {
-            if (!data.isTransformed()) return;
-            int rank = data.getTreeSkillRank(WerewolfTreeSkill.CLAW_EFFICIENCY);
-            if (rank > 0) CLAW_LOOTING.set(rank);
-        });
-    }
-
-    /**
-     * Minecraft 1.21 removed LootingLevelEvent. Death loot is generated synchronously after
-     * LivingDeathEvent, so expose the claw rank as a virtual Looting enchantment only for that
-     * empty-hand loot query, then clear it when the drop phase completes.
-     */
-    @SubscribeEvent
-    public static void provideClawLooting(GetEnchantmentLevelEvent event) {
-        Integer rank = CLAW_LOOTING.get();
-        if (rank == null || rank <= 0 || !event.getStack().isEmpty()
-                || !event.isTargetting(Enchantments.LOOTING)) return;
-        event.getHolder(Enchantments.LOOTING).ifPresent(looting -> {
-            if (rank > event.getEnchantments().getLevel(looting)) {
-                event.getEnchantments().set(looting, rank);
-            }
-        });
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void clearClawLooting(LivingDropsEvent event) {
-        CLAW_LOOTING.remove();
     }
 
     @SubscribeEvent

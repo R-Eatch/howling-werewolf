@@ -20,11 +20,15 @@ public final class ModItems {
     public static final DeferredItem<SwordItem> SILVER_SWORD = ITEMS.register("silver_sword",
             () -> new SwordItem(Tiers.IRON, new Item.Properties()
                     .attributes(SwordItem.createAttributes(Tiers.IRON, 3, -2.4F))));
+    // Neutral tints preserve the dedicated full-color spawn egg textures.
     public static final DeferredItem<Item> WEREWOLF_SPAWN_EGG = ITEMS.register("werewolf_spawn_egg",
-            () -> new DeferredSpawnEggItem(ModEntities.WEREWOLF, 0x211A18, 0x9E1F1F,
+            () -> new DeferredSpawnEggItem(ModEntities.WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
     public static final DeferredItem<Item> HUNTER_SPAWN_EGG = ITEMS.register("hunter_spawn_egg",
-            () -> new DeferredSpawnEggItem(ModEntities.HUNTER, 0x2D2928, 0xB7B9BD,
+            () -> new DeferredSpawnEggItem(ModEntities.HUNTER, 0xFFFFFF, 0xFFFFFF,
+                    new Item.Properties()));
+    public static final DeferredItem<Item> ALPHA_WEREWOLF_SPAWN_EGG = ITEMS.register("alpha_werewolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ALPHA_WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
 
     private ModItems() {}

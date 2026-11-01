@@ -94,8 +94,7 @@ public final class WerewolfCapabilityEvents {
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getEntity() instanceof ServerPlayer observer && event.getTarget() instanceof ServerPlayer target) {
             WerewolfApi.get(target).ifPresent(data -> PacketDistributor.sendToPlayer(observer,
-                    new com.howlingwerewolf.network.SyncWerewolfDataPacket(
-                            target.getId(), data.serializeNBT())));
+                    ModNetwork.createSyncPacket(target.getId(), data)));
         }
     }
 

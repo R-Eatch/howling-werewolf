@@ -8,6 +8,14 @@ official logo and project branding identified there. Original source code is gov
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.7 synchronized item, block and spawn egg artwork
+
+- The Alpha Werewolf Badge, Moonbane Pearl, Wolfsbane flower, Silver Ore and Deepslate Silver Ore textures are byte-for-byte copies of the project's current Minecraft 26.1.2 branch artwork. Seven runtime files are updated at exactly 16×16 pixels, with each ore retaining matching top and side artwork.
+- These adaptations were made from the project's existing artwork with the built-in OpenAI image-generation editing workflow. Entity UV atlases, player coats, model geometry and the project logo are unchanged.
+- `textures/item/werewolf_spawn_egg.png`, `hunter_spawn_egg.png` and `alpha_werewolf_spawn_egg.png` are the project's original mob-specific sprites, created with the same workflow and exported as transparent 16×16 PNGs. Minecraft 26.1.2 eggs informed only the broad silhouette and pixel-art style; no vanilla texture pixels were copied.
+- The Werewolf uses brown fur and a pale muzzle; the Hunter uses charcoal, forest green, leather and silver; the Alpha uses dark red-brown fur and a gold forehead marking. Dedicated item models use neutral white tints to retain the full-color artwork on NeoForge 1.21.1.
+- Generated masters, prompts and reference previews remain private authoring material. Only the final sprites and the spawn-egg documentation preview are distributed. The new artwork follows the project's asset license.
+
 ## 1.1.3 coat refinements
 
 - Ashen, Onyx, and Ivory now have matching eyes in all three forms. Werewolf
