@@ -260,6 +260,6 @@
   "screen.howlingwerewolf.skins.invalid_packs": "Skipped %s invalid skins. Details: latest.log",
   "screen.howlingwerewolf.skins.author": "By %s",
   "skin.howlingwerewolf.modern.desc": "Modern models with the %s coat.",
-  "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By Eatch\nClick to switch to Modern",
-  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By Leo\nClick to switch to Classic"
+  "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By R_Eatch\nClick to switch to Modern",
+  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By thewolfulti\nClick to switch to Classic"
 }

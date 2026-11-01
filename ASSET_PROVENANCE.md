@@ -229,6 +229,6 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 
 ## 1.2.1 model naming and artist credit
 
-- The maintainer identified the Modern model/texture artist as Leo and the Classic artist as Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
+- The maintainer identified the Modern model/texture artist as thewolfulti and the Classic artist as R_Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
 - The public/runtime family name is Modern, with `modern` used for IDs, resource paths and skin-pack model fields.
 - Modern Ashen is used for the Alpha and its summoned pack, while wild/spawn-egg werewolf palettes are selected by the server and saved. The server NPC model setting can switch all of these to Classic Adrian.

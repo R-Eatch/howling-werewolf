@@ -260,6 +260,6 @@
   "screen.howlingwerewolf.skins.invalid_packs": "已跳过 %s 个无效皮肤，详情见 latest.log。",
   "screen.howlingwerewolf.skins.author": "作者：%s",
   "skin.howlingwerewolf.modern.desc": "Modern 模型 · %s 配色",
-  "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By Eatch\n点击切换为 Modern",
-  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By Leo\n点击切换为 Classic"
+  "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By R_Eatch\n点击切换为 Modern",
+  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By thewolfulti\n点击切换为 Classic"
 }

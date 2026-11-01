@@ -73,12 +73,12 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
             textures.put(WerewolfForm.QUADRUPED, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "quadruped_werewolf.png"));
             textures.put(WerewolfForm.BEAST, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "beast.png"));
             String name = skin.getId().substring(0, 1).toUpperCase(java.util.Locale.ROOT) + skin.getId().substring(1);
-            result.add(new Entry(HowlingWerewolf.MOD_ID + ":" + skin.getId(), WerewolfModelSet.CLASSIC, name, "", "Eatch", textures, true));
+            result.add(new Entry(HowlingWerewolf.MOD_ID + ":" + skin.getId(), WerewolfModelSet.CLASSIC, name, "", "R_Eatch", textures, true));
         }
         for (ModernSkin skin : ModernSkin.values()) {
             Map<WerewolfForm, Identifier> textures = new EnumMap<>(WerewolfForm.class);
             for (WerewolfForm form : ModernModelResources.FORMS) textures.put(form, ModernModelResources.textureId(skin, form));
-            result.add(new Entry(skin.skinId(), WerewolfModelSet.MODERN, skin.displayName(), "", "Leo", textures, true));
+            result.add(new Entry(skin.skinId(), WerewolfModelSet.MODERN, skin.displayName(), "", "thewolfulti", textures, true));
         }
         return result;
     }

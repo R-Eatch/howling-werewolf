@@ -336,7 +336,8 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     public void translateToHand(S state, HumanoidArm arm, PoseStack pose) {
         String paw = arm == HumanoidArm.RIGHT ? "right_paw" : "left_paw";
         Matrix4f actual = matrix(paw);
-        Vector3f grip = actual.transformPosition(arm == HumanoidArm.RIGHT ? rightGrip : leftGrip, new Vector3f());
+        // One model-space pixel below the palm center, without changing native item scale or aim.
+        Vector3f grip = actual.transformPosition(arm == HumanoidArm.RIGHT ? rightGrip : leftGrip, new Vector3f()).add(0, 1.0F / 16, 0);
         boolean nativeOrientation = form != WerewolfForm.BEAST || WerewolfRenderData.get(state).beastRunAmount() <= 0
                 || state.isUsingItem || state.isCrouching || state.isFallFlying || state.isInWater;
         org.joml.Quaternionf rotation;
@@ -359,7 +360,8 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
 
     void translateToMouth(PoseStack pose) {
         rig.transform("muzzle", pose);
-        pose.translate(0, 0.03F, -0.3F);
+        // Lift the item into the bite line by one normalized model pixel.
+        pose.translate(0, 0.03F - 1.0F / (16 * rig.scale()), -0.3F);
         pose.scale(1 / rig.scale(), 1 / rig.scale(), 1 / rig.scale());
     }
 
