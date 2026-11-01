@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -17,7 +17,7 @@
 
 > This branch contains the NeoForge edition for Minecraft 26.1.2. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
-Howling Werewolf 1.1.7 fixes raw meat drops from Fire Claws one-hit kills: cows, pigs and similar mobs are now ignited before health and death-loot processing. It retains the Alpha's previous combat timing: 40 ticks (2 seconds) between melee attacks and a 120-tick (6-second) prowl, with Speed III lasting 60 ticks (3 seconds). All item and block textures are now 16×16, and the 1.1.6 JEI recipe synchronization fix is retained. It targets NeoForge 26.1.2.122 and Java 25.
+Howling Werewolf 1.1.8 adds fixed-height Auto Step: **1.0 block** for Quadruped Wolf, **1.5 blocks** for Werewolf, and **2.0 blocks** for Beast. In `config/howlingwerewolf-common.toml`, `gameplay.enableWerewolfAutoStep` defaults to `true`; set it to `false` to restore normal stepping. Manual jumping retains its existing skill and form rules. The 1.1.7 Fire Claws cooked-loot fix, Alpha combat timing and 16×16 item/block textures are retained.
 
 This build retains the NeoForge 1.21.1 Long Claws splash formula, including Moonrend in normal-form splash damage. Long Claws secondary hits still do not trigger Lifesteal.
 
@@ -30,7 +30,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.1.7 |
+| Howling Werewolf | 1.1.8 |
 
 ## Werewolf skins
 
@@ -39,7 +39,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to 1.1.7 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
+Update both server and clients to 1.1.8 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
 
 ## Spawn eggs and item animations
 
@@ -53,7 +53,7 @@ Update both server and clients to 1.1.7 for multiplayer. Only custom skin IDs ar
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.1.7**.
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.1.8**.
 
 ## Build from source
 
@@ -63,9 +63,9 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.1.7-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.1.8-neoforge-26.1.2.jar`.
 
-The latest Mod source version is **1.1.7**; see the [1.1.7 changelog](docs/CHANGELOG-1.1.7.md). **The maintainer completed a full in-game playthrough of 1.1.3; 1.1.7 has not yet been tested in game.** Compilation and source inspection do not establish gameplay validation. GitHub Releases and platform binaries are published separately by the maintainer; check each download for its Minecraft and Mod version.
+The latest Mod source version is **1.1.8**; see the [1.1.8 changelog](docs/CHANGELOG-1.1.8.md). **The maintainer completed a full in-game playthrough of 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** GitHub Releases and platform binaries are published separately by the maintainer; check each download for its Minecraft and Mod version.
 
 ## Administrator commands
 
