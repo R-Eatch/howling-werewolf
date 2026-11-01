@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="最新版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="当前 Mod 版本：1.1.7"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 或更高版本">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -18,6 +18,14 @@
 > 当前分支提供 Minecraft 1.20.1 的 Forge 正式版；Minecraft 1.21.1 的 NeoForge 正式版维护在 [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) 分支。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
+
+## 当前版本与更新
+
+当前最新 Mod 版本为 **1.1.7**。**v1.1.3** 已由作者完成全流程实机生存测试，包括击败末影龙并取得鞘翅；**v1.1.7 尚未实机测试**，编译与包内容核查不能代替实机测试。更新内容见 [1.1.7 更新日志](docs/CHANGELOG-1.1.7.md)；最新消息、支持版本与版本说明以 [GitHub main](https://github.com/R-Eatch/howling-werewolf) 为准。
+
+## 新的刷怪蛋
+
+狼人和猎人刷怪蛋现使用独立的 **16×16** 图标；新增**月冠 Alpha 狼人刷怪蛋**，位于模组创造栏，物品 ID 为 `howlingwerewolf:alpha_werewolf_spawn_egg`。它会生成 Alpha Boss，不启动仪式，也不发放仪式通关奖励。物品和方块贴图统一为 16×16；玩家皮肤贴图尺寸保持原样。
 
 ## 皮肤与自定义外观
 
@@ -53,7 +61,7 @@
 | Minecraft Java 版 | 1.20.1 |
 | Mod 加载器 | 推荐 Forge 47.4.16 或更高版本 |
 | Java | 17 |
-| 月厄狼人 | 1.1.3 |
+| 月厄狼人 | 1.1.7 |
 
 推荐使用 Forge 47.4.16 或更高的兼容 Forge 47.x 版本；Forge 47.4.16 仍是当前正式发布的主要测试目标。
 
@@ -73,7 +81,7 @@
 ## 安装
 
 1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
-2. 将 `howlingwerewolf-1.1.3-forge.jar` 放入游戏的 `mods` 目录。
+2. 将 `howlingwerewolf-1.1.7-forge.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -102,7 +110,7 @@
 | 四足狼 | 学习“荒野奔行”后按 `G` | 移速和跳跃明显提高，但攻击伤害略低，不能穿戴装备。 |
 | 野兽 | 首次完成 Alpha 试炼后按 `H` | 战斗、速度、跳跃和防御显著增强，但饥饿消耗更快，不能穿戴装备。 |
 
-狼人变身后默认不能穿戴护甲或鞘翅。**披甲本能** 只允许普通狼人形态穿戴装备，且默认装备不显示，可在配置文件更改。
+狼人变身后默认不能穿戴护甲或鞘翅。**披甲本能** 只允许普通狼人形态穿戴装备，满足能力条件时默认显示装备，可在配置文件更改。
 
 只有提供正护甲值的装备会削弱该能力提供的自然减伤和移动增益；鞘翅等零护甲装备不会触发这一削弱。
 
@@ -209,7 +217,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 测试与兼容性
 
-此前版本已通过项目作者的实机测试，包括从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程验证。
+**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**v1.1.7 尚未实机测试。**
 
 **本 Mod 尚未完成完整的多人游戏测试。** 因此，在长期多人存档中的表现仍属于未完全验证范围。服务器和客户端应使用相同的 Mod 版本，更新前请查阅对应版本的更新日志，确认兼容性说明。
 

@@ -9,6 +9,22 @@ own terms.
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.7 Forge artwork synchronization
+
+- Seven existing item/block textures (Alpha Werewolf Badge, Moonbane Pearl,
+  Wolfsbane flower and the top/side paths for both Silver Ores) are byte-for-byte
+  copies of the 16×16 artwork prepared for the project's NeoForge 26.1.2 edition.
+  That artwork was adapted from this project's existing textures with the built-in
+  OpenAI image-generation editing workflow. The original subjects and color
+  direction are retained; no third-party texture pixels were copied.
+- Three dedicated 16×16 spawn-egg sprites (Werewolf, Hunter and Moon-Crowned
+  Alpha Werewolf) are copied unchanged from that edition. The original sprites
+  were created with the built-in OpenAI image-generation workflow; Minecraft's
+  newer egg style informed broad silhouette and pixel density only.
+- All 18 runtime item/block PNGs are now 16×16. Entity UV atlases, four player
+  coats, model geometry, painting templates and the project logo are unchanged.
+  These original project artwork updates follow LICENSE-ASSETS.md.
+
 ## 1.1.3 coat refinements
 
 - Ashen, Onyx, and Ivory now have matching eyes in all three forms. Werewolf

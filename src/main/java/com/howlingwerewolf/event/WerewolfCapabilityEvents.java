@@ -137,7 +137,7 @@ public final class WerewolfCapabilityEvents {
         if (event.getEntity() instanceof ServerPlayer observer && event.getTarget() instanceof ServerPlayer target) {
             WerewolfApi.get(target).ifPresent(data -> ModNetwork.CHANNEL.send(
                     net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> observer),
-                    new com.howlingwerewolf.network.SyncWerewolfDataPacket(target.getId(), data.serializeNBT())));
+                    ModNetwork.createSyncPacket(target.getId(), data)));
         }
     }
 

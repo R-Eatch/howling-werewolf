@@ -21,10 +21,13 @@ public final class ModItems {
     public static final RegistryObject<SwordItem> SILVER_SWORD = ITEMS.register("silver_sword",
             () -> new SwordItem(Tiers.IRON, 3, -2.4F, new Item.Properties()));
     public static final RegistryObject<Item> WEREWOLF_SPAWN_EGG = ITEMS.register("werewolf_spawn_egg",
-            () -> new ForgeSpawnEggItem(ModEntities.WEREWOLF, 0x211A18, 0x9E1F1F,
+            () -> new ForgeSpawnEggItem(ModEntities.WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
     public static final RegistryObject<Item> HUNTER_SPAWN_EGG = ITEMS.register("hunter_spawn_egg",
-            () -> new ForgeSpawnEggItem(ModEntities.HUNTER, 0x2D2928, 0xB7B9BD,
+            () -> new ForgeSpawnEggItem(ModEntities.HUNTER, 0xFFFFFF, 0xFFFFFF,
+                    new Item.Properties()));
+    public static final RegistryObject<Item> ALPHA_WEREWOLF_SPAWN_EGG = ITEMS.register("alpha_werewolf_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.ALPHA_WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
 
     private ModItems() {}

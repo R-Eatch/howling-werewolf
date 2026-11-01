@@ -69,10 +69,15 @@ public final class ModNetwork {
 
     public static void sync(ServerPlayer player, WerewolfData data) {
         WerewolfPersistence.save(player, data);
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+                createSyncPacket(player.getId(), data));
+    }
+
+    /** Initial tracking needs the same authoritative level limit as ordinary sync. */
+    public static SyncWerewolfDataPacket createSyncPacket(int entityId, WerewolfData data) {
         CompoundTag syncData = data.serializeNBT();
         syncData.putInt("NetworkMaxLevel", WerewolfData.getMaxLevel());
-        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
-                new SyncWerewolfDataPacket(player.getId(), syncData));
+        return new SyncWerewolfDataPacket(entityId, syncData);
     }
 
     public static void showBadgeActivation(ServerPlayer player) {

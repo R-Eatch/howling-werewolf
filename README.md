@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;style=flat-square" alt="Latest release"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="Current mod version: 1.1.7"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -18,6 +18,14 @@
 > This branch contains the official Forge edition for Minecraft 1.20.1. The official NeoForge edition for Minecraft 1.21.1 is maintained on the [`1.21.1-neoforge`](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge) branch.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
+
+## Current version and updates
+
+The latest mod version is **1.1.7**. **v1.1.3** completed the owner's full in-game survival playthrough, including defeating the Ender Dragon and obtaining elytra. **v1.1.7 has not yet been tested in game**; compilation and package checks do not replace that testing. See the [1.1.7 changelog](docs/CHANGELOG-1.1.7.md) and [GitHub main](https://github.com/R-Eatch/howling-werewolf) for current updates and supported editions.
+
+## New spawn eggs
+
+Werewolf and Hunter spawn eggs now use dedicated **16×16** artwork. The new **Moon-Crowned Alpha Werewolf Spawn Egg** is available in the mod's creative tab (`howlingwerewolf:alpha_werewolf_spawn_egg`). It spawns the Alpha boss without starting a ritual or awarding ritual-completion rewards. Item and block textures are now consistently 16×16; player-skin texture sizes remain unchanged.
 
 ## Skins and customization
 
@@ -53,7 +61,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.1.3 |
+| Howling Werewolf | 1.1.7 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -73,7 +81,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.1.3-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.1.7-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -102,7 +110,7 @@ Wolfsbane represents the path opposed to the werewolf bloodline. A Wolfsbane Pot
 | Quadruped Wolf | Learn **Wildstride Form**, then press `G` | Greatly increased movement speed and jump height, but slightly lower attack damage; cannot wear equipment. |
 | Beast | Complete the Alpha Trial for the first time, then press `H` | Greatly enhanced combat, speed, jumping, and defense, but faster hunger drain; cannot wear equipment. |
 
-Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipped items are hidden by default; this can be changed in the configuration.
+Transformed werewolves cannot wear armor or elytra by default. **Armored Instinct** allows equipment only in normal Werewolf form. Equipment is shown by default when the ability permits it; this can be changed in the configuration.
 
 Only equipment with a positive armor value weakens the natural damage reduction and movement bonuses provided by this ability. Zero-armor equipment such as elytra does not trigger this penalty.
 
@@ -209,7 +217,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Previous versions have passed in-game testing by the project owner, including a complete normal-survival playthrough on a new world, defeating the Ender Dragon and obtaining elytra.
+**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **v1.1.7 has not yet been tested in game.**
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 

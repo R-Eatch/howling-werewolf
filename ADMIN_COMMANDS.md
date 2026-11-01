@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf 1.0.5 for Minecraft 1.20.1 / Forge 47.4.16. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf 1.1.7 for Minecraft 1.20.1 / Forge 47.4.16. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements and notation
 
@@ -28,7 +28,7 @@ Example: `/werewolf awaken Steve`
 
 ### `/werewolf cure <target>`
 
-Completely cures the target and restores default human state. This clears werewolf identity, infection, form, progression, abilities, cooldowns, Alpha completion, modifiers, and summoned spirit wolves. Its current result is the same as `reset`, but it remains as the administrator-facing cure action.
+Completely cures the target and restores default human state. This clears werewolf identity, infection, form, progression, abilities, cooldowns, Alpha completion, modifiers, and summoned spirit wolves. The selected skin ID is preserved. Its current result is the same as `reset`, but it remains as the administrator-facing cure action.
 
 Example: `/werewolf cure Steve`
 
@@ -56,7 +56,7 @@ Example: `/werewolf forcemoon Steve true`
 
 ### `/werewolf reset <target>`
 
-Restores all werewolf data to new-player defaults, including identity, progression, skills, abilities, cooldowns, forms, modifiers, and summoned spirit wolves.
+Restores werewolf gameplay data to new-player defaults, including identity, progression, skills, abilities, cooldowns, forms, modifiers, and summoned spirit wolves. The selected skin ID is preserved.
 
 Example: `/werewolf reset Steve`
 
