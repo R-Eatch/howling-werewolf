@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.Mth;
 
 /**
@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
  * definition here makes the four-legged model part of this mod's compiled JAR while retaining the
  * standard 64x32 wolf UV layout.
  */
-public final class QuadrupedWerewolfModel extends EntityModel<AbstractClientPlayer> {
+public final class QuadrupedWerewolfModel<T extends LivingEntity> extends EntityModel<T> {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart realHead;
@@ -80,7 +80,7 @@ public final class QuadrupedWerewolfModel extends EntityModel<AbstractClientPlay
     }
 
     @Override
-    public void setupAnim(AbstractClientPlayer player, float limbSwing, float limbAmount,
+    public void setupAnim(T player, float limbSwing, float limbAmount,
                           float ageInTicks, float netHeadYaw, float headPitch) {
         root.getAllParts().forEach(ModelPart::resetPose);
 

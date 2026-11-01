@@ -22,7 +22,7 @@ sourceSets.main.resources {
     srcDir('src/generated/resources')
 
     // Exclude common development only resources from finalized outputs
-    exclude("**/*.bbmodel") // BlockBench project files
+    // The three Modern bbmodel projects are runtime geometry and texture resources.
 
     exclude("src/generated/**/.cache") // datagen cache files
 }

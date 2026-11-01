@@ -12,11 +12,11 @@ import net.minecraft.world.item.ItemStack;
 
 /** Places the main-hand stack between the quadruped werewolf's jaws, fox-style. */
 public final class QuadrupedHeldItemLayer
-        extends RenderLayer<AbstractClientPlayer, QuadrupedWerewolfModel> {
+        extends RenderLayer<AbstractClientPlayer, QuadrupedWerewolfModel<AbstractClientPlayer>> {
     private final ItemInHandRenderer itemInHandRenderer;
 
     public QuadrupedHeldItemLayer(
-            RenderLayerParent<AbstractClientPlayer, QuadrupedWerewolfModel> parent,
+            RenderLayerParent<AbstractClientPlayer, QuadrupedWerewolfModel<AbstractClientPlayer>> parent,
             ItemInHandRenderer itemInHandRenderer) {
         super(parent);
         this.itemInHandRenderer = itemInHandRenderer;

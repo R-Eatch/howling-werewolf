@@ -206,3 +206,16 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
   - Chest, abdomen, forearms, lower legs and tail are intentionally more separated now.
 - `WerewolfPlayerModel.java` / `BeastPlayerModel.java`
   - Head presentation simplified: smaller cube ears and a clearer protruding muzzle volume.
+
+## 1.2.0 Modern player models
+
+- Maintainer-supplied Blockbench projects from `design/blockbench/Modern/Werewolf Form.bbmodel`, `Wolf form.bbmodel`, and `Beast form.bbmodel` are copied byte-for-byte to `assets/howlingwerewolf/models/entity/modern/{werewolf,quadruped,beast}.bbmodel`.
+- Each project embeds Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods PNG palettes. Their original names and pixel data are retained. No author/license metadata is added to the supplied projects.
+- Runtime geometry and textures are loaded from these projects. The original files have no animation keyframes. Existing project animation code is retargeted to their skeletons, with a new quadrupedal Beast sprint. The authoring-only variable placeholders are not executed.
+- This addition is limited to player transformations; Alpha, feral werewolf and Classic resources are retained.
+
+## 1.2.1 model naming and artist credit
+
+- The maintainer identified the Modern model/texture artist as thewolfulti and the Classic artist as R_Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
+- The public/runtime family name is Modern, with `modern` used for IDs, resource paths and skin-pack model fields.
+- Modern Ashen is used for the Alpha and its summoned pack, while wild/spawn-egg werewolf palettes are selected by the server and saved. The server NPC model setting can switch all of these to Classic Adrian.

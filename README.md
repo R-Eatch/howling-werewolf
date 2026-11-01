@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Latest mod version 1.1.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="Latest mod version 1.2.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
   <img src="https://img.shields.io/badge/NeoForge-21.1.248%2B-E04E14?style=flat-square" alt="NeoForge 21.1.248 or later">
   <img src="https://img.shields.io/badge/Java-21-007396?style=flat-square" alt="Java 21">
@@ -17,7 +17,7 @@
 
 > This branch contains the NeoForge edition for Minecraft 1.21.1. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
-The latest version is **1.1.8**, adding fixed-height automatic stepping in all three transformed forms. The spawn eggs, artwork, initial-observer synchronization and empty-hand Looting fixes from 1.1.7 are retained. **The maintainer has completed a full gameplay test pass for 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** See the [version changelog](docs/CHANGELOG-1.1.8.md).
+Howling Werewolf **1.2.2** moves Modern hand-held items slightly below the palm center and raises the Quadruped mouth item into the bite line. The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
 
 Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -28,16 +28,31 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 1.21.1 |
 | Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.1.8 |
+| Howling Werewolf | 1.2.2 |
 
-## Werewolf skins and custom skins
+## Werewolf skins
 
-- Open the werewolf menu with **K** by default → **Skins** to choose from four coats: the original brown Adrian, gray Ashen with amber eyes, black Onyx with golden eyes, or white Ivory with red eyes. Each covers Werewolf, Quadruped Wolf, and Beast forms.
+- Open the werewolf menu with **K** by default → **Skins**. Switch **Classic / Modern** in the upper-right corner, then select **Apply** to save. Classic retains Adrian, Ashen, Onyx and Ivory. Modern includes Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods. Each coat covers all three forms.
+- New players default to **Modern / Ashen**. Existing Classic choices are preserved when upgrading.
 - Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is below the skill list on the Skill Tree page.
+- Modern camera height follows standing, crouching and quadrupedal sprinting. Weapons retain native size and palm anchors; armor and elytra follow the imported bones under the existing equipment rules.
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to 1.1.8 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
+Update both server and clients to **1.2.2**. Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+
+## NPC model configuration
+
+In `config/howlingwerewolf-common.toml`:
+
+```toml
+[gameplay]
+npcModelSet = "modern"
+```
+
+- `modern` (default): Alpha and its summoned pack use Ashen; wild and spawn-egg werewolves receive one of the nine saved coats.
+- `classic`: all affected NPCs use the Classic model and Adrian texture for their form.
+- Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
 
 ## Spawn eggs and texture updates
 
@@ -55,7 +70,7 @@ In `config/howlingwerewolf-common.toml`, `[gameplay]` contains `enableWerewolfAu
 
 ## Supported versions
 
-Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**, with **1.1.8** as the latest mod version. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
+Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**, with **1.2.2** as the latest mod version. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
 
 ## Build from source
 
@@ -65,11 +80,11 @@ Download or clone this branch, then use the Gradle wrapper with a Java 21 toolch
 ./gradlew.bat clean build
 ```
 
-The distributable JAR is written to `build/libs/howlingwerewolf-1.1.8-neoforge.jar`.
+The distributable JAR is written to `build/libs/howlingwerewolf-1.2.2-neoforge.jar`.
 
 ## Release status
 
-**The maintainer has completed a full gameplay test pass for 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) and [version changelog](docs/CHANGELOG-1.1.8.md) for the latest update news and notes.
+**The maintainer completed a full gameplay test pass for 1.1.3 and tested the 1.1.8 changes. This 1.2.2 port has been built and checked with independent data/model regressions; in-game and two-client testing remain with the maintainer.** Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) and [version changelog](docs/CHANGELOG-1.2.2.md) for the latest update news and notes.
 
 Back up every important world before adding or updating any Mod.
 
