@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Current mod version: 1.1.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="Current mod version: 1.2.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,19 +21,35 @@
 
 ## Current version and updates
 
-The latest mod version is **1.1.8**. **v1.1.3** completed the owner's full in-game survival playthrough, including defeating the Ender Dragon and obtaining elytra. **The changes introduced in v1.1.8 have been tested.** See the [1.1.8 changelog](docs/CHANGELOG-1.1.8.md) and [GitHub main](https://github.com/R-Eatch/howling-werewolf) for current updates and supported editions.
+Howling Werewolf **1.2.2** fixes Modern model UVs with constructor-caching entity renderers such as Xenon / Embeddium on Minecraft 1.20.1 and restores the missing Modern coat description. The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
 
 ## New spawn eggs
 
 Werewolf and Hunter spawn eggs now use dedicated **16×16** artwork. The new **Moon-Crowned Alpha Werewolf Spawn Egg** is available in the mod's creative tab (`howlingwerewolf:alpha_werewolf_spawn_egg`). It spawns the Alpha boss without starting a ritual or awarding ritual-completion rewards. Item and block textures are now consistently 16×16; player-skin texture sizes remain unchanged.
 
-## Skins and customization
+## Werewolf skins
 
-Four built-in coats cover all three forms: the original brown **Adrian**, gray **Ashen** with amber eyes, black **Onyx** with golden eyes, and white **Ivory** with red eyes.
+- Open the werewolf menu with **K** by default → **Skins**. Switch **Classic / Modern** in the upper-right corner, then select **Apply** to save. Classic retains Adrian, Ashen, Onyx and Ivory. Modern includes Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods. Each coat covers all three forms.
+- New players default to **Modern / Ashen**. Existing Classic choices are preserved when upgrading.
+- Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is below the skill list on the Skill Tree page.
+- Modern camera height follows standing, crouching and quadrupedal sprinting. Weapons retain native size and palm anchors; armor and elytra follow the imported bones under the existing equipment rules.
+- Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
+- Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Open **K → Skins** to preview forms, rotate the model and show equipment. **Create Template** exports three PNGs and editable Blockbench painting templates. Enable your creation through **Resource Packs**, then select and apply it. Friends need the same resource pack to see your custom coat.
+Update both server and clients to **1.2.2**. Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
-See the [simple custom-skin guide](CUSTOM_SKINS.md) or [简体中文教程](CUSTOM_SKINS-zh.md).
+## NPC model configuration
+
+In `config/howlingwerewolf-common.toml`:
+
+```toml
+[gameplay]
+npcModelSet = "modern"
+```
+
+- `modern` (default): Alpha and its summoned pack use Ashen; wild and spawn-egg werewolves receive one of the nine saved coats.
+- `classic`: all affected NPCs use the Classic model and Adrian texture for their form.
+- Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
 
 ## Before the first howl
 
@@ -61,7 +77,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.1.8 |
+| Howling Werewolf | 1.2.2 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -81,7 +97,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.1.8-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.2.2-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -116,7 +132,7 @@ Only equipment with a positive armor value weakens the natural damage reduction 
 
 ## Skins
 
-Press `K` and choose **Skins** to preview **Adrian** (the original brown coat), **Ashen** (gray wolf), **Onyx** (black wolf), **Ivory** (red-eyed white wolf), or an enabled custom skin. Each coat includes normal Werewolf, Quadruped Wolf, and Beast appearances. Choose a form to inspect it, move the mouse to look around, drag to rotate, and scroll to zoom. **Apply** saves the selected coat for all three forms.
+Press `K` → **Skins**, switch **Classic / Modern**, then preview a coat and select **Apply**. Classic has four coats; Modern has nine. Each selection covers all three forms and is saved per player. Use mouse tracking, drag rotation and scroll zoom to inspect the model.
 
 Previewing a form does not unlock or activate it. Your coat survives death, dimension changes, progression resets, and curing/reawakening. **Level Reset** is now below the skill list on the Skill Tree page and still requires confirmation.
 
@@ -219,7 +235,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **The changes introduced in v1.1.8 have been tested.**
+**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **The 1.1.8 changes were tested; this 1.2.2 port has local build/model/data checks, with in-game and two-client testing pending the maintainer.**
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 

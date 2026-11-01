@@ -20,12 +20,30 @@ import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
-public final class AlphaMinionEntity extends Wolf {
+public final class AlphaMinionEntity extends Wolf implements WerewolfNpcAppearance {
+    private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
+            net.minecraft.network.syncher.SynchedEntityData.defineId(AlphaMinionEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN),
+            net.minecraft.network.syncher.SynchedEntityData.defineId(AlphaMinionEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT));
     private UUID alphaOwner;
 
     public AlphaMinionEntity(EntityType<? extends AlphaMinionEntity> type, Level level) {
         super(type, level);
         xpReward = 0;
+        NpcAppearanceData.initialize(this, APPEARANCE, false);
+    }
+
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        NpcAppearanceData.define(entityData, APPEARANCE);
+    }
+
+    @Override public com.howlingwerewolf.WerewolfModelSet getNpcModelSet() { return NpcAppearanceData.modelSet(entityData, APPEARANCE); }
+    @Override public com.howlingwerewolf.ModernSkin getNpcCoat() { return com.howlingwerewolf.ModernSkin.ASHEN; }
+    @Override public com.howlingwerewolf.WerewolfForm getNpcForm() { return com.howlingwerewolf.WerewolfForm.QUADRUPED; }
+
+    @Override public void aiStep() {
+        super.aiStep();
+        NpcAppearanceData.refresh(this, APPEARANCE);
     }
 
     public static AttributeSupplier.Builder createAttributes() {

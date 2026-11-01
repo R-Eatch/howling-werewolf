@@ -39,7 +39,10 @@ import java.util.UUID;
  * pack members opt into the trial buffs, attack effects and natural reduction through saved data.
  * 双足狼人共用实体：野生狼人仅使用基础属性，月冠召唤的狼群成员通过持久化标记获得试炼增益、攻击效果与自然减伤。
  */
-public final class WerewolfEntity extends Monster {
+public final class WerewolfEntity extends Monster implements WerewolfNpcAppearance {
+    private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
+            net.minecraft.network.syncher.SynchedEntityData.defineId(WerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN),
+            net.minecraft.network.syncher.SynchedEntityData.defineId(WerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT));
     private static final int SUMMONED_EFFECT_DURATION = 20 * 60 * 10;
     private static final int SUMMONED_RESISTANCE_DURATION = 20 * 30;
 
@@ -49,7 +52,17 @@ public final class WerewolfEntity extends Monster {
     public WerewolfEntity(EntityType<? extends WerewolfEntity> type, Level level) {
         super(type, level);
         xpReward = 10;
+        NpcAppearanceData.initialize(this, APPEARANCE, true);
     }
+
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        NpcAppearanceData.define(entityData, APPEARANCE);
+    }
+
+    @Override public com.howlingwerewolf.WerewolfModelSet getNpcModelSet() { return NpcAppearanceData.modelSet(entityData, APPEARANCE); }
+    @Override public com.howlingwerewolf.ModernSkin getNpcCoat() { return NpcAppearanceData.coat(entityData, APPEARANCE); }
+    @Override public com.howlingwerewolf.WerewolfForm getNpcForm() { return com.howlingwerewolf.WerewolfForm.WEREWOLF; }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
@@ -103,6 +116,7 @@ public final class WerewolfEntity extends Monster {
     /** Configure an Alpha ally without changing the wild variant's behavior. / 配置月冠援军，不改变野生变体行为。 */
     public void configureForAlpha(UUID owner, @Nullable LivingEntity target) {
         summonedByAlpha = true;
+        NpcAppearanceData.setCoat(entityData, APPEARANCE, com.howlingwerewolf.ModernSkin.ASHEN);
         alphaOwner = owner;
         xpReward = 0;
         setPersistenceRequired();
@@ -127,6 +141,7 @@ public final class WerewolfEntity extends Monster {
     @Override
     public void aiStep() {
         super.aiStep();
+        NpcAppearanceData.refresh(this, APPEARANCE);
         if (!level().isClientSide && summonedByAlpha && tickCount % (20 * 60 * 5) == 0) {
             refreshSummonedEffects();
         }
@@ -174,6 +189,7 @@ public final class WerewolfEntity extends Monster {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("SummonedByAlpha", summonedByAlpha);
+        NpcAppearanceData.save(this, APPEARANCE, tag);
         if (alphaOwner != null) tag.putUUID("AlphaOwner", alphaOwner);
     }
 
@@ -183,6 +199,7 @@ public final class WerewolfEntity extends Monster {
         summonedByAlpha = tag.getBoolean("SummonedByAlpha");
         alphaOwner = tag.hasUUID("AlphaOwner") ? tag.getUUID("AlphaOwner") : null;
         xpReward = summonedByAlpha ? 0 : 10;
+        NpcAppearanceData.load(this, APPEARANCE, tag, summonedByAlpha);
     }
 
     /** Hunters recognize transformed players as werewolves too. / 猎人也会把已变身玩家识别为狼人。 */

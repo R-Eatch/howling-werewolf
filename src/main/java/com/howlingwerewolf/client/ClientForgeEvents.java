@@ -33,6 +33,9 @@ public final class ClientForgeEvents {
     private static BeastPlayerRenderer beastRenderer;
     private static QuadrupedWerewolfRenderer quadrupedRenderer;
     private static WerewolfEquipmentRenderer equipmentRenderer;
+    private static EntityRendererProvider.Context rendererContext;
+    private static final java.util.Map<WerewolfForm, ModernPlayerRenderer> MODERN = new java.util.EnumMap<>(WerewolfForm.class);
+    private static int modernRevision = -1;
     private static ResourceKey<Level> lastClientDimension;
     private static int dimensionResyncTicks = -1;
     private static int secondDimensionResyncTicks = -1;
@@ -110,6 +113,7 @@ public final class ClientForgeEvents {
                     minecraft.getEntityRenderDispatcher(), minecraft.getItemRenderer(), minecraft.getBlockRenderer(),
                     minecraft.getEntityRenderDispatcher().getItemInHandRenderer(), minecraft.getResourceManager(),
                     minecraft.getEntityModels(), minecraft.font);
+            rendererContext = context;
             renderer = new WerewolfPlayerRenderer(context);
             beastRenderer = new BeastPlayerRenderer(context);
             quadrupedRenderer = new QuadrupedWerewolfRenderer(context);
@@ -119,6 +123,16 @@ public final class ClientForgeEvents {
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
         try {
+            if (WerewolfSkinRenderContext.getModelSet(player) == com.howlingwerewolf.WerewolfModelSet.MODERN) {
+                if (modernRevision != ModernModelResources.revision()) {
+                    MODERN.clear();
+                    modernRevision = ModernModelResources.revision();
+                }
+                MODERN.computeIfAbsent(form, selected -> new ModernPlayerRenderer(rendererContext, selected))
+                        .render(player, player.getYRot(), event.getPartialTick(), poseStack,
+                                event.getMultiBufferSource(), event.getPackedLight());
+                return;
+            }
             if (form == WerewolfForm.BEAST) {
                 beastRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
                         event.getMultiBufferSource(), event.getPackedLight());
@@ -146,6 +160,7 @@ public final class ClientForgeEvents {
         WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
             if (!data.isTransformed()) return;
             if (data.isQuadrupedMode()) event.setCanceled(true);
+            else if (data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
             else WerewolfFirstPersonClawRenderer.render(event, data.isBeastMode());
         });
     }

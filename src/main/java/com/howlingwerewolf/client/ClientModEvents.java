@@ -48,6 +48,7 @@ public final class ClientModEvents {
 
     @SubscribeEvent
     public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new ModernModelResources());
         event.registerReloadListener(new WerewolfSkinCatalog());
     }
 
@@ -75,7 +76,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.HUNTER.get(), HunterRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_WEREWOLF.get(), AlphaWerewolfRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_MINION.get(),
-                net.minecraft.client.renderer.entity.WolfRenderer::new);
+                context -> new WerewolfNpcRenderer<com.howlingwerewolf.entity.AlphaMinionEntity>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F));
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.RITUAL_ALTAR.get(),
                 RitualAltarRenderer::new);

@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public final class QuadrupedWerewolfRenderer
-        extends LivingEntityRenderer<AbstractClientPlayer, QuadrupedWerewolfModel> {
+        extends LivingEntityRenderer<AbstractClientPlayer, QuadrupedWerewolfModel<AbstractClientPlayer>> {
     public QuadrupedWerewolfRenderer(EntityRendererProvider.Context context) {
-        super(context, new QuadrupedWerewolfModel(
+        super(context, new QuadrupedWerewolfModel<>(
                 context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F);
         addLayer(new QuadrupedHeldItemLayer(this, context.getItemInHandRenderer()));
     }

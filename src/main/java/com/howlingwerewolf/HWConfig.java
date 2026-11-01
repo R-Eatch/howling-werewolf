@@ -20,10 +20,17 @@ public final class HWConfig {
     public static final ForgeConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
     public static final ForgeConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
+    public static final ForgeConfigSpec.ConfigValue<String> NPC_MODEL_SET;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.push("gameplay");
+        NPC_MODEL_SET = builder.comment(
+                        "Model set for wild werewolves, spawn-egg werewolves, the Alpha and its summoned pack: modern or classic. Default is modern.",
+                        "Modern uses Ashen for the Alpha/pack and a saved random coat for wild werewolves. Classic uses Adrian for all of them.",
+                        "The server (including the integrated single-player server) controls this setting. Existing entities update after the config reloads; player skin choices are independent.")
+                .define("npcModelSet", "modern", value -> value instanceof String name
+                        && (name.equals("classic") || name.equals("modern")));
         WOLF_INFECTION_CHANCE = builder.comment(
                         "Chance that damage from an untamed vanilla wolf infects a human player. Default is 10%.")
                 .defineInRange("wolfInfectionChance", 0.10D, 0.0D, 1.0D);
@@ -76,6 +83,8 @@ public final class HWConfig {
     public static int hunterSpawnWeight() {
         return scaledSpawnWeight(HUNTER_BASE_WEIGHT, HUNTER_SPAWN_WEIGHT_MULTIPLIER.get());
     }
+
+    public static WerewolfModelSet npcModelSet() { return WerewolfModelSet.byId(NPC_MODEL_SET.get()); }
 
     public static int feralWerewolfSpawnWeight() {
         return scaledSpawnWeight(FERAL_WEREWOLF_BASE_WEIGHT, FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER.get());

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="当前 Mod 版本：1.1.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="当前 Mod 版本：1.2.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 或更高版本">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,19 +21,35 @@
 
 ## 当前版本与更新
 
-当前最新 Mod 版本为 **1.1.8**。**v1.1.3** 已由作者完成全流程实机生存测试，包括击败末影龙并取得鞘翅；**当前版本 1.1.8 对更新内容已经完成测试**。更新内容见 [1.1.8 更新日志](docs/CHANGELOG-1.1.8.md)；最新消息、支持版本与版本说明以 [GitHub main](https://github.com/R-Eatch/howling-werewolf) 为准。
+Howling Werewolf **1.2.2** 修复 Minecraft 1.20.1 在 Xenon / Embeddium 等缓存方块构造 UV 的实体渲染器下 Modern 三形态的纹理错配，并补齐 Modern 皮肤描述。模型切换与内置皮肤署名统一为 **Classic — By R_Eatch / Modern — By thewolfulti**。详见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
 
 ## 新的刷怪蛋
 
 狼人和猎人刷怪蛋现使用独立的 **16×16** 图标；新增**月冠 Alpha 狼人刷怪蛋**，位于模组创造栏，物品 ID 为 `howlingwerewolf:alpha_werewolf_spawn_egg`。它会生成 Alpha Boss，不启动仪式，也不发放仪式通关奖励。物品和方块贴图统一为 16×16；玩家皮肤贴图尺寸保持原样。
 
-## 皮肤与自定义外观
+## 狼人皮肤
 
-四套内置皮肤覆盖全部三种形态：经典棕色 **Adrian**、琥珀眼灰狼 **Ashen**、金眼黑狼 **Onyx** 与红眼白狼 **Ivory**。
+- 默认 **K** 打开狼人菜单 → **皮肤**。右上角 **Classic / Modern** 切换模型和皮肤列表，点击 **应用** 保存。Classic 保留 Adrian、Ashen、Onyx、Ivory；Modern 提供 Ashen、Black、Chestnut、Pale、Rusty、Snowy、Spotted、Stripped、Woods。每套覆盖三个形态。
+- 新玩家默认使用 **Modern / Ashen**。升级时保留已有存档的 Classic 外观选择。
+- 预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关，点击应用后保存。预览不会解锁或切换实际形态。等级重置入口位于技能树列表下方。
+- Modern 视角跟随站立、下蹲和四肢冲刺；手持物保持原版大小并对齐掌心，护甲和鞘翅跟随新骨骼，继续遵守原有装备规则。
+- 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
+- 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-打开 **K → 皮肤** 即可切换形态预览、旋转模型和显示装备。**创建模板** 会导出三张 PNG 和可编辑的 Blockbench 绘画模板；完成后通过 **资源包** 启用，再选择并应用。朋友需要启用同一个资源包才能看到你的自定义毛皮。
+联机时服务端与客户端都需更新至 **1.2.2**。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
 
-详细步骤见[普通玩家自定义皮肤教程](CUSTOM_SKINS-zh.md)，也提供[英文版](CUSTOM_SKINS.md)。
+## NPC 模型配置
+
+在 `config/howlingwerewolf-common.toml` 中设置：
+
+```toml
+[gameplay]
+npcModelSet = "modern"
+```
+
+- `modern`（默认）：Alpha 及其召唤的狼人固定 Ashen；野生与刷怪蛋生成的狼人从九套材质中随机选择并保存。
+- `classic`：上述 NPC 使用对应形态的 Classic 模型和 Adrian 材质。
+- 单人由本地整合服务端配置决定，多人由服务器配置决定。配置文件重载后，已生成的 NPC 也会更新；模型和材质通过实体追踪同步，观察者的本地配置不会覆盖服务端选择。该参数不改变玩家自己选用的皮肤。
 
 ## 当第一声嚎叫尚未响起
 
@@ -61,7 +77,7 @@
 | Minecraft Java 版 | 1.20.1 |
 | Mod 加载器 | 推荐 Forge 47.4.16 或更高版本 |
 | Java | 17 |
-| 月厄狼人 | 1.1.8 |
+| 月厄狼人 | 1.2.2 |
 
 推荐使用 Forge 47.4.16 或更高的兼容 Forge 47.x 版本；Forge 47.4.16 仍是当前正式发布的主要测试目标。
 
@@ -81,7 +97,7 @@
 ## 安装
 
 1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
-2. 将 `howlingwerewolf-1.1.8-forge.jar` 放入游戏的 `mods` 目录。
+2. 将 `howlingwerewolf-1.2.2-forge.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -116,7 +132,7 @@
 
 ## 皮肤
 
-按 `K` 并选择**皮肤**，可以预览 **Adrian**（原棕色）、**Ashen**（灰狼）、**Onyx**（黑狼）、**Ivory**（红眼白狼）及已启用的自定义皮肤。每套皮肤都包含普通狼人、四足狼和野兽三种外观。选择形态后，移动鼠标查看、拖动旋转、滚轮缩放；点击**应用**，即可为三种狼人形态统一保存所选皮肤。
+按 `K` → **皮肤**，右上角切换 **Classic / Modern** 后预览并**应用**。Classic 提供四套皮肤，Modern 提供九套配色；选择覆盖三个形态，逐玩家保存。支持鼠标跟随、拖动旋转和滚轮缩放。
 
 预览不会解锁或激活对应形态。所选皮肤会在死亡、换维度、等级重置，以及治愈后重新觉醒时保留。**等级重置**现位于技能树页面的技能列表下方，仍需确认后执行。
 
@@ -219,7 +235,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 测试与兼容性
 
-**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**当前版本 1.1.8 对更新内容已经完成测试。**
+**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**1.1.8 更新内容已测试；本次 1.2.2 移植已完成本地构建和模型/数据检查，实机及双客户端测试待维护者完成。**
 
 **本 Mod 尚未完成完整的多人游戏测试。** 因此，在长期多人存档中的表现仍属于未完全验证范围。服务器和客户端应使用相同的 Mod 版本，更新前请查阅对应版本的更新日志，确认兼容性说明。
 

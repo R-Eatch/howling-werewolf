@@ -3,6 +3,7 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
+import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.capability.WerewolfApi;
 import net.minecraft.client.player.AbstractClientPlayer;
 
@@ -19,9 +20,14 @@ public final class WerewolfSkinRenderContext {
 
     public static void withPreview(AbstractClientPlayer player, WerewolfForm form,
                                    String skinId, Runnable render) {
+        withPreview(player, form, WerewolfModelSet.CLASSIC, skinId, render);
+    }
+
+    public static void withPreview(AbstractClientPlayer player, WerewolfForm form,
+                                   WerewolfModelSet modelSet, String skinId, Runnable render) {
         Preview previous = PREVIEW.get();
         PREVIEW.set(new Preview(Objects.requireNonNull(player), Objects.requireNonNull(form),
-                Objects.requireNonNull(skinId)));
+                Objects.requireNonNull(modelSet), Objects.requireNonNull(skinId)));
         try {
             render.run();
         } finally {
@@ -49,7 +55,12 @@ public final class WerewolfSkinRenderContext {
         return WerewolfApi.get(player).map(data -> data.getSkinId()).orElse(WerewolfSkinIds.DEFAULT_ID);
     }
 
-    private record Preview(AbstractClientPlayer player, WerewolfForm form, String skinId) {}
+    public static WerewolfModelSet getModelSet(AbstractClientPlayer player) {
+        if (isPreview(player)) return PREVIEW.get().modelSet();
+        return WerewolfApi.get(player).map(data -> data.getModelSet()).orElse(WerewolfModelSet.CLASSIC);
+    }
+
+    private record Preview(AbstractClientPlayer player, WerewolfForm form, WerewolfModelSet modelSet, String skinId) {}
 
     private WerewolfSkinRenderContext() {}
 }

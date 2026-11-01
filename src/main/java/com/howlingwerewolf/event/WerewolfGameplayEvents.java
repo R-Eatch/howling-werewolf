@@ -131,6 +131,16 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            WerewolfApi.get(event.player).ifPresent(data -> {
+                var player = event.player;
+                if (player.isAlive() && data.isTransformed() && data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN) {
+                    float eye = com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), player.getPose(),
+                            com.howlingwerewolf.WerewolfModelPose.isBeastSprint(player, data));
+                    if (Math.abs(player.getEyeHeight() - eye) > 0.005F) player.refreshDimensions();
+                }
+            });
+        }
         if (event.player.level().isClientSide || !(event.player instanceof ServerPlayer player)) return;
         if (event.phase == TickEvent.Phase.START) {
             beginHungerTracking(player);
@@ -560,10 +570,13 @@ public final class WerewolfGameplayEvents {
                 // Keep a small clearance inside exact 1x3 (or crouched 1x2) block openings.
                 // A hitbox equal to the opening leaves no tolerance for centering or collision math.
                 event.setNewSize(EntityDimensions.scalable(0.95F, crouching ? 1.95F : 2.95F), true);
-                event.setNewEyeHeight(crouching ? 1.8F : 2.7F);
+                event.setNewEyeHeight(data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN
+                        ? com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), event.getPose(),
+                        com.howlingwerewolf.WerewolfModelPose.isBeastSprint(player, data)) : crouching ? 1.8F : 2.7F);
             } else if (data.isTransformed() && data.isQuadrupedMode()) {
                 event.setNewSize(EntityDimensions.scalable(0.6F, 0.85F), true);
-                event.setNewEyeHeight(0.68F);
+                event.setNewEyeHeight(data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN
+                        ? com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), event.getPose(), false) : 0.68F);
             }
         });
     }
