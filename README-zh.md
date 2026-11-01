@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="开发版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.1-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -16,6 +16,8 @@
 <p align="center"><a href="README.md">English</a></p>
 
 > 当前分支提供 Minecraft 26.1.2 的 NeoForge 版；Minecraft 1.20.1 的 Forge 版维护在 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
+
+Howling Werewolf **1.2.1** 将模型名称更正为 **Modern**，皮肤切换按钮悬停显示 **Classic — By Eatch / Modern — By Leo**。Alpha 及其召唤的狼人使用 Modern Ashen；野生及刷怪蛋生成的狼人随机选用九套 Modern 材质之一并保存。服务端配置 `gameplay.npcModelSet` 默认为 `modern`；设为 `classic` 时上述 NPC 统一使用对应形态的 Classic Adrian。玩家自己的皮肤选择独立保留。详见 [1.2.1 更新日志](docs/CHANGELOG-1.2.1.md)。
 
 Howling Werewolf 1.1.8 新增固定高度自动跨步：四足狼（wolf）为 **1.0 格**、双足狼人（werewolf）为 **1.5 格**、野兽（beast）为 **2.0 格**。配置文件 `config/howlingwerewolf-common.toml` 中的 `gameplay.enableWerewolfAutoStep` 默认为 `true`；设为 `false` 关闭额外跨步，恢复原生跨步。手动跳跃继续沿用原有技能和形态规则。保留 1.1.7 的火焰爪首击熟肉修复、Alpha 战斗节奏及 16×16 物品和方块贴图。
 
@@ -30,16 +32,31 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 26.1.2 |
 | Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
-| Howling Werewolf | 1.1.8 |
+| Howling Werewolf | 1.2.1 |
 
 ## 狼人皮肤
 
-- 默认 **K** 打开狼人菜单 → **皮肤**，可选择原棕色 Adrian、琥珀眼灰狼 Ashen、金眼黑狼 Onyx、红眼白狼 Ivory；每套覆盖双足、四足和野兽三种形态。
+- 默认 **K** 打开狼人菜单 → **皮肤**。右上角 **Classic / Modern** 切换模型和皮肤列表，点击 **应用** 保存。Classic 保留 Adrian、Ashen、Onyx、Ivory；Modern 提供 Ashen、Black、Chestnut、Pale、Rusty、Snowy、Spotted、Stripped、Woods。每套覆盖三个形态。
+- 新玩家默认使用 **Modern / Ashen**。升级时保留已有存档的 Classic 外观选择。
 - 预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关，点击应用后保存。预览不会解锁或切换实际形态。等级重置入口位于技能树列表下方。
+- Modern 视角跟随站立、下蹲和四肢冲刺；手持物保持原版大小并对齐掌心，护甲和鞘翅跟随新骨骼，继续遵守原有装备规则。
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 1.1.8。自定义皮肤只同步 ID，观察者需要启用相同资源包；缺少资源包时显示 Adrian，保存的选择仍保留。
+联机时服务端与客户端都需更新至 **1.2.1**。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
+
+## NPC 模型配置
+
+在 `config/howlingwerewolf-common.toml` 中设置：
+
+```toml
+[gameplay]
+npcModelSet = "modern"
+```
+
+- `modern`（默认）：Alpha 及其召唤的狼人固定 Ashen；野生与刷怪蛋生成的狼人从九套材质中随机选择并保存。
+- `classic`：上述 NPC 使用对应形态的 Classic 模型和 Adrian 材质。
+- 单人由本地整合服务端配置决定，多人由服务器配置决定。配置文件重载后，已生成的 NPC 也会更新；模型和材质通过实体追踪同步，观察者的本地配置不会覆盖服务端选择。该参数不改变玩家自己选用的皮肤。
 
 ## 刷怪蛋与持物动作
 
@@ -53,7 +70,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.1.8**。
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.2.1**。
 
 ## 从源码构建
 
@@ -63,9 +80,9 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 ./gradlew build -x test
 ```
 
-Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.1.8-neoforge-26.1.2.jar`。
+Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.2.1-neoforge-26.1.2.jar`。
 
-当前最新 Mod 源码版本为 **1.1.8**，更新内容见[1.1.8 更新日志](docs/CHANGELOG-1.1.8.md)。**1.1.3 已由维护者完成全流程实机测试；当前版本 1.1.8 对更新内容已经完成测试。**GitHub Release 和各平台模组文件由维护者另行发布；请在下载页确认对应游戏版本与文件版本。
+当前 Mod 源码版本为 **1.2.1**。维护者反馈 1.2.0 实机测试效果良好；1.2.1 完成本地编译与独立回归检查后交由维护者实机测试。GitHub Release 和各平台文件由维护者另行发布。
 
 ## 管理员命令
 

@@ -3,6 +3,7 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
+import com.howlingwerewolf.WerewolfModelSet;
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -47,6 +48,9 @@ public final class WerewolfSkinScreen extends Screen {
     private final Screen parent;
     private final Map<WerewolfForm, Button> formButtons = new EnumMap<>(WerewolfForm.class);
     private String selectedSkin = WerewolfSkinIds.DEFAULT_ID;
+    private WerewolfModelSet modelSet = WerewolfModelSet.CLASSIC;
+    private WerewolfModelSet pendingModelSet;
+    private final Map<WerewolfModelSet, String> rememberedSkins = new EnumMap<>(WerewolfModelSet.class);
     private String pendingSkin;
     private int skinPage;
     private int catalogRevision = -1;
@@ -56,6 +60,7 @@ public final class WerewolfSkinScreen extends Screen {
     private RemotePlayer previewPlayer;
     private Button applyButton;
     private Button equipmentButton;
+    private Button modelButton;
     private boolean initializedSelection;
     private boolean showEquipment = true;
     private boolean draggingPreview;
@@ -82,7 +87,10 @@ public final class WerewolfSkinScreen extends Screen {
         initializeSelection(getData());
         catalogRevision = WerewolfSkinCatalog.revision();
         skinPage = Mth.clamp(skinPage, 0, pageCount() - 1);
-        List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries();
+        List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries(modelSet);
+        modelButton = addRenderableWidget(Button.builder(Component.literal(modelSet.displayName()), clicked -> switchModelSet())
+                .bounds(left + 324, top + 8, 84, 20).build());
+        modelButton.active = pendingSkin == null;
         for (int row = 0; row < 4 && skinPage * 4 + row < skins.size(); row++) {
             addRenderableWidget(new SkinChoiceButton(left + 12, top + 76 + row * 57, skins.get(skinPage * 4 + row)));
         }
@@ -123,7 +131,9 @@ public final class WerewolfSkinScreen extends Screen {
     private void initializeSelection(WerewolfData data) {
         if (!initializedSelection && data != null) {
             selectedSkin = data.getSkinId();
-            List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries();
+            modelSet = data.getModelSet();
+            rememberedSkins.put(modelSet, selectedSkin);
+            List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries(modelSet);
             for (int index = 0; index < skins.size(); index++) {
                 if (skins.get(index).id().equals(selectedSkin)) skinPage = index / 4;
             }
@@ -140,12 +150,13 @@ public final class WerewolfSkinScreen extends Screen {
 
     private void applySkin() {
         WerewolfData data = getData();
-        if (pendingSkin != null || data == null || !data.isWerewolf() || selectedSkin.equals(data.getSkinId())
+        if (pendingSkin != null || data == null || !data.isWerewolf() || isCurrent(data)
                 || WerewolfSkinCatalog.find(selectedSkin) == null) return;
         pendingSkin = selectedSkin;
+        pendingModelSet = modelSet;
         pendingTicks = 0;
         confirmationTimedOut = false;
-        ClientPacketDistributor.sendToServer(new SetWerewolfSkinPacket(selectedSkin));
+        ClientPacketDistributor.sendToServer(new SetWerewolfSkinPacket(modelSet.id(), selectedSkin));
         updateButtons();
     }
 
@@ -157,7 +168,7 @@ public final class WerewolfSkinScreen extends Screen {
         if ((!hadSelection && initializedSelection) || catalogRevision != WerewolfSkinCatalog.revision()) rebuildWidgets();
         if (noticeTicks > 0 && --noticeTicks == 0) notice = null;
         if (pendingSkin != null) {
-            if (data != null && pendingSkin.equals(data.getSkinId())) {
+            if (data != null && pendingModelSet == data.getModelSet() && pendingSkin.equals(data.getSkinId())) {
                 pendingSkin = null;
                 confirmationTimedOut = false;
             } else if (++pendingTicks >= 200) {
@@ -172,7 +183,7 @@ public final class WerewolfSkinScreen extends Screen {
     private void updateButtons() {
         WerewolfData data = getData();
         if (applyButton != null) {
-            boolean current = data != null && selectedSkin.equals(data.getSkinId());
+            boolean current = isCurrent(data);
             applyButton.active = data != null && data.isWerewolf() && !current && pendingSkin == null
                     && WerewolfSkinCatalog.find(selectedSkin) != null;
             applyButton.setMessage(Component.translatable(pendingSkin != null
@@ -180,6 +191,7 @@ public final class WerewolfSkinScreen extends Screen {
                     : current ? "screen.howlingwerewolf.skins.applied" : "screen.howlingwerewolf.skins.apply"));
         }
         if (equipmentButton != null) equipmentButton.setMessage(equipmentLabel());
+        if (modelButton != null) modelButton.active = pendingSkin == null;
         formButtons.forEach((form, button) -> button.active = form != previewForm);
     }
 
@@ -230,7 +242,7 @@ public final class WerewolfSkinScreen extends Screen {
                     left + PANEL_WIDTH / 2, top + 31, DIM);
             WerewolfData data = getData();
             Component current = data == null ? Component.translatable("screen.howlingwerewolf.skins.loading")
-                    : Component.translatable("screen.howlingwerewolf.skins.current", skinName(data.getSkinId()));
+                    : Component.translatable("screen.howlingwerewolf.skins.current", data.getModelSet().displayName() + " / " + skinName(data.getSkinId()).getString());
             graphics.text(font, font.plainSubstrByWidth(current.getString(), PANEL_WIDTH - 32), left + 16, top + 56, GOLD, false);
             graphics.centeredText(font, Component.literal((skinPage + 1) + " / " + pageCount()), left + 73, top + 313, TEXT);
             graphics.fill(left + 144, top + 101, left + 408, top + 301, INNER);
@@ -249,7 +261,7 @@ public final class WerewolfSkinScreen extends Screen {
                 status = Component.translatable("screen.howlingwerewolf.not_werewolf");
             } else if (pendingSkin != null) {
                 status = Component.translatable("screen.howlingwerewolf.skins.waiting", skinName(pendingSkin));
-            } else if (selectedSkin.equals(data.getSkinId())) {
+            } else if (isCurrent(data)) {
                 status = Component.translatable("screen.howlingwerewolf.skins.saved", skinName(selectedSkin));
                 statusColor = GOLD;
             } else if (confirmationTimedOut) {
@@ -264,6 +276,10 @@ public final class WerewolfSkinScreen extends Screen {
                 statusY += 10;
             }
             super.extractRenderState(graphics, logicalMouseX, logicalMouseY, partialTick);
+            if (modelButton != null && modelButton.isHovered()) {
+                Component detail = Component.translatable("screen.howlingwerewolf.skins.model." + modelSet.id() + ".tooltip");
+                graphics.setTooltipForNextFrame(font, font.split(detail, Math.round(260 * uiScale)), mouseX, mouseY);
+            }
             for (var child : children()) {
                 if (child instanceof SkinChoiceButton button && button.isHovered()) {
                     Component detail = skinDescription(button.skin);
@@ -307,7 +323,7 @@ public final class WerewolfSkinScreen extends Screen {
         // The scissor follows the GUI matrix; the deferred entity viewport uses screen coordinates.
         graphics.enableScissor(left + 145, top + 102, left + 407, top + 282);
         try {
-            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, selectedSkin, () -> {
+            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, modelSet, selectedSkin, () -> {
                 var dispatcher = minecraft.getEntityRenderDispatcher();
                 var state = dispatcher.getRenderer(previewPlayer).createRenderState(previewPlayer, 1.0F);
                 state.shadowPieces.clear();
@@ -404,11 +420,32 @@ public final class WerewolfSkinScreen extends Screen {
     }
 
     private static Component skinDescription(WerewolfSkinCatalog.Entry entry) {
+        if (entry.builtin() && entry.modelSet() == WerewolfModelSet.MODERN) {
+            return Component.translatable("skin.howlingwerewolf.modern.desc", entry.name());
+        }
         return entry.builtin() ? Component.translatable("skin.howlingwerewolf." + WerewolfSkin.byId(entry.id()).getId() + ".desc")
                 : Component.literal(entry.description());
     }
 
-    private int pageCount() { return Math.max(1, (WerewolfSkinCatalog.entries().size() + 3) / 4); }
+    private int pageCount() { return Math.max(1, (WerewolfSkinCatalog.entries(modelSet).size() + 3) / 4); }
+
+    private boolean isCurrent(WerewolfData data) {
+        return data != null && modelSet == data.getModelSet() && selectedSkin.equals(data.getSkinId());
+    }
+
+    private void switchModelSet() {
+        if (pendingSkin != null) return;
+        rememberedSkins.put(modelSet, selectedSkin);
+        modelSet = modelSet == WerewolfModelSet.CLASSIC ? WerewolfModelSet.MODERN : WerewolfModelSet.CLASSIC;
+        selectedSkin = rememberedSkins.getOrDefault(modelSet, modelSet.defaultSkinId());
+        skinPage = 0;
+        var skins = WerewolfSkinCatalog.entries(modelSet);
+        for (int index = 0; index < skins.size(); index++) if (skins.get(index).id().equals(selectedSkin)) skinPage = index / 4;
+        confirmationTimedOut = false;
+        initializedSelection = true;
+        resetView();
+        rebuildWidgets();
+    }
 
     private void changePage(int delta) {
         skinPage = Mth.clamp(skinPage + delta, 0, pageCount() - 1);
@@ -424,7 +461,7 @@ public final class WerewolfSkinScreen extends Screen {
 
     private void createTemplate() {
         try {
-            var directory = WerewolfSkinTemplate.export(minecraft.getResourcePackDirectory());
+            var directory = WerewolfSkinTemplate.export(minecraft.getResourcePackDirectory(), modelSet, selectedSkin);
             net.minecraft.util.Util.getPlatform().openPath(directory);
             notice = Component.translatable("screen.howlingwerewolf.skins.template_created");
         } catch (IOException | RuntimeException error) {
@@ -467,7 +504,7 @@ public final class WerewolfSkinScreen extends Screen {
                 graphics.text(font, line, getX() + 10, y, DIM, false);
                 y += 10;
             }
-            int color = !skin.builtin() ? 0xFF917EB3 : switch (WerewolfSkin.byId(skin.id())) {
+            int color = !skin.builtin() ? 0xFF917EB3 : skin.modelSet() == WerewolfModelSet.MODERN ? 0xFF728998 : switch (WerewolfSkin.byId(skin.id())) {
                 case ADRIAN -> 0xFF967055;
                 case ASHEN -> 0xFF9A9EA1;
                 case ONYX -> 0xFF4B4C51;

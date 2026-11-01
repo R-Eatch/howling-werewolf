@@ -1,6 +1,10 @@
 Howling Werewolf / 月厄狼人
 Copyright © 2026 R_Eatch.
 
+Player/NPC model sets:
+- Classic models and textures: Eatch.
+- Modern models and nine texture palettes: Leo.
+
 Howling Werewolf was independently designed and developed by R_Eatch. It was inspired
 by several outstanding werewolf mods created by the Minecraft community, but it is not
 a port, fork, official continuation, or official remake and is not affiliated with or

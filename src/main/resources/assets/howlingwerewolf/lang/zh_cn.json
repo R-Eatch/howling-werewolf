@@ -258,5 +258,8 @@
   "screen.howlingwerewolf.skins.template_failed": "无法创建模板，详情请查看 latest.log。",
   "screen.howlingwerewolf.skins.missing": "未启用此皮肤资源包，暂时显示 Adrian；启用后即可恢复。",
   "screen.howlingwerewolf.skins.invalid_packs": "已跳过 %s 个无效皮肤，详情见 latest.log。",
-  "screen.howlingwerewolf.skins.author": "作者：%s"
+  "screen.howlingwerewolf.skins.author": "作者：%s",
+  "skin.howlingwerewolf.modern.desc": "Modern 模型 · %s 配色",
+  "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By Eatch\n点击切换为 Modern",
+  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By Leo\n点击切换为 Classic"
 }

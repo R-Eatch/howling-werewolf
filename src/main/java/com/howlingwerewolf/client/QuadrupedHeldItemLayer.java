@@ -9,8 +9,8 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 /** Holds the main-hand item between the quadruped's jaws. */
-public final class QuadrupedHeldItemLayer extends RenderLayer<AvatarRenderState, QuadrupedWerewolfModel> {
-    public QuadrupedHeldItemLayer(RenderLayerParent<AvatarRenderState, QuadrupedWerewolfModel> parent) { super(parent); }
+public final class QuadrupedHeldItemLayer extends RenderLayer<AvatarRenderState, QuadrupedWerewolfModel<AvatarRenderState>> {
+    public QuadrupedHeldItemLayer(RenderLayerParent<AvatarRenderState, QuadrupedWerewolfModel<AvatarRenderState>> parent) { super(parent); }
     @Override public void submit(PoseStack pose, SubmitNodeCollector collector, int light,
                                  AvatarRenderState state, float yRot, float xRot) {
         var item = WerewolfRenderData.get(state).mouthItem();

@@ -5,6 +5,8 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
+import com.howlingwerewolf.WerewolfModelSet;
+import com.howlingwerewolf.ModernSkin;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
@@ -35,7 +37,7 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
     private static final int MAX_PNG_BYTES = 1024 * 1024;
     private static volatile Snapshot snapshot = snapshot(builtins(), 0, 0);
 
-    public record Entry(String id, String name, String description, String author,
+    public record Entry(String id, WerewolfModelSet modelSet, String name, String description, String author,
                         Map<WerewolfForm, Identifier> textures, boolean builtin) {
         public Entry { textures = Map.copyOf(textures); }
     }
@@ -44,14 +46,21 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
     private record Snapshot(List<Entry> entries, Map<String, Entry> byId, int revision, int errors) {}
 
     public static List<Entry> entries() { return snapshot.entries(); }
+    public static List<Entry> entries(WerewolfModelSet modelSet) {
+        return snapshot.entries().stream().filter(entry -> entry.modelSet() == modelSet).toList();
+    }
     public static int revision() { return snapshot.revision(); }
     public static int errorCount() { return snapshot.errors(); }
     public static Entry find(String id) { return snapshot.byId().get(WerewolfSkinIds.normalize(id)); }
 
     public static Identifier texture(String id, WerewolfForm form) {
+        return texture(id, WerewolfModelSet.CLASSIC, form);
+    }
+
+    public static Identifier texture(String id, WerewolfModelSet modelSet, WerewolfForm form) {
         Snapshot current = snapshot;
-        Entry skin = current.byId().getOrDefault(WerewolfSkinIds.normalize(id),
-                current.byId().get(WerewolfSkinIds.DEFAULT_ID));
+        Entry skin = current.byId().get(WerewolfSkinIds.normalize(id, modelSet));
+        if (skin == null || skin.modelSet() != modelSet) skin = current.byId().get(modelSet.defaultSkinId());
         return skin.textures().get(form == WerewolfForm.HUMAN ? WerewolfForm.WEREWOLF : form);
     }
 
@@ -64,7 +73,12 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
             textures.put(WerewolfForm.QUADRUPED, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "quadruped_werewolf.png"));
             textures.put(WerewolfForm.BEAST, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, base + "beast.png"));
             String name = skin.getId().substring(0, 1).toUpperCase(java.util.Locale.ROOT) + skin.getId().substring(1);
-            result.add(new Entry(HowlingWerewolf.MOD_ID + ":" + skin.getId(), name, "", "R_Eatch", textures, true));
+            result.add(new Entry(HowlingWerewolf.MOD_ID + ":" + skin.getId(), WerewolfModelSet.CLASSIC, name, "", "Eatch", textures, true));
+        }
+        for (ModernSkin skin : ModernSkin.values()) {
+            Map<WerewolfForm, Identifier> textures = new EnumMap<>(WerewolfForm.class);
+            for (WerewolfForm form : ModernModelResources.FORMS) textures.put(form, ModernModelResources.textureId(skin, form));
+            result.add(new Entry(skin.skinId(), WerewolfModelSet.MODERN, skin.displayName(), "", "Leo", textures, true));
         }
         return result;
     }
@@ -99,6 +113,8 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
                 String document = new String(readBounded(file.getValue(), MAX_JSON_BYTES), StandardCharsets.UTF_8);
                 validateJsonDepth(document);
                 JsonObject json = GsonHelper.parse(document);
+                WerewolfModelSet modelSet = WerewolfModelSet.parse(GsonHelper.getAsString(json, "model", "classic"));
+                if (modelSet == null) throw new IOException("model must be classic or modern");
                 String name = text(json, "name", "", 48);
                 if (name.isBlank()) throw new IOException("name must not be empty");
                 String description = text(json, "description", "", 160);
@@ -114,10 +130,10 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
                         throw new IOException("Invalid texture resource: " + form.id());
                     }
                     Resource resource = manager.getResource(texture).orElseThrow(() -> new IOException("Missing texture: " + texture));
-                    validatePng(readBounded(resource, MAX_PNG_BYTES), form);
+                    validatePng(readBounded(resource, MAX_PNG_BYTES), form, modelSet);
                     textures.put(form, texture);
                 }
-                result.add(new Entry(id, name, description, author, textures, false));
+                result.add(new Entry(id, modelSet, name, description, author, textures, false));
             } catch (Exception error) {
                 errors++;
                 LOGGER.warn("Ignoring invalid werewolf skin {}: {}", file.getKey(), error.getMessage());
@@ -170,7 +186,7 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
         }
     }
 
-    private static void validatePng(byte[] bytes, WerewolfForm form) throws IOException {
+    private static void validatePng(byte[] bytes, WerewolfForm form, WerewolfModelSet modelSet) throws IOException {
         // Validate dimensions before native decoding so a tiny compressed file cannot request
         // an enormous allocation. NativeImage then checks the actual image data as well.
         if (bytes.length < 33 || ByteBuffer.wrap(bytes).getLong() != 0x89504E470D0A1A0AL
@@ -180,8 +196,9 @@ public final class WerewolfSkinCatalog extends SimplePreparableReloadListener<We
         }
         int width = ByteBuffer.wrap(bytes, 16, 4).getInt();
         int height = ByteBuffer.wrap(bytes, 20, 4).getInt();
-        int baseWidth = form == WerewolfForm.QUADRUPED ? 64 : 128;
-        int baseHeight = form == WerewolfForm.QUADRUPED ? 32 : 128;
+        int baseWidth = modelSet == WerewolfModelSet.MODERN ? (form == WerewolfForm.BEAST ? 256 : 128)
+                : form == WerewolfForm.QUADRUPED ? 64 : 128;
+        int baseHeight = modelSet == WerewolfModelSet.MODERN ? baseWidth : form == WerewolfForm.QUADRUPED ? 32 : 128;
         int scale = width / baseWidth;
         if (scale < 1 || scale > 4 || width != baseWidth * scale || height != baseHeight * scale) {
             throw new IOException("Wrong " + form.id() + " size; expected " + baseWidth + "x" + baseHeight + " at 1x-4x scale");

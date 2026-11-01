@@ -21,6 +21,8 @@ public final class WerewolfSkinIds {
         if (id == null || id.getNamespace().isEmpty() || !validPath(id.getPath())
                 || !id.toString().equals(value)) return null;
         if (HowlingWerewolf.MOD_ID.equals(id.getNamespace())) {
+            ModernSkin modern = ModernSkin.bySkinId(value);
+            if (modern != null) return modern.skinId();
             for (WerewolfSkin skin : WerewolfSkin.values()) {
                 if (skin.getId().equals(id.getPath())) return id.toString();
             }
@@ -32,6 +34,18 @@ public final class WerewolfSkinIds {
     public static String normalize(String value) {
         String canonical = canonicalize(value);
         return canonical == null ? DEFAULT_ID : canonical;
+    }
+
+    public static boolean matchesModelSet(String id, WerewolfModelSet modelSet) {
+        String canonical = canonicalize(id);
+        if (canonical == null) return false;
+        if (!canonical.startsWith(HowlingWerewolf.MOD_ID + ":")) return true;
+        return (ModernSkin.bySkinId(canonical) != null) == (modelSet == WerewolfModelSet.MODERN);
+    }
+
+    public static String normalize(String value, WerewolfModelSet modelSet) {
+        String canonical = canonicalize(value);
+        return matchesModelSet(canonical, modelSet) ? canonical : modelSet.defaultSkinId();
     }
 
     /** Resource-pack paths are relative, with no empty or traversal segments. */

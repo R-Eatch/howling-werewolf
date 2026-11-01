@@ -46,7 +46,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public final class AlphaWerewolfEntity extends Monster {
+public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcAppearance {
+    private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
+            net.minecraft.network.syncher.SynchedEntityData.defineId(AlphaWerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN),
+            net.minecraft.network.syncher.SynchedEntityData.defineId(AlphaWerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT));
     private static final int TELEPORT_COOLDOWN = 20 * 20;
     private static final int REVIVED_TELEPORT_COOLDOWN = 20 * 15;
     private static final int TELEPORT_WARNING = 20;
@@ -72,7 +75,17 @@ public final class AlphaWerewolfEntity extends Monster {
         super(type, level);
         xpReward = 50;
         setPersistenceRequired();
+        NpcAppearanceData.initialize(this, APPEARANCE, false);
     }
+
+    @Override protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        NpcAppearanceData.define(builder, APPEARANCE);
+    }
+
+    @Override public com.howlingwerewolf.WerewolfModelSet getNpcModelSet() { return NpcAppearanceData.modelSet(entityData, APPEARANCE); }
+    @Override public com.howlingwerewolf.ModernSkin getNpcCoat() { return com.howlingwerewolf.ModernSkin.ASHEN; }
+    @Override public com.howlingwerewolf.WerewolfForm getNpcForm() { return com.howlingwerewolf.WerewolfForm.BEAST; }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
@@ -168,6 +181,7 @@ public final class AlphaWerewolfEntity extends Monster {
     public void aiStep() {
         super.aiStep();
         if (level().isClientSide()) return;
+        NpcAppearanceData.refresh(this, APPEARANCE);
         if (tickCount % NATURAL_HEAL_INTERVAL == 0 && getHealth() < getMaxHealth()) {
             heal(NATURAL_HEAL_AMOUNT);
         }

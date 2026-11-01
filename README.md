@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.8-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.1-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -16,6 +16,8 @@
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
 > This branch contains the NeoForge edition for Minecraft 26.1.2. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
+
+Howling Werewolf **1.2.1** corrects the model name to **Modern** and credits **Classic — By Eatch / Modern — By Leo** in the skin switch tooltip. The Alpha and its summoned pack use Modern Ashen; wild and spawn-egg werewolves use a saved random Modern coat. The server-controlled `gameplay.npcModelSet` setting defaults to `modern`; `classic` gives all these NPCs Classic Adrian. Player skin choices remain independent. See the [1.2.1 changelog](docs/CHANGELOG-1.2.1.md).
 
 Howling Werewolf 1.1.8 adds fixed-height Auto Step: **1.0 block** for Quadruped Wolf, **1.5 blocks** for Werewolf, and **2.0 blocks** for Beast. In `config/howlingwerewolf-common.toml`, `gameplay.enableWerewolfAutoStep` defaults to `true`; set it to `false` to restore normal stepping. Manual jumping retains its existing skill and form rules. The 1.1.7 Fire Claws cooked-loot fix, Alpha combat timing and 16×16 item/block textures are retained.
 
@@ -30,16 +32,31 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.1.8 |
+| Howling Werewolf | 1.2.1 |
 
 ## Werewolf skins
 
-- Open the werewolf menu with **K** by default → **Skins** to choose from four coats: the original brown Adrian, gray Ashen with amber eyes, black Onyx with golden eyes, or white Ivory with red eyes. Each covers Werewolf, Quadruped Wolf, and Beast forms.
+- Open the werewolf menu with **K** by default → **Skins**. Switch **Classic / Modern** in the upper-right corner, then select **Apply** to save. Classic retains Adrian, Ashen, Onyx and Ivory. Modern includes Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods. Each coat covers all three forms.
+- New players default to **Modern / Ashen**. Existing Classic choices are preserved when upgrading.
 - Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is below the skill list on the Skill Tree page.
+- Modern camera height follows standing, crouching and quadrupedal sprinting. Weapons retain native size and palm anchors; armor and elytra follow the imported bones under the existing equipment rules.
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to 1.1.8 for multiplayer. Only custom skin IDs are synchronized; observers need the same resource pack. Missing packs display Adrian while preserving the saved selection.
+Update both server and clients to **1.2.1**. Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+
+## NPC model configuration
+
+In `config/howlingwerewolf-common.toml`:
+
+```toml
+[gameplay]
+npcModelSet = "modern"
+```
+
+- `modern` (default): Alpha and its summoned pack use Ashen; wild and spawn-egg werewolves receive one of the nine saved coats.
+- `classic`: all affected NPCs use the Classic model and Adrian texture for their form.
+- Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
 
 ## Spawn eggs and item animations
 
@@ -53,7 +70,7 @@ Update both server and clients to 1.1.8 for multiplayer. Only custom skin IDs ar
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.1.8**.
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.2.1**.
 
 ## Build from source
 
@@ -63,9 +80,9 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.1.8-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.2.1-neoforge-26.1.2.jar`.
 
-The latest Mod source version is **1.1.8**; see the [1.1.8 changelog](docs/CHANGELOG-1.1.8.md). **The maintainer completed a full in-game playthrough of 1.1.3; the changes introduced in the current version, 1.1.8, have been tested.** GitHub Releases and platform binaries are published separately by the maintainer; check each download for its Minecraft and Mod version.
+The current Mod source version is **1.2.1**. The maintainer reported successful in-game testing of 1.2.0. Version 1.2.1 is prepared with compilation and independent regression checks; its in-game testing remains with the maintainer. GitHub Releases and platform binaries are published separately.
 
 ## Administrator commands
 

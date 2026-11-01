@@ -50,6 +50,10 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerSkinReloadListener(AddClientReloadListenersEvent event) {
         event.addListener(Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf_skins"), new WerewolfSkinCatalog());
+        Identifier models = Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "modern_models");
+        event.addListener(models, new ModernModelResources());
+        event.addDependency(net.neoforged.neoforge.client.resources.VanillaClientListeners.TEXTURES, models);
+        event.addDependency(models, net.neoforged.neoforge.client.resources.VanillaClientListeners.ENTITY_RENDERER);
     }
 
     @SubscribeEvent
@@ -75,8 +79,7 @@ public final class ClientModEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.HUNTER.get(), HunterRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_WEREWOLF.get(), AlphaWerewolfRenderer::new);
-        event.registerEntityRenderer(ModEntities.ALPHA_MINION.get(),
-                net.minecraft.client.renderer.entity.WolfRenderer::new);
+        event.registerEntityRenderer(ModEntities.ALPHA_MINION.get(), AlphaMinionRenderer::new);
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.RITUAL_ALTAR.get(),
                 RitualAltarRenderer::new);
@@ -92,13 +95,13 @@ public final class ClientModEvents {
         event.registerEntityModifier(new com.google.common.reflect.TypeToken<
                 WerewolfLivingRenderer<net.minecraft.world.entity.LivingEntity,
                         net.minecraft.client.renderer.entity.state.HumanoidRenderState, ?>>() {},
-                (entity, state) -> state.setRenderData(WerewolfRenderData.KEY, WerewolfRenderData.forEntity(entity)));
+                (entity, state) -> state.setRenderData(WerewolfRenderData.KEY, WerewolfRenderData.forEntity(entity, state.partialTick)));
         event.registerAvatarEntityModifier(new net.neoforged.neoforge.client.renderstate.AvatarRenderStateModifier() {
             @Override
             public <T extends net.minecraft.world.entity.Avatar & net.minecraft.client.entity.ClientAvatarEntity>
                     void accept(T avatar, net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
                 if (avatar instanceof net.minecraft.client.player.AbstractClientPlayer player) {
-                    var data = WerewolfRenderData.forEntity(player);
+                    var data = WerewolfRenderData.forEntity(player, state.partialTick);
                     ClientForgeEvents.extractMouthItem(player, data.mouthItem());
                     state.setRenderData(WerewolfRenderData.KEY, data);
                     if (data.preview()) {
