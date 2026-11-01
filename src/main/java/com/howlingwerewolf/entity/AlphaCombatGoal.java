@@ -11,6 +11,9 @@ import java.util.EnumSet;
 
 /** Alternates pressure and evasive footwork instead of blindly holding forward. */
 final class AlphaCombatGoal extends Goal {
+    private static final int ATTACK_INTERVAL_TICKS = 40;
+    private static final int PROWL_DURATION_TICKS = 120;
+    private static final int PROWL_SPEED_DURATION_TICKS = 60;
     private final AlphaWerewolfEntity alpha;
     private int attackCooldown;
     private int retreatTicks;
@@ -33,7 +36,9 @@ final class AlphaCombatGoal extends Goal {
 
     @Override
     public boolean requiresUpdateEveryTick() {
-        // Cooldowns and the 60-tick prowl use the same game-tick clock as potion effects.
+        // Update steering every game tick. Explicit 40/120-tick timers preserve the old Goal's
+        // two-second attacks and six-second prowl when it updated every other game tick.
+        // 每游戏刻更新移动；旧版 Goal 隔刻执行，现用 40/120 游戏刻保留 2 秒攻击间隔和 6 秒游猎。
         return true;
     }
 
@@ -80,15 +85,18 @@ final class AlphaCombatGoal extends Goal {
                 + target.getBbWidth();
         if (distanceSqr <= reach && attackCooldown <= 0 && alpha.hasLineOfSight(target)) {
             alpha.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            // A successful pre-revival hit has a 25% chance to begin a three-second Speed III prowl.
-            // 复活前成功近战后有 25% 概率进入持续 3 秒、附带迅捷 III 的游猎。
+            // Before revival, a successful melee hit has a 25% chance to start a six-second prowl.
+            // Speed III lasts only the first three seconds, matching the old potion duration.
+            // 复活前成功近战后有 25% 概率游猎后撤 6 秒；仅前 3 秒附带迅捷 III，与旧版实际时长一致。
             if (alpha.doHurtTarget((net.minecraft.server.level.ServerLevel) alpha.level(), target) && !alpha.hasRevived()
                     && alpha.getRandom().nextFloat() < 0.25F) {
-                retreatTicks = 60;
+                retreatTicks = PROWL_DURATION_TICKS;
                 alpha.addEffect(new MobEffectInstance(MobEffects.SPEED,
-                        retreatTicks, 2, true, true, true));
+                        PROWL_SPEED_DURATION_TICKS, 2, true, true, true));
             }
-            attackCooldown = 20;
+            // Forty game ticks between melee attempts at 20 TPS; summoning pauses this timer.
+            // 20 TPS 时近战尝试间隔为 40 游戏刻（2 秒）；召唤吟唱期间暂停计时。
+            attackCooldown = ATTACK_INTERVAL_TICKS;
         } else {
             alpha.tryTraversalJump(target.position().subtract(alpha.position()));
             alpha.getNavigation().moveTo(target, 1.12D);

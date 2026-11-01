@@ -316,6 +316,8 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void lifesteal(LivingDamageEvent.Post event) {
+        // As in 1.21.1, Long Claws secondary hits and Bloody Bite do not trigger lifesteal.
+        // 与旧版一致，长爪副伤害和血腥撕咬均不触发吸血。
         if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get()) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker) || event.getEntity() == attacker) return;
         boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)
@@ -339,13 +341,12 @@ public final class WerewolfGameplayEvents {
         if (!melee || !attacker.getMainHandItem().isEmpty()) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
             if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
-            // The secondary hit starts with half of the primary hit's pre-mitigation
-            // damage. Each secondary target then applies its own armor and reductions.
+            // Restore the 1.21.1 splash formula; each secondary target still applies its own reductions.
             boolean convertedVoidHit = event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)
                     && data.isBeastMode() && HWConfig.BEAST_VOID_DAMAGE.get();
             float splashDamage = WerewolfCombatRules.longClawSplash(event.getOriginalDamage(),
                     data.getForm(), convertedVoidHit,
-                    convertedVoidHit ? moonRendDamage(attacker, event.getEntity(), data) : 0.0F);
+                    moonRendDamage(attacker, event.getEntity(), data));
             if (splashDamage <= 0.0F) return;
             LivingEntity primaryTarget = event.getEntity();
             LONG_CLAW_SPLASH.set(true);
@@ -363,8 +364,10 @@ public final class WerewolfGameplayEvents {
     }
 
     @SubscribeEvent
-    public static void fireClawAttack(LivingDamageEvent.Post event) {
-        if (BLOODY_BITE_DAMAGE.get() || event.getHealthDamage() <= 0.0F
+    public static void fireClawAttack(LivingDamageEvent.Pre event) {
+        // Ignite before health/death processing so one-hit kills generate cooked meat drops.
+        // 扣血及死亡掉落结算前点燃目标，使首击击杀也能按燃烧状态掉落熟肉。
+        if (BLOODY_BITE_DAMAGE.get() || event.getNewDamage() <= 0.0F
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || event.getEntity() == attacker || !attacker.getMainHandItem().isEmpty()) return;
         boolean melee = event.getSource().is(DamageTypes.PLAYER_ATTACK)

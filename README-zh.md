@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/v1.1.5"><img src="https://img.shields.io/badge/Mod-1.1.5-blue?style=flat-square" alt="最新版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.1.7-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -17,7 +17,9 @@
 
 > 当前分支提供 Minecraft 26.1.2 的 NeoForge 版；Minecraft 1.20.1 的 Forge 版维护在 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
 
-Howling Werewolf 1.1.5 已完成基于 1.1.3 功能的 Minecraft 26.1.2 移植，使用稳定版 NeoForge 26.1.2.122 与 Java 25，并适配渲染、存档、配方、世界生成、持物动作和新版刷怪蛋美术。
+Howling Werewolf 1.1.7 修复火焰爪首击击杀牛、猪等生物时掉落生肉的问题：现在会在扣血和死亡掉落之前点燃目标。保留 Alpha 的旧版战斗节奏：近战间隔 40 tick（2 秒），游猎后撤 120 tick（6 秒），其中迅捷 III 保持 60 tick（3 秒）。所有物品和方块贴图统一为 16×16，并保留 1.1.6 的 JEI 配方同步修复。使用 NeoForge 26.1.2.122 与 Java 25。
+
+保留 NeoForge 1.21.1 的长爪副伤害公式：普通狼人副伤害重新包含裂月利爪加成；长爪副伤害仍不触发吸血。
 
 Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围绕感染、月相变身、两套成长系统、三种狼人形态、猎人与银制品、狼毒草以及 Alpha 试炼展开。
 
@@ -28,7 +30,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 26.1.2 |
 | Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
-| Howling Werewolf | 1.1.5 |
+| Howling Werewolf | 1.1.7 |
 
 ## 狼人皮肤
 
@@ -37,7 +39,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 1.1.5。自定义皮肤只同步 ID，观察者需要启用相同资源包；缺少资源包时显示 Adrian，保存的选择仍保留。
+联机时服务端与客户端都需更新至 1.1.7。自定义皮肤只同步 ID，观察者需要启用相同资源包；缺少资源包时显示 Adrian，保存的选择仍保留。
 
 ## 刷怪蛋与持物动作
 
@@ -51,7 +53,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.1.5**。
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.1.7**。
 
 ## 从源码构建
 
@@ -61,9 +63,9 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 ./gradlew build -x test
 ```
 
-Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.1.5-neoforge-26.1.2.jar`。
+Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.1.7-neoforge-26.1.2.jar`。
 
-源码与 `v1.1.5` 标签维护于 GitHub；模组文件由维护者另外手动发布。更新 Mod 前请备份重要存档。
+当前最新 Mod 源码版本为 **1.1.7**，更新内容见[1.1.7 更新日志](docs/CHANGELOG-1.1.7.md)。**1.1.3 已由维护者完成全流程实机测试；1.1.7 尚未实机测试。** 编译打包与源码核查不等于游戏内验证。GitHub Release 和各平台模组文件由维护者另行发布；请在下载页确认对应游戏版本与文件版本。
 
 ## 管理员命令
 

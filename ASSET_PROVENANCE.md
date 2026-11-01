@@ -8,6 +8,19 @@ official logo and project branding identified there. Original source code is gov
 
 This file records the provenance policy for the public release branch.
 
+## 1.1.6.1 standard-resolution items and blocks
+
+- The Alpha Werewolf Badge, Moonbane Pearl, Wolfsbane flower, Silver Ore and
+  Deepslate Silver Ore artwork was adapted from this project's existing textures
+  with the built-in OpenAI image-generation editing workflow, retaining each
+  subject and its color direction on a 16×16 pixel grid.
+- The resulting PNGs are exported at exactly 16×16. Each ore uses the same
+  artwork for its existing top and side texture paths, as before; seven runtime
+  files are updated in total. The eleven existing 16×16 item/block images are
+  retained unchanged.
+- Entity UV atlases, player coats, model geometry and the project logo are
+  unchanged. No third-party texture pixels are copied into these adaptations.
+
 ## 1.1.3 coat refinements
 
 - Ashen, Onyx, and Ivory now have matching eyes in all three forms. Werewolf

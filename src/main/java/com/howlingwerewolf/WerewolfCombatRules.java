@@ -12,11 +12,12 @@ public final class WerewolfCombatRules {
 
     public static float longClawSplash(float originalDamage, WerewolfForm form,
                                       boolean convertedVoidHit, float moonRendDamage) {
-        // A recursive Beast void hit already contains the form multiplier and Moonrend.
-        // Ordinary hits start with unmodified source damage; Moonrend never enters their splash.
+        // Match NeoForge 1.21.1: ordinary splash keeps Moonrend and the extra form multiplier.
+        // Converted Beast void hits already include both; remove Moonrend without scaling again.
+        // 恢复旧版普通副伤害中的裂月加成及额外形态倍率；野兽虚空副伤仍扣除裂月、不再乘倍率。
         float clawDamage = convertedVoidHit
                 ? originalDamage - moonRendDamage
-                : originalDamage * attackMultiplier(form);
+                : (originalDamage * attackMultiplier(form) + moonRendDamage) * attackMultiplier(form);
         return Math.max(0.0F, clawDamage) * 0.5F;
     }
 
