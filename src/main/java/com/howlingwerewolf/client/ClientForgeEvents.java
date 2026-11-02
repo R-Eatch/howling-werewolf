@@ -4,6 +4,7 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
+import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.network.RequestWerewolfSyncPacket;
 import com.howlingwerewolf.network.TransformRequestPacket;
@@ -34,6 +35,7 @@ public final class ClientForgeEvents {
     private static BeastPlayerRenderer beastRenderer;
     private static QuadrupedWerewolfRenderer quadrupedRenderer;
     private static WerewolfEquipmentRenderer equipmentRenderer;
+    private static final java.util.Map<WerewolfForm, ModernPlayerRenderer> modernRenderers = new java.util.EnumMap<>(WerewolfForm.class);
     private static ResourceKey<Level> lastClientDimension;
     private static int dimensionResyncTicks = -1;
     private static int secondDimensionResyncTicks = -1;
@@ -101,6 +103,7 @@ public final class ClientForgeEvents {
         beastRenderer = new BeastPlayerRenderer(context);
         quadrupedRenderer = new QuadrupedWerewolfRenderer(context);
         equipmentRenderer = new WerewolfEquipmentRenderer(context);
+        for (WerewolfForm form : ModernModelResources.FORMS) modernRenderers.put(form, new ModernPlayerRenderer(context, form));
         itemModelResolver = context.getItemModelResolver();
     }
 
@@ -122,6 +125,10 @@ public final class ClientForgeEvents {
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         try {
+            if (data.modelSet() == WerewolfModelSet.MODERN) {
+                modernRenderers.get(form).submit(state, pose, event.getSubmitNodeCollector(), camera);
+                return;
+            }
             switch (form) {
                 case BEAST -> beastRenderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
                 case QUADRUPED -> quadrupedRenderer.submit(state, pose, event.getSubmitNodeCollector(), camera);
@@ -142,6 +149,7 @@ public final class ClientForgeEvents {
         var data = WerewolfRenderData.forEntity(event.getPlayer());
         if (data.form() == WerewolfForm.HUMAN) return;
         if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
+        else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
         else WerewolfFirstPersonClawRenderer.render(event, data);
     }
 

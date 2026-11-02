@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
 
-public final class QuadrupedWerewolfRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, QuadrupedWerewolfModel> {
+public final class QuadrupedWerewolfRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, QuadrupedWerewolfModel<AvatarRenderState>> {
     public QuadrupedWerewolfRenderer(EntityRendererProvider.Context context) {
-        super(context, new QuadrupedWerewolfModel(context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F, AvatarRenderState::new);
+        super(context, new QuadrupedWerewolfModel<>(context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F, AvatarRenderState::new);
         addLayer(new QuadrupedHeldItemLayer(this));
     }
 

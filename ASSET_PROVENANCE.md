@@ -219,3 +219,29 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 - Werewolf artwork uses brown fur and a pale muzzle; Hunter artwork uses charcoal, forest green, leather and silver; the Alpha uses dark red-brown fur and a gold forehead marking.
 - The two legacy Minecraft 1.21.1 generic egg layers previously bundled for compatibility have been removed. The new item model definitions reference only the mod's own dedicated textures and do not apply legacy color tints.
 - Generated masters, prompts, reference previews and export metadata are retained locally as authoring material; only the final sprites and their documentation preview are distributed with the source tree. The new artwork follows the project's asset license.
+
+## 1.2.0 Modern player models
+
+- Maintainer-supplied Blockbench projects from `design/blockbench/Modern/Werewolf Form.bbmodel`, `Wolf form.bbmodel`, and `Beast form.bbmodel` are copied byte-for-byte to `assets/howlingwerewolf/models/entity/modern/{werewolf,quadruped,beast}.bbmodel`.
+- Each project embeds Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods PNG palettes. Their original names and pixel data are retained. No author/license metadata is added to the supplied projects.
+- Runtime geometry and textures are loaded from these projects. The original files have no animation keyframes. Existing project animation code is retargeted to their skeletons, with a new quadrupedal Beast sprint. The authoring-only variable placeholders are not executed.
+- This addition is limited to player transformations; Alpha, feral werewolf and Classic resources are retained.
+
+## 1.2.1 model naming and artist credit
+
+- The maintainer identified the Modern model/texture artist as thewolfulti and the Classic artist as R_Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
+- The public/runtime family name is Modern, with `modern` used for IDs, resource paths and skin-pack model fields.
+- Modern Ashen is used for the Alpha and its summoned pack, while wild/spawn-egg werewolf palettes are selected by the server and saved. The server NPC model setting can switch all of these to Classic Adrian.
+
+## 1.2.2 Modern contribution and shared asset license
+
+- **thewolfulti** designed, created, and shared the Modern **Werewolf, Quadruped
+  Wolf, and Beast** models, with **nine skins for each model** (27 form textures).
+  Thank you for creating and sharing these appearances with the project.
+- The three runtime bbmodel projects, their embedded PNG palettes, and exported
+  painting-template geometry and textures follow the project's existing
+  **CC BY-SA 4.0** asset license, as specified by the maintainer for this update.
+- Credit **thewolfulti** for the Modern models and skins. Classic models and
+  artwork remain credited to **R_Eatch**. Source project bytes remain unchanged;
+  attribution and distribution terms are recorded in the public guides and
+  [LICENSE-ASSETS.md](LICENSE-ASSETS.md).

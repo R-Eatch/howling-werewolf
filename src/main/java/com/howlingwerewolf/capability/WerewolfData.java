@@ -5,6 +5,7 @@ import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
+import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,7 +34,8 @@ public final class WerewolfData implements ValueIOSerializable {
     private boolean infected;
     private boolean moonForced;
     private WerewolfForm form = WerewolfForm.HUMAN;
-    private String skinId = WerewolfSkinIds.DEFAULT_ID;
+    private String skinId = WerewolfModelSet.MODERN.defaultSkinId();
+    private WerewolfModelSet modelSet = WerewolfModelSet.MODERN;
     private boolean alphaDefeated;
     private boolean nightVisionEnabled = true;
     private int level = 1;
@@ -62,6 +64,7 @@ public final class WerewolfData implements ValueIOSerializable {
     public WerewolfForm getForm() { return form; }
     public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
     public String getSkinId() { return skinId; }
+    public WerewolfModelSet getModelSet() { return modelSet; }
     public boolean isBeastMode() { return form == WerewolfForm.BEAST; }
     public boolean isQuadrupedMode() { return form == WerewolfForm.QUADRUPED; }
     public boolean hasDefeatedAlpha() { return alphaDefeated; }
@@ -89,7 +92,11 @@ public final class WerewolfData implements ValueIOSerializable {
     public void setInfected(boolean value) { infected = value; }
     public void setMoonForced(boolean value) { moonForced = value; }
     public void setSkin(WerewolfSkin value) { setSkinId(value == null ? null : value.getId()); }
-    public void setSkinId(String value) { skinId = WerewolfSkinIds.normalize(value); }
+    public void setSkinId(String value) { setAppearance(WerewolfModelSet.CLASSIC, value); }
+    public void setAppearance(WerewolfModelSet set, String value) {
+        modelSet = set == null ? WerewolfModelSet.CLASSIC : set;
+        skinId = WerewolfSkinIds.normalize(value, modelSet);
+    }
     public void setForm(WerewolfForm value) {
         WerewolfForm requested = value == null ? WerewolfForm.HUMAN : value;
         if (!werewolf || requested == WerewolfForm.HUMAN) {
@@ -263,7 +270,7 @@ public final class WerewolfData implements ValueIOSerializable {
     /** Returns true only for a fully default state, including cosmetic preferences. */
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
-                && skinId.equals(WerewolfSkinIds.DEFAULT_ID)
+                && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId())
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -307,6 +314,7 @@ public final class WerewolfData implements ValueIOSerializable {
         moonForced = other.moonForced;
         form = other.form;
         skinId = other.skinId;
+        modelSet = other.modelSet;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
         level = other.level;
@@ -336,6 +344,7 @@ public final class WerewolfData implements ValueIOSerializable {
         tag.putBoolean("MoonForced", moonForced);
         tag.putString("Form", form.id());
         tag.putString("Skin", skinId);
+        tag.putString("ModelSet", modelSet.id());
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
         tag.putInt("Level", level);
@@ -371,6 +380,7 @@ public final class WerewolfData implements ValueIOSerializable {
     }
 
     public void deserializeNBT(CompoundTag tag) {
+        boolean fresh = tag.isEmpty();
         tag = migrateData(tag);
         syncedMaxLevel = tag.contains("NetworkMaxLevel")
                 ? Math.max(1, Math.min(MAX_LEVEL_LIMIT, tag.getIntOr("NetworkMaxLevel", 0))) : 0;
@@ -378,7 +388,7 @@ public final class WerewolfData implements ValueIOSerializable {
         infected = tag.getBooleanOr("Infected", false);
         moonForced = tag.getBooleanOr("MoonForced", false);
         form = WerewolfForm.byName(tag.getStringOr("Form", ""));
-        setSkinId(tag.getStringOr("Skin", ""));
+        setAppearance(WerewolfModelSet.byId(tag.getStringOr("ModelSet", fresh ? "modern" : "classic")), tag.getStringOr("Skin", ""));
         alphaDefeated = tag.getBooleanOr("AlphaDefeated", false);
         nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBooleanOr("NightVisionEnabled", false);
         level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getIntOr("Level", 0)));

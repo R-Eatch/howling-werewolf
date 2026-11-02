@@ -137,6 +137,16 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void playerTickPost(PlayerTickEvent.Post event) {
+        // Eye origins are cached by Entity. Refresh on pose changes on both logical sides;
+        // Camera retains vanilla eye-height smoothing and collision dimensions stay unchanged.
+        WerewolfApi.get(event.getEntity()).ifPresent(data -> {
+            var player = event.getEntity();
+            if (player.isAlive() && data.isTransformed() && data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN) {
+                float eye = com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), player.getPose(),
+                        com.howlingwerewolf.WerewolfModelPose.isBeastSprint(player, data));
+                if (Math.abs(player.getEyeHeight() - eye) > 0.005F) player.refreshDimensions();
+            }
+        });
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             processAwakeningAndMoon(player, data);
@@ -553,9 +563,13 @@ public final class WerewolfGameplayEvents {
                 // Keep a small clearance inside exact 1x3 (or crouched 1x2) block openings.
                 // A hitbox equal to the opening leaves no tolerance for centering or collision math.
                 event.setNewSize(EntityDimensions.scalable(0.95F, crouching ? 1.95F : 2.95F)
-                        .withEyeHeight(crouching ? 1.8F : 2.7F));
+                        .withEyeHeight(data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN
+                                ? com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), event.getPose(),
+                                com.howlingwerewolf.WerewolfModelPose.isBeastSprint(player, data)) : crouching ? 1.8F : 2.7F));
             } else if (data.isTransformed() && data.isQuadrupedMode()) {
-                event.setNewSize(EntityDimensions.scalable(0.6F, 0.85F).withEyeHeight(0.68F));
+                event.setNewSize(EntityDimensions.scalable(0.6F, 0.85F).withEyeHeight(
+                        data.getModelSet() == com.howlingwerewolf.WerewolfModelSet.MODERN
+                                ? com.howlingwerewolf.WerewolfModelPose.eyeHeight(data.getForm(), event.getPose(), false) : 0.68F));
             }
         });
     }

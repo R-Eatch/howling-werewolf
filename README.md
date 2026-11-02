@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.8-blue?style=flat-square" alt="Latest source: 1.1.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.2.2-blue?style=flat-square" alt="Latest source: 1.2.2"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
@@ -18,6 +18,12 @@
 > `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all three supported editions.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
+
+## 1.2.2 update
+
+This update adds **Modern models for all three forms: Werewolf, Quadruped Wolf, and Beast**, with **9 skins for each model**. The models and skins were designed and created by **thewolfulti**. The Classic set remains available through the skin-screen switch.
+
+The nine palettes are **Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped, and Woods**. This version also includes animation, held-item, equipment, and camera support for the new models, plus server-controlled NPC models and coats. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
 
 ## Before the first howl
 
@@ -55,13 +61,13 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 
 ## Werewolf skins and custom skins
 
-Press **K** → **Skins** to choose the original brown **Adrian**, amber-eyed gray **Ashen**, gold-eyed black **Onyx**, or red-eyed white **Ivory** coat. Each covers the biped, quadruped, and Beast forms.
+Press **K** → **Skins**, switch **Classic / Modern** in the upper-right corner, choose a coat, and select **Apply** to save it. Classic retains the original brown **Adrian**, amber-eyed gray **Ashen**, gold-eyed black **Onyx**, and red-eyed white **Ivory**. Modern offers nine palettes, each covering Werewolf, Quadruped Wolf, and Beast.
 
-The preview supports mouse tracking, drag rotation, scroll zoom, and equipment visibility. Apply a selection to save it; previewing a form does not unlock or switch your actual form. Your choice persists through death, dimension travel, level resets, and curing followed by reawakening. Third-person rendering, inventory previews, and first-person claws use the same skin.
+New players default to **Modern / Ashen**. Existing Classic choices and legacy saves without a model field remain Classic. Preview with mouse tracking, drag rotation, scroll zoom, and equipment visibility; previewing does not unlock or switch your actual form. Each player's model and coat are saved independently across death, dimension travel, level resets, and curing followed by reawakening. Third-person rendering, inventory previews, and first-person claws use the matching appearance.
 
-Choose **Create Template** on the skin page to export PNGs, Blockbench drawing templates, and resource-pack instructions. Export your own PNGs, enable the resource pack, and press **F3 + T** to reload resources. Your work can then be selected in the skin screen.
+Choose **Create Template** to export PNGs, Blockbench drawing templates, and resource-pack instructions for the selected model set. Modern templates use the selected built-in coat, or Ashen when exporting from a custom coat. Export your own PNGs, enable the pack, and press **F3 + T** to reload resources. Your work can then be selected in Skins.
 
-Multiplayer synchronizes skin IDs rather than uploading images. Other players need the same resource pack; missing resources fall back to Adrian while preserving the saved choice. Resource-pack formats differ between Minecraft editions, so use templates from the matching branch.
+Multiplayer synchronizes each player's model set and skin ID without uploading images. Built-in coats need no extra pack. Custom coats require the same pack on observing clients; missing resources fall back to Classic Adrian or Modern Ashen while preserving the saved selection. Resource-pack formats differ between Minecraft editions, so use templates from the matching branch.
 
 See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chinese](CUSTOM_SKINS-zh.md).
 
@@ -239,7 +245,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**Version 1.1.3 has completed a full in-game playthrough; the changes introduced in the current version, 1.1.8, have been tested.** Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
+**Version 1.1.3 completed a full in-game playthrough, and the 1.1.8 changes were tested. Version 1.2.2 has local build, model, and data regression checks; its visual in-game and multiplayer acceptance remain with the maintainer.** Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 The full-playthrough testing baseline includes starting normal survival in a new world, defeating the Ender Dragon, and obtaining elytra.
 
@@ -256,9 +262,15 @@ When reporting an issue, provide:
 
 ## Source, changelogs, and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.2.2**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
+
+## Credits
+
+Special thanks to **thewolfulti** for designing, creating, and sharing the **Modern Werewolf, Quadruped Wolf, and Beast models**, with **9 skins for each model**. Thank you for the work and for sharing these new appearances with the project and its players.
+
+These models and skins follow the project's existing **CC BY-SA 4.0** asset license. When sharing or adapting them, credit **thewolfulti**, identify your changes, and follow the ShareAlike requirements. Classic models and artwork are by **R_Eatch**. See [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for the terms.
 
 ## License and copyright
 

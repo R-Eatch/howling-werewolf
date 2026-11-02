@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.1.8-blue?style=flat-square" alt="最新源码： 1.1.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.2.2-blue?style=flat-square" alt="最新源码： 1.2.2"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
@@ -19,6 +19,12 @@
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
+
+## 1.2.2 更新
+
+本次更新新增 **Modern** 系列的 **普通狼人、四足狼和野兽** 三个形态模型，**每个模型均有 9 套皮肤**，模型与皮肤均由 **thewolfulti** 设计制作。Classic 系列继续保留，可在皮肤界面切换。
+
+九套配色为 **Ashen、Black、Chestnut、Pale、Rusty、Snowy、Spotted、Stripped、Woods**。本版还包含新模型的动作、持物、装备和视角适配，以及服务端管理的 NPC 模型与配色。详见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
 
 ## 当第一声嚎叫尚未响起
 
@@ -56,13 +62,13 @@
 
 ## 狼人皮肤与自定义皮肤
 
-默认按 **K** 打开狼人菜单 → **皮肤**，可以选择原棕色 **Adrian**、琥珀眼灰狼 **Ashen**、金眼黑狼 **Onyx** 与红眼白狼 **Ivory**；每套都覆盖双足、四足和野兽三种形态。
+默认按 **K** 打开狼人菜单 → **皮肤**，在右上角切换 **Classic / Modern**，选择皮肤并点击**应用**保存。Classic 保留原棕色 **Adrian**、琥珀眼灰狼 **Ashen**、金眼黑狼 **Onyx** 与红眼白狼 **Ivory**；Modern 提供九套配色，每套均覆盖普通狼人、四足狼和野兽三种形态。
 
-预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关。点击应用后保存选择；预览不会解锁或切换实际形态。皮肤选择会随玩家数据保存，死亡、换维度、重置等级以及治愈后再觉醒均保留，第三人称、背包预览与第一人称爪使用同一套皮肤。
+新玩家默认使用 **Modern / Ashen**；已有 Classic 选择和缺少模型字段的旧存档继续按 Classic 读取。预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关；预览不会解锁或切换实际形态。模型系列和皮肤逐玩家保存，死亡、换维度、重置等级以及治愈后再觉醒均保留，第三人称、背包预览与第一人称爪使用相应外观。
 
-在皮肤页选择 **创建模板**，即可获得 PNG、Blockbench 绘画模板和资源包说明。导出自己的 PNG，启用对应资源包，再按 **F3 + T** 重载资源，就能在皮肤界面选择作品。
+在皮肤页选择**创建模板**，即可导出当前模型系列的 PNG、Blockbench 绘画模板和资源包说明。Modern 模板跟随选中的内置配色；从自定义皮肤导出时使用 Ashen。导出自己的 PNG，启用对应资源包，再按 **F3 + T** 重载资源，就能在皮肤界面选择作品。
 
-联机只同步皮肤 ID，不会自动上传图片。其他玩家需要启用相同资源包；缺少资源时会显示 Adrian，保存的选择仍然保留。各游戏版本的资源包格式不同，请使用对应分支的模板。
+联机同步每名玩家的模型系列和皮肤 ID，不会自动上传图片。内置皮肤无需额外资源包；自定义皮肤需要观察者启用相同资源包，缺失时按系列回退到 Classic Adrian 或 Modern Ashen，保存的选择仍然保留。各游戏版本的资源包格式不同，请使用对应分支的模板。
 
 完整教程见[自定义皮肤指南](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
@@ -240,7 +246,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 测试与兼容性
 
-**1.1.3 已完成全流程实机测试；当前版本 1.1.8 对更新内容已经完成测试。** 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
+**1.1.3 已完成全流程实机测试，1.1.8 更新内容已测试。1.2.2 已完成本地构建、模型与数据回归检查；本轮实机观感和多人验收仍由维护者进行。** 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 完整流程测试基线包括从新存档进行常规生存、击败末影龙并取得鞘翅。
 
@@ -257,9 +263,15 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码、更新日志与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**。
+项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.2.2**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
+
+## 致谢 / Credits
+
+特别感谢 **thewolfulti** 为本 Mod 设计、制作并分享 **Modern 普通狼人、四足狼和野兽** 三个形态模型，以及**每个模型的 9 套皮肤**。感谢他投入的制作时间和对作品的分享，为三种狼人形态带来新的外观选择。
+
+这批模型与皮肤同样遵循本项目现有的美术资源协议 **CC BY-SA 4.0**。分享或改编时，请保留 **thewolfulti** 的署名、注明修改并遵守相同方式共享要求。Classic 模型与美术由 **R_Eatch** 制作。详细授权见 [LICENSE-ASSETS.md](LICENSE-ASSETS.md)。
 
 ## 许可与版权
 

@@ -17,12 +17,22 @@ as excluded or third-party.
 The public PNG textures and Blockbench visual geometry in `examples/custom-skin-pack/`
 are also covered by this asset license.
 
-The preferred attribution is:
+The **Modern Werewolf, Quadruped Wolf, and Beast models**, with **nine skins for
+each model**, were designed, created, and shared by **thewolfulti**. These models,
+their embedded PNG palettes, and their exported painting-template artwork are also
+covered by the same **CC BY-SA 4.0** asset license.
+
+The preferred attribution for Classic and other original R_Eatch artwork is:
 
 > Howling Werewolf / 月厄狼人 art by R_Eatch — CC BY-SA 4.0
 
-When sharing a covered asset or an adaptation, follow CC BY-SA 4.0, including its
-attribution, change-indication, license-link, and ShareAlike requirements.
+For the Modern models and skins, the preferred attribution is:
+
+> Howling Werewolf Modern models and skins by thewolfulti — CC BY-SA 4.0
+
+Credit the corresponding original artist when using either set. When sharing a
+covered asset or an adaptation, follow CC BY-SA 4.0, including its attribution,
+change-indication, license-link, and ShareAlike requirements.
 
 ## Exclusions
 
