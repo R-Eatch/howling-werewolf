@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
-  <img src="https://img.shields.io/badge/NeoForge-26.1.2.222%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.222 或更高版本">
+  <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证：MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="美术资源许可证：CC BY-SA 4.0"></a>
@@ -30,7 +30,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | 组件 | 版本 |
 |---|---|
 | Minecraft Java 版 | 26.1.2 |
-| Mod 加载器 | NeoForge 26.1.2.222 或兼容的更高 26.1.2.x 版本 |
+| Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
 | Howling Werewolf | 1.2.2 |
 
