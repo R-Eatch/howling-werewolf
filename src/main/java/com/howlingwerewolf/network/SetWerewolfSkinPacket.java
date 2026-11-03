@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 /** Requests a cosmetic change; the server validates and broadcasts the resulting state. */
 public record SetWerewolfSkinPacket(String modelSetId, String skinId) implements CustomPacketPayload {
@@ -33,11 +33,12 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId) implements
     }
 
     /** Registered on the default MAIN handler thread by ModNetwork. */
-    public static void handle(SetWerewolfSkinPacket packet, IPayloadContext context) {
+    public static void handle(SetWerewolfSkinPacket packet, ServerPlayNetworking.Context context) {
         String skinId = WerewolfSkinIds.canonicalize(packet.skinId());
         WerewolfModelSet modelSet = WerewolfModelSet.parse(packet.modelSetId());
         // The server stores an ID only; custom textures belong to each client's resource packs.
-        if (context.player() instanceof ServerPlayer sender && modelSet != null
+        ServerPlayer sender = context.player();
+        if (modelSet != null
                 && WerewolfSkinIds.matchesModelSet(skinId, modelSet)) {
             WerewolfApi.get(sender).ifPresent(data -> {
                 if (!data.isWerewolf()) return;

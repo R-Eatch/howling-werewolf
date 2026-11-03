@@ -178,8 +178,4 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    @Override
-    public void onDataPacket(Connection net, ValueInput input) {
-        loadWithComponents(input);
-    }
 }

@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record UnlockAbilityPacket(WerewolfAbility ability) implements CustomPacketPayload {
     public static final Type<UnlockAbilityPacket> TYPE = new Type<>(
@@ -23,8 +23,8 @@ public record UnlockAbilityPacket(WerewolfAbility ability) implements CustomPack
         return TYPE;
     }
 
-    public static void handle(UnlockAbilityPacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender) WerewolfApi.get(sender).ifPresent(data -> {
+    public static void handle(UnlockAbilityPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player(); WerewolfApi.get(sender).ifPresent(data -> {
             if (data.unlockAbility(packet.ability())) {
                 WerewolfGuide.firstPoint(sender);
                 ModNetwork.sync(sender, data);

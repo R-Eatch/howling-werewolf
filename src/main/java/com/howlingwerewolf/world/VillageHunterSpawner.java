@@ -12,12 +12,9 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 
 /** Maintains a persistent 4–6 hunter patrol per visited village. / 为每个被访问的村庄维持一支 4–6 人持久巡猎队。 */
-@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
+
 public final class VillageHunterSpawner {
     private static final int CHECK_INTERVAL = 100;
     private static final int VILLAGE_SEARCH_CHUNKS = 5;
@@ -25,8 +22,7 @@ public final class VillageHunterSpawner {
     private static final long REPLENISH_INTERVAL = 24000L;
     private static final long FAILED_SPAWN_RETRY_INTERVAL = 1200L;
 
-    @SubscribeEvent
-    public static void playerTick(PlayerTickEvent.Post event) {
+    public static void playerTick(com.howlingwerewolf.event.GameplayContext.Tick event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
                 || player.tickCount % CHECK_INTERVAL != 0) return;
         ServerLevel level = player.level();
@@ -93,8 +89,7 @@ public final class VillageHunterSpawner {
                 hunter.snapTo(x + 0.5D, y, z + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
                 if (!level.noCollision(hunter)) continue;
                 DifficultyInstance difficulty = level.getCurrentDifficultyAt(pos);
-                net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(
-                        hunter, level, difficulty, EntitySpawnReason.EVENT, null);
+                hunter.finalizeSpawn(level, difficulty, EntitySpawnReason.EVENT, null);
                 hunter.configureForVillagePatrol(villageKey);
                 if (level.addFreshEntity(hunter)) {
                     spawned++;

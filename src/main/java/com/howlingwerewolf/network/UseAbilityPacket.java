@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record UseAbilityPacket(WerewolfAbility ability, int targetId) implements CustomPacketPayload {
     public static final Type<UseAbilityPacket> TYPE = new Type<>(
@@ -27,8 +27,9 @@ public record UseAbilityPacket(WerewolfAbility ability, int targetId) implements
         return TYPE;
     }
 
-    public static void handle(UseAbilityPacket packet, IPayloadContext context) {
-        if (!(context.player() instanceof ServerPlayer sender) || packet.targetId() < -1) return;
+    public static void handle(UseAbilityPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player();
+        if (packet.targetId() < -1) return;
         if (packet.ability() != WerewolfAbility.SUMMON_WOLF_SPIRIT
                 && packet.ability() != WerewolfAbility.BLOODY_BITE
                 && packet.ability() != WerewolfAbility.MOONBLOOD_SURGE) return;

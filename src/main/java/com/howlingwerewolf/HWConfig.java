@@ -1,29 +1,29 @@
 package com.howlingwerewolf;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import com.howlingwerewolf.config.ConfigSpec;
 
 public final class HWConfig {
     private static final int HUNTER_BASE_WEIGHT = 50;
     private static final int FERAL_WEREWOLF_BASE_WEIGHT = 200;
-    public static final ModConfigSpec SPEC;
-    public static final ModConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;
-    public static final ModConfigSpec.DoubleValue FERAL_WEREWOLF_INFECTION_CHANCE;
-    public static final ModConfigSpec.DoubleValue WEREWOLF_EXPERIENCE_GAIN_MULTIPLIER;
-    public static final ModConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
-    public static final ModConfigSpec.BooleanValue GENERATE_SILVER;
-    public static final ModConfigSpec.BooleanValue GENERATE_WOLFSBANE;
-    public static final ModConfigSpec.DoubleValue HUNTER_SPAWN_WEIGHT_MULTIPLIER;
-    public static final ModConfigSpec.DoubleValue FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER;
-    public static final ModConfigSpec.IntValue WOLFSBANE_GENERATION_WEIGHT;
-    public static final ModConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
-    public static final ModConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
-    public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
-    public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
-    public static final ModConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
-    public static final ModConfigSpec.ConfigValue<String> NPC_MODEL_SET;
+    public static final ConfigSpec SPEC;
+    public static final ConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;
+    public static final ConfigSpec.DoubleValue FERAL_WEREWOLF_INFECTION_CHANCE;
+    public static final ConfigSpec.DoubleValue WEREWOLF_EXPERIENCE_GAIN_MULTIPLIER;
+    public static final ConfigSpec.IntValue MAX_WEREWOLF_LEVEL;
+    public static final ConfigSpec.BooleanValue GENERATE_SILVER;
+    public static final ConfigSpec.BooleanValue GENERATE_WOLFSBANE;
+    public static final ConfigSpec.DoubleValue HUNTER_SPAWN_WEIGHT_MULTIPLIER;
+    public static final ConfigSpec.DoubleValue FERAL_WEREWOLF_SPAWN_WEIGHT_MULTIPLIER;
+    public static final ConfigSpec.IntValue WOLFSBANE_GENERATION_WEIGHT;
+    public static final ConfigSpec.BooleanValue BEAST_VOID_DAMAGE;
+    public static final ConfigSpec.IntValue ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS;
+    public static final ConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
+    public static final ConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
+    public static final ConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
+    public static final ConfigSpec.ConfigValue<String> NPC_MODEL_SET;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ConfigSpec.Builder builder = new ConfigSpec.Builder();
         builder.push("gameplay");
         NPC_MODEL_SET = builder.comment(
                         "Model set for wild werewolves, spawn-egg werewolves, the Alpha and its summoned pack: modern or classic. Default is modern.",
@@ -79,6 +79,8 @@ public final class HWConfig {
         builder.pop();
         SPEC = builder.build();
     }
+
+    public static void load() { SPEC.load(); }
 
     public static int hunterSpawnWeight() {
         return scaledSpawnWeight(HUNTER_BASE_WEIGHT, HUNTER_SPAWN_WEIGHT_MULTIPLIER.get());

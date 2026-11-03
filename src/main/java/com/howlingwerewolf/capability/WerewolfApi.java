@@ -8,6 +8,6 @@ public final class WerewolfApi {
     private WerewolfApi() {}
 
     public static Optional<WerewolfData> get(Player player) {
-        return Optional.of(player.getData(ModAttachments.WEREWOLF));
+        return Optional.of(player.getAttachedOrCreate(ModAttachments.WEREWOLF));
     }
 }

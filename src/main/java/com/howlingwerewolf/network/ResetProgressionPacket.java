@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record ResetProgressionPacket() implements CustomPacketPayload {
     public static final Type<ResetProgressionPacket> TYPE = new Type<>(
@@ -23,8 +23,8 @@ public record ResetProgressionPacket() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(ResetProgressionPacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender) WerewolfApi.get(sender).ifPresent(data -> {
+    public static void handle(ResetProgressionPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player(); WerewolfApi.get(sender).ifPresent(data -> {
             if (!data.canResetProgression()) {
                 sender.sendSystemMessage(Component.translatable("message.howlingwerewolf.reset_unavailable")
                         .withStyle(ChatFormatting.RED));

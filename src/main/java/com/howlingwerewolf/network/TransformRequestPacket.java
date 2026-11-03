@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record TransformRequestPacket() implements CustomPacketPayload {
     public static final Type<TransformRequestPacket> TYPE = new Type<>(
@@ -20,7 +20,7 @@ public record TransformRequestPacket() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(TransformRequestPacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender) WerewolfGameplayEvents.requestTransform(sender);
+    public static void handle(TransformRequestPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player(); WerewolfGameplayEvents.requestTransform(sender);
     }
 }

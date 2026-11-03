@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.howlingwerewolf.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LivingEntityRendererMixin",
+    "AvatarRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

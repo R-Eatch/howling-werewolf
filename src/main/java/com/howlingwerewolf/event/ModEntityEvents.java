@@ -16,43 +16,19 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 
 public final class ModEntityEvents {
-    @EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
-    public static final class ModBus {
-        @SubscribeEvent
-        public static void attributes(EntityAttributeCreationEvent event) {
-            event.put(ModEntities.HUNTER.get(), HunterEntity.createAttributes().build());
-            event.put(ModEntities.ALPHA_WEREWOLF.get(),
-                    com.howlingwerewolf.entity.AlphaWerewolfEntity.createAttributes().build());
-            event.put(ModEntities.ALPHA_MINION.get(),
-                    com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes().build());
-            event.put(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes().build());
-        }
-    }
 
-    public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
-        event.register(ModEntities.HUNTER.get(), SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::hunterSpawnRules,
-                RegisterSpawnPlacementsEvent.Operation.OR);
-        event.register(ModEntities.WEREWOLF.get(), SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::werewolfSpawnRules,
-                RegisterSpawnPlacementsEvent.Operation.OR);
-    }
-
-    /** Keep an ineligible werewolf entry from consuming a weighted natural-spawn selection. */
-    public static void filterPotentialSpawns(LevelEvent.PotentialSpawns event) {
-        if (event.getMobCategory() != MobCategory.MONSTER) return;
-        if (event.getLevel() instanceof ServerLevel serverLevel && isFeralWerewolfSpawnWindow(serverLevel)) return;
-        for (int i = event.getSpawnerDataList().size() - 1; i >= 0; i--) {
-            var spawn = event.getSpawnerDataList().get(i);
-            if (spawn.value().type() == ModEntities.WEREWOLF.get()) event.removeSpawnerData(spawn);
-        }
+    public static void register() {
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER.get(), HunterEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_WEREWOLF.get(), com.howlingwerewolf.entity.AlphaWerewolfEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_MINION.get(), com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes());
+        net.minecraft.world.entity.SpawnPlacements.register(ModEntities.HUNTER.get(), SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::hunterSpawnRules);
+        net.minecraft.world.entity.SpawnPlacements.register(ModEntities.WEREWOLF.get(), SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::werewolfSpawnRules);
+        com.howlingwerewolf.content.FabricWorldGeneration.register();
     }
 
     /** Wild werewolves enter forests only beneath a full Overworld moon. / 野生狼人只在主世界满月的森林中出现。 */
@@ -66,11 +42,11 @@ public final class ModEntityEvents {
         return net.minecraft.world.entity.monster.Monster.checkAnyLightMonsterSpawnRules(
                 type, level, reason, pos, random)
                 && level.getBrightness(LightLayer.BLOCK, pos) <= level.dimensionType().monsterSpawnBlockLightLimit()
-                && light <= level.dimensionType().monsterSpawnLightTest().maxInclusive();
+                && light <= level.dimensionType().monsterSpawnLightTest().getMaxValue();
     }
 
-    private static boolean isFeralWerewolfSpawnWindow(ServerLevel level) {
-        long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
+    public static boolean isFeralWerewolfSpawnWindow(ServerLevel level) {
+        long time = Math.floorMod(level.getDayTime(), 24000L);
         return level.dimension() == net.minecraft.world.level.Level.OVERWORLD
                 && time >= 13000L && time < 23000L && level.environmentAttributes().getDimensionValue(net.minecraft.world.attribute.EnvironmentAttributes.MOON_PHASE) == net.minecraft.world.level.MoonPhase.FULL_MOON;
     }

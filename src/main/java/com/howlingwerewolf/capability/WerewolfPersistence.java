@@ -16,12 +16,12 @@ public final class WerewolfPersistence {
 
     public static void save(Player player, WerewolfData data) {
         if (player.level().isClientSide()) return;
-        CompoundTag root = player.getPersistentData();
-        CompoundTag persisted = root.contains(Player.PERSISTED_NBT_TAG)
-                ? root.getCompoundOrEmpty(Player.PERSISTED_NBT_TAG)
+        CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
+        CompoundTag persisted = root.contains("PlayerPersisted")
+                ? root.getCompoundOrEmpty("PlayerPersisted")
                 : new CompoundTag();
         persisted.put(DATA_KEY, data.serializeNBT());
-        root.put(Player.PERSISTED_NBT_TAG, persisted);
+        root.put("PlayerPersisted", persisted);
     }
 
     public static boolean load(Player player, WerewolfData data) {
@@ -32,28 +32,28 @@ public final class WerewolfPersistence {
     }
 
     public static CompoundTag readSnapshot(Player player) {
-        CompoundTag root = player.getPersistentData();
-        if (!root.contains(Player.PERSISTED_NBT_TAG)) return null;
-        CompoundTag persisted = root.getCompoundOrEmpty(Player.PERSISTED_NBT_TAG);
+        CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
+        if (!root.contains("PlayerPersisted")) return null;
+        CompoundTag persisted = root.getCompoundOrEmpty("PlayerPersisted");
         if (!persisted.contains(DATA_KEY)) return null;
         return persisted.getCompoundOrEmpty(DATA_KEY).copy();
     }
 
     public static void writeSnapshot(Player player, CompoundTag snapshot) {
         if (player.level().isClientSide() || snapshot == null) return;
-        CompoundTag root = player.getPersistentData();
-        CompoundTag persisted = root.contains(Player.PERSISTED_NBT_TAG)
-                ? root.getCompoundOrEmpty(Player.PERSISTED_NBT_TAG)
+        CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
+        CompoundTag persisted = root.contains("PlayerPersisted")
+                ? root.getCompoundOrEmpty("PlayerPersisted")
                 : new CompoundTag();
         persisted.put(DATA_KEY, snapshot.copy());
-        root.put(Player.PERSISTED_NBT_TAG, persisted);
+        root.put("PlayerPersisted", persisted);
     }
 
     public static void copyPersistentRoot(Player original, Player replacement) {
-        CompoundTag root = original.getPersistentData();
-        if (!root.contains(Player.PERSISTED_NBT_TAG)) return;
-        replacement.getPersistentData().put(Player.PERSISTED_NBT_TAG,
-                root.getCompoundOrEmpty(Player.PERSISTED_NBT_TAG).copy());
+        CompoundTag root = original.getAttachedOrCreate(ModAttachments.LEGACY);
+        if (!root.contains("PlayerPersisted")) return;
+        replacement.getAttachedOrCreate(ModAttachments.LEGACY).put("PlayerPersisted",
+                root.getCompoundOrEmpty("PlayerPersisted").copy());
     }
 
     /**

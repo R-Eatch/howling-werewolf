@@ -41,7 +41,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -57,7 +56,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     private static final int SUMMON_CHANNEL = 20 * 5;
     private static final int NATURAL_HEAL_INTERVAL = 50;
     private static final float NATURAL_HEAL_AMOUNT = 4.0F;
-    private final ServerBossEvent bossBar = new ServerBossEvent(UUID.randomUUID(),
+    private final ServerBossEvent bossBar = new ServerBossEvent(
             Component.translatable("entity.howlingwerewolf.alpha_werewolf"),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
     private UUID trialOwner;
@@ -338,10 +337,6 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         // 普通伤害固定减免 70%；绕过无敌的伤害保持完整数值。
         if (!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             amount *= 0.30F;
-            // Since NeoForge 1.21, LivingEntity#actuallyHurt reads its DamageContainer instead of
-            // the method argument. Keep that source of truth in sync with the Forge-era override.
-            DamageContainer damage = damageContainers.peek();
-            damage.setNewDamage(amount);
         }
         super.actuallyHurt(serverLevel, source, amount);
     }

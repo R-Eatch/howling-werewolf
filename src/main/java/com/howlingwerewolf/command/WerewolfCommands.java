@@ -18,15 +18,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 
-@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfCommands {
-    @SubscribeEvent
-    public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("werewolf").requires(source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
+    public static void register(com.mojang.brigadier.CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("werewolf").requires(source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("infect").then(target(ctx -> infect(ctx, player(ctx)))))
                 .then(Commands.literal("awaken").then(target(ctx -> awaken(ctx, player(ctx)))))
                 .then(Commands.literal("cure").then(target(ctx -> cure(ctx, player(ctx)))))

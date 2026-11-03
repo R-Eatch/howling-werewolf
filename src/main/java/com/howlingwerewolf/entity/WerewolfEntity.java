@@ -32,7 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -165,9 +164,6 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         if (summonedByAlpha
                 && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             amount *= 0.90F;
-            // NeoForge 1.21 applies damage from the container, not from this method argument.
-            DamageContainer damage = damageContainers.peek();
-            damage.setNewDamage(amount);
         }
         super.actuallyHurt(serverLevel, source, amount);
     }
@@ -176,7 +172,7 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.WOLF_SOUNDS.get(
                 net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC)
-                .adultSounds().hurtSound().value();
+                .hurtSound().value();
     }
 
     public boolean isSummonedByAlpha() {

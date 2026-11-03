@@ -1,12 +1,10 @@
 package com.howlingwerewolf.network;
 
 import com.howlingwerewolf.HowlingWerewolf;
-import com.howlingwerewolf.client.ClientPacketHandlers;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record BadgeActivationPacket() implements CustomPacketPayload {
     public static final Type<BadgeActivationPacket> TYPE = new Type<>(
@@ -19,7 +17,4 @@ public record BadgeActivationPacket() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(BadgeActivationPacket packet, IPayloadContext context) {
-        ClientPacketHandlers.showBadgeActivation();
-    }
 }

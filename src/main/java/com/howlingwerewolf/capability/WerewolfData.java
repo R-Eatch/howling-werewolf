@@ -13,7 +13,7 @@ import net.minecraft.nbt.StringTag;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.common.util.ValueIOSerializable;
+
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public final class WerewolfData implements ValueIOSerializable {
+public final class WerewolfData {
     private static final MapCodec<CompoundTag> PERSISTENCE_CODEC = MapCodec.assumeMapUnsafe(CompoundTag.CODEC);
     public static final int CURRENT_DATA_VERSION = 2;
     public static final int DEFAULT_MAX_LEVEL = 20;
@@ -309,6 +309,7 @@ public final class WerewolfData implements ValueIOSerializable {
     }
 
     public void copyFrom(WerewolfData other) {
+        if (other == this) return;
         werewolf = other.werewolf;
         infected = other.infected;
         moonForced = other.moonForced;
@@ -374,7 +375,6 @@ public final class WerewolfData implements ValueIOSerializable {
         return tag;
     }
 
-    @Override
     public void serialize(ValueOutput output) {
         output.store(PERSISTENCE_CODEC, serializeNBT());
     }
@@ -434,7 +434,6 @@ public final class WerewolfData implements ValueIOSerializable {
         if (form == WerewolfForm.BEAST && !alphaDefeated) form = WerewolfForm.WEREWOLF;
     }
 
-    @Override
     public void deserialize(ValueInput input) {
         deserializeNBT(input.read(PERSISTENCE_CODEC).orElseGet(CompoundTag::new));
     }

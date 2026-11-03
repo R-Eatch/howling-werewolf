@@ -1,13 +1,11 @@
 package com.howlingwerewolf.network;
 
 import com.howlingwerewolf.HowlingWerewolf;
-import com.howlingwerewolf.client.ClientPacketHandlers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SyncWerewolfDataPacket(int entityId, CompoundTag data) implements CustomPacketPayload {
     public static final Type<SyncWerewolfDataPacket> TYPE = new Type<>(
@@ -28,7 +26,4 @@ public record SyncWerewolfDataPacket(int entityId, CompoundTag data) implements 
         return TYPE;
     }
 
-    public static void handle(SyncWerewolfDataPacket packet, IPayloadContext context) {
-        ClientPacketHandlers.applySync(packet);
-    }
 }

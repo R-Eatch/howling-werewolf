@@ -1,21 +1,14 @@
-/* SPDX-License-Identifier: MPL-2.0 */
 package com.howlingwerewolf.capability;
-
-import com.howlingwerewolf.HowlingWerewolf;
-import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-
-/** NeoForge data attachments used by the mod. */
+import com.howlingwerewolf.content.ModRegistry;
+import net.fabricmc.fabric.api.attachment.v1.*;
+import net.minecraft.nbt.CompoundTag;
 public final class ModAttachments {
-    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
-            DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, HowlingWerewolf.MOD_ID);
-
-    public static final DeferredHolder<AttachmentType<?>, AttachmentType<WerewolfData>> WEREWOLF =
-            ATTACHMENT_TYPES.register("werewolf_data", () -> AttachmentType.serializable(WerewolfData::new)
-                    .copyOnDeath()
-                    .build());
-
-    private ModAttachments() {}
+    public static final AttachmentType<WerewolfData> WEREWOLF = AttachmentRegistry.create(ModRegistry.id("werewolf"), builder -> builder
+        .initializer(WerewolfData::new)
+        .persistent(CompoundTag.CODEC.xmap(tag -> { var data=new WerewolfData(); data.deserializeNBT(tag); return data; }, WerewolfData::serializeNBT))
+        .copyOnDeath());
+    public static final AttachmentType<CompoundTag> LEGACY = AttachmentRegistry.create(ModRegistry.id("legacy_player_data"), builder -> builder
+        .initializer(CompoundTag::new).persistent(CompoundTag.CODEC).copyOnDeath());
+    public static void initialize() { }
+    private ModAttachments() { }
 }

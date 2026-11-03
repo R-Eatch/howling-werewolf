@@ -261,5 +261,8 @@
   "screen.howlingwerewolf.skins.author": "By %s",
   "skin.howlingwerewolf.modern.desc": "Modern models with the %s coat.",
   "screen.howlingwerewolf.skins.model.classic.tooltip": "Classic — By R_Eatch\nClick to switch to Modern",
-  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By thewolfulti\nClick to switch to Classic"
+  "screen.howlingwerewolf.skins.model.modern.tooltip": "Modern — By thewolfulti\nClick to switch to Classic",
+  "tag.item.howlingwerewolf.werewolf_meat": "Werewolf Meat",
+  "tag.item.howlingwerewolf.silver_weapons": "Silver Weapons",
+  "tag.item.c.ingots.silver": "Silver Ingots"
 }

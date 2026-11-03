@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "howlingwerewolf",
+  "version": "${version}",
+  "name": "Howling Werewolf",
+  "description": "Lunar transformations, progression, hunters, Beast Form and the Alpha Trial.",
+  "authors": [
+    "R_Eatch"
+  ],
+  "contributors": [
+    "thewolfulti (Modern models and skins)"
+  ],
+  "contact": {
+    "sources": "https://github.com/R-Eatch/howling-werewolf"
+  },
+  "license": [
+    "MPL-2.0",
+    "CC-BY-SA-4.0"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.howlingwerewolf.HowlingWerewolf"
+    ],
+    "client": [
+      "com.howlingwerewolf.client.HowlingWerewolfClient"
+    ]
+  },
+  "mixins": [
+    "howlingwerewolf.mixins.json",
+    {
+      "config": "howlingwerewolf.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener": "howlingwerewolf.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": ">=0.141.6+1.21.11"
+  },
+  "icon": "logo.png"
+}

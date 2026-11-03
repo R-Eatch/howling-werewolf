@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record SetClawSlotPacket(int slot) implements CustomPacketPayload {
     public static final Type<SetClawSlotPacket> TYPE = new Type<>(
@@ -22,8 +22,9 @@ public record SetClawSlotPacket(int slot) implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(SetClawSlotPacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender && packet.slot() >= 0 && packet.slot() < 9) {
+    public static void handle(SetClawSlotPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player();
+        if (packet.slot() >= 0 && packet.slot() < 9) {
             WerewolfApi.get(sender).ifPresent(data -> {
             if (data.hasAbility(WerewolfAbility.EMPTY_CLAW_SLOT)) {
                 data.setClawHotbarSlot(packet.slot());

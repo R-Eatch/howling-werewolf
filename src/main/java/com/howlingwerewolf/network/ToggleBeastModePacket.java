@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record ToggleBeastModePacket() implements CustomPacketPayload {
     public static final Type<ToggleBeastModePacket> TYPE = new Type<>(
@@ -20,7 +20,7 @@ public record ToggleBeastModePacket() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(ToggleBeastModePacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender) WerewolfGameplayEvents.toggleBeastMode(sender);
+    public static void handle(ToggleBeastModePacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player(); WerewolfGameplayEvents.toggleBeastMode(sender);
     }
 }

@@ -22,7 +22,7 @@ public final class VillageHunterSavedData extends SavedData {
     private static final Codec<VillageHunterSavedData> CODEC = CompoundTag.CODEC.xmap(
             VillageHunterSavedData::load, VillageHunterSavedData::save);
     private static final SavedDataType<VillageHunterSavedData> TYPE = new SavedDataType<>(
-            Identifier.fromNamespaceAndPath("howlingwerewolf", "village_hunters"),
+            "howlingwerewolf_village_hunters",
             VillageHunterSavedData::new, CODEC, null);
     private final Map<Long, Integer> patrolTargets = new HashMap<>();
     private final Set<Long> completedVillages = new HashSet<>();

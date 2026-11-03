@@ -53,23 +53,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.entity.EntityEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
-import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
-import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.enchanting.EnchantedEntityLootEvent;
 import net.minecraft.util.TriState;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashSet;
 import java.util.HashMap;
@@ -78,7 +62,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.joml.Vector3f;
 
-@EventBusSubscriber(modid = HowlingWerewolf.MOD_ID)
 public final class WerewolfGameplayEvents {
     private static final Identifier CLAW_DAMAGE_ID = modifierId("claw_damage");
     private static final Identifier WEREWOLF_SPEED_ID = modifierId("werewolf_speed");
@@ -130,13 +113,11 @@ public final class WerewolfGameplayEvents {
     private static final Map<UUID, Float> LAST_EXHAUSTION = new HashMap<>();
     private static final Set<UUID> AUTOMATIC_NIGHT_VISION = new HashSet<>();
 
-    @SubscribeEvent
-    public static void playerTickPre(PlayerTickEvent.Pre event) {
+    public static void playerTickPre(GameplayContext.Tick event) {
         if (event.getEntity() instanceof ServerPlayer player) beginHungerTracking(player);
     }
 
-    @SubscribeEvent
-    public static void playerTickPost(PlayerTickEvent.Post event) {
+    public static void playerTickPost(GameplayContext.Tick event) {
         // Eye origins are cached by Entity. Refresh on pose changes on both logical sides;
         // Camera retains vanilla eye-height smoothing and collision dimensions stay unchanged.
         WerewolfApi.get(event.getEntity()).ifPresent(data -> {
@@ -188,7 +169,7 @@ public final class WerewolfGameplayEvents {
 
     private static void processAwakeningAndMoon(ServerPlayer player, WerewolfData data) {
         ServerLevel overworld = player.level().getServer().overworld();
-        long absoluteDayTime = overworld.getOverworldClockTime();
+        long absoluteDayTime = overworld.getDayTime();
         long timeOfDay = Math.floorMod(absoluteDayTime, 24000L);
         boolean night = timeOfDay >= 13000L && timeOfDay < 23000L;
         boolean inOverworld = player.level().dimension() == Level.OVERWORLD;
@@ -240,8 +221,7 @@ public final class WerewolfGameplayEvents {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void beastVoidMeleeDamage(LivingIncomingDamageEvent event) {
+    public static void beastVoidMeleeDamage(GameplayContext.Damage event) {
         if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get() || !HWConfig.BEAST_VOID_DAMAGE.get()
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || !event.getSource().is(DamageTypes.PLAYER_ATTACK)) return;
@@ -258,8 +238,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void formMeleeDamage(LivingIncomingDamageEvent event) {
+    public static void formMeleeDamage(GameplayContext.Damage event) {
         if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get()) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || !event.getSource().is(DamageTypes.PLAYER_ATTACK)) return;
@@ -272,8 +251,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void livingHurt(LivingIncomingDamageEvent event) {
+    public static void livingHurt(GameplayContext.Damage event) {
         if (!(event.getEntity() instanceof ServerPlayer victim)) return;
         WerewolfApi.get(victim).ifPresent(data -> {
             Entity infectionSource = event.getSource().getEntity();
@@ -325,8 +303,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void lifesteal(LivingDamageEvent.Post event) {
+    public static void lifesteal(GameplayContext.Damage event) {
         // As in 1.21.1, Long Claws secondary hits and Bloody Bite do not trigger lifesteal.
         // 与旧版一致，长爪副伤害和血腥撕咬均不触发吸血。
         if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get()) return;
@@ -342,8 +319,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void longClawSplash(LivingDamageEvent.Post event) {
+    public static void longClawSplash(GameplayContext.Damage event) {
         if (LONG_CLAW_SPLASH.get() || BLOODY_BITE_DAMAGE.get() || event.getHealthDamage() <= 0.0F
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker)
                 || event.getEntity() == attacker) return;
@@ -374,8 +350,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void fireClawAttack(LivingDamageEvent.Pre event) {
+    public static void fireClawAttack(GameplayContext.Damage event) {
         // Ignite before health/death processing so one-hit kills generate cooked meat drops.
         // 扣血及死亡掉落结算前点燃目标，使首击击杀也能按燃烧状态掉落熟肉。
         if (BLOODY_BITE_DAMAGE.get() || event.getNewDamage() <= 0.0F
@@ -391,8 +366,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void preventDeathWithBadge(LivingDeathEvent event) {
+    public static void preventDeathWithBadge(GameplayContext.Damage event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
                 || event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         WerewolfApi.get(player).ifPresent(data -> {
@@ -413,15 +387,13 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void prepareClawAttack(AttackEntityEvent event) {
+    public static void prepareClawAttack(GameplayContext.Attack event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WerewolfApi.get(player).ifPresent(data -> refreshClawDamage(player, data));
         }
     }
 
-    @SubscribeEvent
-    public static void livingDeathExperience(LivingDeathEvent event) {
+    public static void livingDeathExperience(GameplayContext.Damage event) {
         ServerPlayer player = event.getSource().getEntity() instanceof ServerPlayer directPlayer
                 ? directPlayer
                 : event.getEntity().getKillCredit() instanceof ServerPlayer creditedPlayer ? creditedPlayer : null;
@@ -443,8 +415,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void restrictFood(LivingEntityUseItemEvent.Start event) {
+    public static void restrictFood(GameplayContext.Food event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
                 || event.getItem().get(DataComponents.FOOD) == null) return;
         WerewolfApi.get(player).ifPresent(data -> {
@@ -457,8 +428,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void restrictCake(PlayerInteractEvent.RightClickBlock event) {
+    public static void restrictCake(GameplayContext.Interaction event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
                 || !(player.level().getBlockState(event.getPos()).getBlock() instanceof CakeBlock)) return;
         WerewolfApi.get(player).ifPresent(data -> {
@@ -470,8 +440,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void preventMaxRankFallImpact(LivingFallEvent event) {
+    public static void preventMaxRankFallImpact(GameplayContext.Fall event) {
         if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed()
@@ -485,8 +454,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void jumpBoost(LivingEvent.LivingJumpEvent event) {
+    public static void jumpBoost(GameplayContext.Jump event) {
         if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed()) return;
@@ -514,8 +482,7 @@ public final class WerewolfGameplayEvents {
                 Math.max(0.0D, height - step.getBaseValue()));
     }
 
-    @SubscribeEvent
-    public static void toolClawBreakSpeed(PlayerEvent.BreakSpeed event) {
+    public static void toolClawBreakSpeed(GameplayContext.BreakSpeed event) {
         WerewolfApi.get(event.getEntity()).ifPresent(data -> {
             if (!canUseToolClaws(event.getEntity(), data)) return;
             float toolSpeed = bestIronToolSpeed(event.getState());
@@ -525,8 +492,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void toolClawHarvestCheck(PlayerEvent.HarvestCheck event) {
+    public static void toolClawHarvestCheck(GameplayContext.Harvest event) {
         if (event.canHarvest()) return;
         WerewolfApi.get(event.getEntity()).ifPresent(data -> {
             if (!canUseToolClaws(event.getEntity(), data)) return;
@@ -540,8 +506,8 @@ public final class WerewolfGameplayEvents {
     }
 
     /** Empty stacks never reach equipped-enchantment queries; modify the actual loot query. */
-    @SubscribeEvent
-    public static void provideClawLooting(EnchantedEntityLootEvent event) {
+
+    public static void provideClawLooting(GameplayContext.Looting event) {
         if (!event.getEnchantment().is(Enchantments.LOOTING)
                 || !(event.getDamageSource().getEntity() instanceof ServerPlayer player)
                 || !player.getMainHandItem().isEmpty()) return;
@@ -554,8 +520,7 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    @SubscribeEvent
-    public static void formSize(EntityEvent.Size event) {
+    public static void formSize(GameplayContext.Size event) {
         if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             if (data.isTransformed() && data.isBeastMode()) {
@@ -837,7 +802,7 @@ public final class WerewolfGameplayEvents {
         data.setTransformed(false);
         data.setMoonForced(false);
         data.setInfected(true);
-        data.setAwakeningDayTime(calculateNextNight(player.level().getServer().overworld().getOverworldClockTime()));
+        data.setAwakeningDayTime(calculateNextNight(player.level().getServer().overworld().getDayTime()));
         WerewolfGuide.infection(player);
     }
 
@@ -993,8 +958,7 @@ public final class WerewolfGameplayEvents {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preventReservedSlotPickupWhenInventoryIsFull(ItemEntityPickupEvent.Pre event) {
+    public static void preventReservedSlotPickupWhenInventoryIsFull(GameplayContext.Pickup event) {
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.EMPTY_CLAW_SLOT)) return;
@@ -1173,7 +1137,7 @@ public final class WerewolfGameplayEvents {
                 EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
-            boolean hasArmorModifier = stack.getAttributeModifiers().modifiers().stream()
+            boolean hasArmorModifier = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY).modifiers().stream()
                     .anyMatch(entry -> entry.slot().test(slot)
                             && entry.attribute().equals(Attributes.ARMOR)
                             && entry.modifier().amount() > 0.0D);
@@ -1338,9 +1302,9 @@ public final class WerewolfGameplayEvents {
                 volume, pitch, player.getRandom().nextLong()));
     }
 
-    private static net.minecraft.world.entity.animal.wolf.WolfSoundVariant.WolfSoundSet classicWolfSounds() {
+    private static net.minecraft.world.entity.animal.wolf.WolfSoundVariant classicWolfSounds() {
         return SoundEvents.WOLF_SOUNDS.get(
-                net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds();
+                net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC);
     }
 
     private record FoodSnapshot(float exhaustion, float saturation, int food, float multiplier) {}

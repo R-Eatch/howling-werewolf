@@ -55,7 +55,7 @@ public final class AlphaTrialManager {
             reject(player, "message.howlingwerewolf.trial.overworld_only");
             return;
         }
-        long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
+        long time = Math.floorMod(level.getDayTime(), 24000L);
         if (time < 13000L || time >= 23000L) {
             reject(player, "message.howlingwerewolf.trial.night_only");
             return;
@@ -403,14 +403,14 @@ public final class AlphaTrialManager {
             ACTIVE_TRIALS.remove(player.getUUID());
             return;
         }
-        player.getPersistentData().putBoolean(PENDING_FAILURE_TAG, true);
+        player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).putBoolean(PENDING_FAILURE_TAG, true);
         fail(altar, FailureReason.OWNER_MISSING);
     }
 
     /** A closed connection cannot display chat, so repeat the unified failure line on login. */
     public static void deliverPendingFailureMessage(ServerPlayer player) {
-        if (!player.getPersistentData().getBooleanOr(PENDING_FAILURE_TAG, false)) return;
-        player.getPersistentData().remove(PENDING_FAILURE_TAG);
+        if (!player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).getBooleanOr(PENDING_FAILURE_TAG, false)) return;
+        player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).remove(PENDING_FAILURE_TAG);
         player.sendSystemMessage(Component.translatable("message.howlingwerewolf.trial.failed")
                 .withStyle(ChatFormatting.DARK_RED));
     }

@@ -17,7 +17,7 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     public static final AlphaWerewolfBadgeRecipe INSTANCE = new AlphaWerewolfBadgeRecipe();
 
     private AlphaWerewolfBadgeRecipe() {
-        super();
+        super(net.minecraft.world.item.crafting.CraftingBookCategory.MISC);
     }
 
     @Override
@@ -43,7 +43,7 @@ public final class AlphaWerewolfBadgeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput container) {
+    public ItemStack assemble(CraftingInput container, net.minecraft.core.HolderLookup.Provider registries) {
         return new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get());
     }
 

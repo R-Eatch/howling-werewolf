@@ -7,18 +7,28 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.2.2-blue?style=flat-square" alt="最新源码： 1.2.2"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
-  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
-  <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
+  <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证： MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="美术资源许可证： CC BY-SA 4.0"></a>
 </p>
 
 <p align="center"><a href="README.md">English</a></p>
 
-> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖项目支持的三个版本。
+> 此分支为 **Minecraft 1.21.11 / Fabric 的 1.2.2-beta.1 测试移植版**，分支名为 `1.21.11-fabric`。下方保留完整玩法介绍及其他正式版本的信息。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
+
+## Fabric 1.21.11 Beta
+
+本移植以已发布的 **1.2.2** 为基线，保留 Classic / Modern 三形态、技能与技能树、猎人、Alpha 试炼、皮肤与模板导出。它不包含尚未发布的 NeoForge 同伴系统。
+
+- 环境：Minecraft **1.21.11**、Java **21**、Fabric Loader **0.20.1 或更新版本**、Fabric API **0.141.6+1.21.11**。
+- 测试版文件：`howlingwerewolf-1.2.2-fabric-1.21.11-beta.jar`。客户端和服务端均需安装相同版本与对应 Fabric API。
+- Fabric 配置文件为 `config/howlingwerewolf-common.json`，键名保留 `gameplay.*`、`worldGeneration.*` 的分类；修改后重启世界或服务器。原 Forge/NeoForge TOML 不会被覆盖。
+- 本 JAR 的 Minecraft 依赖限定为 `~1.21.11`。后续 Minecraft 的 Fabric 版本需要独立适配、构建和验收。
+- 本地构建：在 Java 21 环境运行 `./gradlew build`；可分发 JAR 位于 `build/libs/`。构建固定使用 Loom 1.16.1 / Gradle 9.4.1 和官方 Mojang 映射，通用逻辑与客户端渲染分开编译。
 
 ## 1.2.2 更新
 
@@ -74,8 +84,8 @@
 
 ## 安装
 
-1. 选择所需的 Minecraft 版本，安装对应的 Forge 或 NeoForge 加载器及所需 Java。
-2. 从 [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases)、[Modrinth](https://modrinth.com/mod/howling-werewolf) 或 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 下载与该版本对应的 Mod JAR，放入游戏的 `mods` 目录。
+1. 此分支请使用 Minecraft 1.21.11、Java 21 和 Fabric Loader 0.20.1 或更新版本，并安装对应 1.21.11 的 Fabric API。
+2. 此 Beta 可从源码构建，将 `build/libs/howlingwerewolf-1.2.2-fabric-1.21.11-beta.jar` 放入 `mods`。其他正式版本可从 [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases)、[Modrinth](https://modrinth.com/mod/howling-werewolf) 或 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 下载与该版本对应的 Mod JAR，放入游戏的 `mods` 目录。
 3. 启动游戏。联机时客户端与服务端应安装对应游戏版本的相同 Mod 版本。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -233,7 +243,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 各版本的通用配置中可以调整感染率、经验倍率、最高等级等多个参数，你可以根据自己的喜好来改变整段狼人旅程的节奏。
 
-配置文件：`config/howlingwerewolf-common.toml`。
+配置文件：`config/howlingwerewolf-common.json`（此 Fabric 分支；Forge / NeoForge 版仍使用 TOML）。
 
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
@@ -246,7 +256,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 测试与兼容性
 
-**1.1.3 已完成全流程实机测试，1.1.8 更新内容已测试。1.2.2 已完成本地构建、模型与数据回归检查；本轮实机观感和多人验收仍由维护者进行。** 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
+**Fabric Beta 已执行原生 GameTest 和真实图形客户端检查，覆盖属性与技能、试炼、存档、重生、跨维度同步、模型预览及资源重载。多人观察测试使用真实客户端与模拟的第二名服务端玩家。另已通过 Sodium 0.8.14 的图形客户端回归、模板资源包导出/应用及存档退出重进检查；长期多人整合包仍需进一步验收。** 历史正式版的测试基线为 1.1.3 全流程与 1.1.8 更新内容。 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 完整流程测试基线包括从新存档进行常规生存、击败末影龙并取得鞘翅。
 
@@ -255,7 +265,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 反馈问题时，请提供：
 
 - Minecraft 版本；
-- 加载器名称与版本（Forge 或 NeoForge）；
+- 加载器名称与版本（Fabric、Forge 或 NeoForge）；
 - 月厄狼人版本；
 - 相关配置；
 - 已安装 Mod 列表；
@@ -263,7 +273,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码、更新日志与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.2.2**。
+项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**，本分支提供 **Minecraft 1.21.11 Fabric / 1.2.2-beta.1** 移植；其他正式分支最新已发布源码为 **1.2.2**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 

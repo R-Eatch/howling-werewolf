@@ -4,48 +4,47 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.capability.WerewolfPersistence;
 import net.minecraft.nbt.CompoundTag;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetwork {
     private static final String PROTOCOL = "12";
 
-    /** Registers all gameplay payloads; handlers run on the main game thread by default. */
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(PROTOCOL);
-        registrar.playToClient(SyncWerewolfDataPacket.TYPE, SyncWerewolfDataPacket.STREAM_CODEC,
-                SyncWerewolfDataPacket::handle);
-        registrar.playToClient(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC,
-                BadgeActivationPacket::handle);
-        registrar.playToServer(TransformRequestPacket.TYPE, TransformRequestPacket.STREAM_CODEC,
-                TransformRequestPacket::handle);
-        registrar.playToServer(UpgradeTreeSkillPacket.TYPE, UpgradeTreeSkillPacket.STREAM_CODEC,
-                UpgradeTreeSkillPacket::handle);
-        registrar.playToServer(UnlockAbilityPacket.TYPE, UnlockAbilityPacket.STREAM_CODEC,
-                UnlockAbilityPacket::handle);
-        registrar.playToServer(ToggleBeastModePacket.TYPE, ToggleBeastModePacket.STREAM_CODEC,
-                ToggleBeastModePacket::handle);
-        registrar.playToServer(ToggleQuadrupedModePacket.TYPE, ToggleQuadrupedModePacket.STREAM_CODEC,
-                ToggleQuadrupedModePacket::handle);
-        registrar.playToServer(ToggleNightVisionPacket.TYPE, ToggleNightVisionPacket.STREAM_CODEC,
-                ToggleNightVisionPacket::handle);
-        registrar.playToServer(UseAbilityPacket.TYPE, UseAbilityPacket.STREAM_CODEC,
-                UseAbilityPacket::handle);
-        registrar.playToServer(SetClawSlotPacket.TYPE, SetClawSlotPacket.STREAM_CODEC,
-                SetClawSlotPacket::handle);
-        registrar.playToServer(ResetProgressionPacket.TYPE, ResetProgressionPacket.STREAM_CODEC,
-                ResetProgressionPacket::handle);
-        registrar.playToServer(RequestWerewolfSyncPacket.TYPE, RequestWerewolfSyncPacket.STREAM_CODEC,
-                RequestWerewolfSyncPacket::handle);
-        registrar.playToServer(SetWerewolfSkinPacket.TYPE, SetWerewolfSkinPacket.STREAM_CODEC,
-                SetWerewolfSkinPacket::handle);
+    public static void register() {
+        PayloadTypeRegistry.playS2C().register(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(RequestWerewolfSyncPacket.TYPE, RequestWerewolfSyncPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(RequestWerewolfSyncPacket.TYPE, (packet, context) -> context.server().execute(() -> RequestWerewolfSyncPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(ResetProgressionPacket.TYPE, ResetProgressionPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ResetProgressionPacket.TYPE, (packet, context) -> context.server().execute(() -> ResetProgressionPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(SetClawSlotPacket.TYPE, SetClawSlotPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(SetClawSlotPacket.TYPE, (packet, context) -> context.server().execute(() -> SetClawSlotPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(SetWerewolfSkinPacket.TYPE, SetWerewolfSkinPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(SetWerewolfSkinPacket.TYPE, (packet, context) -> context.server().execute(() -> SetWerewolfSkinPacket.handle(packet, context)));
+        PayloadTypeRegistry.playS2C().register(SyncWerewolfDataPacket.TYPE, SyncWerewolfDataPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(ToggleBeastModePacket.TYPE, ToggleBeastModePacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ToggleBeastModePacket.TYPE, (packet, context) -> context.server().execute(() -> ToggleBeastModePacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(ToggleNightVisionPacket.TYPE, ToggleNightVisionPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ToggleNightVisionPacket.TYPE, (packet, context) -> context.server().execute(() -> ToggleNightVisionPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(ToggleQuadrupedModePacket.TYPE, ToggleQuadrupedModePacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ToggleQuadrupedModePacket.TYPE, (packet, context) -> context.server().execute(() -> ToggleQuadrupedModePacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(TransformRequestPacket.TYPE, TransformRequestPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(TransformRequestPacket.TYPE, (packet, context) -> context.server().execute(() -> TransformRequestPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(UnlockAbilityPacket.TYPE, UnlockAbilityPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(UnlockAbilityPacket.TYPE, (packet, context) -> context.server().execute(() -> UnlockAbilityPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(UpgradeTreeSkillPacket.TYPE, UpgradeTreeSkillPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(UpgradeTreeSkillPacket.TYPE, (packet, context) -> context.server().execute(() -> UpgradeTreeSkillPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(UseAbilityPacket.TYPE, UseAbilityPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(UseAbilityPacket.TYPE, (packet, context) -> context.server().execute(() -> UseAbilityPacket.handle(packet, context)));
     }
 
+    public static void sendToPlayer(ServerPlayer player, net.minecraft.network.protocol.common.custom.CustomPacketPayload packet) {
+        if (ServerPlayNetworking.canSend(player, packet.type())) ServerPlayNetworking.send(player, packet);
+    }
     public static void sync(ServerPlayer player, WerewolfData data) {
         WerewolfPersistence.save(player, data);
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, createSyncPacket(player.getId(), data));
+        var packet = createSyncPacket(player.getId(), data);
+        sendToPlayer(player, packet);
+        for (ServerPlayer observer : PlayerLookup.tracking(player)) sendToPlayer(observer, packet);
     }
 
     /** Every recipient, including new observers, needs the authoritative progression limit. */
@@ -56,7 +55,7 @@ public final class ModNetwork {
     }
 
     public static void showBadgeActivation(ServerPlayer player) {
-        PacketDistributor.sendToPlayer(player, new BadgeActivationPacket());
+        sendToPlayer(player, new BadgeActivationPacket());
     }
 
     private ModNetwork() {}

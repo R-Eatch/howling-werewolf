@@ -7,17 +7,27 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.2.2-blue?style=flat-square" alt="Latest source: 1.2.2"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
-  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1 and 26.1.2">
-  <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge-E04E14?style=flat-square" alt="Forge and NeoForge">
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
+  <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="Asset license: CC BY-SA 4.0"></a>
 </p>
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all three supported editions.
+> This branch contains **1.2.2-beta.1 for Minecraft 1.21.11 / Fabric** (`1.21.11-fabric`). The complete gameplay introduction and information about the other released editions are retained below.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
+
+## Fabric 1.21.11 Beta
+
+This port uses the published **1.2.2** baseline, retaining Classic / Modern forms, abilities and skill trees, hunters, the Alpha Trial, skins and template export. The unpublished NeoForge companion system is outside this baseline.
+
+- Requires Minecraft **1.21.11**, Java **21**, Fabric Loader **0.20.1 or newer** and Fabric API **0.141.6+1.21.11**.
+- Test artifact: `howlingwerewolf-1.2.2-fabric-1.21.11-beta.jar`. Install the same version and matching Fabric API on the client and server.
+- Fabric configuration: `config/howlingwerewolf-common.json`, with `gameplay.*` and `worldGeneration.*` keys. Restart the world/server after changes. Existing Forge/NeoForge TOML files are preserved.
+- This JAR declares Minecraft `~1.21.11`. Later Minecraft releases require their own port, build and validation.
+- Build with Java 21 and `./gradlew build`; the distributable JAR is in `build/libs/`. Pins Loom 1.16.1 / Gradle 9.4.1, with official Mojang mappings and separate common/client source sets.
 
 ## 1.2.2 update
 
@@ -73,8 +83,8 @@ See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chin
 
 ## Installation
 
-1. Choose the Minecraft version you want to play, then install its matching Forge or NeoForge loader and Java version.
-2. Download the matching Mod JAR from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf), then place it in the game's `mods` directory.
+1. For this branch, install Minecraft 1.21.11, Java 21, Fabric Loader 0.20.1 or newer, and Fabric API for 1.21.11.
+2. Build this Beta from source and place `build/libs/howlingwerewolf-1.2.2-fabric-1.21.11-beta.jar` in `mods`. Other released editions are available from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf).
 3. Start the game. Clients and servers should use the same Mod version for their Minecraft edition.
 
 Back up important worlds before adding or updating any Mod.
@@ -232,7 +242,7 @@ I do not recommend the following methods, since they skip part of the gameplay e
 
 Each edition's common configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
 
-Configuration file: `config/howlingwerewolf-common.toml`.
+Configuration file: `config/howlingwerewolf-common.json` on this Fabric branch (Forge/NeoForge editions still use TOML).
 
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
@@ -245,7 +255,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**Version 1.1.3 completed a full in-game playthrough, and the 1.1.8 changes were tested. Version 1.2.2 has local build, model, and data regression checks; its visual in-game and multiplayer acceptance remain with the maintainer.** Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
+**This Fabric Beta has native GameTest and real graphics-client checks covering attributes/skills, the trial, persistence, respawn, dimension synchronization, model previews and resource reloads. Observer tests use a real client and a simulated second server player. Sodium 0.8.14, exported resource-pack activation and real world reopen checks also pass.** Historical released-edition coverage includes the 1.1.3 playthrough and the 1.1.8 changes. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 The full-playthrough testing baseline includes starting normal survival in a new world, defeating the Ender Dragon, and obtaining elytra.
 
@@ -254,7 +264,7 @@ The full-playthrough testing baseline includes starting normal survival in a new
 When reporting an issue, provide:
 
 - the Minecraft version;
-- the loader name and version (Forge or NeoForge);
+- the loader name and version (Fabric, Forge or NeoForge);
 - the Howling Werewolf version;
 - the relevant configuration;
 - the list of installed Mods;
@@ -262,7 +272,7 @@ When reporting an issue, provide:
 
 ## Source, changelogs, and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.2.2**.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. This branch adds the **Minecraft 1.21.11 Fabric / 1.2.2-beta.1** port; the latest published source on the other release branches is **1.2.2**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

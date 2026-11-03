@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 /**
  * Client-to-server resync request used after login / dimension transitions.
@@ -24,8 +24,8 @@ public record RequestWerewolfSyncPacket() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(RequestWerewolfSyncPacket packet, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sender) {
+    public static void handle(RequestWerewolfSyncPacket packet, ServerPlayNetworking.Context context) {
+        ServerPlayer sender = context.player(); {
             WerewolfApi.get(sender).ifPresent(data -> ModNetwork.sync(sender, data));
         }
     }
