@@ -365,6 +365,7 @@ public final class WerewolfGameplayEvents {
                 for (LivingEntity secondary : primaryTarget.level().getEntitiesOfClass(LivingEntity.class,
                         primaryTarget.getBoundingBox().inflate(2.0D, 1.0D, 2.0D), entity ->
                                 entity != primaryTarget && entity != attacker && entity.isAlive()
+                                        && !(entity instanceof com.howlingwerewolf.entity.WerewolfCompanionEntity companion && companion.isRecruited())
                                         && !attacker.isAlliedTo(entity) && !isOwnedBy(entity, attacker))) {
                     secondary.hurtServer(attacker.level(), event.getSource(), splashDamage);
                 }

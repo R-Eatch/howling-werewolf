@@ -20,11 +20,16 @@ public final class HWConfig {
     public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
     public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
     public static final ModConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
+    public static final ModConfigSpec.BooleanValue ENABLE_COMPANIONS;
     public static final ModConfigSpec.ConfigValue<String> NPC_MODEL_SET;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("gameplay");
+        ENABLE_COMPANIONS = builder.comment(
+                        "Enable werewolf merchants, recruitment and companion commands. Default is true.",
+                        "The server controls this setting. Disabling parks existing companions without deleting belongings and pauses hunts/cooldowns until re-enabled.")
+                .define("enableCompanions", true);
         NPC_MODEL_SET = builder.comment(
                         "Model set for wild werewolves, spawn-egg werewolves, the Alpha and its summoned pack: modern or classic. Default is modern.",
                         "Modern uses Ashen for the Alpha/pack and a saved random coat for wild werewolves. Classic uses Adrian for all of them.",

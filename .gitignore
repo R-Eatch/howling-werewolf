@@ -46,3 +46,8 @@ repo/
 /PORTING.md
 /BUGFIX_*.md
 /build-local.ps1
+
+### Local-only version logs (user policy 2026-11-02) ###
+/docs/[Cc][Hh][Aa][Nn][Gg][Ee][Ll][Oo][Gg]*
+/[Cc][Hh][Aa][Nn][Gg][Ee][Ll][Oo][Gg].txt
+/AGENTS.md

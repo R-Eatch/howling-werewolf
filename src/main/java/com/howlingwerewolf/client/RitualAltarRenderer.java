@@ -23,17 +23,22 @@ public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAlta
     public RitualAltarRenderer(BlockEntityRendererProvider.Context context) { itemModelResolver = context.itemModelResolver(); }
     public static final class State extends BlockEntityRenderState {
         boolean activation;
+        boolean companion;
+        float companionTicks;
         float ritualTicks;
         float time;
         final ItemStackRenderState offering = new ItemStackRenderState();
         final ItemStackRenderState badge = new ItemStackRenderState();
         final ItemStackRenderState pearl = new ItemStackRenderState();
+        final ItemStackRenderState flower = new ItemStackRenderState();
     }
     @Override public State createRenderState() { return new State(); }
     @Override public void extractRenderState(RitualAltarBlockEntity altar, State state, float partialTick,
                                               Vec3 cameraPosition, ModelFeatureRenderer.CrumblingOverlay breaking) {
         BlockEntityRenderer.super.extractRenderState(altar, state, partialTick, cameraPosition, breaking);
         state.activation = altar.isCentral() && altar.getTrialPhase() == RitualAltarBlockEntity.PHASE_ACTIVATION;
+        state.companion = altar.isCentral() && altar.isCompanionRitualActive();
+        state.companionTicks = altar.getCompanionRitualTicks() + partialTick;
         state.ritualTicks = altar.getRitualTicks() + partialTick;
         state.time = altar.getLevel() == null ? 0.0F : altar.getLevel().getGameTime() + partialTick;
         itemModelResolver.updateForTopItem(state.offering, altar.getOffering(), ItemDisplayContext.GROUND,
@@ -42,11 +47,22 @@ public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAlta
                 ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
         itemModelResolver.updateForTopItem(state.pearl, new ItemStack(ModItems.MOONBANE_PEARL.get()),
                 ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
+        itemModelResolver.updateForTopItem(state.flower, new ItemStack(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.asItem()),
+                ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
     }
     // The activation pearls orbit three blocks away from the altar's own block bounds.
     @Override public boolean shouldRenderOffScreen() { return true; }
     @Override public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-        if (state.activation) {
+        if (state.companion) {
+            float progress = Math.min(1, state.companionTicks / com.howlingwerewolf.companion.CompanionRitual.DURATION);
+            renderStack(state.pearl, pose, collector, state.lightCoords, 0.5, 1 + progress * 2, 0.5, state.companionTicks * 4, 0.8F);
+            for (int i = 0; i < 4; i++) {
+                double angle = i * Math.PI / 2 + state.companionTicks * 0.04;
+                double radius = 3 * (1 - progress);
+                renderStack(state.flower, pose, collector, state.lightCoords, 0.5 + Math.cos(angle) * radius,
+                        1 + progress * 1.8, 0.5 + Math.sin(angle) * radius, state.companionTicks * 3, 0.6F);
+            }
+        } else if (state.activation) {
             float ticks = state.ritualTicks;
             float badgeRise = Math.min(1.0F, ticks / 100.0F);
             renderStack(state.badge, pose, collector, state.lightCoords,

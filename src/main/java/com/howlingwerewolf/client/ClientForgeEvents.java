@@ -70,6 +70,11 @@ public final class ClientForgeEvents {
         while (ClientModEvents.OPEN_PROGRESSION.consumeClick()) {
             minecraft.setScreen(new WerewolfProgressionScreen());
         }
+        while (ClientModEvents.OPEN_COMPANIONS.consumeClick()) {
+            ClientPacketDistributor.sendToServer(new com.howlingwerewolf.network.CompanionActionPacket(
+                    com.howlingwerewolf.network.CompanionActionPacket.Action.OPEN,
+                    com.howlingwerewolf.network.CompanionActionPacket.NO_TARGET));
+        }
         while (ClientModEvents.TRANSFORM.consumeClick()) {
             ClientPacketDistributor.sendToServer(new TransformRequestPacket());
         }

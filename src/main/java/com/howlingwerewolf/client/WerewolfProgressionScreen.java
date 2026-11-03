@@ -24,7 +24,7 @@ import java.util.Map;
 
 public final class WerewolfProgressionScreen extends Screen {
     private static final int PANEL_WIDTH = 326;
-    private static final int PANEL_HEIGHT = 450;
+    private static final int PANEL_HEIGHT = 474;
     private static final int TREE_ROW_HEIGHT = 18;
     private static final int ABILITY_ROW_HEIGHT = 29;
     private static final int BACKGROUND = 0xF0110D13;
@@ -56,6 +56,11 @@ public final class WerewolfProgressionScreen extends Screen {
         uiScale = Math.max(0.1F, uiScale);
         int left = (logicalWidth() - PANEL_WIDTH) / 2;
         int top = (logicalHeight() - PANEL_HEIGHT) / 2;
+        addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.shortcut"), button ->
+                        ClientPacketDistributor.sendToServer(new com.howlingwerewolf.network.CompanionActionPacket(
+                                com.howlingwerewolf.network.CompanionActionPacket.Action.OPEN,
+                                com.howlingwerewolf.network.CompanionActionPacket.NO_TARGET)))
+                .bounds(left + 8, top + PANEL_HEIGHT - 53, 54, 18).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.tab.tree"), button -> switchPage(Page.TREE))
                 .bounds(left + 8, top + PANEL_HEIGHT - 29, 54, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.tab.abilities"), button -> switchPage(Page.ABILITIES))

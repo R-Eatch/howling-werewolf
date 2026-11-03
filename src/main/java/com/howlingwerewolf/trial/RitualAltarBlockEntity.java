@@ -34,6 +34,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     private int ritualTicks;
     private final List<UUID> hunterIds = new ArrayList<>();
     private UUID alphaId;
+    private UUID companionSummoner;
+    private int companionRitualTicks;
 
     public RitualAltarBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.RITUAL_ALTAR.get(), pos, state);
@@ -42,6 +44,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state,
                                   RitualAltarBlockEntity altar) {
         if (altar.isCentral() && altar.isTrialActive()) AlphaTrialManager.tick(altar);
+        if (altar.isCentral() && altar.isCompanionRitualActive()) com.howlingwerewolf.companion.CompanionRitual.tick(altar);
     }
 
     public boolean isCentral() {
@@ -127,6 +130,25 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         changedAndSync();
     }
 
+    public boolean isCompanionRitualActive() { return companionSummoner != null; }
+    public UUID getCompanionSummoner() { return companionSummoner; }
+    public int getCompanionRitualTicks() { return companionRitualTicks; }
+    public void startCompanionRitual(UUID owner) {
+        companionSummoner = owner;
+        companionRitualTicks = 0;
+        changedAndSync();
+    }
+    public int advanceCompanionRitual() {
+        companionRitualTicks++;
+        if (companionRitualTicks % 5 == 0) changedAndSync(); else setChanged();
+        return companionRitualTicks;
+    }
+    public void resetCompanionRitual() {
+        companionSummoner = null;
+        companionRitualTicks = 0;
+        changedAndSync();
+    }
+
     private void changedAndSync() {
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -139,6 +161,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
                 AlphaTrialManager.fail(this, AlphaTrialManager.FailureReason.ALTAR_BROKEN);
             }
             dropOffering();
+            com.howlingwerewolf.companion.CompanionRitual.cancel(this);
         }
         super.preRemoveSideEffects(pos, state);
     }
@@ -153,6 +176,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         var hunters = output.list("HunterIds", UUIDUtil.STRING_CODEC);
         hunterIds.forEach(hunters::add);
         output.storeNullable("AlphaId", UUIDUtil.CODEC, alphaId);
+        output.storeNullable("CompanionSummoner", UUIDUtil.CODEC, companionSummoner);
+        output.putInt("CompanionRitualTicks", companionRitualTicks);
     }
 
     @Override
@@ -165,6 +190,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         hunterIds.clear();
         input.listOrEmpty("HunterIds", UUIDUtil.STRING_CODEC).forEach(hunterIds::add);
         alphaId = input.read("AlphaId", UUIDUtil.CODEC).orElse(null);
+        companionSummoner = input.read("CompanionSummoner", UUIDUtil.CODEC).orElse(null);
+        companionRitualTicks = Math.clamp(input.getIntOr("CompanionRitualTicks", 0), 0, com.howlingwerewolf.companion.CompanionRitual.DURATION);
     }
 
     @Override
