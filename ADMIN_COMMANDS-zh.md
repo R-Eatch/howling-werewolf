@@ -2,7 +2,7 @@
 
 [English](ADMIN_COMMANDS.md)
 
-本文适用于 Howling Werewolf `1.2.2`（Minecraft 26.1.2 / NeoForge 26.1.2.122）。这些命令用于开发、验收、服务器管理和存档诊断。
+本文适用于 Howling Werewolf `1.2.7`（Minecraft 26.1.2 / NeoForge 26.1.2.122）。这些命令用于开发、验收、服务器管理和存档诊断。
 
 ## 使用条件
 
@@ -27,6 +27,7 @@
 | `/werewolf settreepoints <target> <amount>` | 将当前可用技能树点数设置为 0–100；不是追加点数。 |
 | `/werewolf settree <target> <skill> <rank>` | 直接设置技能树等级，不消耗点数；`0` 表示清除，等级不能超过该技能上限。 |
 | `/werewolf setability <target> <ability> <unlocked>` | 直接解锁或移除能力，不消耗点数。移除四足形态能力时会退出四足形态。 |
+| `/werewolf unlockalpha <target> [state]` | 一条命令解锁 Alpha，方便调试。省略或 `true`：目标成为狼人，并永久解锁野兽形态和 Alpha 相关的随从名额；`false`：撤销解锁并退出野兽形态。不发放徽章和试炼奖励。 |
 | `/werewolf resettree <target>` | 清空所有技能树等级，保留狼人身份、等级和能力。 |
 | `/werewolf resetabilities <target>` | 清空所有能力，保留狼人身份、等级和技能树。 |
 | `/werewolf reset <target>` | 将全部狼人数据恢复为新玩家默认值。 |
@@ -65,6 +66,7 @@
 /werewolf settreepoints @s 50
 /werewolf setskillpoints @s 30
 /werewolf settree @s damage 6
+/werewolf unlockalpha @s
 /werewolf setability @s quadruped_form true
 /werewolf status @s
 /werewolf reset @s

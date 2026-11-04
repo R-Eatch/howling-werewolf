@@ -1,270 +1,344 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 package com.howlingwerewolf.client;
 
+import com.howlingwerewolf.client.CompanionUi.Look;
+import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.companion.CompanionRules;
+import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
-/** Stable roster beside the selected companion's state and grouped controls. */
-public final class CompanionScreen extends Screen {
-    private static final int PANEL_WIDTH = 432, PANEL_HEIGHT = 321, DETAIL_X = 160, DETAIL_WIDTH = 258;
-    private final Screen parent;
-    private CompoundTag snapshot;
-    private UUID selected;
-    private boolean focusedView;
-    private final CompanionPreview preview = new CompanionPreview();
+/** The pack page: roster, a live portrait, and the selected companion's status and orders. */
+public final class CompanionScreen extends CompanionFrameScreen {
+    private static final String KEY = "screen.howlingwerewolf.companion.";
+    private static final int ROSTER_X = 10, ROSTER_W = 128, STAGE_X = 146, STAGE_W = 128, DETAIL_X = 282, DETAIL_W = 178;
+    private static final CompanionActionPacket.Action[] ORDERS = {CompanionActionPacket.Action.FOLLOW, CompanionActionPacket.Action.GUARD,
+            CompanionActionPacket.Action.REST, CompanionActionPacket.Action.SORT, CompanionActionPacket.Action.HUNT};
+    private static final CompanionActionPacket.Action[] DEEDS = {CompanionActionPacket.Action.RECALL, CompanionActionPacket.Action.INVENTORY,
+            CompanionActionPacket.Action.UPGRADE};
+    private final Map<CompanionActionPacket.Action, UiButton> commands = new EnumMap<>(CompanionActionPacket.Action.class);
+    private final List<UiButton> slots = new ArrayList<>();
     private EditBox address;
-    private Button saveAddress, resetAddress;
-    private float scale = 1;
-    private int refreshTicks, actionDelay;
-    private Button customizeButton;
-    private final Map<CompanionActionPacket.Action, Button> commands = new EnumMap<>(CompanionActionPacket.Action.class);
+    private UiButton saveAddress, resetAddress, appearance;
+    private int actionDelay;
+    private @Nullable CompanionActionPacket.Action hovered;
 
-    public CompanionScreen(Screen parent, CompoundTag snapshot) {
-        super(Component.translatable("screen.howlingwerewolf.companions"));
-        this.parent = parent;
-        this.snapshot = snapshot.copy();
-        applyOpenTarget();
-    }
-    public void update(CompoundTag next) {
-        boolean rosterChanged = !rosterIds(snapshot).equals(rosterIds(next));
-        boolean wasFocused = focusedView;
-        String previousAddress = snapshot.getStringOr("Address", "");
-        snapshot = next.copy();
-        applyOpenTarget();
-        if (address != null && address.getValue().equals(previousAddress)) address.setValue(snapshot.getStringOr("Address", ""));
-        if (rosterChanged || wasFocused != focusedView) rebuildWidgets(); else updateButtons();
-    }
-    private void applyOpenTarget() {
-        if (!snapshot.contains("OpenTarget")) return;
+    public CompanionScreen(@Nullable Screen parent, CompoundTag snapshot) { this(parent, snapshot, null); }
+    CompanionScreen(@Nullable Screen parent, CompoundTag snapshot, @Nullable UUID selected) {
+        super(Component.translatable("screen.howlingwerewolf.companions"), parent, snapshot, selected);
         String target = snapshot.getStringOr("OpenTarget", "");
-        if (target.isEmpty()) { focusedView = false; return; }
-        ListTag entries = snapshot.getListOrEmpty("Companions");
-        for (int i = 0; i < entries.size(); i++) {
-            if (!target.equals(entries.getCompoundOrEmpty(i).getStringOr("Id", ""))) continue;
-            try { selected = UUID.fromString(target); focusedView = true; } catch (IllegalArgumentException ignored) {}
-            return;
-        }
+        if (!target.isEmpty()) try { this.selected = UUID.fromString(target); } catch (IllegalArgumentException ignored) {}
     }
-    private static List<String> rosterIds(CompoundTag data) {
-        java.util.ArrayList<String> ids = new java.util.ArrayList<>();
-        ListTag entries = data.getListOrEmpty("Companions");
-        for (int i = 0; i < entries.size(); i++) ids.add(entries.getCompoundOrEmpty(i).getStringOr("Id", ""));
-        return ids;
+    @Override protected Tab tab() { return Tab.PACK; }
+
+    @Override protected void onSnapshot(CompoundTag previous) {
+        String before = previous.getStringOr("Address", "");
+        if (address != null && address.getValue().equals(before)) address.setValue(snapshot.getStringOr("Address", ""));
     }
-    @Override protected void init() {
-        clearWidgets();
-        commands.clear();
-        scale = Math.max(0.1F, Math.min(1, Math.min((width - 12F) / PANEL_WIDTH, (height - 12F) / panelHeight())));
-        int left = left(), top = top();
+
+    @Override protected void build(int left, int top) {
+        previewActive = true;
+        commands.clear(); slots.clear();
+        preview.bounds(left + STAGE_X, top + BODY_TOP + 4, STAGE_W, 242);
+        for (int i = 0; i < CompanionRules.MAX_COMPANIONS; i++) {
+            int index = i;
+            UiButton card = new UiButton(left + ROSTER_X, top + 48 + i * 52, ROSTER_W, 48, Component.empty(), Look.CARD, () -> choose(index))
+                    .hint(() -> slotHint(index));
+            slots.add(addRenderableWidget(card));
+        }
+        String value = address == null ? snapshot.getStringOr("Address", "") : address.getValue();
+        address = addRenderableWidget(new EditBox(font, left + ROSTER_X + 5, top + 222, ROSTER_W - 10, 12, Component.translatable(KEY + "address")));
+        address.setBordered(false);
+        address.setMaxLength(CompanionRules.MAX_ADDRESS_LENGTH * 2);
+        address.setHint(Component.translatable("dialogue.howlingwerewolf.companion.address_default"));
+        address.setValue(value);
+        saveAddress = addRenderableWidget(new UiButton(left + ROSTER_X, top + 238, 62, 18, Component.translatable(KEY + "save_address"), Look.SOFT, () -> requestAddress(address.getValue())));
+        resetAddress = addRenderableWidget(new UiButton(left + ROSTER_X + 66, top + 238, 62, 18, Component.translatable(KEY + "reset_address"), Look.SOFT, () -> { address.setValue(""); requestAddress(""); }));
+
+        int tileW = (DETAIL_W - 8) / 5;
+        List<Supplier<ItemLike>> orderIcons = List.of(() -> Items.LEAD, () -> Items.IRON_SWORD, () -> Items.RED_BED, () -> Items.CHEST, () -> Items.BOW);
+        for (int i = 0; i < ORDERS.length; i++) {
+            CompanionActionPacket.Action action = ORDERS[i];
+            UiButton tile = new UiButton(left + DETAIL_X + i * (tileW + 2), top + 112, tileW, 36, Component.translatable(KEY + action.name().toLowerCase(java.util.Locale.ROOT)), Look.TILE, () -> request(action))
+                    .icon(orderIcons.get(i)).hint(() -> disabledReason(action));
+            commands.put(action, addRenderableWidget(tile));
+        }
+        int deedW = (DETAIL_W - 4) / 2;
+        List<Supplier<ItemLike>> deedIcons = List.of(() -> Items.ENDER_PEARL, () -> Items.CHEST, ModItems.MOONBANE_PEARL::get);
+        for (int i = 0; i < DEEDS.length; i++) {
+            CompanionActionPacket.Action action = DEEDS[i];
+            UiButton deed = new UiButton(left + DETAIL_X + i % 2 * (deedW + 4), top + 212 + i / 2 * 24, deedW, 21, deedLabel(action), Look.SOFT, () -> request(action))
+                    .icon(deedIcons.get(i)).hint(() -> deedHint(action));
+            commands.put(action, addRenderableWidget(deed));
+        }
+        appearance = addRenderableWidget(new UiButton(left + DETAIL_X + deedW + 4, top + 236, deedW, 21, Component.translatable(KEY + "tab.look"), Look.SOFT, () -> showTab(Tab.LOOK))
+                .icon(() -> Items.NAME_TAG).hint(() -> Component.translatable(KEY + "customize")));
+        // A fallen companion has one thing to do, so it takes the whole action area.
+        commands.put(CompanionActionPacket.Action.REVIVE, addRenderableWidget(new UiButton(left + DETAIL_X, top + 212, DETAIL_W, 45, deedLabel(CompanionActionPacket.Action.REVIVE), Look.PRIMARY,
+                () -> request(CompanionActionPacket.Action.REVIVE)).icon(() -> Items.TOTEM_OF_UNDYING).hint(() -> deedHint(CompanionActionPacket.Action.REVIVE))));
+    }
+    private void choose(int index) {
         ListTag entries = snapshot.getListOrEmpty("Companions");
-        if (selectedRecord() == null && !entries.isEmpty()) selected = UUID.fromString(entries.getCompoundOrEmpty(0).getStringOr("Id", CompanionActionPacket.NO_TARGET.toString()));
-        if (focusedView) preview.bounds(left + 12, top + 62, 134, 211);
-        for (int i = 0; !focusedView && i < Math.min(3, entries.size()); i++) {
-            UUID id = UUID.fromString(entries.getCompoundOrEmpty(i).getStringOr("Id", CompanionActionPacket.NO_TARGET.toString()));
-            addRenderableWidget(Button.builder(Component.empty(), button -> { selected = id; updateButtons(); })
-                    .bounds(left + 12, top + 62 + i * 48, 134, 43).build());
-        }
-        CompanionActionPacket.Action[] actions = {CompanionActionPacket.Action.FOLLOW, CompanionActionPacket.Action.GUARD,
-                CompanionActionPacket.Action.REST, CompanionActionPacket.Action.HUNT, CompanionActionPacket.Action.RECALL,
-                CompanionActionPacket.Action.INVENTORY, CompanionActionPacket.Action.UPGRADE, CompanionActionPacket.Action.REVIVE,
-                CompanionActionPacket.Action.SORT};
-        for (int i = 0; i < actions.length; i++) {
-            var action = actions[i];
-            commands.put(action, addRenderableWidget(Button.builder(actionText(action), ignored -> request(action))
-                    .bounds(left + DETAIL_X + i % 3 * 86, top + 177 + i / 3 * 25, 82, 21).build()));
-        }
-        customizeButton = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.customize"), button -> {
-            CompoundTag record = selectedRecord();
-            if (record != null) minecraft.setScreen(new CompanionCustomizeScreen(this, snapshot, record));
-        }).bounds(left + DETAIL_X, top + 252, 254, 21).build());
-        addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.guide"), button ->
-                        minecraft.setScreen(new CompanionGuideScreen(this)))
-                .bounds(left + PANEL_WIDTH - 66, top + 9, 54, 20).build());
-        if (focusedView) {
-            addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.overview"), button ->
-                            ClientPacketDistributor.sendToServer(new CompanionActionPacket(CompanionActionPacket.Action.OPEN, CompanionActionPacket.NO_TARGET)))
-                    .bounds(left + PANEL_WIDTH - 128, top + 9, 54, 20).build());
-        } else {
-            String value = address == null ? snapshot.getStringOr("Address", "") : address.getValue();
-            address = addRenderableWidget(new EditBox(font, left + 64, top + 291, 206, 20,
-                    Component.translatable("screen.howlingwerewolf.companion.address")));
-            address.setMaxLength(CompanionRules.MAX_ADDRESS_LENGTH * 2);
-            address.setHint(Component.translatable("dialogue.howlingwerewolf.companion.address_default"));
-            address.setValue(value);
-            saveAddress = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.save_address"), button ->
-                            requestAddress(address.getValue())).bounds(left + 274, top + 291, 64, 20).build());
-            resetAddress = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.reset_address"), button -> {
-                address.setValue(""); requestAddress("");
-            }).bounds(left + 346, top + 291, 72, 20).build());
-        }
-        updateButtons();
+        if (index >= entries.size()) return;
+        try { selected = UUID.fromString(entries.getCompoundOrEmpty(index).getStringOr("Id", "")); } catch (IllegalArgumentException ignored) {}
+        refreshControls();
+    }
+    private void step(int direction) {
+        ListTag entries = snapshot.getListOrEmpty("Companions");
+        if (entries.isEmpty()) return;
+        int index = 0;
+        for (int i = 0; i < entries.size(); i++) if (selected != null && selected.toString().equals(entries.getCompoundOrEmpty(i).getStringOr("Id", ""))) index = i;
+        choose(Math.floorMod(index + direction, entries.size()));
     }
     private void requestAddress(String value) {
-        ClientPacketDistributor.sendToServer(new CompanionActionPacket(CompanionActionPacket.Action.ADDRESS, CompanionActionPacket.NO_TARGET, value));
-        actionDelay = 5; updateButtons();
-    }
-    private Component actionText(CompanionActionPacket.Action action) {
-        if (action == CompanionActionPacket.Action.UPGRADE) {
-            CompoundTag record = selectedRecord();
-            return Component.translatable("screen.howlingwerewolf.companion.upgrade", CompanionRules.upgradeCost(record == null ? 0 : record.getIntOr("Tier", 0)));
-        }
-        return Component.translatable("screen.howlingwerewolf.companion." + action.name().toLowerCase(java.util.Locale.ROOT));
+        send(CompanionActionPacket.Action.ADDRESS, CompanionActionPacket.NO_TARGET, value);
+        actionDelay = 5; refreshControls();
     }
     private void request(CompanionActionPacket.Action action) {
         if (selected == null) return;
-        if (action == CompanionActionPacket.Action.SORT) {
-            minecraft.setScreen(new CompanionSortingScreen(this, snapshot, selected)); return;
-        }
-        ClientPacketDistributor.sendToServer(new CompanionActionPacket(action, selected));
+        if (action == CompanionActionPacket.Action.SORT) { showTab(Tab.SORT); return; }
+        send(action, selected, "");
         actionDelay = 5;
-        updateButtons();
+        refreshControls();
+    }
+    private Component deedLabel(CompanionActionPacket.Action action) {
+        if (action == CompanionActionPacket.Action.UPGRADE) {
+            CompoundTag record = selectedRecord();
+            return Component.translatable(KEY + "upgrade", CompanionRules.upgradeCost(record == null ? 0 : record.getIntOr("Tier", 0)));
+        }
+        return Component.translatable(KEY + action.name().toLowerCase(java.util.Locale.ROOT));
     }
     @Override public void tick() {
         if (actionDelay > 0) actionDelay--;
-        if (snapshot.getBooleanOr("SystemEnabled", true)) {
+        if (systemEnabled()) {
             ListTag records = snapshot.getListOrEmpty("Companions");
             for (int i = 0; i < records.size(); i++) {
                 CompoundTag record = records.getCompoundOrEmpty(i);
                 for (String key : List.of("HuntRemaining", "HuntCooldownRemaining")) record.putLong(key, Math.max(0, record.getLongOr(key, 0) - 1));
             }
         }
-        updateButtons();
-        if (++refreshTicks >= 20) {
-            refreshTicks = 0;
-            ClientPacketDistributor.sendToServer(new CompanionActionPacket(CompanionActionPacket.Action.REFRESH, CompanionActionPacket.NO_TARGET));
-        }
+        super.tick();
     }
-    private void updateButtons() {
+    private boolean canUse(CompanionActionPacket.Action action, CompoundTag record) {
+        CompanionMode current = mode(record);
+        boolean enabled = record.getBooleanOr("Enabled", false);
+        return switch (action) {
+            case FOLLOW -> current.hasEntity() && current != CompanionMode.FOLLOW && enabled;
+            case GUARD -> current.hasEntity() && current != CompanionMode.GUARD && enabled;
+            case REST -> current.hasEntity() && current != CompanionMode.REST;
+            case HUNT -> current.hasEntity() && enabled && record.getLongOr("HuntCooldownRemaining", 0) == 0;
+            case RECALL -> current != CompanionMode.DEAD;
+            case REVIVE -> current == CompanionMode.DEAD;
+            case UPGRADE -> current.hasEntity() && enabled && record.getIntOr("Tier", 0) < Math.min(snapshot.getIntOr("Skill", 0), CompanionRules.MAX_TIER);
+            case INVENTORY -> current.hasEntity() && record.getBooleanOr("Nearby", false);
+            case SORT -> current.hasEntity() && enabled && snapshot.getBooleanOr("SortingEnabled", false);
+            default -> false;
+        };
+    }
+    @Override protected void refreshControls() {
+        if (address == null) return;
         CompoundTag record = selectedRecord();
-        boolean systemEnabled = snapshot.getBooleanOr("SystemEnabled", true);
-        if (address != null) {
-            address.setEditable(systemEnabled);
-            saveAddress.active = systemEnabled && actionDelay == 0 && !address.getValue().equals(snapshot.getStringOr("Address", ""));
-            resetAddress.active = systemEnabled && actionDelay == 0 && (!address.getValue().isEmpty() || !snapshot.getStringOr("Address", "").isEmpty());
+        boolean system = systemEnabled();
+        address.setEditable(system);
+        address.setTextColor(CompanionUi.TEXT);
+        saveAddress.active = system && actionDelay == 0 && !address.getValue().equals(snapshot.getStringOr("Address", ""));
+        resetAddress.active = system && actionDelay == 0 && (!address.getValue().isEmpty() || !snapshot.getStringOr("Address", "").isEmpty());
+        appearance.active = system && record != null && mode(record).hasEntity();
+        appearance.visible = record != null && mode(record) != CompanionMode.DEAD;
+        ListTag entries = snapshot.getListOrEmpty("Companions");
+        int capacity = snapshot.getIntOr("Capacity", 0);
+        for (int i = 0; i < slots.size(); i++) {
+            UiButton slot = slots.get(i);
+            boolean filled = i < entries.size();
+            slot.active = filled;
+            slot.selected(filled && selected != null && selected.toString().equals(entries.getCompoundOrEmpty(i).getStringOr("Id", "")));
         }
-        if (customizeButton != null) customizeButton.active = systemEnabled && record != null && mode(record).hasEntity();
         commands.forEach((action, button) -> {
-            button.setMessage(actionText(action));
-            if (!systemEnabled || record == null || actionDelay > 0) { button.active = false; return; }
-            CompanionMode current = mode(record);
-            boolean enabled = record.getBooleanOr("Enabled", false);
-            button.active = switch (action) {
-                case FOLLOW -> current.hasEntity() && current != CompanionMode.FOLLOW && enabled;
-                case GUARD -> current.hasEntity() && current != CompanionMode.GUARD && enabled;
-                case REST -> current.hasEntity() && current != CompanionMode.REST;
-                case HUNT -> current.hasEntity() && enabled && record.getLongOr("HuntCooldownRemaining", 0) == 0;
-                case RECALL -> current != CompanionMode.DEAD;
-                case REVIVE -> current == CompanionMode.DEAD;
-                case UPGRADE -> current.hasEntity() && enabled && record.getIntOr("Tier", 0) < snapshot.getIntOr("Skill", 0);
-                case INVENTORY -> current.hasEntity() && record.getBooleanOr("Nearby", false);
-                case SORT -> current.hasEntity() && enabled && snapshot.getBooleanOr("SortingEnabled", false);
-                default -> false;
-            };
+            if (action == CompanionActionPacket.Action.UPGRADE) button.setMessage(deedLabel(action));
+            button.visible = record != null;
+            button.active = system && record != null && actionDelay == 0 && canUse(action, record);
+            if (record != null && ordinalOrder(action) >= 0) button.selected(modeFor(action) == mode(record));
         });
-    }
-    private CompoundTag selectedRecord() {
-        ListTag entries = snapshot.getListOrEmpty("Companions");
-        for (int i = 0; i < entries.size(); i++) {
-            CompoundTag entry = entries.getCompoundOrEmpty(i);
-            if (selected != null && selected.toString().equals(entry.getStringOr("Id", ""))) return entry;
-        }
-        return null;
-    }
-    private static CompanionMode mode(CompoundTag entry) {
-        return CompanionMode.values()[Math.clamp(entry.getIntOr("Mode", 0), 0, CompanionMode.values().length - 1)];
-    }
-    private String fit(String text, int maxWidth) {
-        return font.width(text) <= maxWidth ? text : font.plainSubstrByWidth(text, maxWidth - font.width("…")) + "…";
-    }
-    private void wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color, int maxLines) {
-        int count = 0;
-        for (var line : font.split(text, width)) {
-            if (count++ >= maxLines) break;
-            graphics.text(font, line, x, y, color, false); y += 11;
+        if (record != null) {
+            boolean dead = mode(record) == CompanionMode.DEAD;
+            commands.get(CompanionActionPacket.Action.REVIVE).visible = dead;
+            for (var action : DEEDS) commands.get(action).visible = !dead;
         }
     }
-    @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractTransparentBackground(graphics);
-        int left = left(), top = top();
-        graphics.pose().pushMatrix(); graphics.pose().scale(scale, scale);
-        graphics.fill(left, top, left + PANEL_WIDTH, top + panelHeight(), 0xF0181724);
-        graphics.outline(left, top, PANEL_WIDTH, panelHeight(), 0xFF8674BB);
-        graphics.text(font, focusedView ? Component.translatable("screen.howlingwerewolf.companion.detail") : title, left + 14, top + 14, 0xFFE3D3FF, false);
-        Component status = snapshot.getBooleanOr("SystemEnabled", true)
-                ? Component.translatable("screen.howlingwerewolf.companion.capacity", snapshot.getListOrEmpty("Companions").size(), snapshot.getIntOr("Capacity", 0), snapshot.getIntOr("Skill", 0))
-                : Component.translatable("message.howlingwerewolf.companion.disabled");
-        graphics.text(font, status, left + 14, top + 37, 0xFFB5CDE8, false);
-        graphics.fill(left + 151, top + 60, left + 152, top + 273, 0xFF51425F);
+    private static int ordinalOrder(CompanionActionPacket.Action action) {
+        for (int i = 0; i < ORDERS.length; i++) if (ORDERS[i] == action) return i;
+        return -1;
+    }
+    private static CompanionMode modeFor(CompanionActionPacket.Action action) {
+        return switch (action) {
+            case FOLLOW -> CompanionMode.FOLLOW;
+            case GUARD -> CompanionMode.GUARD;
+            case REST -> CompanionMode.REST;
+            case SORT -> CompanionMode.SORT;
+            default -> CompanionMode.HUNT;
+        };
+    }
+    private @Nullable Component slotHint(int index) {
+        if (index < snapshot.getListOrEmpty("Companions").size()) return null;
+        return Component.translatable(KEY + (index < snapshot.getIntOr("Capacity", 0) ? "slot.empty_hint" : "slot.locked_hint"));
+    }
+    private Component disabledReason(CompanionActionPacket.Action action) {
         CompoundTag record = selectedRecord();
-        if (record == null) {
-            graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.no_selection"), left + DETAIL_X, top + 76, 0xFFCFCCD9, false);
-        } else {
-            if (focusedView) preview.render(graphics, snapshot.getStringOr("Model", "modern"), record.getStringOr("Skin", ""), scale, mouseX / scale, mouseY / scale);
-            graphics.text(font, fit(record.getStringOr("Name", ""), DETAIL_WIDTH), left + DETAIL_X, top + 65, 0xFFE3D3FF, false);
-            graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.tier", record.getIntOr("Tier", 0)).append(" · ")
-                    .append(Component.translatable(mode(record).translationKey())), left + DETAIL_X, top + 82, 0xFFBEB5CF, false);
-            float max = Math.max(1, record.getFloatOr("MaxHealth", 30));
-            float hp = Math.clamp(record.getFloatOr("Health", 0), 0, max);
-            graphics.fill(left + DETAIL_X, top + 99, left + DETAIL_X + DETAIL_WIDTH, top + 111, 0xFF3A2A38);
-            graphics.fill(left + DETAIL_X, top + 99, left + DETAIL_X + Math.round(DETAIL_WIDTH * hp / max), top + 111, 0xFFAC4766);
-            graphics.centeredText(font, Component.translatable("screen.howlingwerewolf.companion.health", Math.round(hp), Math.round(max)), left + DETAIL_X + DETAIL_WIDTH / 2, top + 101, 0xFFFFFFFF);
-            Component detail = mode(record) == CompanionMode.HUNT
-                    ? Component.translatable("screen.howlingwerewolf.companion.hunt_remaining", String.format(java.util.Locale.ROOT, "%.2f", record.getLongOr("HuntRemaining", 0) / 24000.0))
-                    : record.getLongOr("HuntCooldownRemaining", 0) > 0
-                    ? Component.translatable("screen.howlingwerewolf.companion.hunt_cooldown", String.format(java.util.Locale.ROOT, "%.2f", record.getLongOr("HuntCooldownRemaining", 0) / 24000.0))
-                    : record.getBooleanOr("Enabled", false) ? Component.empty() : Component.translatable("screen.howlingwerewolf.companion.suspended_short");
-            wrapped(graphics, detail, left + DETAIL_X, top + 128, DETAIL_WIDTH, 0xFFD7BA77, 3);
-        }
-        if (!focusedView) graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.address"), left + 12, top + 297, 0xFFBEB5CF, false);
-        super.extractRenderState(graphics, Math.round(mouseX / scale), Math.round(mouseY / scale), partialTick);
-        ListTag entries = snapshot.getListOrEmpty("Companions");
-        for (int i = 0; !focusedView && i < Math.min(3, entries.size()); i++) {
-            CompoundTag entry = entries.getCompoundOrEmpty(i);
-            int y = top + 62 + i * 48;
-            boolean chosen = selected != null && selected.toString().equals(entry.getStringOr("Id", ""));
-            if (chosen) graphics.outline(left + 12, y, 134, 43, 0xFFE3C5FF);
-            graphics.text(font, fit(entry.getStringOr("Name", ""), 118), left + 20, y + 9, chosen ? 0xFFFFE8FF : 0xFFE7E2EC, false);
-            graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.tier", entry.getIntOr("Tier", 0)).append(" · ")
-                    .append(Component.translatable(mode(entry).translationKey())), left + 20, y + 25, 0xFFCFCCD9, false);
-            if (mouseX / scale >= left + 12 && mouseX / scale < left + 146 && mouseY / scale >= y && mouseY / scale < y + 43
-                    && font.width(entry.getStringOr("Name", "")) > 118) {
-                graphics.setTooltipForNextFrame(font, font.split(Component.literal(entry.getStringOr("Name", "")), 240), mouseX, mouseY);
+        if (record == null) return null;
+        Component description = Component.translatable(KEY + "mode_desc." + modeFor(action).getSerializedName());
+        if (canUse(action, record) || modeFor(action) == mode(record)) return description;
+        Component reason = reason(action, record);
+        return reason == null ? description : reason;
+    }
+    private @Nullable Component reason(CompanionActionPacket.Action action, CompoundTag record) {
+        CompanionMode current = mode(record);
+        if (current == CompanionMode.DEAD) return Component.translatable(KEY + "reason.dead");
+        if (current == CompanionMode.HUNT && action != CompanionActionPacket.Action.RECALL) return Component.translatable(KEY + "reason.hunting");
+        if (!record.getBooleanOr("Enabled", false)) return Component.translatable(KEY + "reason.suspended");
+        return switch (action) {
+            case HUNT -> Component.translatable(KEY + "reason.cooldown", days(record.getLongOr("HuntCooldownRemaining", 0)));
+            case SORT -> snapshot.getBooleanOr("SortingEnabled", false) ? null : Component.translatable(KEY + "reason.sort_off");
+            case INVENTORY -> Component.translatable(KEY + "reason.far");
+            case UPGRADE -> Component.translatable(KEY + "reason.upgrade_max");
+            default -> null;
+        };
+    }
+    private Component deedHint(CompanionActionPacket.Action action) {
+        CompoundTag record = selectedRecord();
+        if (record == null) return null;
+        if (!canUse(action, record)) { Component reason = reason(action, record); if (reason != null) return reason; }
+        int tier = record.getIntOr("Tier", 0);
+        return switch (action) {
+            case RECALL -> Component.translatable(KEY + "recall_hint");
+            case INVENTORY -> Component.translatable(KEY + "inventory_hint");
+            case UPGRADE -> Component.translatable(KEY + "upgrade_hint", CompanionRules.upgradeCost(tier), Math.min(tier + 1, CompanionRules.MAX_TIER));
+            case REVIVE -> Component.translatable(KEY + "revive_hint");
+            default -> null;
+        };
+    }
+    private static String days(long ticks) { return String.format(java.util.Locale.ROOT, "%.2f", ticks / 24000.0); }
+
+    @Override public boolean keyPressed(KeyEvent event) {
+        if (!address.isFocused()) {
+            int number = event.key() - org.lwjgl.glfw.GLFW.GLFW_KEY_1;
+            if (number >= 0 && number < ORDERS.length) {
+                UiButton order = commands.get(ORDERS[number]);
+                if (order != null && order.active && order.visible) { request(ORDERS[number]); return true; }
             }
+            if (event.isUp() || event.isDown()) { step(event.isUp() ? -1 : 1); return true; }
         }
-        graphics.pose().popMatrix();
+        return super.keyPressed(event);
     }
-    @Override public void extractBackground(GuiGraphicsExtractor graphics, int x, int y, float partialTick) {}
-    private int left() { return (Math.round(width / scale) - PANEL_WIDTH) / 2; }
-    private int panelHeight() { return focusedView ? 289 : PANEL_HEIGHT; }
-    private int top() { return (Math.round(height / scale) - panelHeight()) / 2; }
-    private MouseButtonEvent logical(MouseButtonEvent event) { return new MouseButtonEvent(event.x() / scale, event.y() / scale, event.buttonInfo()); }
-    @Override public void mouseMoved(double x, double y) { super.mouseMoved(x / scale, y / scale); }
-    @Override public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        return focusedView && preview.click(event.x() / scale, event.y() / scale, event.button()) || super.mouseClicked(logical(event), doubleClick);
+
+    @Override protected void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+        ListTag entries = snapshot.getListOrEmpty("Companions");
+        int capacity = snapshot.getIntOr("Capacity", 0);
+        Component count = Component.literal(entries.size() + " / " + capacity);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "tab.pack").append("  ").append(count), left + ROSTER_X, top + BODY_TOP + 2, ROSTER_W);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "address"), left + ROSTER_X, top + 206, ROSTER_W);
+        CompanionUi.card(graphics, left + ROSTER_X, top + 218, ROSTER_W, 16, CompanionUi.SURFACE, CompanionUi.LINE);
+        CompoundTag record = selectedRecord();
+        hovered = null;
+        for (var entry : commands.entrySet()) if (entry.getValue().visible && entry.getValue().isHovered() && ordinalOrder(entry.getKey()) >= 0) hovered = entry.getKey();
+        if (record == null) { emptyState(graphics, left, top); return; }
+        preview.render(graphics, snapshot.getStringOr("Model", "modern"), record.getStringOr("Skin", ""), scale, mouseX, mouseY);
+        int x = left + DETAIL_X, y = top + BODY_TOP + 4;
+        CompanionUi.label(graphics, font, Component.literal(record.getStringOr("Name", "")), x, y + 2, DETAIL_W, CompanionUi.TEXT);
+        y += 15;
+        int tier = record.getIntOr("Tier", 0);
+        for (int i = 0; i < CompanionRules.MAX_TIER; i++) {
+            CompanionUi.box(graphics, x + i * 9, y + 3, 7, 7, i < tier ? CompanionUi.MOON : CompanionUi.RAISED);
+        }
+        CompanionMode current = mode(record);
+        CompanionUi.pill(graphics, font, Component.translatable(current.translationKey()), x + 34, y, modeColor(current));
+        y += 18;
+        float max = Math.max(1, record.getFloatOr("MaxHealth", 30));
+        float hp = Math.clamp(record.getFloatOr("Health", 0), 0, max);
+        float ratio = hp / max;
+        CompanionUi.bar(graphics, x, y, DETAIL_W, 11, ratio, ratio > 0.5F ? CompanionUi.GOOD : ratio > 0.25F ? CompanionUi.WARN : CompanionUi.DANGER);
+        graphics.centeredText(font, Component.translatable(KEY + "health", Math.round(hp), Math.round(max)), x + DETAIL_W / 2, y + 2, CompanionUi.TEXT);
+        y += 14;
+        int effective = Math.min(tier, snapshot.getIntOr("Skill", 0));
+        Component stats = Component.translatable(KEY + "stats", (int) CompanionRules.attackDamage(effective),
+                Math.round((1 - CompanionRules.damageMultiplier(effective)) * 100), String.valueOf(CompanionRules.regeneration(effective)));
+        CompanionUi.label(graphics, font, stats, x, y, DETAIL_W, CompanionUi.MUTED);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "section.orders"), x, top + 100, DETAIL_W);
+        // Description follows the pointer, and otherwise explains the active order.
+        Component text = statusLine(record, current);
+        if (hovered != null) text = Component.translatable(KEY + "mode_desc." + modeFor(hovered).getSerializedName());
+        CompanionUi.wrapped(graphics, font, text, x, top + 153, DETAIL_W, hovered != null ? CompanionUi.TEXT : CompanionUi.MUTED, 4);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "section.actions"), x, top + 201, DETAIL_W);
     }
-    @Override public boolean mouseReleased(MouseButtonEvent event) {
-        return focusedView && preview.release(event.button()) || super.mouseReleased(logical(event));
+    private Component statusLine(CompoundTag record, CompanionMode current) {
+        if (current == CompanionMode.HUNT) return Component.translatable(KEY + "hunt_remaining", days(record.getLongOr("HuntRemaining", 0)));
+        if (!record.getBooleanOr("Enabled", false) && current != CompanionMode.DEAD) return Component.translatable(KEY + "suspended");
+        long cooldown = record.getLongOr("HuntCooldownRemaining", 0);
+        Component description = Component.translatable(KEY + "mode_desc." + current.getSerializedName());
+        return cooldown > 0 ? description.copy().append("\n").append(Component.translatable(KEY + "hunt_cooldown", days(cooldown))) : description;
     }
-    @Override public boolean mouseDragged(MouseButtonEvent event, double x, double y) {
-        return focusedView && preview.drag(x / scale) || super.mouseDragged(logical(event), x / scale, y / scale);
+    private static int modeColor(CompanionMode mode) {
+        return switch (mode) {
+            case FOLLOW -> 0xFF8FC7F0;
+            case GUARD -> CompanionUi.DANGER;
+            case REST -> CompanionUi.MUTED;
+            case SORT -> CompanionUi.MOON;
+            case HUNT -> CompanionUi.GOOD;
+            case DEAD -> CompanionUi.FAINT;
+        };
     }
-    @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
-        return focusedView && preview.scroll(x / scale, y / scale, dy) || super.mouseScrolled(x / scale, y / scale, dx, dy);
+    private void emptyState(GuiGraphicsExtractor graphics, int left, int top) {
+        int x = left + STAGE_X, y = top + BODY_TOP + 4, w = STAGE_W + 8 + DETAIL_W;
+        CompanionUi.card(graphics, x, y, w, 242, CompanionUi.SURFACE, CompanionUi.LINE);
+        CompanionUi.disc(graphics, x + w / 2, y + 62, 26, 0xFFD9BC77);
+        CompanionUi.disc(graphics, x + w / 2 + 10, y + 56, 23, CompanionUi.SURFACE);
+        Component message = systemEnabled() ? Component.translatable(KEY + "empty") : Component.translatable("message.howlingwerewolf.companion.disabled");
+        int lineY = y + 104;
+        for (var line : font.split(message, w - 40)) { graphics.centeredText(font, line, x + w / 2, lineY, CompanionUi.TEXT); lineY += 12; }
+        graphics.centeredText(font, Component.translatable(KEY + "empty_more"), x + w / 2, lineY + 8, CompanionUi.FAINT);
     }
-    @Override public void onClose() { minecraft.setScreen(parent); }
-    @Override public boolean isPauseScreen() { return false; }
+    @Override protected void overlay(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+        ListTag entries = snapshot.getListOrEmpty("Companions");
+        int capacity = snapshot.getIntOr("Capacity", 0);
+        for (int i = 0; i < slots.size(); i++) {
+            int x = left + ROSTER_X + 8, y = top + 48 + i * 52;
+            if (i >= entries.size()) {
+                boolean open = i < capacity;
+                Component label = Component.translatable(KEY + (open ? "slot.empty" : "slot.locked"));
+                graphics.centeredText(font, label, left + ROSTER_X + ROSTER_W / 2, y + 20, open ? CompanionUi.MUTED : CompanionUi.FAINT);
+                continue;
+            }
+            CompoundTag entry = entries.getCompoundOrEmpty(i);
+            boolean chosen = slots.get(i).selected();
+            CompanionUi.label(graphics, font, Component.literal(entry.getStringOr("Name", "")), x, y + 7, ROSTER_W - 16, chosen ? CompanionUi.MOON : CompanionUi.TEXT);
+            CompanionMode current = mode(entry);
+            CompanionUi.label(graphics, font, Component.translatable(current.translationKey()), x, y + 19, 70, modeColor(current));
+            int tier = entry.getIntOr("Tier", 0);
+            for (int pip = 0; pip < CompanionRules.MAX_TIER; pip++) {
+                CompanionUi.box(graphics, x + ROSTER_W - 16 - (CompanionRules.MAX_TIER - pip) * 7, y + 20, 5, 5, pip < tier ? CompanionUi.MOON : CompanionUi.RAISED);
+            }
+            float max = Math.max(1, entry.getFloatOr("MaxHealth", 30));
+            float ratio = Math.clamp(entry.getFloatOr("Health", 0), 0, max) / max;
+            CompanionUi.bar(graphics, x, y + 33, ROSTER_W - 16, 6, ratio, ratio > 0.5F ? CompanionUi.GOOD : ratio > 0.25F ? CompanionUi.WARN : CompanionUi.DANGER);
+        }
+    }
+    @Override protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) {
+        return selectedRecord() != null && preview.contains(mouseX, mouseY) ? Component.translatable(KEY + "preview_hint") : null;
+    }
 }

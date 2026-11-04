@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.6-blue?style=flat-square" alt="开发版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.7-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -16,6 +16,8 @@
 <p align="center"><a href="README.md">English</a></p>
 
 > 当前分支提供 Minecraft 26.1.2 的 NeoForge 版；Minecraft 1.20.1 的 Forge 版维护在 [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) 分支。
+
+Howling Werewolf **1.2.7** 让随从亲手整理：点一下开始，它就会走到半径 16 格内的箱子和木桶前，打开盖子，把物品搬到该去的地方，不再需要逐个登记容器。随从界面重做为四个页签，带实时储物雷达；教程全部重写；Modern Beast 换上狼一样的奔跑步态，下蹲时四足着地；随从攻击时会挥手；`/werewolf unlockalpha` 一条命令解锁 Alpha。详见 [1.2.7 指南](docs/COMPANIONS-1.2.7-zh.md)（[English](docs/COMPANIONS-1.2.7.md)）。
 
 Howling Werewolf **1.2.6** 新增随从“整理”：登记允许整理的箱子或木桶，合并零散堆叠并按需集中同类物品；服务器可独立关闭该功能。Modern 模型改为直接提交完成 UV 修正的面数据，Beast 四足冲刺调整为前肢成对先迈、后肢随后跟进。见[1.2.6 随从与整理指南](docs/COMPANIONS-1.2.6-zh.md)及[英文说明](docs/COMPANIONS-1.2.6.md)。
 
@@ -38,7 +40,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 26.1.2 |
 | Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
-| Howling Werewolf | 1.2.6 (Companion sorting) |
+| Howling Werewolf | 1.2.7 (Hands-on sorting, new companion screens) |
 
 ## 狼人皮肤
 
@@ -49,7 +51,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 **1.2.6**（协议 16）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
+联机时服务端与客户端都需更新至 **1.2.7**（协议 17）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
 
 ## NPC 模型配置
 
@@ -79,7 +81,7 @@ enableCompanionSorting = true
 
 设为 `false`收起随从并关闭其相关操作，保留档案/背包，狩猎与冷却暂停。默认启用；多人游戏使用服务器设置。[完整行为](docs/COMPANIONS-1.2.4-zh.md#服务器禁用开关)。
 
-`enableCompanionSorting = false` 仅关闭整理：已登记的容器保留，其余随从功能继续使用。选择随从 → 整理 → 登记容器，潜行右键加入箱子/木桶，再打开随从管理结束登记并开始整理。范围为工作点水平 8 格、上下 4 格，最多 24 个逻辑容器；双箱计作一个。[使用说明](docs/COMPANIONS-1.2.6-zh.md)。
+`enableCompanionSorting = false` 仅关闭整理，其余随从功能继续使用。使用时把随从带到仓库，打开“整理”页点“开始整理”，它会归整半径 16 格内的箱子和木桶。详见 [1.2.7 指南](docs/COMPANIONS-1.2.7-zh.md)。
 
 ## 刷怪蛋与持物动作
 
@@ -93,7 +95,7 @@ enableCompanionSorting = true
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.2.6**（随从整理与 Modern 渲染/奔跑调整）。
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.2.7**（随从亲手整理、全新随从界面与 Beast 步态）。
 
 ## 从源码构建
 
@@ -103,9 +105,9 @@ enableCompanionSorting = true
 ./gradlew build -x test
 ```
 
-Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.2.6-neoforge-26.1.2.jar`。
+Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.2.7-neoforge-26.1.2.jar`。
 
-当前 Mod 源码版本为 **1.2.6**，网络协议 16。1.2.5 基线已保存在本地标签；已通过 455 项原生服务端、21129 项模型/NPC/UI、1323 项成品检查及 Sodium GPU 对比；本轮验证及边界见[1.2.6 指南](docs/COMPANIONS-1.2.6-zh.md#验证范围)。旧安装保留已保存的按键绑定，请在控制选项中改为 C 或恢复默认。GitHub Release 和各平台文件由维护者另行发布。
+当前 Mod 源码版本为 **1.2.7**，网络协议 17。构建通过；成品检查 2243 项通过，其中全部对白与 1.2.6 逐字节一致。原生 NeoForge 服务端 478 项通过：先从 1.2.6 留下的真实存档升级启动，再做一次真实保存重启。模型/NPC/UI 回归 20842 项通过。在 NeoForge 26.1.2.122、RTX 4060 Laptop 上用隔离的游戏目录运行真实客户端，中文 GUI 缩放 2、4 和英文 GUI 缩放 3 各跑完一轮脚本：随从实际走动、开箱并搬运 99 件物品，物品总量守恒，范围外和走不到的容器未被改动，能到达的容器盖子都实际打开，随从攻击时挥手动画正常推进。Beast 冲刺和潜行在真实世界和渲染画面中都检查过。手感和长时间游玩有待作者实机验收；本版未验证 Sodium、光影包、领地插件或两个真实客户端。
 
 ## 管理员命令
 

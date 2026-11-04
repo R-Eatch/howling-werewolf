@@ -45,8 +45,14 @@ final class CompanionPreview {
         return true;
     }
     void render(GuiGraphicsExtractor graphics, String model, String skin, float uiScale, double mouseX, double mouseY) {
-        graphics.fill(x, y, x + width, y + height, 0xFF211E2C);
-        graphics.outline(x, y, width, height, 0xFF51425F);
+        graphics.fillGradient(x, y, x + width, y + height, 0xFF25223A, 0xFF12101B);
+        // A low moon behind the figure, and a pool of light where it stands.
+        CompanionUi.disc(graphics, x + width / 2, y + height / 3, Math.min(width, height) / 3, 0xFF2F2B47);
+        for (int row = 0; row < 7; row++) {
+            int half = (width / 2 - 8) - row * row;
+            graphics.fill(x + width / 2 - half, y + height - 22 + row, x + width / 2 + half, y + height - 21 + row, 0x28EBC97F);
+        }
+        graphics.outline(x, y, width, height, CompanionUi.LINE);
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null) { player = null; return; }
         if (player == null || player.level() != minecraft.level) {
@@ -60,7 +66,7 @@ final class CompanionPreview {
         player.setXRot(-vertical * 20);
         player.yHeadRot = player.yHeadRotO = player.getYRot();
         player.xRotO = player.getXRot();
-        float size = Math.min(width / 2.1F, height / 2.5F) * zoom;
+        float size = Math.min(width / 1.8F, height / 2.6F) * zoom;
         Quaternionf camera = new Quaternionf().rotateX(vertical * 20 * Mth.DEG_TO_RAD);
         Quaternionf pose = new Quaternionf().rotateZ(Mth.PI).mul(camera);
         graphics.enableScissor(x, y, x + width, y + height);

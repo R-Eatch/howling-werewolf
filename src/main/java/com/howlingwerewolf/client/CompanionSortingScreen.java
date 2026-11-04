@@ -1,132 +1,166 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 package com.howlingwerewolf.client;
 
+import com.howlingwerewolf.client.CompanionUi.Look;
+import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.companion.CompanionSortSettings;
+import com.howlingwerewolf.companion.CompanionSorting;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import java.util.*;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 
-public final class CompanionSortingScreen extends Screen {
-    private static final int WIDTH = 432, HEIGHT = 316;
-    private final CompanionScreen parent;
-    private final UUID id;
-    private CompoundTag snapshot;
-    private final Map<String, Button> controls = new HashMap<>();
-    private float scale = 1;
-    private int scroll, ticks, delay;
+import java.util.UUID;
 
-    CompanionSortingScreen(CompanionScreen parent, CompoundTag snapshot, UUID id) {
-        super(Component.translatable("screen.howlingwerewolf.companion.sort"));
-        this.parent = parent; this.snapshot = snapshot.copy(); this.id = id;
+/** A live map of the work area beside the job's status, method and a single start control. */
+public final class CompanionSortingScreen extends CompanionFrameScreen {
+    private static final String KEY = "screen.howlingwerewolf.companion.sort.";
+    private static final int RADAR_X = 10, RADAR_SIZE = 214, SIDE_X = 234, SIDE_W = 226;
+    private UiButton consolidate, merge, start, stop;
+    private int delay, surveyTicks;
+
+    CompanionSortingScreen(@Nullable Screen parent, CompoundTag snapshot, @Nullable UUID selected) {
+        super(Component.translatable("screen.howlingwerewolf.companion.sort"), parent, snapshot, selected);
     }
-    public void update(CompoundTag snapshot) { this.snapshot = snapshot.copy(); parent.update(snapshot); updateButtons(); }
-    public void openManagement(CompoundTag snapshot) { parent.update(snapshot); minecraft.setScreen(parent); }
-    private CompoundTag record() {
-        ListTag list = snapshot.getListOrEmpty("Companions");
-        for (int i = 0; i < list.size(); i++) if (list.getCompoundOrEmpty(i).getStringOr("Id", "").equals(id.toString())) return list.getCompoundOrEmpty(i);
-        return new CompoundTag();
+    @Override protected Tab tab() { return Tab.SORT; }
+    @Override protected void build(int left, int top) {
+        int half = (SIDE_W - 4) / 2;
+        consolidate = addRenderableWidget(new UiButton(left + SIDE_X, top + 140, half, 24, Component.translatable(KEY + "consolidate"), Look.CHIP, () -> setMethod(true))
+                .icon(() -> Items.CHEST).hint(() -> Component.translatable(KEY + "consolidate_desc")));
+        merge = addRenderableWidget(new UiButton(left + SIDE_X + half + 4, top + 140, half, 24, Component.translatable(KEY + "merge"), Look.CHIP, () -> setMethod(false))
+                .icon(() -> Items.BUNDLE).hint(() -> Component.translatable(KEY + "merge_desc")));
+        start = addRenderableWidget(new UiButton(left + SIDE_X, top + 254, SIDE_W, 26, Component.translatable(KEY + "start"), Look.PRIMARY, () -> request(CompanionActionPacket.Action.SORT, "start"))
+                .hint(this::startHint));
+        stop = addRenderableWidget(new UiButton(left + SIDE_X, top + 254, SIDE_W, 26, Component.translatable(KEY + "stop"), Look.DANGER, () -> request(CompanionActionPacket.Action.REST, "stop")));
+        survey();
     }
-    @Override protected void init() {
-        clearWidgets(); controls.clear();
-        scale = Math.max(0.1F, Math.min(1, Math.min((width - 12F) / WIDTH, (height - 12F) / HEIGHT)));
-        String[] actions = {"register", "clear", "toggle", "start", "stop"};
-        for (int i = 0; i < actions.length; i++) {
-            String action = actions[i];
-            controls.put(action, addRenderableWidget(Button.builder(text(action), button -> request(action))
-                    .bounds(left() + 14 + i % 3 * 136, top() + 250 + i / 3 * 27, 130, 21).build()));
-        }
-        addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.guide"), button -> minecraft.setScreen(new CompanionGuideScreen(this)))
-                .bounds(left() + WIDTH - 66, top() + 9, 54, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), button -> onClose())
-                .bounds(left() + 286, top() + 277, 130, 21).build());
-        updateButtons();
+    private void survey() {
+        CompoundTag record = selectedRecord();
+        if (selected != null && record != null && mode(record) != CompanionMode.SORT) send(CompanionActionPacket.Action.SORT, selected, "preview");
     }
-    private Component text(String action) {
-        if (action.equals("toggle")) return Component.translatable("screen.howlingwerewolf.companion.sort." + (record().getBooleanOr("SortConsolidate", true) ? "consolidate" : "merge"));
-        return Component.translatable("screen.howlingwerewolf.companion.sort." + action);
+    private void setMethod(boolean wanted) {
+        CompoundTag record = selectedRecord();
+        if (record != null && record.getBooleanOr("SortConsolidate", true) != wanted) request(CompanionActionPacket.Action.SORT, "toggle");
     }
-    private void request(String action) {
-        Button control = controls.get(action);
-        if (control == null || !control.active) return;
-        ClientPacketDistributor.sendToServer(new CompanionActionPacket(action.equals("stop") ? CompanionActionPacket.Action.REST : CompanionActionPacket.Action.SORT, id, action));
-        delay = 5; updateButtons();
-        if (action.equals("register")) minecraft.setScreen(null);
+    private void request(CompanionActionPacket.Action action, String value) {
+        if (selected == null) return;
+        send(action, selected, value);
+        delay = 5; refreshControls();
     }
-    private void updateButtons() {
-        CompoundTag record = record(); int mode = record.getIntOr("Mode", CompanionMode.DEAD.ordinal());
-        boolean ready = snapshot.getBooleanOr("SystemEnabled", true) && snapshot.getBooleanOr("SortingEnabled", false) && record.getBooleanOr("Enabled", false)
-                && mode != CompanionMode.HUNT.ordinal() && mode != CompanionMode.DEAD.ordinal() && delay == 0;
-        controls.forEach((action, button) -> {
-            button.setMessage(text(action));
-            button.active = ready && (action.equals("stop") || record.getBooleanOr("SortNearby", false))
-                    && (!action.equals("start") || mode != CompanionMode.SORT.ordinal() && !record.getListOrEmpty("SortContainers").isEmpty())
-                    && (!action.equals("stop") || mode == CompanionMode.SORT.ordinal());
-        });
-    }
-    private String fit(Component text, int width) {
-        String value = text.getString();
-        return font.width(value) <= width ? value : font.plainSubstrByWidth(value, width - font.width("…")) + "…";
+    private @Nullable Component startHint() {
+        CompoundTag record = selectedRecord();
+        if (record == null) return null;
+        if (!record.getBooleanOr("SortNearby", false)) return Component.translatable("screen.howlingwerewolf.companion.reason.sort_far");
+        return Component.translatable(KEY + "start_hint", CompanionSortSettings.RADIUS);
     }
     @Override public void tick() {
-        if (delay > 0) delay--; updateButtons();
-        if (++ticks % 20 == 0) ClientPacketDistributor.sendToServer(new CompanionActionPacket(CompanionActionPacket.Action.REFRESH, CompanionActionPacket.NO_TARGET));
+        if (delay > 0) delay--;
+        if (++surveyTicks >= 100) { surveyTicks = 0; survey(); }
+        super.tick();
     }
-    @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractTransparentBackground(graphics);
-        int left = left(), top = top(); CompoundTag record = record(); ListTag positions = record.getListOrEmpty("SortContainers");
-        graphics.pose().pushMatrix();
-        try {
-            graphics.pose().scale(scale, scale);
-            graphics.fill(left, top, left + WIDTH, top + HEIGHT, 0xF0181724);
-            graphics.outline(left, top, WIDTH, HEIGHT, 0xFF8674BB);
-            graphics.text(font, title, left + 14, top + 14, 0xFFE3D3FF, false);
-            CompanionMode mode = CompanionMode.values()[Math.clamp(record.getIntOr("Mode", CompanionMode.DEAD.ordinal()), 0, CompanionMode.values().length - 1)];
-            Component identity = Component.literal(record.getStringOr("Name", "")).append(" · ").append(Component.translatable(mode.translationKey()));
-            graphics.text(font, fit(identity, WIDTH - 28), left + 14, top + 44, 0xFFE7E2EC, false);
-            graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.sort.count", positions.size(), CompanionSortSettings.LIMIT), left + 14, top + 62, 0xFFCFCCD9, false);
-            int[] center = record.getIntArray("SortCenter").orElse(new int[]{0, 0, 0});
-            if (center.length == 3) graphics.text(font, fit(Component.translatable("screen.howlingwerewolf.companion.sort.center", center[0], center[1], center[2])
-                    .append(" · ").append(record.getStringOr("SortDimension", "")), WIDTH - 28), left + 14, top + 79, 0xFFCFCCD9, false);
-            graphics.fill(left + 14, top + 98, left + WIDTH - 14, top + 239, 0xFF211E2B);
-            scroll = Math.clamp(scroll, 0, Math.max(0, positions.size() - 8));
-            if (positions.size() > 8) {
-                int thumbHeight = Math.max(16, 137 * 8 / positions.size());
-                int thumbTop = top + 100 + (137 - thumbHeight) * scroll / (positions.size() - 8);
-                graphics.fill(left + WIDTH - 22, top + 100, left + WIDTH - 18, top + 237, 0xFF51425F);
-                graphics.fill(left + WIDTH - 22, thumbTop, left + WIDTH - 18, thumbTop + thumbHeight, 0xFFB7A5DB);
-            }
-            for (int i = scroll; i < Math.min(positions.size(), scroll + 8); i++) {
-                CompoundTag position = positions.getCompoundOrEmpty(i);
-                graphics.text(font, Component.literal((i + 1) + ".  " + position.getIntOr("X", 0) + ", " + position.getIntOr("Y", 0) + ", " + position.getIntOr("Z", 0)),
-                        left + 24, top + 106 + (i - scroll) * 16, 0xFFE7E2EC, false);
-            }
-            super.extractRenderState(graphics, Math.round(mouseX / scale), Math.round(mouseY / scale), partialTick);
-        } finally { graphics.pose().popMatrix(); }
+    @Override protected void refreshControls() {
+        if (start == null) return;
+        CompoundTag record = selectedRecord();
+        boolean ready = record != null && systemEnabled() && snapshot.getBooleanOr("SortingEnabled", false) && record.getBooleanOr("Enabled", false) && mode(record).hasEntity() && delay == 0;
+        boolean sorting = record != null && mode(record) == CompanionMode.SORT;
+        start.visible = !sorting; stop.visible = sorting;
+        start.active = ready && record.getBooleanOr("SortNearby", false);
+        stop.active = ready;
+        boolean together = record != null && record.getBooleanOr("SortConsolidate", true);
+        consolidate.selected(together); merge.selected(!together);
+        consolidate.active = merge.active = ready;
     }
-    private int left() { return (Math.round(width / scale) - WIDTH) / 2; }
-    private int top() { return (Math.round(height / scale) - HEIGHT) / 2; }
-    private MouseButtonEvent logical(MouseButtonEvent event) { return new MouseButtonEvent(event.x() / scale, event.y() / scale, event.buttonInfo()); }
-    @Override public void mouseMoved(double x, double y) { super.mouseMoved(x / scale, y / scale); }
-    @Override public boolean mouseClicked(MouseButtonEvent event, boolean twice) { return super.mouseClicked(logical(event), twice); }
-    @Override public boolean mouseReleased(MouseButtonEvent event) { return super.mouseReleased(logical(event)); }
-    @Override public boolean mouseDragged(MouseButtonEvent event, double x, double y) { return super.mouseDragged(logical(event), x / scale, y / scale); }
-    @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
-        double logicalX = x / scale, logicalY = y / scale;
-        if (logicalX >= left() + 14 && logicalX < left() + WIDTH - 14 && logicalY >= top() + 98 && logicalY < top() + 239 && dy != 0) {
-            scroll = Math.clamp(scroll + (dy > 0 ? -1 : 1), 0, Math.max(0, record().getListOrEmpty("SortContainers").size() - 8));
-            return true;
+    private static int[] center(CompoundTag record) {
+        int[] center = record.getIntArray("SortCenter").orElse(new int[3]);
+        return center.length == 3 ? center : new int[3];
+    }
+    private int radarX(int left, int offset) { return left + RADAR_X + RADAR_SIZE / 2 + Math.round(offset * (RADAR_SIZE / 2F - 7) / CompanionSortSettings.RADIUS); }
+    private int radarY(int top, int offset) { return top + BODY_TOP + 4 + RADAR_SIZE / 2 + Math.round(offset * (RADAR_SIZE / 2F - 7) / CompanionSortSettings.RADIUS); }
+
+    @Override protected void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+        CompoundTag record = selectedRecord();
+        if (record == null) return;
+        drawRadar(graphics, left, top, record);
+        int x = left + SIDE_X, y = top + BODY_TOP + 4;
+        CompanionUi.label(graphics, font, Component.literal(record.getStringOr("Name", "")), x, y + 2, SIDE_W - 90, CompanionUi.TEXT);
+        String phase = record.getStringOr("SortPhase", "stopped");
+        Component phaseText = Component.translatable(KEY + "phase." + phase);
+        CompanionUi.pill(graphics, font, phaseText, x + SIDE_W - font.width(phaseText) - 10, y, phaseColor(phase));
+        y += 20;
+        CompanionUi.card(graphics, x, y, SIDE_W, 66, CompanionUi.SURFACE, CompanionUi.LINE);
+        int moved = record.getIntOr("SortMoved", 0), remaining = record.getIntOr("SortRemaining", 0);
+        int usable = 0, skipped = 0;
+        ListTag containers = record.getListOrEmpty("SortContainers");
+        for (int i = 0; i < containers.size(); i++) { if (containers.getCompoundOrEmpty(i).getBooleanOr("Usable", false)) usable++; else skipped++; }
+        CompanionUi.label(graphics, font, Component.translatable(KEY + "found", usable, skipped), x + 8, y + 8, SIDE_W - 16, CompanionUi.TEXT);
+        CompanionUi.bar(graphics, x + 8, y + 24, SIDE_W - 16, 8, moved + remaining == 0 ? (phase.equals("done") ? 1 : 0) : moved / (float) (moved + remaining), CompanionUi.MOON);
+        CompanionUi.label(graphics, font, Component.translatable(KEY + "moved", moved, remaining), x + 8, y + 38, SIDE_W - 16, CompanionUi.MUTED);
+        CompanionUi.label(graphics, font, Component.translatable(KEY + "limit", CompanionSorting.SCAN_LIMIT), x + 8, y + 51, SIDE_W - 16, CompanionUi.FAINT);
+        CompanionUi.section(graphics, font, Component.translatable("screen.howlingwerewolf.companion.section.method"), x, top + 128, SIDE_W);
+        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + (record.getBooleanOr("SortConsolidate", true) ? "consolidate_desc" : "merge_desc")), x, top + 168, SIDE_W, CompanionUi.MUTED, 2);
+        CompanionUi.section(graphics, font, Component.translatable("screen.howlingwerewolf.companion.section.how"), x, top + 195, SIDE_W);
+        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + "note"), x, top + 207, SIDE_W, CompanionUi.MUTED, 4);
+    }
+    private static int phaseColor(String phase) {
+        return switch (phase) {
+            case "walking", "opening", "moving", "closing" -> CompanionUi.MOON;
+            case "done" -> CompanionUi.GOOD;
+            case "paused" -> CompanionUi.WARN;
+            default -> CompanionUi.MUTED;
+        };
+    }
+    private void drawRadar(GuiGraphicsExtractor graphics, int left, int top, CompoundTag record) {
+        int x = left + RADAR_X, y = top + BODY_TOP + 4, cx = x + RADAR_SIZE / 2, cy = y + RADAR_SIZE / 2, radius = RADAR_SIZE / 2 - 7;
+        CompanionUi.card(graphics, x, y, RADAR_SIZE, RADAR_SIZE, 0xFF12101B, CompanionUi.LINE);
+        CompanionUi.disc(graphics, cx, cy, radius, 0xFF191725);
+        graphics.fill(cx - radius, cy, cx + radius + 1, cy + 1, 0xFF262338);
+        graphics.fill(cx, cy - radius, cx + 1, cy + radius + 1, 0xFF262338);
+        CompanionUi.ring(graphics, cx, cy, radius, CompanionUi.mix(CompanionUi.LINE, CompanionUi.MOON, 0.45F));
+        CompanionUi.ring(graphics, cx, cy, radius / 2, CompanionUi.LINE);
+        boolean sorting = mode(record) == CompanionMode.SORT;
+        if (sorting) {
+            // A slow pulse expands from the anchor while the job runs.
+            float pulse = (Util.getMillis() % 2200) / 2200F;
+            CompanionUi.ring(graphics, cx, cy, Math.round(radius * pulse), CompanionUi.mix(CompanionUi.MOON, 0xFF191725, pulse));
         }
-        return super.mouseScrolled(logicalX, logicalY, dx, dy);
+        graphics.text(font, "N", cx - 2, y + 2, CompanionUi.FAINT, false);
+        graphics.text(font, CompanionSortSettings.RADIUS + "m", cx + radius - font.width(CompanionSortSettings.RADIUS + "m") + 2, y + RADAR_SIZE - 11, CompanionUi.FAINT, false);
+        int[] center = center(record);
+        int[] at = record.getIntArray("SortAt").orElse(new int[0]);
+        ListTag containers = record.getListOrEmpty("SortContainers");
+        for (int i = 0; i < containers.size(); i++) {
+            CompoundTag entry = containers.getCompoundOrEmpty(i);
+            int px = radarX(left, entry.getIntOr("X", 0) - center[0]), py = radarY(top, entry.getIntOr("Z", 0) - center[2]);
+            boolean usable = entry.getBooleanOr("Usable", false);
+            boolean current = at.length == 3 && entry.getIntOr("X", 0) == at[0] && entry.getIntOr("Y", 0) == at[1] && entry.getIntOr("Z", 0) == at[2];
+            int color = current ? CompanionUi.TEXT : usable ? CompanionUi.MOON : CompanionUi.FAINT;
+            CompanionUi.box(graphics, px - 2, py - 2, 5, 5, color);
+            if (current) graphics.outline(px - 4, py - 4, 9, 9, CompanionUi.mix(CompanionUi.MOON, 0x00000000, (Util.getMillis() % 800) / 800F));
+        }
+        graphics.fill(cx - 3, cy - 1, cx + 4, cy + 2, CompanionUi.VIOLET);
+        graphics.fill(cx - 1, cy - 3, cx + 2, cy + 4, CompanionUi.VIOLET);
+        if (containers.isEmpty()) graphics.centeredText(font, Component.translatable(KEY + "radar_empty"), cx, cy + 12, CompanionUi.FAINT);
     }
-    @Override public void extractBackground(GuiGraphicsExtractor graphics, int x, int y, float partialTick) {}
-    @Override public void onClose() { minecraft.setScreen(parent); }
-    @Override public boolean isPauseScreen() { return false; }
+    @Override protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) {
+        CompoundTag record = selectedRecord();
+        if (record == null) return null;
+        int[] center = center(record);
+        ListTag containers = record.getListOrEmpty("SortContainers");
+        for (int i = 0; i < containers.size(); i++) {
+            CompoundTag entry = containers.getCompoundOrEmpty(i);
+            int px = radarX(left, entry.getIntOr("X", 0) - center[0]), py = radarY(top, entry.getIntOr("Z", 0) - center[2]);
+            if (Mth.abs(mouseX - px) <= 3 && Mth.abs(mouseY - py) <= 3) {
+                return Component.translatable(KEY + (entry.getBooleanOr("Usable", false) ? "dot_ready" : "dot_skipped"),
+                        entry.getIntOr("X", 0), entry.getIntOr("Y", 0), entry.getIntOr("Z", 0));
+            }
+        }
+        return null;
+    }
 }

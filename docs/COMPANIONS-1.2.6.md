@@ -1,5 +1,7 @@
 # Companions and sorting: 1.2.6
 
+> This describes 1.2.6. From 1.2.7 companions walk and sort by hand with nothing to register; see the [1.2.7 guide](COMPANIONS-1.2.7.md).
+
 Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25. Install 1.2.6 on both client and server, using network protocol 16. [简体中文](COMPANIONS-1.2.6-zh.md).
 
 This version adds **Sort**, changes Modern UV submission, and adjusts the Modern Beast quadrupedal sprint. Existing rituals, trading, recruitment, inventories, hunting, upgrades and revival retain their rules. See the [base rules](COMPANIONS-1.2.4-zh.md) and [1.2.5 controls](COMPANIONS-1.2.5-zh.md); current controls and sorting behavior below take precedence over historical guide text.

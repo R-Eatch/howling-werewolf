@@ -84,14 +84,7 @@ public final class ClientPacketHandlers {
             }, Component.translatable("screen.howlingwerewolf.companion.recruit_title"),
                     Component.translatable("screen.howlingwerewolf.companion.recruit_body", data.getStringOr("Name", ""))));
         } else if (data.getStringOr("View", "").equals("manage")) {
-            if (minecraft.screen instanceof CompanionScreen screen) screen.update(data);
-            else if (minecraft.screen instanceof CompanionCustomizeScreen screen) {
-                if (packet.open()) screen.openManagement(data); else screen.update(data);
-            } else if (minecraft.screen instanceof CompanionGuideScreen screen) {
-                if (packet.open()) screen.openManagement(data); else screen.update(data);
-            } else if (minecraft.screen instanceof CompanionSortingScreen screen) {
-                if (packet.open()) screen.openManagement(data); else screen.update(data);
-            }
+            if (minecraft.screen instanceof CompanionFrameScreen screen) screen.receive(data, packet.open());
             else if (packet.open()) minecraft.setScreen(new CompanionScreen(minecraft.screen, data));
         }
     }

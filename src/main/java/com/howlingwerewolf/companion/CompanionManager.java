@@ -72,7 +72,6 @@ public final class CompanionManager {
         requests.put(player.getUUID(), now);
         switch (packet.action()) {
             case OPEN -> {
-                CompanionSorting.endRegistration(player);
                 if (packet.target().equals(CompanionActionPacket.NO_TARGET)) sendView(player, true);
                 else {
                     CompanionRecord record = data.find(packet.target());
@@ -485,7 +484,7 @@ public final class CompanionManager {
             entry.putInt("Tier", record.tier);
             entry.putInt("Mode", record.mode.ordinal());
             entry.putBoolean("SortNearby", entity != null && entity.level() == player.level() && entity.distanceToSqr(player) <= 16 * 16);
-            CompanionSorting.writeView(entry, record);
+            CompanionSorting.writeView(entry, record, player.level().getServer());
             entry.putFloat("Health", record.health);
             entry.putFloat("MaxHealth", (float) CompanionRules.maxHealth(effectiveTier(player, record)));
             entry.putBoolean("Enabled", enabled(player, record));

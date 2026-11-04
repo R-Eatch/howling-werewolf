@@ -16,10 +16,22 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Retargets the established actions onto the imported skeleton, preserving its authored rest pose. */
 final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel<S> implements ArmedModel<S>, HeadedModel {
+    private static final String[] FORE_RIGHT = {"rightArmRotation", "right_forearn"}, FORE_LEFT = {"leftArmRotation", "left_forearn"};
+    private static final String[] HIND_RIGHT = {"rightLeg", "right_leg_lower", "right_foot_upper"}, HIND_LEFT = {"leftLeg", "left_leg_lower", "left_foot_upper"};
+    private static final List<String> RELAXED_JOINTS = List.of("rightArm", "leftArm", "rightArmRotation", "leftArmRotation", "right_forearn", "left_forearn",
+            "rightLeg", "leftLeg", "right_leg_lower", "left_leg_lower");
+    private static final float SHOULDER_IN = 0.40F, HIP_RANGE = 1.05F, HIP_SOCKET = 11, REACH_MARGIN = 0.96F;
+    // Carriage of the gallop and prowl: root drop in pixels, then torso lean and chest and neck pitch in radians.
+    private static final float GALLOP_HEIGHT = -0.6F, GALLOP_LEAN = 1.52F, GALLOP_CHEST = -0.22F, GALLOP_GAZE = 0.10F;
+    private static final float FORE_BIAS = -0.10F, HIND_BIAS = 0.02F;
+    private static final float PROWL_HEIGHT = 1.5F, PROWL_LEAN = 1.52F, PROWL_CHEST = -0.22F, PROWL_GAZE = 0.05F;
+    private static final float PROWL_FORE_BIAS = -0.04F, PROWL_HIND_BIAS = -0.02F;
     private final WerewolfForm form;
     final BlockbenchModel.Baked rig;
     private final EntityModel<S> driver;
@@ -32,6 +44,7 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     private final Vector3f leftFootContact;
     private final Vector3f rightGrip;
     private final Vector3f leftGrip;
+    private final Map<String, Float> bendDirection = new HashMap<>();
 
     ModernPlayerModel(WerewolfForm form) {
         this(form, ModernModelResources.model(form).bake(height(form)));
@@ -69,6 +82,10 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         leftPawContact = form == WerewolfForm.BEAST ? contact("left_paw") : null;
         rightFootContact = form == WerewolfForm.BEAST ? contact("right_foot_lower") : null;
         leftFootContact = form == WerewolfForm.BEAST ? contact("left_foot_lower") : null;
+        if (form == WerewolfForm.BEAST) {
+            restBend("right_paw", FORE_RIGHT); restBend("left_paw", FORE_LEFT);
+            restBend("right_foot_lower", HIND_RIGHT); restBend("left_foot_lower", HIND_LEFT);
+        }
         rightGrip = form == WerewolfForm.QUADRUPED ? null : palm("right_paw");
         leftGrip = form == WerewolfForm.QUADRUPED ? null : palm("left_paw");
     }
@@ -104,16 +121,18 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
         applyNativeHands(state);
         if (form == WerewolfForm.BEAST) {
-            if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying) {
-                // Lower the head by leaning from the hips. Deeply lowering the hip itself
-                // folds this digitigrade rig's long hocks back through the feet.
+            var motion = WerewolfRenderData.get(state);
+            if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying && state.isUsingItem) {
+                // Aiming keeps the upright crouch, so native arm poses still point at the target.
                 root.y += 2.4F;
                 rig.bone("waist").xRot += 0.72F;
                 rig.bone("head").xRot -= 0.72F;
-                runLeg("right_foot_lower", rightFootContact, new String[]{"rightLeg", "right_leg_lower", "right_foot_upper"}, "rightLeg", 0, 0, false, 1);
-                runLeg("left_foot_lower", leftFootContact, new String[]{"leftLeg", "left_leg_lower", "left_foot_upper"}, "leftLeg", 0, 0, false, 1);
+                placeLimb("right_foot_lower", rightFootContact, HIND_RIGHT, "rightLeg", 0, 0, 0, 0, 1);
+                placeLimb("left_foot_lower", leftFootContact, HIND_LEFT, "leftLeg", 0, 0, 0, 0, 1);
+            } else if (motion.beastProwlAmount() > 0 && !blockedQuadruped(state)) {
+                applyBeastProwl(state, motion.beastProwlAmount());
             }
-            applyBeastRun(state, WerewolfRenderData.get(state).beastRunAmount());
+            applyBeastRun(state, motion.beastRunAmount(), motion.beastLeapAmount());
         }
         animateTail(state);
     }
@@ -138,7 +157,7 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         float phase = state.ageInTicks * 0.085F;
         float movement = Mth.clamp(state.walkAnimationSpeed, 0, 1);
         float strength = state.isCrouching ? 0.55F : form == WerewolfForm.BEAST
-                && WerewolfRenderData.get(state).beastRunAmount() > 0 ? 0.7F : 1;
+                && WerewolfRenderData.get(state).beastRunAmount() > 0 ? 0.45F : 1;
         String[] names = {"tail", "tail_main12", "tail_12"};
         float[] amplitudes = {0.09F, 0.13F, 0.18F};
         for (int index = 0; index < names.length; index++) {
@@ -152,33 +171,54 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
     }
 
-    private void applyBeastRun(S state, float amount) {
-        if (amount <= 0 || state.isCrouching || state.isInWater || state.isVisuallySwimming || state.isFallFlying
-                || state.isAutoSpinAttack || state.isPassenger || state.isUsingItem) return;
+    private static boolean blockedQuadruped(HumanoidRenderState state) {
+        return state.isPassenger || state.isInWater || state.isVisuallySwimming || state.isFallFlying
+                || state.isAutoSpinAttack || state.isUsingItem;
+    }
+
+    /** Levels the spine over all four limbs: the Beast's upright rig folded into a quadruped carriage. */
+    private void carryOnFours(S state, float amount, float height, float lean, float chest, float gaze) {
+        ModelPart head = rig.bone("head");
+        root.y += height * amount;
+        rig.bone("waist").xRot += lean * amount;
         ModelPart body = rig.bone("body");
         ModelPart upper = rig.bone("body_upper");
-        ModelPart head = rig.bone("head");
-        root.y += 6.5F * amount;
-        rig.bone("waist").xRot += 0.78F * amount;
-        body.xRot = Mth.lerp(amount, body.xRot, 0.05F);
-        upper.xRot = Mth.lerp(amount, upper.xRot, upper.getInitialPose().xRot() + 0.07F);
-        head.xRot = Mth.lerp(amount, head.xRot, -1.48F + Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.5F, 0.5F));
-        for (String name : List.of("rightArm", "leftArm", "right_forearn", "left_forearn",
-                "rightLeg", "leftLeg", "right_leg_lower", "left_leg_lower")) {
+        body.xRot = Mth.lerp(amount, body.xRot, 0);
+        upper.xRot = Mth.lerp(amount, upper.xRot, upper.getInitialPose().xRot() + chest);
+        // The neck cancels every pitch of the spine, so the eyes stay level through the stride.
+        float level = -(lean + chest + upper.getInitialPose().xRot());
+        head.xRot = Mth.lerp(amount, head.xRot, level + gaze + Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.5F, 0.5F));
+        for (String name : RELAXED_JOINTS) {
             ModelPart joint = rig.bone(name);
             joint.xRot = Mth.lerp(amount, joint.xRot, joint.getInitialPose().xRot());
+            joint.yRot = Mth.lerp(amount, joint.yRot, joint.getInitialPose().yRot());
+            joint.zRot = Mth.lerp(amount, joint.zRot, joint.getInitialPose().zRot());
         }
-        float cycle = state.walkAnimationPos * 0.8F;
-        float stride = 0.28F + Math.min(state.walkAnimationSpeed, 1) * 0.12F;
-        float bounce = Mth.sin(cycle * 2) * Math.min(state.walkAnimationSpeed, 1) * amount;
-        root.y += bounce * 0.35F;
-        rig.bone("waist").xRot += Mth.sin(cycle) * 0.045F * amount;
-        head.xRot -= Mth.sin(cycle) * 0.045F * amount;
-        runLeg("right_paw", rightPawContact, new String[]{"rightArmRotation", "right_forearn"}, "rightArmRotation", cycle, stride, true, amount);
-        runLeg("left_paw", leftPawContact, new String[]{"leftArmRotation", "left_forearn"}, "leftArmRotation", cycle, stride, true, amount);
-        runLeg("right_foot_lower", rightFootContact, new String[]{"rightLeg", "right_leg_lower", "right_foot_upper"}, "rightLeg", cycle - Mth.PI, stride, false, amount);
-        runLeg("left_foot_lower", leftFootContact, new String[]{"leftLeg", "left_leg_lower", "left_foot_upper"}, "leftLeg", cycle - Mth.PI, stride, false, amount);
-        rig.bone("jaw").xRot -= 0.08F * amount;
+        // Bring the paws in under the chest rather than out at the shoulders.
+        rig.bone("rightArm").zRot += SHOULDER_IN * amount;
+        rig.bone("leftArm").zRot -= SHOULDER_IN * amount;
+        // The tail hangs off the torso, so it streams behind instead of rising with the lean.
+        rig.bone("tail").xRot -= lean * 0.92F * amount;
+    }
+
+    private void applyBeastRun(S state, float amount, float leap) {
+        if (amount <= 0 || state.isCrouching || blockedQuadruped(state)) return;
+        float speed = Math.min(state.walkAnimationSpeed, 1);
+        float cycle = BeastGait.stride(state.walkAnimationPos, BeastGait.GALLOP_RATE);
+        float pitch = BeastGait.pitch(cycle) * speed * (1 - leap);
+        float flex = BeastGait.flex(cycle) * speed * (1 - leap);
+        float rise = BeastGait.rise(cycle) * speed * (1 - leap);
+        carryOnFours(state, amount, GALLOP_HEIGHT - rise * 0.8F - leap * 1.5F, GALLOP_LEAN - pitch * 0.09F + leap * -0.10F,
+                GALLOP_CHEST + flex * 0.22F - leap * 0.12F, GALLOP_GAZE);
+        rig.bone("waist").zRot += Mth.sin(cycle * Mth.TWO_PI) * 0.025F * speed * amount;
+        rig.bone("jaw").xRot -= (0.10F + Math.max(0, -flex) * 0.08F) * amount;
+        rig.bone("tail_main12").xRot += Mth.sin((cycle - 0.20F) * Mth.TWO_PI) * 0.14F * speed * amount;
+        rig.bone("tail_12").xRot += Mth.sin((cycle - 0.32F) * Mth.TWO_PI) * 0.20F * speed * amount;
+        float reach = (0.40F + speed * 0.20F) * (1 - leap * 0.2F);
+        limbGallop("right_paw", rightPawContact, FORE_RIGHT, "rightArmRotation", cycle, BeastGait.FORE_LEAD, reach, true, amount, speed, leap);
+        limbGallop("left_paw", leftPawContact, FORE_LEFT, "leftArmRotation", cycle, BeastGait.FORE_TRAIL, reach, true, amount, speed, leap);
+        limbGallop("right_foot_lower", rightFootContact, HIND_RIGHT, "rightLeg", cycle, BeastGait.HIND_LEAD, reach, false, amount, speed, leap);
+        limbGallop("left_foot_lower", leftFootContact, HIND_LEFT, "leftLeg", cycle, BeastGait.HIND_TRAIL, reach, false, amount, speed, leap);
         if (state.attackTime > 0) {
             // A running attack lifts the attacking paw; the other three limbs keep their gait.
             float eased = 1 - (float) Math.pow(1 - state.attackTime, 4);
@@ -189,26 +229,64 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
     }
 
-    private void runLeg(String effector, Vector3f contact, String[] joints, String anchor,
-                        float phase, float stride, boolean front, float amount) {
+    private void limbGallop(String paw, Vector3f contact, String[] joints, String anchor, float cycle, float start,
+                            float reach, boolean fore, float amount, float speed, float leap) {
+        BeastGait.Step step = BeastGait.gallop(cycle, start);
+        // Airborne limbs stretch out: forelegs reach ahead, hind legs trail behind.
+        float travel = Mth.lerp(leap, step.travel() * Math.max(speed, 0.2F), fore ? -0.95F : 0.95F);
+        float lift = Mth.lerp(leap, step.lift() * (fore ? 0.30F : 0.20F) * speed, fore ? 0.55F : 0.42F);
+        float bias = fore ? FORE_BIAS : HIND_BIAS;
+        float span = reach * (fore ? 1 : 1.12F);
+        // A swinging forepaw folds at the wrist; a hind paw trails from the hock.
+        float tilt = step.tuck() * (fore ? -0.9F : 0.7F) * speed * (1 - leap);
+        placeLimb(paw, contact, joints, anchor, bias + travel * span, lift, tilt, 1, amount);
+    }
+
+    private void applyBeastProwl(S state, float amount) {
+        float speed = Math.min(state.walkAnimationSpeed * 1.4F, 1);
+        float cycle = BeastGait.stride(state.walkAnimationPos, BeastGait.PROWL_RATE);
+        carryOnFours(state, amount, PROWL_HEIGHT, PROWL_LEAN + Mth.sin(cycle * Mth.TWO_PI * 2) * 0.012F * speed,
+                PROWL_CHEST, PROWL_GAZE);
+        rig.bone("waist").zRot += Mth.sin(cycle * Mth.TWO_PI) * 0.03F * speed * amount;
+        float reach = 0.26F * speed;
+        limbProwl("right_foot_lower", rightFootContact, HIND_RIGHT, "rightLeg", cycle, BeastGait.PROWL[0], reach, false, amount, speed);
+        limbProwl("right_paw", rightPawContact, FORE_RIGHT, "rightArmRotation", cycle, BeastGait.PROWL[1], reach, true, amount, speed);
+        limbProwl("left_foot_lower", leftFootContact, HIND_LEFT, "leftLeg", cycle, BeastGait.PROWL[2], reach, false, amount, speed);
+        limbProwl("left_paw", leftPawContact, FORE_LEFT, "leftArmRotation", cycle, BeastGait.PROWL[3], reach, true, amount, speed);
+    }
+
+    private void limbProwl(String paw, Vector3f contact, String[] joints, String anchor, float cycle, float start,
+                           float reach, boolean fore, float amount, float speed) {
+        BeastGait.Step step = BeastGait.prowl(cycle, start);
+        placeLimb(paw, contact, joints, anchor, (fore ? PROWL_FORE_BIAS : PROWL_HIND_BIAS) + step.travel() * reach,
+                step.lift() * 0.20F * speed, step.tuck() * (fore ? -0.5F : 0.4F) * speed, 1, amount);
+    }
+
+    private void placeLimb(String effector, Vector3f contact, String[] joints, String anchor,
+                           float offsetZ, float lift, float pawTilt, float zWeight, float amount) {
         Vector3f current = matrix(effector).transformPosition(contact, new Vector3f());
         Vector3f initialDown = matrix(effector).transformDirection(new Vector3f(0, 1, 0));
-        float pawPitch = (float) Math.atan2(initialDown.z, initialDown.y) * (1 - amount);
+        float pawPitch = (float) Math.atan2(initialDown.z, initialDown.y) * (1 - amount) + pawTilt * amount;
         int jointCount = joints.length;
         Vector3f origin = matrix(anchor).transformPosition(new Vector3f());
         float bottom = pawBottom(effector);
-        BeastGait.Step gait = BeastGait.step(phase);
-        float lift = stride <= 0 ? 0 : gait.lift() * (front ? 0.22F : 0.18F);
-        // Lowering the hips during the upright-to-bound blend must not push the
-        // hind paws through the floor while only part of their IK is blended in.
+        // Lowering the hips during a blend must not push the paws through the floor
+        // while only part of their inverse kinematics is blended in.
         float desiredBottom = Math.min(1.5F, Mth.lerp(amount, bottom, 1.5F - lift));
-        Vector3f target = new Vector3f(current.x, current.y + desiredBottom - bottom,
-                origin.z + (front ? 0.12F : 0.08F) + gait.travel() * stride);
-        target.z = Mth.lerp(amount, current.z, target.z);
-        // Planar inverse kinematics places the paws on the ground during the stance half-cycle.
+        float goalZ = zWeight > 0 ? origin.z + offsetZ : current.z;
+        Vector3f target = new Vector3f(current.x, current.y + desiredBottom - bottom, Mth.lerp(amount, current.z, goalZ));
+        boolean hind = jointCount == 3;
+        ModelPart hip = rig.bone(joints[0]);
+        float hipRest = hip.getInitialPose().xRot(), hipY = hip.y, hipZ = hip.z;
+        // Planar inverse kinematics keeps grounded paws on the floor through the stance.
         for (int pass = 0; pass < 3; pass++) {
             levelPaw(effector, pawPitch);
+            keepWithinReach(effector, contact, joints, target);
             seedLimb(effector, contact, joints, target);
+            if (hind) {
+                hip.xRot = Mth.clamp(hip.xRot, hipRest - HIP_RANGE * amount, hipRest + HIP_RANGE * amount);
+                swingFromSocket(hip, hipRest, hipY, hipZ);
+            }
             float[] centers = new float[jointCount];
             for (int index = 0; index < jointCount; index++) centers[index] = rig.bone(joints[index]).xRot;
             for (int iteration = 0; iteration < 16; iteration++) {
@@ -223,9 +301,11 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
                     float rotation = joint.xRot;
                     float pawRotation = rig.bone(effector).xRot;
                     joint.xRot += 0.002F;
+                    if (hind && index == 0) swingFromSocket(hip, hipRest, hipY, hipZ);
                     levelPaw(effector, pawPitch);
                     derivatives[index] = matrix(effector).transformPosition(contact, new Vector3f()).sub(end).div(0.002F);
                     joint.xRot = rotation;
+                    if (hind && index == 0) swingFromSocket(hip, hipRest, hipY, hipZ);
                     rig.bone(effector).xRot = pawRotation;
                 }
                 // Damped least squares remains stable when a limb approaches full extension.
@@ -243,12 +323,60 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
                 for (int index = 0; index < jointCount; index++) {
                     ModelPart joint = rig.bone(joints[index]);
                     float step = derivatives[index].y * correctionY + derivatives[index].z * correctionZ;
-                    joint.xRot = Mth.clamp(joint.xRot + Mth.clamp(step, -0.3F, 0.3F), centers[index] - 1.2F, centers[index] + 1.2F);
+                    float low = hind && index == 0 ? hipRest - HIP_RANGE * amount : centers[index] - 1.2F;
+                    float high = hind && index == 0 ? hipRest + HIP_RANGE * amount : centers[index] + 1.2F;
+                    joint.xRot = Mth.clamp(joint.xRot + Mth.clamp(step, -0.3F, 0.3F), low, high);
                 }
+                if (hind) swingFromSocket(hip, hipRest, hipY, hipZ);
             }
             levelPaw(effector, pawPitch);
             target.y += desiredBottom - pawBottom(effector);
         }
+    }
+
+    /**
+     * A goal past the limb's full length has no stable solution and the joints would chatter.
+     * Pulling the goal back along its own direction keeps the paw moving smoothly.
+     */
+    private void keepWithinReach(String effector, Vector3f contact, String[] joints, Vector3f target) {
+        Vector3f root = matrix(joints[0]).transformPosition(new Vector3f());
+        float length = 0;
+        Vector3f previous = root;
+        for (int index = 1; index < joints.length; index++) {
+            Vector3f next = matrix(joints[index]).transformPosition(new Vector3f());
+            length += planar(previous, next);
+            previous = next;
+        }
+        length += planar(previous, matrix(effector).transformPosition(contact, new Vector3f()));
+        float reach = length * REACH_MARGIN;
+        float height = target.y - root.y, forward = target.z - root.z;
+        float distance = Mth.sqrt(height * height + forward * forward);
+        if (distance <= reach) return;
+        target.y = root.y + height * reach / distance;
+        target.z = root.z + forward * reach / distance;
+    }
+    private static float planar(Vector3f from, Vector3f to) {
+        float y = to.y - from.y, z = to.z - from.z;
+        return Mth.sqrt(y * y + z * z);
+    }
+
+    /**
+     * This rig pivots the thigh at its lower end, so turning it there would pull its top off the
+     * pelvis. Sliding the pivot as it turns makes the whole leg swing from the hip socket instead.
+     */
+    private static void swingFromSocket(ModelPart hip, float rest, float baseY, float baseZ) {
+        float angle = hip.xRot - rest;
+        hip.y = baseY + HIP_SOCKET * (Mth.cos(angle) - 1);
+        hip.z = baseZ + HIP_SOCKET * Mth.sin(angle);
+    }
+
+    private void restBend(String effector, String[] joints) {
+        Vector3f first = matrix(joints[0]).transformPosition(new Vector3f());
+        Vector3f second = matrix(joints[1]).transformPosition(new Vector3f());
+        Vector3f tip = matrix(effector).transformPosition(new Vector3f());
+        float upper = (float) Math.atan2(second.z - first.z, second.y - first.y);
+        float lower = (float) Math.atan2(tip.z - second.z, tip.y - second.y);
+        bendDirection.put(joints[1], Math.signum(wrap(lower - upper)));
     }
 
     private void seedLimb(String effector, Vector3f contact, String[] joints, Vector3f target) {
@@ -268,7 +396,9 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         float angleA = (float) Math.atan2(firstZ, firstY);
         float bend = wrap((float) Math.atan2(secondZ, secondY) - angleA);
         float cosine = (goalY * goalY + goalZ * goalZ - lengthA * lengthA - lengthB * lengthB) / (2 * lengthA * lengthB);
-        float goalBend = Math.copySign((float) Math.acos(Mth.clamp(cosine, -1, 1)), bend);
+        // A limb near full extension has almost no bend to read a direction from, so each joint
+        // keeps the direction it has at rest instead of flipping and snapping the paw across.
+        float goalBend = bendDirection.getOrDefault(joints[1], Math.signum(bend)) * (float) Math.acos(Mth.clamp(cosine, -1, 1));
         float goalAngle = (float) Math.atan2(goalZ, goalY)
                 - (float) Math.atan2(lengthB * Mth.sin(goalBend), lengthA + lengthB * Mth.cos(goalBend));
         ModelPart upper = rig.bone(joints[0]);
@@ -346,8 +476,9 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         Matrix4f actual = matrix(paw);
         // One model-space pixel below the palm center, without changing native item scale or aim.
         Vector3f grip = actual.transformPosition(arm == HumanoidArm.RIGHT ? rightGrip : leftGrip, new Vector3f()).add(0, 1.0F / 16, 0);
-        boolean nativeOrientation = form != WerewolfForm.BEAST || WerewolfRenderData.get(state).beastRunAmount() <= 0
-                || state.isUsingItem || state.isCrouching || state.isFallFlying || state.isInWater;
+        var motion = WerewolfRenderData.get(state);
+        boolean nativeOrientation = form != WerewolfForm.BEAST || motion.beastRunAmount() <= 0 && motion.beastProwlAmount() <= 0
+                || state.isUsingItem || state.isFallFlying || state.isInWater;
         org.joml.Quaternionf rotation;
         if (nativeOrientation) {
             nativeHands.setupAnim(state);

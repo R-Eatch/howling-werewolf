@@ -11,8 +11,11 @@ import java.util.*;
 public final class CompanionSortPlanner {
     public record Storage(BlockPos id, ResourceHandler<ItemResource> handler) {}
     private record Cell(Storage storage, int slot, ItemResource resource, int amount) {}
-    public record Move(Storage source, int sourceSlot, Storage target, int targetSlot,
-                       ItemResource resource, int amount, int expectedSource, int expectedTarget) {}
+    public record Move(Storage source, int sourceSlot, Storage target, int targetSlot, ItemResource resource, int amount) {
+        public Move using(Storage currentSource, Storage currentTarget) {
+            return new Move(currentSource, sourceSlot, currentTarget, targetSlot, resource, amount);
+        }
+    }
 
     public static List<Move> plan(List<Storage> storages, boolean consolidate) {
         Map<ItemResource, List<Cell>> groups = new LinkedHashMap<>();
@@ -70,8 +73,7 @@ public final class CompanionSortPlanner {
                     Cell source = donors.peek();
                     int beforeSource = amounts.get(source), beforeTarget = amounts.get(target);
                     int count = Math.min(wanted - beforeTarget, beforeSource - desired.getOrDefault(source, 0));
-                    result.add(new Move(source.storage, source.slot, target.storage, target.slot,
-                            resource, count, beforeSource, beforeTarget));
+                    result.add(new Move(source.storage, source.slot, target.storage, target.slot, resource, count));
                     amounts.put(source, beforeSource - count); amounts.put(target, beforeTarget + count);
                     if (amounts.get(source) == desired.getOrDefault(source, 0)) donors.remove();
                 }
@@ -85,13 +87,15 @@ public final class CompanionSortPlanner {
         return Math.min(resource.getMaxStackSize(), cell.storage.handler.getCapacityAsInt(cell.slot, resource));
     }
 
-    /** A stale snapshot or a failed insertion aborts both halves of this individual move. */
+    /**
+     * Donor and receiver cells never overlap, so moves stay valid in any order; the worker walks
+     * them nearest-first. A changed slot or a failed insertion aborts both halves of this move.
+     */
     public static boolean execute(Move move) {
         ResourceHandler<ItemResource> source = move.source.handler, target = move.target.handler;
-        if (source.getAmountAsInt(move.sourceSlot) != move.expectedSource
-                || target.getAmountAsInt(move.targetSlot) != move.expectedTarget
+        if (source.getAmountAsInt(move.sourceSlot) < move.amount
                 || !source.getResource(move.sourceSlot).equals(move.resource)
-                || move.expectedTarget > 0 && !target.getResource(move.targetSlot).equals(move.resource)) return false;
+                || target.getAmountAsInt(move.targetSlot) > 0 && !target.getResource(move.targetSlot).equals(move.resource)) return false;
         try (Transaction transaction = Transaction.openRoot()) {
             if (source.extract(move.sourceSlot, move.resource, move.amount, transaction) != move.amount) return false;
             if (target.insert(move.targetSlot, move.resource, move.amount, transaction) != move.amount) return false;

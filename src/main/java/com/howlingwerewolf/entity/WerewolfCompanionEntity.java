@@ -29,7 +29,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -51,16 +53,23 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.item.trading.TradeSet;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /** A temporary merchant, or one live projection of a persistent, player-owned companion. */
-public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance {
+public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance, ContainerUser {
     private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> RECRUITED = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.BOOLEAN);
     private static final ResourceKey<TradeSet> TRADES = ResourceKey.create(Registries.TRADE_SET,
@@ -80,6 +89,8 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     private String merchantClassicSkin;
     private String merchantModernSkin;
     private final SimpleContainer merchantInventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE);
+    private final Set<BlockPos> openedContainers = new HashSet<>();
+    private boolean sortBusy;
 
     public WerewolfCompanionEntity(EntityType<? extends WerewolfCompanionEntity> type, Level level) {
         super(type, level);
@@ -161,7 +172,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         goalSelector.addGoal(1, new Goal() {
             { setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP)); }
-            @Override public boolean canUse() { return record != null && (record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT); }
+            @Override public boolean canUse() { return record != null && record.mode == CompanionMode.REST; }
             @Override public void start() { getNavigation().stop(); setTarget(null); }
         });
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
@@ -192,8 +203,14 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             @Override public boolean canUse() { return !isRecruited() && altar == null && super.canUse(); }
             @Override public boolean canContinueToUse() { return !isRecruited() && altar == null && super.canContinueToUse(); }
         });
-        goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 10));
-        goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 10) {
+            @Override public boolean canUse() { return !sortBusy && super.canUse(); }
+            @Override public boolean canContinueToUse() { return !sortBusy && super.canContinueToUse(); }
+        });
+        goalSelector.addGoal(8, new RandomLookAroundGoal(this) {
+            @Override public boolean canUse() { return !sortBusy && super.canUse(); }
+            @Override public boolean canContinueToUse() { return !sortBusy && super.canContinueToUse(); }
+        });
     }
     private boolean canFight() {
         ServerPlayer player = owner();
@@ -236,6 +253,8 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
 
     @Override public void aiStep() {
         if (!level().isClientSide() && !HWConfig.ENABLE_COMPANIONS.get()) { park(); return; }
+        // Vanilla only advances the swing timer for monsters and players; villagers never attack.
+        updateSwingTime();
         if (!level().isClientSide() && getTarget() != null && !canAttack(getTarget())) {
             setTarget(null); setAggressive(false); getNavigation().stop();
         }
@@ -254,6 +273,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (record == null) { discard(); return; }
         CompanionSavedData data = CompanionSavedData.get(level.getServer());
         if (!data.isCurrent(record, this) || !record.mode.hasEntity()) { discard(); return; }
+        if (record.mode != CompanionMode.SORT) endSortVisuals();
         ServerPlayer player = owner();
         if (player == null) { CompanionManager.remember(this); discard(); return; }
         if (getTarget() != null && !canAttack(getTarget())) setTarget(null);
@@ -265,6 +285,40 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             CompanionManager.remember(this);
             tickIdleDialogue(player);
         }
+    }
+    @Override public boolean hasContainerOpen(ContainerOpenersCounter container, BlockPos pos) { return openedContainers.contains(pos); }
+    @Override public double getContainerInteractionRange() { return 4.0; }
+    /** Opens through the vanilla counter, giving the real lid motion, sounds and observer updates. */
+    public void openSortContainers(List<BlockEntity> members) {
+        closeSortContainers();
+        for (BlockEntity member : members) {
+            if (member instanceof ChestBlockEntity chest) chest.startOpen(this);
+            else if (member instanceof BarrelBlockEntity barrel) barrel.startOpen(this);
+            else continue;
+            openedContainers.add(member.getBlockPos().immutable());
+        }
+    }
+    public void closeSortContainers() {
+        for (BlockPos pos : List.copyOf(openedContainers)) {
+            openedContainers.remove(pos);
+            // An unloading chunk must stay unloaded; its counter rebuilds from whoever is left.
+            if (!level().hasChunkAt(pos)) continue;
+            BlockEntity member = level().getBlockEntity(pos);
+            if (member instanceof ChestBlockEntity chest) chest.stopOpen(this);
+            else if (member instanceof BarrelBlockEntity barrel) barrel.stopOpen(this);
+        }
+    }
+    /** Display only, and never dropped: this entity is rebuilt from its record and owns no items. */
+    public void setCarriedItem(ItemStack stack) {
+        if (ItemStack.matches(stack, getMainHandItem())) return;
+        setDropChance(EquipmentSlot.MAINHAND, 0);
+        setItemSlot(EquipmentSlot.MAINHAND, stack);
+    }
+    public void setSortBusy(boolean busy) { sortBusy = busy; }
+    public void endSortVisuals() {
+        closeSortContainers();
+        setCarriedItem(ItemStack.EMPTY);
+        sortBusy = false;
     }
     public void resetIdleDialogue() { nextIdleLine = level().getGameTime() + 1200 + random.nextInt(1201); }
     private void tickIdleDialogue(ServerPlayer player) {
@@ -361,6 +415,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         super.die(source);
     }
     @Override public void onRemoval(RemovalReason reason) {
+        if (!level().isClientSide()) closeSortContainers();
         if (level() instanceof ServerLevel level) CompanionSavedData.get(level.getServer()).untrack(this);
         if (!level().isClientSide() && record != null) {
             if (reason == RemovalReason.KILLED) CompanionManager.died(this);
