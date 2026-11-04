@@ -161,7 +161,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         goalSelector.addGoal(1, new Goal() {
             { setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP)); }
-            @Override public boolean canUse() { return record != null && record.mode == CompanionMode.REST; }
+            @Override public boolean canUse() { return record != null && (record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT); }
             @Override public void start() { getNavigation().stop(); setTarget(null); }
         });
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
@@ -178,7 +178,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             }
             @Override public boolean canContinueToUse() {
                 ServerPlayer player = owner();
-                return player != null && record != null && record.mode.hasEntity() && record.mode != CompanionMode.REST
+                return player != null && record != null && (record.mode == CompanionMode.FOLLOW || record.mode == CompanionMode.GUARD)
                         && getTarget() == null && player.level() == level() && distanceToSqr(player) > 4;
             }
             @Override public void start() { pathDelay = 0; }

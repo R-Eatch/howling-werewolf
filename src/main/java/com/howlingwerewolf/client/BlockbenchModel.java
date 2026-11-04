@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
@@ -143,7 +144,7 @@ final class BlockbenchModel {
         boolean mirror = GsonHelper.getAsBoolean(json, "mirror_uv", false);
         float inflate = number(json, "inflate", 0);
         var directions = EnumSet.allOf(Direction.class);
-        ModelPart.Cube cube = new ModelPart.Cube(0, 0, origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
+        ModelPart.Cube cube = new AuthoredUvCube(origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
                 size[0], size[1], size[2], inflate, inflate, inflate, mirror, textureWidth, textureHeight, directions);
         // Blockbench rounds box-UV sizes separately from the actual fractional geometry.
         ModelPart.Cube uv = new ModelPart.Cube(0, 0, 0, 0, 0,
@@ -158,6 +159,33 @@ final class BlockbenchModel {
             cube.polygons[index] = new ModelPart.Polygon(points, cube.polygons[index].normal());
         }
         return cube;
+    }
+
+    /**
+     * These fractional boxes have UV dimensions independent of their geometry.
+     * Entity optimizers may cache vanilla constructor arguments, before our authored
+     * UVs are installed. Emit the final polygons directly so every consumer receives
+     * the same vertices, without depending on a renderer mod's private cache or API.
+     */
+    static final class AuthoredUvCube extends ModelPart.Cube {
+        AuthoredUvCube(float x, float y, float z, float width, float height, float depth,
+                       float growX, float growY, float growZ, boolean mirror,
+                       float textureWidth, float textureHeight, Set<Direction> faces) {
+            super(0, 0, x, y, z, width, height, depth, growX, growY, growZ,
+                    mirror, textureWidth, textureHeight, faces);
+        }
+
+        @Override public void compile(PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, int color) {
+            Vector3f normal = new Vector3f();
+            for (ModelPart.Polygon polygon : polygons) {
+                pose.transformNormal(polygon.normal(), normal);
+                for (ModelPart.Vertex vertex : polygon.vertices()) {
+                    consumer.addVertex(pose, vertex.worldX(), vertex.worldY(), vertex.worldZ())
+                            .setColor(color).setUv(vertex.u(), vertex.v()).setOverlay(overlay).setLight(light)
+                            .setNormal(normal.x, normal.y, normal.z);
+                }
+            }
+        }
     }
 
     static float[] bounds(ModelPart root) {

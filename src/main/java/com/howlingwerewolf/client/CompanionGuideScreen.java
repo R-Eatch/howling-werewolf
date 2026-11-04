@@ -15,7 +15,7 @@ import java.util.List;
 /** The single home for companion instructions, with scrollable bilingual chapters. */
 public final class CompanionGuideScreen extends Screen {
     private static final int PANEL_WIDTH = 432, PANEL_HEIGHT = 316, VISIBLE_LINES = 21;
-    static final List<String> TOPICS = List.of("ritual", "merchant", "recruit", "commands", "inventory", "appearance", "hunt", "upgrade", "revive");
+    static final List<String> TOPICS = List.of("ritual", "merchant", "recruit", "commands", "inventory", "appearance", "hunt", "upgrade", "revive", "sort");
     private final Screen parent;
     private final List<Button> chapters = new ArrayList<>();
     private int chapter, scroll, maximumScroll, ticks;
@@ -28,10 +28,12 @@ public final class CompanionGuideScreen extends Screen {
     public void update(CompoundTag snapshot) {
         if (parent instanceof CompanionScreen screen) screen.update(snapshot);
         else if (parent instanceof CompanionCustomizeScreen screen) screen.update(snapshot);
+        else if (parent instanceof CompanionSortingScreen screen) screen.update(snapshot);
     }
     public void openManagement(CompoundTag snapshot) {
         if (parent instanceof CompanionScreen screen) { screen.update(snapshot); minecraft.setScreen(screen); }
         else if (parent instanceof CompanionCustomizeScreen screen) screen.openManagement(snapshot);
+        else if (parent instanceof CompanionSortingScreen screen) screen.openManagement(snapshot);
     }
     @Override protected void init() {
         clearWidgets(); chapters.clear();

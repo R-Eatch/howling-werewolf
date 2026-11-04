@@ -72,6 +72,7 @@ public final class CompanionManager {
         requests.put(player.getUUID(), now);
         switch (packet.action()) {
             case OPEN -> {
+                CompanionSorting.endRegistration(player);
                 if (packet.target().equals(CompanionActionPacket.NO_TARGET)) sendView(player, true);
                 else {
                     CompanionRecord record = data.find(packet.target());
@@ -98,6 +99,7 @@ public final class CompanionManager {
                     case INVENTORY -> openInventory(player, record);
                     case RENAME -> rename(player, record, packet.value());
                     case SKIN -> changeSkin(player, record, packet.value());
+                    case SORT -> CompanionSorting.action(player, record, packet.value());
                     default -> {}
                 }
                 sendView(player, false);
@@ -375,9 +377,11 @@ public final class CompanionManager {
         data.removeUntracked();
         data.synchronizeAvailability(HWConfig.ENABLE_COMPANIONS.get(), server.overworld().getGameTime());
         if (!HWConfig.ENABLE_COMPANIONS.get()) {
+            CompanionSorting.tick(server);
             for (WerewolfCompanionEntity entity : data.activeEntities()) entity.park();
             return;
         }
+        CompanionSorting.tick(server);
         if (server.getTickCount() % 20 != 0) return;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (!player.isAlive() || player.isSpectator()) continue;
@@ -393,7 +397,7 @@ public final class CompanionManager {
                     if (entity == null || entity.level() != player.level() || entity.distanceToSqr(player) > 32 * 32) {
                         spawnNear(player, record, record.health);
                     }
-                } else if (record.mode == CompanionMode.REST && data.loaded(record.id) == null) {
+                } else if ((record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT) && data.loaded(record.id) == null) {
                     restoreResting(server, record);
                 }
             }
@@ -456,6 +460,7 @@ public final class CompanionManager {
         CompoundTag tag = new CompoundTag();
         tag.putString("View", "manage");
         tag.putBoolean("SystemEnabled", HWConfig.ENABLE_COMPANIONS.get());
+        tag.putBoolean("SortingEnabled", CompanionSorting.enabled());
         tag.putInt("Capacity", capacity(player));
         tag.putInt("Skill", skillRank(player));
         tag.putString("Address", data.address(player.getUUID()));
@@ -479,6 +484,8 @@ public final class CompanionManager {
             entry.putString("Skin", record.skin());
             entry.putInt("Tier", record.tier);
             entry.putInt("Mode", record.mode.ordinal());
+            entry.putBoolean("SortNearby", entity != null && entity.level() == player.level() && entity.distanceToSqr(player) <= 16 * 16);
+            CompanionSorting.writeView(entry, record);
             entry.putFloat("Health", record.health);
             entry.putFloat("MaxHealth", (float) CompanionRules.maxHealth(effectiveTier(player, record)));
             entry.putBoolean("Enabled", enabled(player, record));

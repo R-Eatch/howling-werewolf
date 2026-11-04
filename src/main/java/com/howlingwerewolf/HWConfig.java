@@ -21,6 +21,7 @@ public final class HWConfig {
     public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
     public static final ModConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
     public static final ModConfigSpec.BooleanValue ENABLE_COMPANIONS;
+    public static final ModConfigSpec.BooleanValue ENABLE_COMPANION_SORTING;
     public static final ModConfigSpec.ConfigValue<String> NPC_MODEL_SET;
 
     static {
@@ -30,6 +31,10 @@ public final class HWConfig {
                         "Enable werewolf merchants, recruitment and companion commands. Default is true.",
                         "The server controls this setting. Disabling parks existing companions without deleting belongings and pauses hunts/cooldowns until re-enabled.")
                 .define("enableCompanions", true);
+        ENABLE_COMPANION_SORTING = builder.comment(
+                        "Allow companions to consolidate items in owner-registered vanilla chests and barrels. Default is true.",
+                        "Server-controlled. Disabling stops sorting without deleting registered containers or moving belongings.")
+                .define("enableCompanionSorting", true);
         NPC_MODEL_SET = builder.comment(
                         "Model set for wild werewolves, spawn-egg werewolves, the Alpha and its summoned pack: modern or classic. Default is modern.",
                         "Modern uses Ashen for the Alpha/pack and a saved random coat for wild werewolves. Classic uses Adrian for all of them.",

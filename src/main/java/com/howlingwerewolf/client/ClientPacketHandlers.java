@@ -89,6 +89,8 @@ public final class ClientPacketHandlers {
                 if (packet.open()) screen.openManagement(data); else screen.update(data);
             } else if (minecraft.screen instanceof CompanionGuideScreen screen) {
                 if (packet.open()) screen.openManagement(data); else screen.update(data);
+            } else if (minecraft.screen instanceof CompanionSortingScreen screen) {
+                if (packet.open()) screen.openManagement(data); else screen.update(data);
             }
             else if (packet.open()) minecraft.setScreen(new CompanionScreen(minecraft.screen, data));
         }

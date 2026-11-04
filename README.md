@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.5-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.6-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -16,6 +16,8 @@
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
 > This branch contains the NeoForge edition for Minecraft 26.1.2. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
+
+Howling Werewolf **1.2.6** adds companion **Sort**: register allowed chests or barrels, merge partial stacks and optionally consolidate matching items. Servers can disable sorting independently. Modern models now emit their final authored UV polygons directly; the Beast sprint uses paired forelimbs followed by the hind pair. See the [1.2.6 guide](docs/COMPANIONS-1.2.6.md) ([简体中文](docs/COMPANIONS-1.2.6-zh.md)).
 
 Howling Werewolf **1.2.5** improves companion controls: **C** opens the overview, right-click opens an individual page with an appearance preview, and sneak-right-click retains direct access to the nine-slot inventory. The guide covers rituals, recruitment, commands, upgrades and revival. Owners can customize their title; companion dialogue is private to its owner. Following companions reject hostile target acquisition and never retaliate. See the [1.2.5 companion guide](docs/COMPANIONS-1.2.5-zh.md), [loot and trade tables](docs/COMPANION-TABLES-1.2.4.md), and [implementation provenance](docs/COMPANION-PROVENANCE.md).
 
@@ -36,7 +38,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.2.5 (Companion improvements) |
+| Howling Werewolf | 1.2.6 (Companion sorting) |
 
 ## Werewolf skins
 
@@ -47,7 +49,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.2.5** (protocol 15). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.2.6** (protocol 16). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -72,9 +74,12 @@ Press **C** to manage companions, remappable in Controls. The K-menu shortcut si
 ```toml
 [gameplay]
 enableCompanions = true
+enableCompanionSorting = true
 ```
 
 Set to `false` to park companions and block interactions while retaining records/inventories and pausing hunt/cooldown timers. Enabled by default; multiplayer uses the server setting. See the [full rules](docs/COMPANIONS-1.2.4-zh.md).
+
+Set only `enableCompanionSorting = false` to stop sorting while keeping registrations and other companion features. Choose a companion → Sort → Register storage, sneak-right-click allowed chests/barrels, then reopen management to finish registration and start sorting. The work area extends eight blocks horizontally and four vertically, with up to 24 logical containers; a double chest counts as one. See the [sorting guide](docs/COMPANIONS-1.2.6.md).
 
 ## Spawn eggs and item animations
 
@@ -88,7 +93,7 @@ Set to `false` to park companions and block interactions while retaining records
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.2.5** (companion improvements).
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.2.6** (sorting and Modern rendering/gait updates).
 
 ## Build from source
 
@@ -98,9 +103,9 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.2.5-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.2.6-neoforge-26.1.2.jar`.
 
-Source version **1.2.5** builds successfully: 178 native server checks, 1391 model/NPC/UI checks and 992 artifact checks passed. GPU visuals and two real clients remain unverified. Existing saved key bindings are preserved; change them to C or reset them in Controls. Releases are published separately by the maintainer.
+Current source version is **1.2.6**, protocol 16. The 1.2.5 baseline is preserved in a local tag; 455 native server, 21129 model/NPC/UI and 1323 artifact checks passed, along with the Sodium GPU comparison; see the [1.2.6 guide](docs/COMPANIONS-1.2.6.md#validation-scope) for current validation and its limits. Existing saved key bindings are preserved; change them to C or reset them in Controls. Releases are published separately by the maintainer.
 
 ## Administrator commands
 

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 /** Stable roster beside the selected companion's state and grouped controls. */
 public final class CompanionScreen extends Screen {
-    private static final int PANEL_WIDTH = 432, PANEL_HEIGHT = 296, DETAIL_X = 160, DETAIL_WIDTH = 258;
+    private static final int PANEL_WIDTH = 432, PANEL_HEIGHT = 321, DETAIL_X = 160, DETAIL_WIDTH = 258;
     private final Screen parent;
     private CompoundTag snapshot;
     private UUID selected;
@@ -72,7 +72,7 @@ public final class CompanionScreen extends Screen {
         int left = left(), top = top();
         ListTag entries = snapshot.getListOrEmpty("Companions");
         if (selectedRecord() == null && !entries.isEmpty()) selected = UUID.fromString(entries.getCompoundOrEmpty(0).getStringOr("Id", CompanionActionPacket.NO_TARGET.toString()));
-        if (focusedView) preview.bounds(left + 12, top + 62, 134, 186);
+        if (focusedView) preview.bounds(left + 12, top + 62, 134, 211);
         for (int i = 0; !focusedView && i < Math.min(3, entries.size()); i++) {
             UUID id = UUID.fromString(entries.getCompoundOrEmpty(i).getStringOr("Id", CompanionActionPacket.NO_TARGET.toString()));
             addRenderableWidget(Button.builder(Component.empty(), button -> { selected = id; updateButtons(); })
@@ -80,7 +80,8 @@ public final class CompanionScreen extends Screen {
         }
         CompanionActionPacket.Action[] actions = {CompanionActionPacket.Action.FOLLOW, CompanionActionPacket.Action.GUARD,
                 CompanionActionPacket.Action.REST, CompanionActionPacket.Action.HUNT, CompanionActionPacket.Action.RECALL,
-                CompanionActionPacket.Action.INVENTORY, CompanionActionPacket.Action.UPGRADE, CompanionActionPacket.Action.REVIVE};
+                CompanionActionPacket.Action.INVENTORY, CompanionActionPacket.Action.UPGRADE, CompanionActionPacket.Action.REVIVE,
+                CompanionActionPacket.Action.SORT};
         for (int i = 0; i < actions.length; i++) {
             var action = actions[i];
             commands.put(action, addRenderableWidget(Button.builder(actionText(action), ignored -> request(action))
@@ -89,7 +90,7 @@ public final class CompanionScreen extends Screen {
         customizeButton = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.customize"), button -> {
             CompoundTag record = selectedRecord();
             if (record != null) minecraft.setScreen(new CompanionCustomizeScreen(this, snapshot, record));
-        }).bounds(left + DETAIL_X + 172, top + 227, 82, 21).build());
+        }).bounds(left + DETAIL_X, top + 252, 254, 21).build());
         addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.guide"), button ->
                         minecraft.setScreen(new CompanionGuideScreen(this)))
                 .bounds(left + PANEL_WIDTH - 66, top + 9, 54, 20).build());
@@ -99,16 +100,16 @@ public final class CompanionScreen extends Screen {
                     .bounds(left + PANEL_WIDTH - 128, top + 9, 54, 20).build());
         } else {
             String value = address == null ? snapshot.getStringOr("Address", "") : address.getValue();
-            address = addRenderableWidget(new EditBox(font, left + 64, top + 266, 206, 20,
+            address = addRenderableWidget(new EditBox(font, left + 64, top + 291, 206, 20,
                     Component.translatable("screen.howlingwerewolf.companion.address")));
             address.setMaxLength(CompanionRules.MAX_ADDRESS_LENGTH * 2);
             address.setHint(Component.translatable("dialogue.howlingwerewolf.companion.address_default"));
             address.setValue(value);
             saveAddress = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.save_address"), button ->
-                            requestAddress(address.getValue())).bounds(left + 274, top + 266, 64, 20).build());
+                            requestAddress(address.getValue())).bounds(left + 274, top + 291, 64, 20).build());
             resetAddress = addRenderableWidget(Button.builder(Component.translatable("screen.howlingwerewolf.companion.reset_address"), button -> {
                 address.setValue(""); requestAddress("");
-            }).bounds(left + 346, top + 266, 72, 20).build());
+            }).bounds(left + 346, top + 291, 72, 20).build());
         }
         updateButtons();
     }
@@ -125,6 +126,9 @@ public final class CompanionScreen extends Screen {
     }
     private void request(CompanionActionPacket.Action action) {
         if (selected == null) return;
+        if (action == CompanionActionPacket.Action.SORT) {
+            minecraft.setScreen(new CompanionSortingScreen(this, snapshot, selected)); return;
+        }
         ClientPacketDistributor.sendToServer(new CompanionActionPacket(action, selected));
         actionDelay = 5;
         updateButtons();
@@ -167,6 +171,7 @@ public final class CompanionScreen extends Screen {
                 case REVIVE -> current == CompanionMode.DEAD;
                 case UPGRADE -> current.hasEntity() && enabled && record.getIntOr("Tier", 0) < snapshot.getIntOr("Skill", 0);
                 case INVENTORY -> current.hasEntity() && record.getBooleanOr("Nearby", false);
+                case SORT -> current.hasEntity() && enabled && snapshot.getBooleanOr("SortingEnabled", false);
                 default -> false;
             };
         });
@@ -203,7 +208,7 @@ public final class CompanionScreen extends Screen {
                 ? Component.translatable("screen.howlingwerewolf.companion.capacity", snapshot.getListOrEmpty("Companions").size(), snapshot.getIntOr("Capacity", 0), snapshot.getIntOr("Skill", 0))
                 : Component.translatable("message.howlingwerewolf.companion.disabled");
         graphics.text(font, status, left + 14, top + 37, 0xFFB5CDE8, false);
-        graphics.fill(left + 151, top + 60, left + 152, top + 248, 0xFF51425F);
+        graphics.fill(left + 151, top + 60, left + 152, top + 273, 0xFF51425F);
         CompoundTag record = selectedRecord();
         if (record == null) {
             graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.no_selection"), left + DETAIL_X, top + 76, 0xFFCFCCD9, false);
@@ -224,7 +229,7 @@ public final class CompanionScreen extends Screen {
                     : record.getBooleanOr("Enabled", false) ? Component.empty() : Component.translatable("screen.howlingwerewolf.companion.suspended_short");
             wrapped(graphics, detail, left + DETAIL_X, top + 128, DETAIL_WIDTH, 0xFFD7BA77, 3);
         }
-        if (!focusedView) graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.address"), left + 12, top + 272, 0xFFBEB5CF, false);
+        if (!focusedView) graphics.text(font, Component.translatable("screen.howlingwerewolf.companion.address"), left + 12, top + 297, 0xFFBEB5CF, false);
         super.extractRenderState(graphics, Math.round(mouseX / scale), Math.round(mouseY / scale), partialTick);
         ListTag entries = snapshot.getListOrEmpty("Companions");
         for (int i = 0; !focusedView && i < Math.min(3, entries.size()); i++) {
@@ -244,7 +249,7 @@ public final class CompanionScreen extends Screen {
     }
     @Override public void extractBackground(GuiGraphicsExtractor graphics, int x, int y, float partialTick) {}
     private int left() { return (Math.round(width / scale) - PANEL_WIDTH) / 2; }
-    private int panelHeight() { return focusedView ? 264 : PANEL_HEIGHT; }
+    private int panelHeight() { return focusedView ? 289 : PANEL_HEIGHT; }
     private int top() { return (Math.round(height / scale) - panelHeight()) / 2; }
     private MouseButtonEvent logical(MouseButtonEvent event) { return new MouseButtonEvent(event.x() / scale, event.y() / scale, event.buttonInfo()); }
     @Override public void mouseMoved(double x, double y) { super.mouseMoved(x / scale, y / scale); }

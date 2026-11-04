@@ -38,7 +38,8 @@ public final class CompanionRecord {
             Codec.INT.optionalFieldOf("generation", 0).forGetter(record -> record.generation),
             Identifier.CODEC.fieldOf("dimension").forGetter(record -> record.dimension),
             BlockPos.CODEC.fieldOf("position").forGetter(record -> record.position),
-            INVENTORY_CODEC.fieldOf("inventory").forGetter(CompanionRecord::items)
+            INVENTORY_CODEC.fieldOf("inventory").forGetter(CompanionRecord::items),
+            CompanionSortSettings.CODEC.optionalFieldOf("sorting", CompanionSortSettings.EMPTY).forGetter(record -> record.sorting)
     ).apply(instance, CompanionRecord::new));
 
     public final UUID id;
@@ -55,6 +56,7 @@ public final class CompanionRecord {
     public int generation;
     public Identifier dimension;
     public BlockPos position;
+    public CompanionSortSettings sorting;
     private Runnable inventoryChanged = () -> {};
     public final SimpleContainer inventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE) {
         @Override public void setChanged() { super.setChanged(); inventoryChanged.run(); }
@@ -63,7 +65,7 @@ public final class CompanionRecord {
 
     private CompanionRecord(UUID id, UUID owner, String classicSkin, String modernSkin, String customName, int tier, CompanionMode mode, float health,
                             long huntStart, long huntEnd, long huntCooldownEnd, int generation, Identifier dimension,
-                            BlockPos position, List<ItemStack> items) {
+                            BlockPos position, List<ItemStack> items, CompanionSortSettings sorting) {
         this.id = id;
         this.owner = owner;
         this.classicSkin = "howlingwerewolf:" + WerewolfSkin.byId(classicSkin).getId();
@@ -78,6 +80,7 @@ public final class CompanionRecord {
         this.generation = generation;
         this.dimension = dimension;
         this.position = position.immutable();
+        this.sorting = sorting;
         for (int slot = 0; slot < items.size(); slot++) inventory.setItem(slot, items.get(slot).copy());
     }
 
@@ -85,7 +88,7 @@ public final class CompanionRecord {
         this(UUID.randomUUID(), owner, "howlingwerewolf:" + WerewolfSkin.byId(skin).getId(),
                 ModernSkin.bySkinId(skin) == null ? ModernSkin.ASHEN.skinId() : skin, "", 0, CompanionMode.FOLLOW,
                 (float) CompanionRules.maxHealth(0), 0, 0, 0, 0, dimension, position,
-                java.util.Collections.nCopies(CompanionRules.INVENTORY_SIZE, ItemStack.EMPTY));
+                java.util.Collections.nCopies(CompanionRules.INVENTORY_SIZE, ItemStack.EMPTY), CompanionSortSettings.EMPTY);
     }
 
     public static String normalizeSkin(String skin) {

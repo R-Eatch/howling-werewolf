@@ -170,10 +170,14 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
         float cycle = state.walkAnimationPos * 0.8F;
         float stride = 0.28F + Math.min(state.walkAnimationSpeed, 1) * 0.12F;
+        float bounce = Mth.sin(cycle * 2) * Math.min(state.walkAnimationSpeed, 1) * amount;
+        root.y += bounce * 0.35F;
+        rig.bone("waist").xRot += Mth.sin(cycle) * 0.045F * amount;
+        head.xRot -= Mth.sin(cycle) * 0.045F * amount;
         runLeg("right_paw", rightPawContact, new String[]{"rightArmRotation", "right_forearn"}, "rightArmRotation", cycle, stride, true, amount);
-        runLeg("left_paw", leftPawContact, new String[]{"leftArmRotation", "left_forearn"}, "leftArmRotation", cycle + Mth.PI, stride, true, amount);
-        runLeg("right_foot_lower", rightFootContact, new String[]{"rightLeg", "right_leg_lower", "right_foot_upper"}, "rightLeg", cycle + Mth.PI, stride, false, amount);
-        runLeg("left_foot_lower", leftFootContact, new String[]{"leftLeg", "left_leg_lower", "left_foot_upper"}, "leftLeg", cycle, stride, false, amount);
+        runLeg("left_paw", leftPawContact, new String[]{"leftArmRotation", "left_forearn"}, "leftArmRotation", cycle, stride, true, amount);
+        runLeg("right_foot_lower", rightFootContact, new String[]{"rightLeg", "right_leg_lower", "right_foot_upper"}, "rightLeg", cycle - Mth.PI, stride, false, amount);
+        runLeg("left_foot_lower", leftFootContact, new String[]{"leftLeg", "left_leg_lower", "left_foot_upper"}, "leftLeg", cycle - Mth.PI, stride, false, amount);
         rig.bone("jaw").xRot -= 0.08F * amount;
         if (state.attackTime > 0) {
             // A running attack lifts the attacking paw; the other three limbs keep their gait.
@@ -193,9 +197,13 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         int jointCount = joints.length;
         Vector3f origin = matrix(anchor).transformPosition(new Vector3f());
         float bottom = pawBottom(effector);
-        float desiredBottom = Mth.lerp(amount, bottom, 1.5F - Math.max(0, Mth.sin(phase)) * 0.18F);
+        BeastGait.Step gait = BeastGait.step(phase);
+        float lift = stride <= 0 ? 0 : gait.lift() * (front ? 0.22F : 0.18F);
+        // Lowering the hips during the upright-to-bound blend must not push the
+        // hind paws through the floor while only part of their IK is blended in.
+        float desiredBottom = Math.min(1.5F, Mth.lerp(amount, bottom, 1.5F - lift));
         Vector3f target = new Vector3f(current.x, current.y + desiredBottom - bottom,
-                origin.z + (front ? 0.12F : 0.08F) + Mth.cos(phase) * stride);
+                origin.z + (front ? 0.12F : 0.08F) + gait.travel() * stride);
         target.z = Mth.lerp(amount, current.z, target.z);
         // Planar inverse kinematics places the paws on the ground during the stance half-cycle.
         for (int pass = 0; pass < 3; pass++) {

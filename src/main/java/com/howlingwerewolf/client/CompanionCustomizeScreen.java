@@ -41,7 +41,7 @@ public final class CompanionCustomizeScreen extends Screen {
         model = snapshot.getStringOr("Model", "modern");
         selectedSkin = record.getStringOr("Skin", "");
         editable = snapshot.getBooleanOr("SystemEnabled", true)
-                && record.getIntOr("Mode", 0) < com.howlingwerewolf.companion.CompanionMode.HUNT.ordinal();
+                && available(record);
     }
     public void update(CompoundTag snapshot) {
         parent.update(snapshot);
@@ -52,7 +52,7 @@ public final class CompanionCustomizeScreen extends Screen {
             CompoundTag record = companions.getCompoundOrEmpty(i);
             if (id.toString().equals(record.getStringOr("Id", ""))) {
                 editable = snapshot.getBooleanOr("SystemEnabled", true)
-                        && record.getIntOr("Mode", 0) < com.howlingwerewolf.companion.CompanionMode.HUNT.ordinal();
+                        && available(record);
                 currentSkin = record.getStringOr("Skin", "");
             }
         }
@@ -67,6 +67,11 @@ public final class CompanionCustomizeScreen extends Screen {
     public void openManagement(CompoundTag snapshot) {
         parent.update(snapshot);
         minecraft.setScreen(parent);
+    }
+    private static boolean available(CompoundTag record) {
+        int mode = record.getIntOr("Mode", 0);
+        return mode != com.howlingwerewolf.companion.CompanionMode.HUNT.ordinal()
+                && mode != com.howlingwerewolf.companion.CompanionMode.DEAD.ordinal();
     }
     @Override protected void init() {
         clearWidgets();
