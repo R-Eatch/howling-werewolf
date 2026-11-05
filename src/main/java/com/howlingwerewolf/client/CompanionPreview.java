@@ -10,15 +10,18 @@ import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-/** A detached fitting-room model; previewing never changes a live companion or player. */
+/** A detached fitting-room model standing before the moon; previewing changes no live companion. */
 final class CompanionPreview {
     private RemotePlayer player;
-    private int x, y, width, height;
-    private float rotation, zoom = 1;
+    private int x, y, width, height, moonX, moonY, radius, viewLeft, viewTop, viewRight, viewBottom;
+    private float rotation = -18, zoom = 1;
     private boolean dragging;
 
-    void bounds(int x, int y, int width, int height) {
-        this.x = x; this.y = y; this.width = width; this.height = height;
+    /** The moon sets the size and the hit area; the view may be larger, so tall ears are not cut off. */
+    void stage(int moonX, int moonY, int radius, int viewLeft, int viewTop, int viewRight, int viewBottom) {
+        this.moonX = moonX; this.moonY = moonY; this.radius = radius;
+        this.viewLeft = viewLeft; this.viewTop = viewTop; this.viewRight = viewRight; this.viewBottom = viewBottom;
+        x = moonX - radius; y = moonY - radius; width = height = radius * 2;
         dragging = false;
     }
     boolean contains(double mouseX, double mouseY) {
@@ -44,40 +47,35 @@ final class CompanionPreview {
         zoom = Mth.clamp(zoom + (float) amount * 0.08F, 0.65F, 1.3F);
         return true;
     }
-    void render(GuiGraphicsExtractor graphics, String model, String skin, float uiScale, double mouseX, double mouseY) {
-        graphics.fillGradient(x, y, x + width, y + height, 0xFF25223A, 0xFF12101B);
-        // A low moon behind the figure, and a pool of light where it stands.
-        CompanionUi.disc(graphics, x + width / 2, y + height / 3, Math.min(width, height) / 3, 0xFF2F2B47);
-        for (int row = 0; row < 7; row++) {
-            int half = (width / 2 - 8) - row * row;
-            graphics.fill(x + width / 2 - half, y + height - 22 + row, x + width / 2 + half, y + height - 21 + row, 0x28EBC97F);
-        }
-        graphics.outline(x, y, width, height, CompanionUi.LINE);
+    void render(GuiGraphicsExtractor graphics, String model, String skin, float uiScale, double mouseX, double mouseY, MoonUi.Theme theme) {
+        MoonUi.moon(graphics, moonX, moonY, radius, MoonUi.moonPhase(), theme);
+        float feet = moonY + radius * 0.88F;
+        MoonUi.pool(graphics, moonX, feet, radius * 0.62F, radius * 0.11F, theme.shadow());
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null) { player = null; return; }
         if (player == null || player.level() != minecraft.level) {
             player = WerewolfSkinScreen.createPreviewPlayer(minecraft.level, minecraft.player.getGameProfile());
         }
         player.tickCount = minecraft.player.tickCount;
-        float horizontal = (float) Math.atan((x + width / 2.0 - mouseX) / 80.0);
-        float vertical = (float) Math.atan((y + height / 2.0 - mouseY) / 100.0);
-        player.yBodyRot = player.yBodyRotO = 180 + rotation + horizontal * 20;
-        player.setYRot(180 + rotation + horizontal * 40);
-        player.setXRot(-vertical * 20);
+        float horizontal = (float) Math.atan((moonX - mouseX) / 90.0);
+        float vertical = (float) Math.atan((moonY - mouseY) / 120.0);
+        player.yBodyRot = player.yBodyRotO = 180 + rotation + horizontal * 12;
+        player.setYRot(180 + rotation + horizontal * 30);
+        player.setXRot(-vertical * 14);
         player.yHeadRot = player.yHeadRotO = player.getYRot();
         player.xRotO = player.getXRot();
-        float size = Math.min(width / 1.8F, height / 2.6F) * zoom;
-        Quaternionf camera = new Quaternionf().rotateX(vertical * 20 * Mth.DEG_TO_RAD);
+        float size = radius * 1.72F / 2.5F * zoom;
+        Quaternionf camera = new Quaternionf().rotateX(4 * Mth.DEG_TO_RAD);
         Quaternionf pose = new Quaternionf().rotateZ(Mth.PI).mul(camera);
-        graphics.enableScissor(x, y, x + width, y + height);
+        graphics.enableScissor(viewLeft, viewTop, viewRight, viewBottom);
         try {
             WerewolfSkinRenderContext.withPreview(player, WerewolfForm.WEREWOLF, WerewolfModelSet.byId(model), skin, () -> {
                 var state = minecraft.getEntityRenderDispatcher().getRenderer(player).createRenderState(player, 1);
                 state.shadowPieces.clear(); state.outlineColor = 0; state.nameTag = null; state.scoreText = null;
                 graphics.entity(state, size * uiScale,
-                        new Vector3f(0, (height / 2.0F - 12) / size, 0), pose, camera,
-                        Math.round(x * uiScale), Math.round(y * uiScale),
-                        Math.round((x + width) * uiScale), Math.round((y + height) * uiScale));
+                        new Vector3f(0, (feet - (viewTop + viewBottom) / 2F) / size, 0), pose, camera,
+                        Math.round(viewLeft * uiScale), Math.round(viewTop * uiScale),
+                        Math.round(viewRight * uiScale), Math.round(viewBottom * uiScale));
             });
         } finally { graphics.disableScissor(); }
     }

@@ -15,27 +15,10 @@ import net.minecraft.world.level.ItemLike;
 
 import java.util.function.Supplier;
 
-/** Moonlit palette and flat, softly animated controls shared by every companion page. */
+/** Text helpers and the softly animated controls of the companion window. */
 final class CompanionUi {
-    static final int PANEL = 0xF2141220, SURFACE = 0xFF1E1B2C, RAISED = 0xFF2A2640, LINE = 0xFF39344F;
-    static final int MOON = 0xFFEBC97F, VIOLET = 0xFFA18CEB, TEXT = 0xFFF3F0FA, MUTED = 0xFFADA8C1, FAINT = 0xFF76708E;
-    static final int GOOD = 0xFF74D19E, WARN = 0xFFE8AC62, DANGER = 0xFFE36C80, INK = 0xFF16131F;
+    static final int ROW_RADIUS = 12;
 
-    /** A rectangle with chamfered corners. The rows never overlap, so translucent fills stay even. */
-    static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
-        graphics.fill(x + 1, y, x + width - 1, y + 1, color);
-        graphics.fill(x, y + 1, x + width, y + height - 1, color);
-        graphics.fill(x + 1, y + height - 1, x + width - 1, y + height, color);
-    }
-    static void card(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int fill, int line) {
-        box(graphics, x, y, width, height, line);
-        box(graphics, x + 1, y + 1, width - 2, height - 2, fill);
-    }
-    static void bar(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float ratio, int color) {
-        box(graphics, x, y, width, height, 0xFF0F0D17);
-        int filled = Math.round((width - 2) * Mth.clamp(ratio, 0, 1));
-        if (filled > 0) box(graphics, x + 1, y + 1, filled, height - 2, color);
-    }
     static int mix(int from, int to, float amount) {
         int a = Math.round(Mth.lerp(amount, from >>> 24, to >>> 24));
         int r = Math.round(Mth.lerp(amount, from >> 16 & 255, to >> 16 & 255));
@@ -54,41 +37,44 @@ final class CompanionUi {
         for (var line : font.split(text, width)) {
             if (lines++ >= maxLines) break;
             graphics.text(font, line, x, y, color, false);
-            y += 11;
+            y += 10;
         }
         return y;
     }
-    /** Returns the width used, so pills can flow in a row. */
-    static int pill(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int color) {
+    /** A small heading with a hairline running to the column edge. */
+    static void section(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int width, MoonUi.Theme theme) {
+        graphics.text(font, text, x, y, theme.faint(), false);
+        int start = x + font.width(text) + 6;
+        if (start < x + width) graphics.fill(start, y + 4, x + width, y + 5, theme.line());
+    }
+    /** A slim meter on the canvas. */
+    static void meter(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float ratio, int color, MoonUi.Theme theme) {
+        MoonUi.round(graphics, x, y, width, height, height / 2, theme.line());
+        int filled = Math.round(width * Mth.clamp(ratio, 0, 1));
+        if (filled >= height) MoonUi.round(graphics, x, y, filled, height, height / 2, color);
+    }
+    /** A small rounded tag for a state; returns its width. */
+    static int tag(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int color) {
         int width = font.width(text) + 10;
-        box(graphics, x, y, width, 13, mix(0xFF000000, color, 0.22F));
+        MoonUi.round(graphics, x, y, width, 13, 6, MoonUi.alpha(color, 0.16F));
         graphics.text(font, text, x + 5, y + 3, color, false);
         return width;
     }
-    /** Small uppercase-style heading with a hairline to the column edge. */
-    static void section(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int width) {
-        graphics.text(font, text, x, y, FAINT, false);
-        int start = x + font.width(text) + 6;
-        if (start < x + width) graphics.fill(start, y + 4, x + width, y + 5, LINE);
-    }
-    static void disc(GuiGraphicsExtractor graphics, int centerX, int centerY, int radius, int color) {
-        for (int row = -radius; row <= radius; row++) {
-            int half = (int) Math.sqrt(radius * radius - row * row);
-            graphics.fill(centerX - half, centerY + row, centerX + half + 1, centerY + row + 1, color);
-        }
-    }
-    static void ring(GuiGraphicsExtractor graphics, int centerX, int centerY, int radius, int color) {
-        int steps = Math.max(24, radius * 6);
-        for (int step = 0; step < steps; step++) {
-            double angle = step * Mth.TWO_PI / steps;
-            int x = centerX + (int) Math.round(Math.cos(angle) * radius), y = centerY + (int) Math.round(Math.sin(angle) * radius);
-            graphics.fill(x, y, x + 1, y + 1, color);
-        }
+
+    enum Look {
+        /** Pills: solid blood for a page's main action, dark red for stopping one, an outline for the rest. */
+        PRIMARY, DANGER, SOFT,
+        /** One word in the upper band. */
+        TAB,
+        /** A plain row in a list on the canvas. */
+        GHOST,
+        /** A small choice on the canvas. */
+        CHIP,
+        /** A row led by a disc holding its icon. */
+        ROW
     }
 
-    enum Look { PRIMARY, SOFT, GHOST, DANGER, TAB, TILE, CARD, CHIP }
-
-    /** Flat button with an eased hover, an optional item icon, and a hint explaining what it does or what it needs. */
+    /** Flat button with an eased hover, an optional item icon, and a hint for the lower band to read out. */
     static final class UiButton extends AbstractButton {
         private final Runnable action;
         private final Look look;
@@ -109,6 +95,8 @@ final class CompanionUi {
         void selected(boolean value) { selected = value; }
         boolean selected() { return selected; }
         Component hintText() { return hint.get(); }
+        Look look() { return look; }
+        float glow() { return glow; }
 
         @Override public void onPress(InputWithModifiers input) { if (active) action.run(); }
 
@@ -118,47 +106,71 @@ final class CompanionUi {
             lastFrame = now;
             glow = Mth.clamp(glow + (active && isHovered() ? step : -step), 0, 1);
             Font font = Minecraft.getInstance().font;
+            MoonUi.Theme theme = MoonUi.theme();
             int x = getX(), y = getY(), width = getWidth(), height = getHeight();
-            int ink = active ? TEXT : FAINT;
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(x - 1, y - 1, width + 2, height + 2, theme.accent());
+            if (look == Look.ROW) { drawRow(graphics, font, theme); return; }
+            int ink;
             switch (look) {
                 case PRIMARY -> {
-                    int base = active ? mix(MOON, 0xFFFFE6AE, glow) : RAISED;
-                    box(graphics, x, y, width, height, base);
-                    ink = active ? INK : FAINT;
+                    MoonUi.round(graphics, x, y, width, height, height / 2, active ? MoonUi.mix(MoonUi.BLOOD, 0xFFE9506A, glow) : 0xFF2B2930);
+                    ink = active ? 0xFFFFFFFF : MoonUi.BAND_FAINT;
                 }
                 case DANGER -> {
-                    box(graphics, x, y, width, height, active ? mix(0xFF4A2030, 0xFF6A2B40, glow) : RAISED);
-                    ink = active ? 0xFFFFD9DF : FAINT;
+                    MoonUi.round(graphics, x, y, width, height, height / 2, active ? MoonUi.mix(0xFF4A2030, 0xFF6A2B40, glow) : 0xFF2B2930);
+                    ink = active ? 0xFFFFD9DF : MoonUi.BAND_FAINT;
                 }
-                case SOFT -> card(graphics, x, y, width, height, mix(SURFACE, RAISED, glow), mix(LINE, VIOLET, glow));
-                case CHIP, TILE, CARD -> {
-                    int fill = selected ? mix(0xFF000000, MOON, 0.16F) : mix(SURFACE, RAISED, glow);
-                    int edge = selected ? MOON : mix(LINE, VIOLET, glow);
-                    card(graphics, x, y, width, height, fill, active || selected ? edge : mix(LINE, 0xFF000000, 0.3F));
+                case SOFT -> {
+                    MoonUi.round(graphics, x, y, width, height, height / 2, active ? MoonUi.mix(0xFF4B4852, MoonUi.BAND_TEXT, glow) : 0xFF2B2930);
+                    MoonUi.round(graphics, x + 1, y + 1, width - 2, height - 2, height / 2 - 1, active ? MoonUi.mix(MoonUi.BAND, 0xFF2B2930, glow) : MoonUi.BAND);
+                    ink = active ? MoonUi.BAND_TEXT : MoonUi.BAND_FAINT;
                 }
-                case GHOST -> { if (selected || glow > 0) box(graphics, x, y, width, height, mix(0x00000000, selected ? RAISED : SURFACE, selected ? 1 : glow)); }
-                case TAB -> { ink = selected ? MOON : active ? mix(MUTED, TEXT, glow) : FAINT; }
+                case CHIP -> {
+                    int edge = selected ? theme.accent() : MoonUi.mix(theme.line(), theme.ink(), glow);
+                    MoonUi.round(graphics, x, y, width, height, 5, active || selected ? edge : MoonUi.alpha(theme.line(), 0.6F));
+                    MoonUi.round(graphics, x + 1, y + 1, width - 2, height - 2, 4, theme.node());
+                    ink = selected ? theme.accent() : active ? theme.ink() : theme.faint();
+                }
+                case GHOST -> {
+                    if (selected) graphics.fill(x, y + 3, x + 2, y + height - 3, theme.accent());
+                    ink = selected ? theme.accent() : MoonUi.mix(theme.sub(), theme.ink(), glow);
+                }
+                default -> ink = !active ? MoonUi.BAND_FAINT : selected ? MoonUi.BAND_TEXT : MoonUi.mix(MoonUi.BAND_SUB, MoonUi.BAND_TEXT, glow);
             }
-            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(x, y, width, height, VIOLET);
-            if (look == Look.CARD) return;
             boolean hasIcon = icon != null;
-            if (hasIcon && iconStack.isEmpty()) iconStack = new ItemStack(icon.get());
+            if (hasIcon) refreshIcon();
             if (getMessage().getString().isEmpty()) {
                 if (hasIcon) graphics.item(iconStack, x + (width - 16) / 2, y + (height - 16) / 2);
-                return;
-            }
-            if (look == Look.TILE) {
-                if (hasIcon) graphics.item(iconStack, x + (width - 16) / 2, y + 3);
-                String text = fit(font, getMessage().getString(), width - 2);
-                graphics.text(font, text, x + (width - font.width(text)) / 2, y + height - 12, selected ? MOON : ink, false);
                 return;
             }
             int room = width - 8 - (hasIcon ? 18 : 0);
             String text = fit(font, getMessage().getString(), room);
             int contentWidth = font.width(text) + (hasIcon ? 18 : 0);
-            int cursor = look == Look.GHOST ? x + 4 : x + (width - contentWidth) / 2;
+            int cursor = look == Look.GHOST ? x + 6 : x + (width - contentWidth) / 2;
             if (hasIcon) { graphics.item(iconStack, cursor, y + (height - 16) / 2); cursor += 18; }
-            graphics.text(font, text, cursor, y + (height - 8) / 2, look == Look.GHOST && selected ? MOON : ink, false);
+            graphics.text(font, text, cursor, y + (height - 8) / 2, ink, false);
+        }
+        private void refreshIcon() {
+            ItemLike item = icon.get();
+            if (iconStack.isEmpty() || !iconStack.is(item.asItem())) iconStack = new ItemStack(item);
+        }
+        private void drawRow(GuiGraphicsExtractor graphics, Font font, MoonUi.Theme theme) {
+            float x = getX() + ROW_RADIUS + 1, y = getY() + getHeight() / 2F;
+            float radius = ROW_RADIUS + (selected ? 0.8F : 0) + glow * 1.2F;
+            MoonUi.pool(graphics, x, y + 3, radius * 1.5F, radius * 1.5F, theme.shadow());
+            MoonUi.disc(graphics, x, y, radius, theme.node());
+            int edge = selected ? theme.accent() : active ? MoonUi.mix(theme.sub(), theme.ink(), glow) : theme.line();
+            MoonUi.ring(graphics, x, y, radius, edge);
+            if (selected) MoonUi.ring(graphics, x, y, radius - 0.8F, edge);
+            if (icon != null) {
+                refreshIcon();
+                graphics.item(iconStack, Math.round(x) - 8, Math.round(y) - 8);
+            }
+            if (!active && !selected) MoonUi.disc(graphics, x, y, radius - 1, MoonUi.alpha(theme.node(), 0.62F));
+            if (!getMessage().getString().isEmpty()) {
+                int ink = selected ? theme.accent() : active ? MoonUi.mix(theme.ink(), theme.accent(), glow * 0.6F) : theme.faint();
+                label(graphics, font, getMessage(), getX() + ROW_RADIUS * 2 + 7, Math.round(y) - 4, getWidth() - ROW_RADIUS * 2 - 7, ink);
+            }
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }

@@ -1,6 +1,6 @@
-# 1.2.4 随从狩猎与交易表
+# 随从狩猎与交易表
 
-适用 Minecraft 26.1.2 / NeoForge。以下表格按本版本实际 JSON 生成；数据包覆盖后，以服务器加载的资源为准。[完整规则](COMPANIONS-1.2.4-zh.md)。
+适用 Minecraft 26.1.2 / NeoForge。表格来自模组内置的 JSON；数据包覆盖后，以服务器加载的内容为准。[随从指南](COMPANIONS-zh.md) · [English](COMPANION-TABLES.md)
 
 ## 狩猎权重与数量
 
@@ -68,7 +68,7 @@
 - 冷却期间仍可跟随、守护、休息、召回、开背包、升级和改名换肤，只禁止再次出发狩猎。死亡与复活不会清除冷却。
 - 使用服务器 `gameTime`，睡眠和 `/time set` 不跳过；服务器关闭时不流逝。禁用随从系统时，狩猎与冷却一同暂停，重新启用后继续。
 
-## 商人交易列表
+## 商人交易
 
 交易池共 **9 种**；每位商人均匀抽出 **6 种不同交易**，因此每项被选入该商人列表的概率为 6/9 = 2/3。交易没有狩猎式的权重，不受随从阶数、技能或狩猎时长影响。次数耗尽后不补货；下表的次数是每位商人每项交易的上限。
 
@@ -84,11 +84,11 @@
 | 4 绿宝石 | 4 狼毒花 | 8 | `wolfsbane.json` |
 | 4 狼毒花 | 2 银锭 | 8 | `silver_for_wolfsbane.json` |
 
-本版移除“1 月厄珍珠＋2 银锭 → 1 银剑”。月厄珍珠的最终两条交易为 **6 狼毒花＋1 钻石 → 1 月厄珍珠**及 **12 绿宝石＋4 狼毒花 → 1 月厄珍珠**，每项最多四次。此前两条涉及银锭／末影珍珠的兑换配方均已移除。
+月厄珍珠有两条交易：**6 狼毒花＋1 钻石**或 **12 绿宝石＋4 狼毒花**，每项最多四次。
 
-商人自然存在 **12000 游戏刻**，正常 20 TPS 时为 **10 分钟**，交易不暂停寿命，区块卸载仍会消失。召唤时先问候，再告知只停留十分钟。全部对白见[商人与随从台词](COMPANION-DIALOGUE-1.2.4-zh.md)。
+商人自然存在 **12000 游戏刻**，正常 20 TPS 时为 **10 分钟**，交易不暂停寿命，区块卸载仍会消失。召唤时先问候，再告知只停留十分钟。全部对白见[对白目录](COMPANION-DIALOGUE.md)。
 
-药水最终配方为“4 狼毒花＋2 绿宝石 → 1 狼人药水”和“4 银锭＋2 绿宝石 → 1 狼毒花药水”。两条银锭与狼毒花互换配方均为 4 换 2，不能按原数量循环套利。
+银锭与狼毒花的两条互换交易都是 4 换 2，不能循环套利。
 
 ## 数据包入口与代码
 
@@ -97,5 +97,3 @@
 - 单条交易：`data/howlingwerewolf/villager_trade/werewolf_brother/*.json`。
 - 阶数、时长与冷却规则：[CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java)。
 - 结算、背包合并和溢出：[CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java)。
-
-English: 30 independently weighted hunt entries, total weight 235. Wolfsbane has weight 8 and a count of 1–3. Tier coefficients 4/5/6/8 multiply elapsed days to determine the floored number of rolls; entry probabilities and counts remain unchanged. Every hunt, including an early recall, starts a three-game-day cooldown. The merchant selects six unique offers uniformly from the nine recipes listed above, with no restocking.

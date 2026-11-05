@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "17";
+    private static final String PROTOCOL = "18";
 
     /** Registers all gameplay payloads; handlers run on the main game thread by default. */
     public static void register(RegisterPayloadHandlersEvent event) {

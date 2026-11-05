@@ -2,7 +2,9 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfModelSet;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.HumanoidArm;
@@ -17,22 +19,26 @@ final class ModernFirstPersonClawRenderer {
     private static int revision = -1;
 
     static void render(RenderArmEvent event, WerewolfRenderData data) {
+        draw(event.getPoseStack(), event.getSubmitNodeCollector(), event.getPackedLight(), event.getArm(), data);
+        event.setCanceled(true);
+    }
+
+    static void draw(PoseStack pose, SubmitNodeCollector collector, int light, HumanoidArm side, WerewolfRenderData data) {
         if (revision != ModernModelResources.revision()) {
             ARMS.clear();
             revision = ModernModelResources.revision();
         }
         ModernPlayerModel<net.minecraft.client.renderer.entity.state.AvatarRenderState> model = ARMS.computeIfAbsent(data.form(), ModernPlayerModel::new);
         model.resetPose();
-        boolean right = event.getArm() == HumanoidArm.RIGHT;
+        boolean right = side == HumanoidArm.RIGHT;
         ModelPart arm = model.rig.bone(right ? "rightArmRotation" : "leftArmRotation");
         arm.setPos(right ? -5 : 5, 2, 0);
         arm.setRotation(0, 0, 0);
         float scale = data.form() == WerewolfForm.BEAST ? 0.65F : 0.9F;
         arm.xScale = arm.yScale = arm.zScale = scale;
-        event.getSubmitNodeCollector().submitModelPart(arm, event.getPoseStack(), RenderTypes.entityCutout(
+        collector.submitModelPart(arm, pose, RenderTypes.entityCutout(
                 WerewolfSkinCatalog.texture(data.skinId(), WerewolfModelSet.MODERN, data.form())),
-                event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
-        event.setCanceled(true);
+                light, OverlayTexture.NO_OVERLAY, null);
     }
 
     private ModernFirstPersonClawRenderer() {}

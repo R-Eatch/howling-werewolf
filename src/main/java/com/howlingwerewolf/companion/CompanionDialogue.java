@@ -15,8 +15,9 @@ public final class CompanionDialogue {
             Map.entry("inventory", 2), Map.entry("upgrade", 2), Map.entry("renamed", 2),
             Map.entry("reskinned", 2), Map.entry("combat", 3), Map.entry("wounded", 2),
             Map.entry("victory", 2), Map.entry("farewell", 2), Map.entry("fallen", 2),
-            Map.entry("idle_follow", 3), Map.entry("idle_guard", 3), Map.entry("idle_rest", 3));
-    private static final Set<String> RELIABLE = Set.of("follow", "guard", "rest", "sort", "fallen", "wounded");
+            Map.entry("idle_follow", 3), Map.entry("idle_guard", 3), Map.entry("idle_rest", 3),
+            Map.entry("sort", 3), Map.entry("sort_idle_found", 2));
+    private static final Set<String> RELIABLE = Set.of("follow", "guard", "rest", "sort", "sort_idle_found", "fallen", "wounded");
 
     public static String key(String occasion, RandomSource random) {
         int count = VARIANTS.getOrDefault(occasion, 0);

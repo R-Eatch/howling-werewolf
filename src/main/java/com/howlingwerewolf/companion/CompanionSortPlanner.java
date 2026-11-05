@@ -2,14 +2,23 @@
 package com.howlingwerewolf.companion;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import java.util.*;
 
-/** Group exact resources once, compact into stable destinations, then transfer without clearing inventories. */
+/**
+ * Group exact resources once, compact into stable destinations, then transfer without clearing
+ * inventories. A framed storage holds only its framed item types: those types gather there from
+ * everywhere, and anything else inside moves out as soon as there is room for it.
+ */
 public final class CompanionSortPlanner {
-    public record Storage(BlockPos id, ResourceHandler<ItemResource> handler) {}
+    /** An empty {@code filter} takes anything. */
+    public record Storage(BlockPos id, ResourceHandler<ItemResource> handler, Set<Item> filter) {
+        public Storage(BlockPos id, ResourceHandler<ItemResource> handler) { this(id, handler, Set.of()); }
+        boolean framed() { return !filter.isEmpty(); }
+    }
     private record Cell(Storage storage, int slot, ItemResource resource, int amount) {}
     public record Move(Storage source, int sourceSlot, Storage target, int targetSlot, ItemResource resource, int amount) {
         public Move using(Storage currentSource, Storage currentTarget) {
@@ -27,23 +36,30 @@ public final class CompanionSortPlanner {
                 int amount = storage.handler.getAmountAsInt(i);
                 Cell cell = new Cell(storage, i, resource, amount);
                 if (amount == 0 || resource.isEmpty()) free.add(cell);
-                else if (resource.getMaxStackSize() > 1) groups.computeIfAbsent(resource, ignored -> new ArrayList<>()).add(cell);
+                else groups.computeIfAbsent(resource, ignored -> new ArrayList<>()).add(cell);
             }
         }
         List<Move> result = new ArrayList<>();
         for (var group : groups.entrySet()) {
             ItemResource resource = group.getKey();
             List<Cell> cells = group.getValue();
+            List<Storage> framedHomes = storages.stream().filter(s -> s.filter.contains(resource.getItem())).toList();
+            List<Storage> homes = framedHomes.isEmpty() ? storages.stream().filter(s -> !s.framed()).toList() : framedHomes;
+            if (homes.isEmpty()) continue;
+            List<Cell> placed = cells.stream().filter(c -> homes.contains(c.storage)).toList();
+            List<Cell> misplaced = cells.stream().filter(c -> !homes.contains(c.storage)).toList();
+            // Single items have no stacks to merge, so they only ever move to answer a frame.
+            if (misplaced.isEmpty() && resource.getMaxStackSize() == 1) continue;
             Map<Storage, Integer> totals = new HashMap<>();
-            for (Cell cell : cells) totals.merge(cell.storage, cell.amount, Integer::sum);
+            for (Cell cell : placed) totals.merge(cell.storage, cell.amount, Integer::sum);
             List<Storage> preferred = new ArrayList<>(totals.keySet());
             preferred.sort(Comparator.<Storage>comparingInt(s -> totals.get(s)).reversed()
                     .thenComparing(Storage::id));
             List<Cell> destinations = new ArrayList<>();
             Map<Cell, Integer> desired = new HashMap<>();
-            int remaining = cells.stream().mapToInt(Cell::amount).sum();
+            int remaining = placed.stream().mapToInt(Cell::amount).sum();
             for (Storage storage : preferred) {
-                List<Cell> occupied = cells.stream().filter(c -> c.storage.equals(storage))
+                List<Cell> occupied = placed.stream().filter(c -> c.storage.equals(storage))
                         .sorted(Comparator.comparingInt(Cell::amount).reversed().thenComparingInt(Cell::slot)).toList();
                 for (Cell cell : occupied) {
                     int count = Math.min(remaining, capacity(cell, resource));
@@ -61,6 +77,29 @@ public final class CompanionSortPlanner {
             }
             // Valid vanilla slots always hold their present amount. Fail closed if an adapter violates that.
             if (remaining != 0) continue;
+            int homeless = misplaced.stream().mapToInt(Cell::amount).sum();
+            if (homeless > 0) {
+                List<Storage> order = new ArrayList<>(preferred);
+                homes.stream().filter(home -> !totals.containsKey(home)).sorted(Comparator.comparing(Storage::id)).forEach(order::add);
+                for (Storage home : order) homeless = settle(home, resource, homeless, cells, destinations, desired, empty);
+                if (homeless > 0 && !framedHomes.isEmpty()) {
+                    // The frames are full. What already waits outside them stays together, and a
+                    // framed storage still sheds what its frame refuses into plain storage.
+                    for (Cell cell : misplaced) {
+                        if (cell.storage.framed()) continue;
+                        int count = Math.min(homeless, capacity(cell, resource));
+                        desired.put(cell, count); destinations.add(cell); homeless -= count;
+                    }
+                    List<Storage> plain = storages.stream().filter(s -> !s.framed()).sorted(Comparator.comparing(Storage::id)).toList();
+                    for (Storage storage : plain) homeless = fill(storage, resource, homeless, cells, destinations, desired, empty);
+                }
+                // Anything still without room waits where it is for a later pass.
+                for (Cell cell : misplaced) {
+                    if (homeless == 0 || desired.containsKey(cell)) continue;
+                    int keep = Math.min(homeless, cell.amount);
+                    desired.put(cell, keep); homeless -= keep;
+                }
+            }
             ArrayDeque<Cell> donors = new ArrayDeque<>();
             Map<Cell, Integer> amounts = new HashMap<>();
             for (Cell cell : cells) {
@@ -80,6 +119,30 @@ public final class CompanionSortPlanner {
             }
         }
         return List.copyOf(result);
+    }
+
+    /** Tops up the destinations already chosen in this storage, then opens its free slots. */
+    private static int settle(Storage storage, ItemResource resource, int amount, List<Cell> cells, List<Cell> destinations,
+                              Map<Cell, Integer> desired, Map<Storage, ArrayDeque<Cell>> empty) {
+        for (Cell cell : destinations) {
+            if (amount == 0) break;
+            if (!cell.storage.equals(storage)) continue;
+            int extra = Math.min(amount, capacity(cell, resource) - desired.get(cell));
+            if (extra > 0) { desired.merge(cell, extra, Integer::sum); amount -= extra; }
+        }
+        return fill(storage, resource, amount, cells, destinations, desired, empty);
+    }
+
+    private static int fill(Storage storage, ItemResource resource, int amount, List<Cell> cells, List<Cell> destinations,
+                            Map<Cell, Integer> desired, Map<Storage, ArrayDeque<Cell>> empty) {
+        Iterator<Cell> free = empty.get(storage).iterator();
+        while (amount > 0 && free.hasNext()) {
+            Cell cell = free.next(); int count = Math.min(amount, capacity(cell, resource));
+            if (count == 0) continue;
+            free.remove(); cells.add(cell); destinations.add(cell);
+            desired.put(cell, count); amount -= count;
+        }
+        return amount;
     }
 
     private static int capacity(Cell cell, ItemResource resource) {

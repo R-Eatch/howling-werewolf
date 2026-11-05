@@ -14,6 +14,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
@@ -25,10 +26,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/** The pack page: roster, a live portrait, and the selected companion's status and orders. */
+/** The pack page: roster on the left, the selected companion before the moon, its orders on the right. */
 public final class CompanionScreen extends CompanionFrameScreen {
     private static final String KEY = "screen.howlingwerewolf.companion.";
-    private static final int ROSTER_X = 10, ROSTER_W = 128, STAGE_X = 146, STAGE_W = 128, DETAIL_X = 282, DETAIL_W = 178;
+    private static final int ROSTER_X = 12, ROSTER_W = 134, ROSTER_TOP = 34, ROSTER_STEP = 50, ORDER_W = 116, ORDER_TOP = 44, ORDER_STEP = 38;
+    private static final int MOON_RADIUS = 80, RING_TICKS = 64, DEED_W = 78, DEED_H = 17;
     private static final CompanionActionPacket.Action[] ORDERS = {CompanionActionPacket.Action.FOLLOW, CompanionActionPacket.Action.GUARD,
             CompanionActionPacket.Action.REST, CompanionActionPacket.Action.SORT, CompanionActionPacket.Action.HUNT};
     private static final CompanionActionPacket.Action[] DEEDS = {CompanionActionPacket.Action.RECALL, CompanionActionPacket.Action.INVENTORY,
@@ -38,7 +40,6 @@ public final class CompanionScreen extends CompanionFrameScreen {
     private EditBox address;
     private UiButton saveAddress, resetAddress, appearance;
     private int actionDelay;
-    private @Nullable CompanionActionPacket.Action hovered;
 
     public CompanionScreen(@Nullable Screen parent, CompoundTag snapshot) { this(parent, snapshot, null); }
     CompanionScreen(@Nullable Screen parent, CompoundTag snapshot, @Nullable UUID selected) {
@@ -47,52 +48,74 @@ public final class CompanionScreen extends CompanionFrameScreen {
         if (!target.isEmpty()) try { this.selected = UUID.fromString(target); } catch (IllegalArgumentException ignored) {}
     }
     @Override protected Tab tab() { return Tab.PACK; }
+    @Override protected int actionsWidth() { return DEED_W * 2 + 16; }
 
     @Override protected void onSnapshot(CompoundTag previous) {
         String before = previous.getStringOr("Address", "");
         if (address != null && address.getValue().equals(before)) address.setValue(snapshot.getStringOr("Address", ""));
     }
 
+    private static int moonX(int left) { return left + (ROSTER_X + ROSTER_W + WIDTH - ORDER_W - 14) / 2; }
+    private static int moonY(int top) { return top + TOP_BAND + 28 + MOON_RADIUS + 13; }
+
     @Override protected void build(int left, int top) {
         previewActive = true;
         commands.clear(); slots.clear();
-        preview.bounds(left + STAGE_X, top + BODY_TOP + 4, STAGE_W, 242);
+        int canvasBottom = top + HEIGHT - LOWER_BAND;
+        preview.stage(moonX(left), moonY(top), MOON_RADIUS, moonX(left) - MOON_RADIUS - 30, top + TOP_BAND, moonX(left) + MOON_RADIUS + 30, canvasBottom);
         for (int i = 0; i < CompanionRules.MAX_COMPANIONS; i++) {
             int index = i;
-            UiButton card = new UiButton(left + ROSTER_X, top + 48 + i * 52, ROSTER_W, 48, Component.empty(), Look.CARD, () -> choose(index))
-                    .hint(() -> slotHint(index));
+            UiButton card = new UiButton(left + ROSTER_X, top + ROSTER_TOP + i * ROSTER_STEP, ROSTER_W, 44, Component.empty(), Look.ROW, () -> choose(index))
+                    .icon(() -> slotIcon(index)).hint(() -> slotHint(index));
             slots.add(addRenderableWidget(card));
         }
         String value = address == null ? snapshot.getStringOr("Address", "") : address.getValue();
-        address = addRenderableWidget(new EditBox(font, left + ROSTER_X + 5, top + 222, ROSTER_W - 10, 12, Component.translatable(KEY + "address")));
+        int addressY = top + 200;
+        address = addRenderableWidget(new EditBox(font, left + ROSTER_X + 2, addressY + 13, ROSTER_W - 4, 12, Component.translatable(KEY + "address")));
         address.setBordered(false);
+        address.setTextShadow(false);
         address.setMaxLength(CompanionRules.MAX_ADDRESS_LENGTH * 2);
         address.setHint(Component.translatable("dialogue.howlingwerewolf.companion.address_default"));
         address.setValue(value);
-        saveAddress = addRenderableWidget(new UiButton(left + ROSTER_X, top + 238, 62, 18, Component.translatable(KEY + "save_address"), Look.SOFT, () -> requestAddress(address.getValue())));
-        resetAddress = addRenderableWidget(new UiButton(left + ROSTER_X + 66, top + 238, 62, 18, Component.translatable(KEY + "reset_address"), Look.SOFT, () -> { address.setValue(""); requestAddress(""); }));
+        int pill = (ROSTER_W - 4) / 2;
+        saveAddress = addRenderableWidget(new UiButton(left + ROSTER_X, addressY + 29, pill, 16, Component.translatable(KEY + "save_address"), Look.SOFT, () -> requestAddress(address.getValue())));
+        resetAddress = addRenderableWidget(new UiButton(left + ROSTER_X + pill + 4, addressY + 29, pill, 16, Component.translatable(KEY + "reset_address"), Look.SOFT, () -> { address.setValue(""); requestAddress(""); }));
 
-        int tileW = (DETAIL_W - 8) / 5;
+        int orderX = left + WIDTH - ORDER_W - 10;
         List<Supplier<ItemLike>> orderIcons = List.of(() -> Items.LEAD, () -> Items.IRON_SWORD, () -> Items.RED_BED, () -> Items.CHEST, () -> Items.BOW);
         for (int i = 0; i < ORDERS.length; i++) {
             CompanionActionPacket.Action action = ORDERS[i];
-            UiButton tile = new UiButton(left + DETAIL_X + i * (tileW + 2), top + 112, tileW, 36, Component.translatable(KEY + action.name().toLowerCase(java.util.Locale.ROOT)), Look.TILE, () -> request(action))
+            UiButton row = new UiButton(orderX, top + ORDER_TOP + i * ORDER_STEP, ORDER_W, 28, Component.translatable(KEY + action.name().toLowerCase(java.util.Locale.ROOT)), Look.ROW, () -> request(action))
                     .icon(orderIcons.get(i)).hint(() -> disabledReason(action));
-            commands.put(action, addRenderableWidget(tile));
+            commands.put(action, addRenderableWidget(row));
         }
-        int deedW = (DETAIL_W - 4) / 2;
-        List<Supplier<ItemLike>> deedIcons = List.of(() -> Items.ENDER_PEARL, () -> Items.CHEST, ModItems.MOONBANE_PEARL::get);
+        int bandTop = canvasBottom + 5, right = left + WIDTH - 12;
         for (int i = 0; i < DEEDS.length; i++) {
             CompanionActionPacket.Action action = DEEDS[i];
-            UiButton deed = new UiButton(left + DETAIL_X + i % 2 * (deedW + 4), top + 212 + i / 2 * 24, deedW, 21, deedLabel(action), Look.SOFT, () -> request(action))
-                    .icon(deedIcons.get(i)).hint(() -> deedHint(action));
+            UiButton deed = new UiButton(right - (2 - i % 2) * DEED_W - (1 - i % 2) * 4, bandTop + i / 2 * (DEED_H + 3), DEED_W, DEED_H, deedLabel(action), Look.SOFT, () -> request(action))
+                    .hint(() -> deedHint(action));
             commands.put(action, addRenderableWidget(deed));
         }
-        appearance = addRenderableWidget(new UiButton(left + DETAIL_X + deedW + 4, top + 236, deedW, 21, Component.translatable(KEY + "tab.look"), Look.SOFT, () -> showTab(Tab.LOOK))
-                .icon(() -> Items.NAME_TAG).hint(() -> Component.translatable(KEY + "customize")));
+        appearance = addRenderableWidget(new UiButton(right - DEED_W, bandTop + DEED_H + 3, DEED_W, DEED_H, Component.translatable(KEY + "tab.look"), Look.SOFT, () -> showTab(Tab.LOOK))
+                .hint(() -> Component.translatable(KEY + "customize")));
         // A fallen companion has one thing to do, so it takes the whole action area.
-        commands.put(CompanionActionPacket.Action.REVIVE, addRenderableWidget(new UiButton(left + DETAIL_X, top + 212, DETAIL_W, 45, deedLabel(CompanionActionPacket.Action.REVIVE), Look.PRIMARY,
-                () -> request(CompanionActionPacket.Action.REVIVE)).icon(() -> Items.TOTEM_OF_UNDYING).hint(() -> deedHint(CompanionActionPacket.Action.REVIVE))));
+        commands.put(CompanionActionPacket.Action.REVIVE, addRenderableWidget(new UiButton(right - DEED_W * 2 - 4, bandTop + 4, DEED_W * 2 + 4, 26, deedLabel(CompanionActionPacket.Action.REVIVE), Look.PRIMARY,
+                () -> request(CompanionActionPacket.Action.REVIVE)).hint(() -> deedHint(CompanionActionPacket.Action.REVIVE))));
+    }
+    private ItemLike slotIcon(int index) {
+        ListTag entries = snapshot.getListOrEmpty("Companions");
+        if (index >= entries.size()) return index < snapshot.getIntOr("Capacity", 0) ? Items.BONE : Items.BARRIER;
+        return modeIcon(mode(entries.getCompoundOrEmpty(index)));
+    }
+    private static ItemLike modeIcon(CompanionMode mode) {
+        return switch (mode) {
+            case FOLLOW -> Items.LEAD;
+            case GUARD -> Items.IRON_SWORD;
+            case REST -> Items.RED_BED;
+            case SORT -> Items.CHEST;
+            case HUNT -> Items.BOW;
+            case DEAD -> Items.SKELETON_SKULL;
+        };
     }
     private void choose(int index) {
         ListTag entries = snapshot.getListOrEmpty("Companions");
@@ -157,13 +180,12 @@ public final class CompanionScreen extends CompanionFrameScreen {
         CompoundTag record = selectedRecord();
         boolean system = systemEnabled();
         address.setEditable(system);
-        address.setTextColor(CompanionUi.TEXT);
+        address.setTextColor(MoonUi.theme().ink());
         saveAddress.active = system && actionDelay == 0 && !address.getValue().equals(snapshot.getStringOr("Address", ""));
         resetAddress.active = system && actionDelay == 0 && (!address.getValue().isEmpty() || !snapshot.getStringOr("Address", "").isEmpty());
         appearance.active = system && record != null && mode(record).hasEntity();
         appearance.visible = record != null && mode(record) != CompanionMode.DEAD;
         ListTag entries = snapshot.getListOrEmpty("Companions");
-        int capacity = snapshot.getIntOr("Capacity", 0);
         for (int i = 0; i < slots.size(); i++) {
             UiButton slot = slots.get(i);
             boolean filled = i < entries.size();
@@ -234,6 +256,11 @@ public final class CompanionScreen extends CompanionFrameScreen {
         };
     }
     private static String days(long ticks) { return String.format(java.util.Locale.ROOT, "%.2f", ticks / 24000.0); }
+    /** How far through its hunt a companion is. */
+    private static float huntProgress(CompoundTag record) {
+        long total = record.getLongOr("HuntDuration", 0);
+        return total <= 0 ? 0 : Mth.clamp(1 - (float) record.getLongOr("HuntRemaining", 0) / total, 0, 1);
+    }
 
     @Override public boolean keyPressed(KeyEvent event) {
         if (!address.isFocused()) {
@@ -247,95 +274,119 @@ public final class CompanionScreen extends CompanionFrameScreen {
         return super.keyPressed(event);
     }
 
-    @Override protected void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
-        ListTag entries = snapshot.getListOrEmpty("Companions");
-        int capacity = snapshot.getIntOr("Capacity", 0);
-        Component count = Component.literal(entries.size() + " / " + capacity);
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "tab.pack").append("  ").append(count), left + ROSTER_X, top + BODY_TOP + 2, ROSTER_W);
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "address"), left + ROSTER_X, top + 206, ROSTER_W);
-        CompanionUi.card(graphics, left + ROSTER_X, top + 218, ROSTER_W, 16, CompanionUi.SURFACE, CompanionUi.LINE);
+    @Override protected Focus focus() {
         CompoundTag record = selectedRecord();
-        hovered = null;
-        for (var entry : commands.entrySet()) if (entry.getValue().visible && entry.getValue().isHovered() && ordinalOrder(entry.getKey()) >= 0) hovered = entry.getKey();
-        if (record == null) { emptyState(graphics, left, top); return; }
-        preview.render(graphics, snapshot.getStringOr("Model", "modern"), record.getStringOr("Skin", ""), scale, mouseX, mouseY);
-        int x = left + DETAIL_X, y = top + BODY_TOP + 4;
-        CompanionUi.label(graphics, font, Component.literal(record.getStringOr("Name", "")), x, y + 2, DETAIL_W, CompanionUi.TEXT);
-        y += 15;
-        int tier = record.getIntOr("Tier", 0);
-        for (int i = 0; i < CompanionRules.MAX_TIER; i++) {
-            CompanionUi.box(graphics, x + i * 9, y + 3, 7, 7, i < tier ? CompanionUi.MOON : CompanionUi.RAISED);
-        }
+        if (record == null) return new Focus(null, Component.translatable(KEY + "empty_more"));
         CompanionMode current = mode(record);
-        CompanionUi.pill(graphics, font, Component.translatable(current.translationKey()), x + 34, y, modeColor(current));
-        y += 18;
+        return new Focus(Component.translatable(current.translationKey()), statusLine(record, current));
+    }
+
+    @Override protected void body(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
+        int x = moonX(left), y = moonY(top);
+        int fieldY = top + 200;
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "address"), left + ROSTER_X, fieldY, ROSTER_W, theme);
+        graphics.fill(left + ROSTER_X, fieldY + 25, left + ROSTER_X + ROSTER_W, fieldY + 26, address != null && address.isFocused() ? theme.accent() : theme.line());
+        CompoundTag record = selectedRecord();
+        if (record == null) { emptyState(graphics, theme, x, y); return; }
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "section.orders"), left + WIDTH - ORDER_W - 10, top + 31, ORDER_W, theme);
+        MoonUi.glow(graphics, x, y, MOON_RADIUS * 1.7F, theme.bloom());
+        preview.render(graphics, snapshot.getStringOr("Model", "modern"), record.getStringOr("Skin", ""), scale, mouseX, mouseY, theme);
+        CompanionMode current = mode(record);
+        boolean hunting = current == CompanionMode.HUNT;
         float max = Math.max(1, record.getFloatOr("MaxHealth", 30));
         float hp = Math.clamp(record.getFloatOr("Health", 0), 0, max);
-        float ratio = hp / max;
-        CompanionUi.bar(graphics, x, y, DETAIL_W, 11, ratio, ratio > 0.5F ? CompanionUi.GOOD : ratio > 0.25F ? CompanionUi.WARN : CompanionUi.DANGER);
-        graphics.centeredText(font, Component.translatable(KEY + "health", Math.round(hp), Math.round(max)), x + DETAIL_W / 2, y + 2, CompanionUi.TEXT);
-        y += 14;
+        float ratio = hunting ? huntProgress(record) : hp / max;
+        int color = hunting ? MoonUi.tint(0xFF2F8F5B, 0xFF74D19E) : theme.accent();
+        float ring = MOON_RADIUS + 6;
+        int lit = Math.round(ratio * RING_TICKS);
+        for (int i = 0; i < RING_TICKS; i++) {
+            float angle = i * Mth.TWO_PI / RING_TICKS - Mth.HALF_PI, cos = Mth.cos(angle), sin = Mth.sin(angle);
+            boolean on = i < lit;
+            float outer = ring + (on ? 5 : 3);
+            MoonUi.line(graphics, x + cos * ring, y + sin * ring, x + cos * outer, y + sin * outer, on ? 1.4F : 0.8F, on ? color : theme.line());
+        }
+        // Name and tier above, then the figures of this tier.
+        Component name = Component.literal(record.getStringOr("Name", ""));
+        int tier = record.getIntOr("Tier", 0);
+        int nameRoom = 150, nameWidth = Math.min(nameRoom, font.width(name));
+        int groupX = x - (nameWidth + 8 + CompanionRules.MAX_TIER * 9) / 2;
+        CompanionUi.label(graphics, font, name, groupX, top + TOP_BAND + 5, nameRoom, theme.ink());
+        for (int i = 0; i < CompanionRules.MAX_TIER; i++) {
+            MoonUi.disc(graphics, groupX + nameWidth + 12 + i * 9, top + TOP_BAND + 9, 3, i < tier ? theme.accent() : theme.line());
+        }
         int effective = Math.min(tier, snapshot.getIntOr("Skill", 0));
         Component stats = Component.translatable(KEY + "stats", (int) CompanionRules.attackDamage(effective),
                 Math.round((1 - CompanionRules.damageMultiplier(effective)) * 100), String.valueOf(CompanionRules.regeneration(effective)));
-        CompanionUi.label(graphics, font, stats, x, y, DETAIL_W, CompanionUi.MUTED);
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "section.orders"), x, top + 100, DETAIL_W);
-        // Description follows the pointer, and otherwise explains the active order.
-        Component text = statusLine(record, current);
-        if (hovered != null) text = Component.translatable(KEY + "mode_desc." + modeFor(hovered).getSerializedName());
-        CompanionUi.wrapped(graphics, font, text, x, top + 153, DETAIL_W, hovered != null ? CompanionUi.TEXT : CompanionUi.MUTED, 4);
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "section.actions"), x, top + 201, DETAIL_W);
+        String statsText = CompanionUi.fit(font, stats.getString(), 200);
+        graphics.text(font, statsText, x - font.width(statsText) / 2, top + TOP_BAND + 16, theme.sub(), false);
+        // Below the moon: how far the hunt has come, or how much health is left.
+        int footer = y + MOON_RADIUS + 15;
+        if (hunting) {
+            Component remaining = Component.translatable(KEY + "hunt_remaining", days(record.getLongOr("HuntRemaining", 0)));
+            String text = CompanionUi.fit(font, remaining.getString(), 190);
+            graphics.text(font, text, x - font.width(text) / 2, footer, theme.sub(), false);
+            CompanionUi.meter(graphics, x - 70, footer + 11, 140, 4, ratio, color, theme);
+        } else {
+            MoonUi.centered(graphics, font, Component.translatable(KEY + "health", Math.round(hp), Math.round(max)), x, footer, theme.sub());
+            long cooldown = record.getLongOr("HuntCooldownRemaining", 0);
+            if (cooldown > 0) {
+                String text = CompanionUi.fit(font, Component.translatable(KEY + "hunt_cooldown", days(cooldown)).getString(), 190);
+                graphics.text(font, text, x - font.width(text) / 2, footer + 10, theme.faint(), false);
+            }
+        }
     }
     private Component statusLine(CompoundTag record, CompanionMode current) {
-        if (current == CompanionMode.HUNT) return Component.translatable(KEY + "hunt_remaining", days(record.getLongOr("HuntRemaining", 0)));
-        if (!record.getBooleanOr("Enabled", false) && current != CompanionMode.DEAD) return Component.translatable(KEY + "suspended");
-        long cooldown = record.getLongOr("HuntCooldownRemaining", 0);
-        Component description = Component.translatable(KEY + "mode_desc." + current.getSerializedName());
-        return cooldown > 0 ? description.copy().append("\n").append(Component.translatable(KEY + "hunt_cooldown", days(cooldown))) : description;
+        if (!record.getBooleanOr("Enabled", false) && current != CompanionMode.DEAD && current != CompanionMode.HUNT) return Component.translatable(KEY + "suspended");
+        return Component.translatable(KEY + "mode_desc." + current.getSerializedName());
     }
-    private static int modeColor(CompanionMode mode) {
+    private static int modeColor(CompanionMode mode, MoonUi.Theme theme) {
         return switch (mode) {
-            case FOLLOW -> 0xFF8FC7F0;
-            case GUARD -> CompanionUi.DANGER;
-            case REST -> CompanionUi.MUTED;
-            case SORT -> CompanionUi.MOON;
-            case HUNT -> CompanionUi.GOOD;
-            case DEAD -> CompanionUi.FAINT;
+            case FOLLOW -> MoonUi.tint(0xFF2F76AE, 0xFF8FC7F0);
+            case GUARD -> theme.accent();
+            case REST -> theme.sub();
+            case SORT -> MoonUi.tint(0xFF9C6F14, 0xFFEBC97F);
+            case HUNT -> MoonUi.tint(0xFF2F8F5B, 0xFF74D19E);
+            case DEAD -> theme.faint();
         };
     }
-    private void emptyState(GuiGraphicsExtractor graphics, int left, int top) {
-        int x = left + STAGE_X, y = top + BODY_TOP + 4, w = STAGE_W + 8 + DETAIL_W;
-        CompanionUi.card(graphics, x, y, w, 242, CompanionUi.SURFACE, CompanionUi.LINE);
-        CompanionUi.disc(graphics, x + w / 2, y + 62, 26, 0xFFD9BC77);
-        CompanionUi.disc(graphics, x + w / 2 + 10, y + 56, 23, CompanionUi.SURFACE);
+    private void emptyState(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int x, int y) {
+        MoonUi.glow(graphics, x, y - 44, 90, theme.bloom());
+        MoonUi.moon(graphics, x, y - 44, 42, 6, theme);
         Component message = systemEnabled() ? Component.translatable(KEY + "empty") : Component.translatable("message.howlingwerewolf.companion.disabled");
-        int lineY = y + 104;
-        for (var line : font.split(message, w - 40)) { graphics.centeredText(font, line, x + w / 2, lineY, CompanionUi.TEXT); lineY += 12; }
-        graphics.centeredText(font, Component.translatable(KEY + "empty_more"), x + w / 2, lineY + 8, CompanionUi.FAINT);
+        int lineY = y + 10;
+        for (var line : font.split(message, 200)) { graphics.text(font, line, x - font.width(line) / 2, lineY, theme.ink(), false); lineY += 11; }
     }
-    @Override protected void overlay(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+    @Override protected void overlay(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
         ListTag entries = snapshot.getListOrEmpty("Companions");
-        int capacity = snapshot.getIntOr("Capacity", 0);
+        int textX = left + ROSTER_X + CompanionUi.ROW_RADIUS * 2 + 7, room = ROSTER_W - CompanionUi.ROW_RADIUS * 2 - 9;
         for (int i = 0; i < slots.size(); i++) {
-            int x = left + ROSTER_X + 8, y = top + 48 + i * 52;
+            int y = top + ROSTER_TOP + i * ROSTER_STEP;
             if (i >= entries.size()) {
-                boolean open = i < capacity;
-                Component label = Component.translatable(KEY + (open ? "slot.empty" : "slot.locked"));
-                graphics.centeredText(font, label, left + ROSTER_X + ROSTER_W / 2, y + 20, open ? CompanionUi.MUTED : CompanionUi.FAINT);
+                boolean open = i < snapshot.getIntOr("Capacity", 0);
+                graphics.text(font, Component.translatable(KEY + (open ? "slot.empty" : "slot.locked")), textX, y + 18, open ? theme.sub() : theme.faint(), false);
                 continue;
             }
             CompoundTag entry = entries.getCompoundOrEmpty(i);
             boolean chosen = slots.get(i).selected();
-            CompanionUi.label(graphics, font, Component.literal(entry.getStringOr("Name", "")), x, y + 7, ROSTER_W - 16, chosen ? CompanionUi.MOON : CompanionUi.TEXT);
+            CompanionUi.label(graphics, font, Component.literal(entry.getStringOr("Name", "")), textX, y + 5, room, chosen ? theme.accent() : theme.ink());
             CompanionMode current = mode(entry);
-            CompanionUi.label(graphics, font, Component.translatable(current.translationKey()), x, y + 19, 70, modeColor(current));
+            CompanionUi.label(graphics, font, Component.translatable(current.translationKey()), textX, y + 16, room - 26, modeColor(current, theme));
             int tier = entry.getIntOr("Tier", 0);
             for (int pip = 0; pip < CompanionRules.MAX_TIER; pip++) {
-                CompanionUi.box(graphics, x + ROSTER_W - 16 - (CompanionRules.MAX_TIER - pip) * 7, y + 20, 5, 5, pip < tier ? CompanionUi.MOON : CompanionUi.RAISED);
+                MoonUi.disc(graphics, textX + room - (CompanionRules.MAX_TIER - pip) * 7 + 3, y + 20, 2.2F, pip < tier ? theme.accent() : theme.line());
             }
             float max = Math.max(1, entry.getFloatOr("MaxHealth", 30));
-            float ratio = Math.clamp(entry.getFloatOr("Health", 0), 0, max) / max;
-            CompanionUi.bar(graphics, x, y + 33, ROSTER_W - 16, 6, ratio, ratio > 0.5F ? CompanionUi.GOOD : ratio > 0.25F ? CompanionUi.WARN : CompanionUi.DANGER);
+            float health = Math.clamp(entry.getFloatOr("Health", 0), 0, max) / max;
+            boolean hunting = current == CompanionMode.HUNT;
+            int color = hunting ? MoonUi.tint(0xFF2F8F5B, 0xFF74D19E) : health > 0.5F ? MoonUi.tint(0xFF2F8F5B, 0xFF74D19E) : health > 0.25F ? MoonUi.tint(0xFFB9791F, 0xFFE8AC62) : theme.accent();
+            CompanionUi.meter(graphics, textX, y + 29, room, 3, hunting ? huntProgress(entry) : health, color, theme);
+        }
+        CompoundTag record = selectedRecord();
+        if (record != null) {
+            for (int i = 0; i < ORDERS.length; i++) {
+                UiButton order = commands.get(ORDERS[i]);
+                if (order != null && order.visible) graphics.text(font, String.valueOf(i + 1), order.getX() + order.getWidth() - 6, order.getY() + 10, theme.faint(), false);
+            }
         }
     }
     @Override protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) {

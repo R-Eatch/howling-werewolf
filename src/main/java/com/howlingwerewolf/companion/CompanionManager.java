@@ -489,6 +489,7 @@ public final class CompanionManager {
             entry.putFloat("MaxHealth", (float) CompanionRules.maxHealth(effectiveTier(player, record)));
             entry.putBoolean("Enabled", enabled(player, record));
             entry.putLong("HuntRemaining", record.mode == CompanionMode.HUNT ? Math.max(0, record.huntEnd - now) : 0);
+            entry.putLong("HuntDuration", record.mode == CompanionMode.HUNT ? Math.max(0, record.huntEnd - record.huntStart) : 0);
             entry.putLong("HuntCooldownRemaining", Math.max(0, record.huntCooldownEnd - now));
             entry.putBoolean("Nearby", entity != null && entity.isAlive() && entity.level() == player.level() && entity.distanceToSqr(player) <= 64);
             entries.add(entry);

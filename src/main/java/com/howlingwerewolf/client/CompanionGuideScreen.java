@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -17,20 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/** A reading view: chapters down the side and one scrollable page, with paging at the foot. */
+/** A reading view: chapters down the side and one scrollable page, with paging in the lower band. */
 public final class CompanionGuideScreen extends CompanionFrameScreen {
     private static final String KEY = "screen.howlingwerewolf.companion.guide.";
     static final List<String> TOPICS = List.of("start", "ritual", "merchant", "recruit", "commands", "inventory", "appearance", "hunt", "upgrade", "revive", "sort");
-    private static final int NAV_X = 10, NAV_W = 116, PAGE_X = 134, PAGE_W = 326, PAGE_TOP = 58, VISIBLE_LINES = 17;
+    private static final int NAV_X = 12, NAV_W = 126, NAV_TOP = 28, NAV_STEP = 21, PAGE_X = 150, PAGE_W = 356, PAGE_TOP = 52;
     private static int chapter;
     private final List<UiButton> chapters = new ArrayList<>();
     private UiButton previous, next;
     private int scroll, maximumScroll;
+    private float shown;
 
     CompanionGuideScreen(@Nullable Screen parent, CompoundTag snapshot, @Nullable UUID selected) {
         super(Component.translatable("screen.howlingwerewolf.companion.guide"), parent, snapshot, selected);
     }
     @Override protected Tab tab() { return Tab.GUIDE; }
+    @Override protected int actionsWidth() { return WIDTH - 24; }
+    @Override protected Focus focus() { return new Focus(null, null); }
     private static ItemLike icon(String topic) {
         return switch (topic) {
             case "start" -> Items.COMPASS;
@@ -50,16 +54,18 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
     private void open(int index) {
         chapter = Math.clamp(index, 0, TOPICS.size() - 1);
         scroll = maximumScroll = 0;
+        shown = 0;
         refreshControls();
     }
     @Override protected void build(int left, int top) {
         chapters.clear();
         for (int i = 0; i < TOPICS.size(); i++) {
             int index = i;
-            chapters.add(addRenderableWidget(new UiButton(left + NAV_X, top + BODY_TOP + 4 + i * 22, NAV_W, 21, topicTitle(i), Look.GHOST, () -> open(index)).icon(() -> icon(TOPICS.get(index)))));
+            chapters.add(addRenderableWidget(new UiButton(left + NAV_X, top + NAV_TOP + i * NAV_STEP, NAV_W, NAV_STEP, topicTitle(i), Look.GHOST, () -> open(index)).icon(() -> icon(TOPICS.get(index)))));
         }
-        previous = addRenderableWidget(new UiButton(left + PAGE_X, top + 258, 120, 22, Component.empty(), Look.SOFT, () -> open(chapter - 1)));
-        next = addRenderableWidget(new UiButton(left + PAGE_X + PAGE_W - 120, top + 258, 120, 22, Component.empty(), Look.SOFT, () -> open(chapter + 1)));
+        int y = top + HEIGHT - LOWER_BAND + 12;
+        previous = addRenderableWidget(new UiButton(left + 12, y, 150, 22, Component.empty(), Look.SOFT, () -> open(chapter - 1)));
+        next = addRenderableWidget(new UiButton(left + WIDTH - 12 - 150, y, 150, 22, Component.empty(), Look.SOFT, () -> open(chapter + 1)));
     }
     @Override protected void refreshControls() {
         if (next == null) return;
@@ -69,32 +75,31 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
         if (previous.visible) previous.setMessage(Component.literal("‹ ").append(topicTitle(chapter - 1)));
         if (next.visible) next.setMessage(topicTitle(chapter + 1).copy().append(" ›"));
     }
-    @Override protected void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
-        int x = left + PAGE_X;
-        graphics.fill(left + PAGE_X - 5, top + BODY_TOP + 4, left + PAGE_X - 4, top + HEIGHT - 10, CompanionUi.LINE);
-        graphics.item(new ItemStack(icon(TOPICS.get(chapter))), x, top + BODY_TOP + 2);
-        graphics.text(font, topicTitle(chapter), x + 22, top + BODY_TOP + 7, CompanionUi.MOON, false);
-        var lines = font.split(Component.translatable(KEY + TOPICS.get(chapter) + ".body"), PAGE_W - 12);
-        maximumScroll = Math.max(0, lines.size() - VISIBLE_LINES);
+    @Override protected void body(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
+        int x = left + PAGE_X, bottom = top + HEIGHT - LOWER_BAND - 6;
+        // A faint moon sits behind the page, so the guide stays part of the same window.
+        MoonUi.moon(graphics, x + PAGE_W - 60, top + 128, 92, 2, theme, 0.28F);
+        graphics.fill(x - 7, top + TOP_BAND + 6, x - 6, bottom, theme.line());
+        graphics.item(new ItemStack(icon(TOPICS.get(chapter))), x, top + TOP_BAND + 4);
+        graphics.text(font, topicTitle(chapter), x + 21, top + TOP_BAND + 8, theme.accent(), false);
+        var lines = font.split(Component.translatable(KEY + TOPICS.get(chapter) + ".body"), PAGE_W - 14);
+        int height = bottom - (top + PAGE_TOP);
+        maximumScroll = Math.max(0, lines.size() * 11 - height);
         scroll = Math.clamp(scroll, 0, maximumScroll);
-        graphics.enableScissor(x, top + PAGE_TOP, x + PAGE_W, top + PAGE_TOP + VISIBLE_LINES * 11 + 2);
-        try {
-            for (int line = scroll; line < Math.min(lines.size(), scroll + VISIBLE_LINES); line++) {
-                graphics.text(font, lines.get(line), x, top + PAGE_TOP + (line - scroll) * 11, CompanionUi.TEXT, false);
-            }
-        } finally { graphics.disableScissor(); }
+        shown = Mth.lerp(0.28F, shown, scroll);
+        reading(graphics, lines, x, PAGE_W - 8, top + PAGE_TOP, bottom, shown, maximumScroll, theme.ink());
         if (maximumScroll > 0) {
-            int track = VISIBLE_LINES * 11, barX = x + PAGE_W - 3;
-            int thumb = Math.max(18, track * VISIBLE_LINES / lines.size());
-            graphics.fill(barX, top + PAGE_TOP, barX + 2, top + PAGE_TOP + track, CompanionUi.LINE);
-            int offset = (track - thumb) * scroll / maximumScroll;
-            graphics.fill(barX, top + PAGE_TOP + offset, barX + 2, top + PAGE_TOP + offset + thumb, CompanionUi.VIOLET);
+            int trackX = x + PAGE_W - 3;
+            graphics.fill(trackX, top + PAGE_TOP, trackX + 1, bottom, theme.line());
+            int thumb = Math.max(18, height * height / (lines.size() * 11));
+            int thumbY = top + PAGE_TOP + Math.round((height - thumb) * shown / maximumScroll);
+            MoonUi.round(graphics, trackX - 1, thumbY, 3, thumb, 1, theme.accent());
         }
     }
     @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
         double logicalX = x / scale, logicalY = y / scale;
-        if (logicalX >= left() + PAGE_X && logicalX < left() + PAGE_X + PAGE_W && logicalY >= top() + PAGE_TOP - 8 && logicalY < top() + 256) {
-            scroll = Math.clamp(scroll - (int) Math.signum(dy) * 3, 0, maximumScroll);
+        if (logicalX >= left() + PAGE_X && logicalX < left() + PAGE_X + PAGE_W && logicalY >= top() + TOP_BAND && logicalY < top() + HEIGHT - LOWER_BAND) {
+            scroll = Math.clamp(scroll - (int) Math.signum(dy) * 33, 0, maximumScroll);
             return true;
         }
         return super.mouseScrolled(x, y, dx, dy);

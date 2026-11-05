@@ -1,6 +1,6 @@
 # Make your own werewolf skin
 
-For **Howling Werewolf 1.2.2 · Minecraft 26.1.2 NeoForge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
+For **Howling Werewolf 1.3.0 · Minecraft 26.1.2 NeoForge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
 
 ## Start in the game
 

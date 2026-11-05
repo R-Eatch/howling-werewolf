@@ -7,6 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +18,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.BarrelBlock;
@@ -26,6 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -50,18 +55,20 @@ public final class CompanionSorting {
     private static final Map<MinecraftServer, State> STATES = new WeakHashMap<>();
     public static final int SCAN_LIMIT = 64;
     private static final int LID_TICKS = 14, SETTLE_TICKS = 6, WALK_LIMIT = 300, IDLE_SCAN = 200, RETRY = 40, NEXT_PASS = 20, UNREACHABLE_RETRY = 1200;
+    private static final int REMARK_GAP = 6000, REMARK_RANGE = 32;
     private static final int LEASH = CompanionSortSettings.RADIUS + 8;
     private static final double REACH_HORIZONTAL = 2.6, REACH_VERTICAL = 3.2;
 
     /** Serialized for the UI; the lowercase name selects the status text. */
     public enum Phase { IDLE, WALKING, OPENING, MOVING, CLOSING }
-    public record ScanEntry(BlockPos position, boolean usable) {}
+    public record ScanEntry(BlockPos position, boolean usable, Set<Item> filter) {}
     private record Preview(BlockPos center, List<ScanEntry> entries) {}
     private record Lease(Identifier dimension, BlockPos position) {}
     private record Endpoint(CompanionSortPlanner.Storage storage, List<BlockEntity> members, List<BlockState> layout) {
         boolean matches(@Nullable Endpoint current) {
             return current != null && members.equals(current.members) && layout.equals(current.layout)
-                    && storage.handler().size() == current.storage.handler().size();
+                    && storage.handler().size() == current.storage.handler().size()
+                    && storage.filter().equals(current.storage.filter());
         }
         BlockPos id() { return storage.id(); }
     }
@@ -79,7 +86,10 @@ public final class CompanionSorting {
         Phase phase = Phase.IDLE;
         int timer, walked;
         long nextScan;
-        boolean reported;
+        boolean reported, warnedUnreachable;
+        // The opening order counts as the announcement of the first round.
+        boolean announced = true;
+        long nextRemark;
         int moved;
         List<ScanEntry> scan = List.of();
         final Set<BlockPos> unreachable = new HashSet<>();
@@ -151,8 +161,19 @@ public final class CompanionSorting {
         return !event.isCanceled() && event.getUseBlock() != TriState.FALSE;
     }
 
+    /** Trapped chests and shulker boxes stay out on purpose: they are the player's untouched storage. */
     private static boolean supported(BlockState block) {
-        return block.is(Blocks.CHEST) || block.is(Blocks.TRAPPED_CHEST) || block.is(BlockTags.COPPER_CHESTS) || block.is(Blocks.BARREL);
+        return block.is(Blocks.CHEST) || block.is(BlockTags.COPPER_CHESTS) || block.is(Blocks.BARREL);
+    }
+    /** Every item framed on any face of these blocks; an empty frame asks for nothing. */
+    private static Set<Item> framedItems(ServerLevel level, List<BlockPos> blocks) {
+        Set<Item> items = new HashSet<>();
+        for (BlockPos block : blocks) {
+            for (ItemFrame frame : level.getEntitiesOfClass(ItemFrame.class, new AABB(block).inflate(0.2))) {
+                if (!frame.getItem().isEmpty() && frame.getPos().relative(frame.getDirection().getOpposite()).equals(block)) items.add(frame.getItem().getItem());
+            }
+        }
+        return Set.copyOf(items);
     }
     private static boolean idle(List<net.minecraft.world.entity.ContainerUser> users, @Nullable WerewolfCompanionEntity self) {
         for (var user : users) if (user != self) return false;
@@ -195,7 +216,7 @@ public final class CompanionSorting {
         BlockPos id = positions.getFirst().immutable();
         var handler = level.getCapability(Capabilities.Item.BLOCK, id, null);
         if (handler == null || handler.size() < 1 || handler.size() > 54) return null;
-        return new Endpoint(new CompanionSortPlanner.Storage(id, handler), List.copyOf(members), List.copyOf(layout));
+        return new Endpoint(new CompanionSortPlanner.Storage(id, handler, framedItems(level, positions)), List.copyOf(members), List.copyOf(layout));
     }
 
     /** Nearest storage first; a double chest counts once. Unloaded chunks stay unloaded. */
@@ -226,7 +247,7 @@ public final class CompanionSorting {
             seen.add(pos);
             Endpoint endpoint = resolve(player, self, settings, pos);
             if (endpoint != null) usable.add(endpoint);
-            result.add(new ScanEntry(pos, endpoint != null));
+            result.add(new ScanEntry(pos, endpoint != null, endpoint != null ? endpoint.storage.filter() : Set.of()));
         }
         return List.copyOf(result);
     }
@@ -345,9 +366,17 @@ public final class CompanionSorting {
         }
         if (grouped.isEmpty()) {
             release(state, record.id, task);
-            if (!task.reported && task.moved > 0) { CompanionDialogue.say(player, record, "sorted"); task.reported = true; }
+            if (!task.reported && task.moved > 0) {
+                if (task.announced) CompanionDialogue.say(player, record, "sorted");
+                task.reported = true; task.announced = false;
+            }
             task.nextScan = now + IDLE_SCAN;
             return;
+        }
+        // Fresh work after a finished round. A hopper can feed this endlessly, so remarks are rationed.
+        if (task.reported && now >= task.nextRemark && entity.distanceToSqr(player) <= REMARK_RANGE * REMARK_RANGE) {
+            CompanionDialogue.say(player, record, "sort_idle_found");
+            task.announced = true; task.nextRemark = now + REMARK_GAP;
         }
         task.trips.addAll(grouped.values());
         entity.setSortBusy(true);
@@ -414,6 +443,7 @@ public final class CompanionSorting {
     private static void skipUnreachable(State state, WerewolfCompanionEntity entity, CompanionRecord record, ServerPlayer player, Task task, long now, Endpoint endpoint) {
         task.unreachable.add(endpoint.id());
         task.retryUnreachable = now + UNREACHABLE_RETRY;
+        if (!task.warnedUnreachable) { CompanionDialogue.say(player, record, "sort_unreachable"); task.warnedUnreachable = true; }
         entity.getNavigation().stop();
         task.trips.removeIf(trip -> trip.source == endpoint || trip.target == endpoint);
         nextTrip(state, entity, record, player, task, now);
@@ -471,6 +501,11 @@ public final class CompanionSorting {
             CompoundTag entry = new CompoundTag();
             entry.putInt("X", scanned.position().getX()); entry.putInt("Y", scanned.position().getY()); entry.putInt("Z", scanned.position().getZ());
             entry.putBoolean("Usable", scanned.usable() && (task == null || !task.unreachable.contains(scanned.position())));
+            if (!scanned.filter().isEmpty()) {
+                ListTag frames = new ListTag();
+                scanned.filter().stream().map(item -> BuiltInRegistries.ITEM.getKey(item).toString()).sorted().forEach(id -> frames.add(StringTag.valueOf(id)));
+                entry.put("Frames", frames);
+            }
             positions.add(entry);
         }
         tag.put("SortContainers", positions);

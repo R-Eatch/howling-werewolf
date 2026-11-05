@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -26,6 +27,9 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     private static final String[] HIND_RIGHT = {"rightLeg", "right_leg_lower", "right_foot_upper"}, HIND_LEFT = {"leftLeg", "left_leg_lower", "left_foot_upper"};
     private static final List<String> RELAXED_JOINTS = List.of("rightArm", "leftArm", "rightArmRotation", "leftArmRotation", "right_forearn", "left_forearn",
             "rightLeg", "leftLeg", "right_leg_lower", "left_leg_lower");
+    private static final List<String> FOREARMS = List.of("right_forearn", "left_forearn");
+    private static final float ELBOW_FUR_LAY = 0.5F;
+    private static final float STRIKE_RAISE = 1.95F, STRIKE_REACH = 0.95F, STRIKE_TURN_BACK = 0.26F, STRIKE_TURN_IN = 0.38F, STRIKE_LUNGE = 1.0F, BEAST_LUNGE = 3.0F, BITE_LUNGE = 3.2F, RAKE_FOLLOW = 0.17F;
     private static final float SHOULDER_IN = 0.40F, HIP_RANGE = 1.05F, HIP_SOCKET = 11, REACH_MARGIN = 0.96F;
     // Carriage of the gallop and prowl: root drop in pixels, then torso lean and chest and neck pitch in radians.
     private static final float GALLOP_HEIGHT = -0.6F, GALLOP_LEAN = 1.52F, GALLOP_CHEST = -0.22F, GALLOP_GAZE = 0.10F;
@@ -107,7 +111,12 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     @Override
     public void setupAnim(S state) {
         resetPose();
+        // The driver models carry a plain arm lift; the Modern strikes below replace it. Held items
+        // keep their native swing, so reach and spear thrusts stay what the item's animation says.
+        float swing = state.attackTime;
+        state.attackTime = 0;
         driver.setupAnim(state);
+        state.attackTime = swing;
         for (Binding binding : bindings) {
             ModelPart source = binding.source();
             ModelPart target = binding.target();
@@ -134,6 +143,10 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
             }
             applyBeastRun(state, motion.beastRunAmount(), motion.beastLeapAmount());
         }
+        var strike = WerewolfRenderData.get(state).strike();
+        if (strike.previousTime() > 0) applyStrike(state, strike.previousTime(), strike.previousLeadRight(), strike.previousIndex(), strike.dig());
+        if (strike.time() > 0) applyStrike(state, strike.time(), strike.leadRight(), strike.index(), strike.dig());
+        layElbowFur();
         animateTail(state);
     }
 
@@ -151,6 +164,174 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
         rig.bone("body").yRot = nativeHands.body.yRot;
         rig.bone("body_upper").yRot = rig.bone("body_upper").getInitialPose().yRot();
+    }
+
+    /** Each form fights its own way. */
+    private void applyStrike(S state, float time, boolean leadRight, int index, boolean dig) {
+        if (state.isUsingItem || state.isFallFlying || state.isVisuallySwimming) return;
+        float power = dig ? 0.55F : 1;
+        switch (form) {
+            case QUADRUPED -> applyBite(state, time, leadRight, index, power);
+            case BEAST -> {
+                var motion = WerewolfRenderData.get(state);
+                boolean onFours = !blockedQuadruped(state) && (motion.beastRunAmount() > 0 || motion.beastProwlAmount() > 0);
+                if (onFours) applyPounce(time, leadRight, power);
+                else applyMaul(state, time, leadRight, index, power);
+            }
+            default -> applyRake(state, time, leadRight, power);
+        }
+    }
+
+    private boolean holds(S state, boolean right) {
+        return !(right ? state.rightHandItemStack : state.leftHandItemStack).isEmpty();
+    }
+
+    /**
+     * The Werewolf is quick: the right claw rakes across the body and the left follows it home.
+     * With a weapon in hand the free claw only follows through, and a full off-hand stays out of it.
+     */
+    private void applyRake(S state, float t, boolean leadRight, float power) {
+        float leadUp = beat(t, 0.14F, 0.12F, 0.28F), leadDown = reach(t, 0.12F, 0.28F, 0.38F, 0.74F);
+        float later = t - RAKE_FOLLOW;
+        float followUp = beat(later, 0.14F, 0.12F, 0.28F), followDown = reach(later, 0.12F, 0.28F, 0.38F, 0.74F);
+        boolean leadHolds = holds(state, leadRight), followHolds = holds(state, !leadRight);
+        float follow = followHolds ? 0 : leadHolds ? 0.45F : 0.88F;
+        if (!leadHolds) swingClaw(leadRight, leadUp, leadDown, power);
+        if (follow > 0) swingClaw(!leadRight, followUp, followDown, follow * power);
+        else rig.bone(leadRight ? "leftArm" : "rightArm").xRot += (0.42F * leadDown - 0.2F * leadUp) * power;
+        float side = leadRight ? 1 : -1;
+        // The torso rocks with each claw in turn.
+        float twist = side * (STRIKE_TURN_BACK * leadUp - STRIKE_TURN_IN * leadDown) - side * follow * (STRIKE_TURN_BACK * followUp - STRIKE_TURN_IN * followDown);
+        ModelPart upper = rig.bone("body_upper");
+        upper.yRot += twist * power;
+        rig.bone("head").yRot -= twist * 0.7F * power;
+        float drive = Math.max(leadDown, followDown * follow);
+        upper.xRot += (-0.10F * leadUp + 0.20F * drive) * power;
+        rig.bone("jaw").xRot -= 0.34F * drive;
+        root.z -= STRIKE_LUNGE * drive * power;
+    }
+
+    private void swingClaw(boolean right, float up, float down, float power) {
+        float side = right ? 1 : -1;
+        ModelPart limb = rig.bone(right ? "rightArm" : "leftArm");
+        ModelPart forearm = rig.bone(right ? "right_forearn" : "left_forearn");
+        limb.xRot += (-STRIKE_RAISE * up - STRIKE_REACH * down) * power;
+        limb.yRot += side * (0.32F * up - 0.62F * down) * power;
+        limb.zRot += side * (0.42F * up - 0.18F * down) * power;
+        forearm.xRot += (-0.95F * up - 0.12F * down) * power;
+    }
+
+    /**
+     * The Beast is heavy, and each blow takes the whole body. A chain opens with both arms crashing
+     * down from overhead, then answers with a wide scything sweep. With something in either hand
+     * the free arm strikes alone while the body still drives the blow.
+     */
+    private void applyMaul(S state, float t, boolean leadRight, int index, float power) {
+        float up = beat(t, 0.20F, 0.18F, 0.32F), down = reach(t, 0.18F, 0.32F, 0.46F, 0.92F);
+        boolean leadHolds = holds(state, leadRight), otherHolds = holds(state, !leadRight);
+        boolean both = !leadHolds && !otherHolds;
+        boolean sweep = index % 2 == 1;
+        for (boolean right : both ? new boolean[]{true, false} : leadHolds ? new boolean[0] : new boolean[]{leadRight}) {
+            float side = right ? 1 : -1;
+            ModelPart limb = rig.bone(right ? "rightArm" : "leftArm");
+            ModelPart forearm = rig.bone(right ? "right_forearn" : "left_forearn");
+            if (sweep) {
+                limb.xRot += (-1.35F * up - 1.50F * down) * power;
+                limb.yRot += side * (0.95F * up - 0.85F * down) * power;
+                limb.zRot += side * (0.90F * up - 0.10F * down) * power;
+                forearm.xRot += (-0.55F * up - 0.25F * down) * power;
+            } else {
+                limb.xRot += (-2.55F * up - 1.35F * down) * power;
+                limb.zRot += side * (0.35F * up - 0.12F * down) * power;
+                forearm.xRot += (-1.10F * up - 0.35F * down) * power;
+            }
+        }
+        if (!both) rig.bone(leadRight ? "leftArm" : "rightArm").xRot += (0.30F * down - 0.15F * up) * power;
+        ModelPart upper = rig.bone("body_upper");
+        float side = leadRight ? 1 : -1;
+        upper.xRot += (-0.28F * up + 0.55F * down) * power;
+        if (sweep) upper.yRot += side * (0.34F * up - 0.40F * down) * power;
+        rig.bone("waist").xRot += 0.18F * down * power;
+        // The eyes stay on the target as the torso folds over it.
+        rig.bone("head").xRot += (0.14F * up - 0.42F * down) * power;
+        rig.bone("jaw").xRot -= (0.15F * up + 0.55F * down);
+        root.y += (-0.8F * up + 1.6F * down) * power;
+        root.z += (0.8F * up - BEAST_LUNGE * down) * power;
+    }
+
+    /** On all fours the Beast rakes with one forepaw and drives its jaws in behind it. */
+    private void applyPounce(float t, boolean leadRight, float power) {
+        float up = beat(t, 0.18F, 0.16F, 0.30F), down = reach(t, 0.16F, 0.30F, 0.44F, 0.88F);
+        float side = leadRight ? 1 : -1;
+        ModelPart limb = rig.bone(leadRight ? "rightArmRotation" : "leftArmRotation");
+        ModelPart forearm = rig.bone(leadRight ? "right_forearn" : "left_forearn");
+        limb.xRot += (-1.10F * up - 0.55F * down) * power;
+        limb.yRot += side * (0.20F * up - 0.35F * down) * power;
+        forearm.xRot += (-0.60F * up - 0.08F * down) * power;
+        ModelPart upper = rig.bone("body_upper");
+        upper.xRot += (-0.16F * up + 0.10F * down) * power;
+        upper.yRot += side * (0.14F * up - 0.20F * down) * power;
+        rig.bone("head").xRot += (-0.10F * up + 0.26F * down) * power;
+        rig.bone("jaw").xRot -= 0.50F * down;
+        root.z -= STRIKE_LUNGE * 2 * down * power;
+    }
+
+    /**
+     * The wolf strikes with its teeth: it gathers, lunges and snaps shut. A chain follows up with a
+     * tearing twist of the head while a forepaw pins the prey.
+     */
+    private void applyBite(S state, float t, boolean leadRight, int index, float power) {
+        float up = beat(t, 0.20F, 0.16F, 0.30F), down = reach(t, 0.16F, 0.30F, 0.42F, 0.85F);
+        float side = leadRight ? 1 : -1;
+        ModelPart head = rig.bone("head");
+        boolean tear = index % 2 == 1;
+        head.xRot += (-0.42F * up + (tear ? 0.22F : 0.40F) * down) * power;
+        if (tear) {
+            head.yRot += side * (-0.30F * up + 0.55F * down) * power;
+            head.zRot += side * 0.30F * down * Mth.sin(t * Mth.TWO_PI * 3) * power;
+        }
+        rig.bone("jaw").xRot -= 0.62F * (up + down * Mth.sqrt(1 - down));
+        root.z -= (tear ? BITE_LUNGE * 0.7F : BITE_LUNGE) * down * power;
+        root.y += (1.1F * down - 0.8F * up) * power;
+        rig.bone(leadRight ? "front_RightLeg" : "front_LeftLeg").xRot += (-0.75F * up - 0.35F * down) * power;
+        rig.bone("rightLeg").xRot += 0.32F * down * power;
+        rig.bone("leftLeg").xRot += 0.32F * down * power;
+    }
+
+    private static float beat(float t, float rise, float fallStart, float fallEnd) {
+        return smooth(t / rise) * (1 - smooth((t - fallStart) / (fallEnd - fallStart)));
+    }
+
+    private static float reach(float t, float whipStart, float whipEnd, float settleStart, float settleEnd) {
+        return smooth((t - whipStart) / (whipEnd - whipStart)) * (1 - smooth((t - settleStart) / (settleEnd - settleStart)));
+    }
+
+    private static float smooth(float value) {
+        float clamped = Mth.clamp(value, 0, 1);
+        return clamped * clamped * (3 - 2 * clamped);
+    }
+
+    /**
+     * The elbow tuft is modelled on the forearm. Undoing half of the bend lets it sweep out of the
+     * joint between the two arm bones, instead of jutting out in line with the folded forearm.
+     */
+    private void layElbowFur() {
+        for (String bone : FOREARMS) {
+            ModelPart forearm = rig.bones().get(bone);
+            List<ModelPart> tufts = rig.flats().get(bone);
+            if (forearm == null || tufts == null) continue;
+            float bend = forearm.xRot - forearm.getInitialPose().xRot();
+            if (Math.abs(bend) < 0.001F) continue;
+            for (ModelPart tuft : tufts) {
+                var rest = tuft.getInitialPose();
+                Vector3f euler = new Quaternionf().rotationX(-bend * ELBOW_FUR_LAY)
+                        .mul(new Quaternionf().rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()))
+                        .getEulerAnglesZYX(new Vector3f());
+                tuft.xRot = euler.x;
+                tuft.yRot = euler.y;
+                tuft.zRot = euler.z;
+            }
+        }
     }
 
     private void animateTail(S state) {
@@ -219,14 +400,6 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         limbGallop("left_paw", leftPawContact, FORE_LEFT, "leftArmRotation", cycle, BeastGait.FORE_TRAIL, reach, true, amount, speed, leap);
         limbGallop("right_foot_lower", rightFootContact, HIND_RIGHT, "rightLeg", cycle, BeastGait.HIND_LEAD, reach, false, amount, speed, leap);
         limbGallop("left_foot_lower", leftFootContact, HIND_LEFT, "leftLeg", cycle, BeastGait.HIND_TRAIL, reach, false, amount, speed, leap);
-        if (state.attackTime > 0) {
-            // A running attack lifts the attacking paw; the other three limbs keep their gait.
-            float eased = 1 - (float) Math.pow(1 - state.attackTime, 4);
-            float swipe = Mth.sin(eased * Mth.PI) * amount;
-            boolean right = state.attackArm == HumanoidArm.RIGHT;
-            rig.bone(right ? "rightArmRotation" : "leftArmRotation").xRot -= swipe * 0.9F;
-            rig.bone(right ? "right_forearn" : "left_forearn").xRot -= swipe * 0.25F;
-        }
     }
 
     private void limbGallop(String paw, Vector3f contact, String[] joints, String anchor, float cycle, float start,

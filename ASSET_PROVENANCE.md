@@ -232,3 +232,8 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 - The maintainer identified the Modern model/texture artist as thewolfulti and the Classic artist as R_Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
 - The public/runtime family name is Modern, with `modern` used for IDs, resource paths and skin-pack model fields.
 - Modern Ashen is used for the Alpha and its summoned pack, while wild/spawn-egg werewolf palettes are selected by the server and saved. The server NPC model setting can switch all of these to Classic Adrian.
+
+## 1.3.0 progression screen textures
+
+- `assets/howlingwerewolf/textures/gui/moon/` holds `moon.png`, `moon_phase.png`, `soft.png`, `disc.png` and `ring.png`. All five are original procedural images generated for this project with a deterministic NumPy script: value noise, Gaussian shading and analytic disc, ring and phase shapes. They use no reference images or third-party art. The script is retained locally as authoring material.
+- The layout of the screen takes its broad idea, a world-hiding canvas with options floating around the player, from the public description of the Shooting Star mod. No code, images or other assets from that mod were used.

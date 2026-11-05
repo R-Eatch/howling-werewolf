@@ -17,10 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/** A fitting room: every coat is one click away, and nothing changes on the companion until applied. */
+/** A fitting room: every coat is one click away, and the companion changes only when you apply it. */
 public final class CompanionCustomizeScreen extends CompanionFrameScreen {
     private static final String KEY = "screen.howlingwerewolf.companion.";
-    private static final int STAGE_X = 10, STAGE_W = 170, SIDE_X = 190, SIDE_W = 270;
+    private static final int MOON_X = 124, MOON_RADIUS = 96, SIDE_X = 250, SIDE_W = 258, ACTION_W = 130;
     private final List<UiButton> coats = new ArrayList<>();
     private final List<String> coatIds = new ArrayList<>();
     private EditBox name;
@@ -38,6 +38,7 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
         model = snapshot.getStringOr("Model", "modern");
     }
     @Override protected Tab tab() { return Tab.LOOK; }
+    @Override protected int actionsWidth() { return ACTION_W + 10; }
     @Override protected void onSnapshot(CompoundTag previous) {
         String nextModel = snapshot.getStringOr("Model", model);
         if (!nextModel.equals(model)) {
@@ -51,13 +52,16 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
     @Override protected void build(int left, int top) {
         previewActive = true;
         coats.clear(); coatIds.clear();
-        preview.bounds(left + STAGE_X, top + BODY_TOP + 4, STAGE_W, 242);
-        name = addRenderableWidget(new EditBox(font, left + SIDE_X + 5, top + 58, SIDE_W - 92, 12, Component.translatable(KEY + "name")));
+        int moonY = top + (TOP_BAND + HEIGHT - LOWER_BAND) / 2;
+        preview.stage(left + MOON_X, moonY, MOON_RADIUS, left + 6, top + TOP_BAND, left + SIDE_X - 6, top + HEIGHT - LOWER_BAND);
+        int x = left + SIDE_X;
+        name = addRenderableWidget(new EditBox(font, x + 2, top + 49, SIDE_W - 84, 12, Component.translatable(KEY + "name")));
         name.setBordered(false);
+        name.setTextShadow(false);
         name.setMaxLength(64);
         name.setValue(pendingName);
         name.setResponder(value -> pendingName = value);
-        saveName = addRenderableWidget(new UiButton(left + SIDE_X + SIDE_W - 72, top + 52, 72, 20, Component.translatable(KEY + "save_name"), Look.SOFT,
+        saveName = addRenderableWidget(new UiButton(x + SIDE_W - 72, top + 44, 72, 18, Component.translatable(KEY + "save_name"), Look.SOFT,
                 () -> request(CompanionActionPacket.Action.RENAME, name.getValue())));
         ListTag skins = snapshot.getListOrEmpty("Skins");
         int columns = 3, gap = 4, chipW = (SIDE_W - gap * (columns - 1)) / columns;
@@ -65,11 +69,11 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
             CompoundTag skin = skins.getCompoundOrEmpty(i);
             String id = skin.getStringOr("Id", "");
             coatIds.add(id);
-            UiButton chip = new UiButton(left + SIDE_X + i % columns * (chipW + gap), top + 116 + i / columns * 24, chipW, 21,
+            UiButton chip = new UiButton(x + i % columns * (chipW + gap), top + 112 + i / columns * 26, chipW, 22,
                     Component.literal(skin.getStringOr("Name", "")), Look.CHIP, () -> { pendingSkin = id; refreshControls(); });
             coats.add(addRenderableWidget(chip));
         }
-        applySkin = addRenderableWidget(new UiButton(left + SIDE_X, top + 256, SIDE_W, 24, Component.translatable(KEY + "apply_skin"), Look.PRIMARY,
+        applySkin = addRenderableWidget(new UiButton(left + WIDTH - 12 - ACTION_W, top + HEIGHT - LOWER_BAND + 10, ACTION_W, 26, Component.translatable(KEY + "apply_skin"), Look.PRIMARY,
                 () -> request(CompanionActionPacket.Action.SKIN, pendingSkin)));
     }
     private void request(CompanionActionPacket.Action action, String value) {
@@ -88,22 +92,25 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
         saveName.active = editable && actionDelay == 0 && !name.getValue().equals(record.getStringOr("CustomName", ""));
         applySkin.active = editable && actionDelay == 0 && !pendingSkin.equals(record.getStringOr("Skin", ""));
         name.setEditable(editable);
-        name.setTextColor(CompanionUi.TEXT);
+        name.setTextColor(MoonUi.theme().ink());
         for (int i = 0; i < coats.size(); i++) {
             coats.get(i).active = editable;
             coats.get(i).selected(coatIds.get(i).equals(pendingSkin));
         }
     }
-    @Override protected void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+    @Override protected Focus focus() {
+        return new Focus(null, Component.translatable(KEY + "skin_hint"));
+    }
+    @Override protected void body(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
         if (selectedRecord() == null) return;
-        preview.render(graphics, model, pendingSkin, scale, mouseX, mouseY);
+        int moonY = top + (TOP_BAND + HEIGHT - LOWER_BAND) / 2;
+        MoonUi.glow(graphics, left + MOON_X, moonY, MOON_RADIUS * 1.6F, theme.bloom());
+        preview.render(graphics, model, pendingSkin, scale, mouseX, mouseY, theme);
         int x = left + SIDE_X;
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "name"), x, top + BODY_TOP + 6, SIDE_W);
-        CompanionUi.card(graphics, x, top + 52, SIDE_W - 78, 20, CompanionUi.SURFACE, CompanionUi.LINE);
-        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + "name_hint"), x, top + 76, SIDE_W, CompanionUi.FAINT, 1);
-        CompanionUi.section(graphics, font, Component.translatable(KEY + "skin").append(" · " + (model.equals("modern") ? "Modern" : "Classic")), x, top + 102, SIDE_W);
-        int rows = (coats.size() + 2) / 3;
-        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + "skin_hint"), x, top + 116 + rows * 24 + 2, SIDE_W, CompanionUi.FAINT, 2);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "name"), x, top + 32, SIDE_W, theme);
+        graphics.fill(x, top + 62, x + SIDE_W - 80, top + 63, name != null && name.isFocused() ? theme.accent() : theme.line());
+        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + "name_hint"), x, top + 68, SIDE_W, theme.faint(), 1);
+        CompanionUi.section(graphics, font, Component.translatable(KEY + "skin").append(" · " + (model.equals("modern") ? "Modern" : "Classic")), x, top + 96, SIDE_W, theme);
     }
     @Override protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) {
         return preview.contains(mouseX, mouseY) ? Component.translatable(KEY + "preview_hint") : null;

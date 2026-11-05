@@ -4,30 +4,42 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.client.CompanionUi.Look;
 import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.companion.CompanionMode;
-import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** The shared window: one frame and tab bar, so moving between companion pages keeps its place. */
+/**
+ * The companion window is opened far more often than the progression screen, so it speaks the same
+ * language in a lighter form: a sheet over the world that keeps the game in view and opens at once.
+ * The tabs sit in its upper band, and the lower band reads out whatever the pointer rests on.
+ */
 abstract class CompanionFrameScreen extends Screen {
-    protected static final int WIDTH = 470, HEIGHT = 290, BODY_TOP = 34;
+    protected static final int WIDTH = 520, HEIGHT = 306, TOP_BAND = 26, LOWER_BAND = 46;
+    private static final int TITLE_ROOM = 136, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     enum Tab { PACK, SORT, LOOK, GUIDE }
     /** Where the tab underline last rested, so it glides to the next page instead of jumping. */
-    private static float underlineX = -1;
+    private static float underlineX = -1, underlineWidth;
+    /** Switching tabs replaces the screen; only a window that was closed rises into place. */
+    private static long lastDrawn;
+
+    /** What the lower band shows when the pointer rests on nothing in particular. */
+    protected record Focus(@Nullable Component heading, @Nullable Component body) {}
 
     protected final Screen parent;
     protected CompoundTag snapshot;
@@ -36,6 +48,7 @@ abstract class CompanionFrameScreen extends Screen {
     protected final CompanionPreview preview = new CompanionPreview();
     protected boolean previewActive;
     private final Map<Tab, UiButton> tabs = new EnumMap<>(Tab.class);
+    private final long opened = Util.getMillis() - lastDrawn < 250 ? 0 : Util.getMillis();
     private int refreshTicks;
     private long lastFrame = Util.getMillis();
 
@@ -49,13 +62,16 @@ abstract class CompanionFrameScreen extends Screen {
 
     protected abstract Tab tab();
     protected abstract void build(int left, int top);
-    protected abstract void body(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY);
-    /** Drawn above the controls, for text that sits on card buttons. */
-    protected void overlay(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {}
+    protected abstract void body(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY);
+    /** Drawn above the controls, for text that sits beside a row. */
+    protected void overlay(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {}
     protected void refreshControls() {}
     protected void onSnapshot(CompoundTag previous) {}
     /** A hint for something drawn directly rather than a button. */
     protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) { return null; }
+    protected abstract Focus focus();
+    /** How much of the lower band's right side this page's actions take. */
+    protected abstract int actionsWidth();
 
     /** Packets from the server land here for whichever page is open. */
     final void receive(CompoundTag next, boolean open) {
@@ -120,18 +136,20 @@ abstract class CompanionFrameScreen extends Screen {
     @Override protected final void init() {
         clearWidgets();
         tabs.clear();
-        scale = Math.max(0.1F, Math.min(1, Math.min((width - 8F) / WIDTH, (height - 8F) / HEIGHT)));
+        float fit = Math.min((width - 8F) / WIDTH, (height - 8F) / HEIGHT);
+        scale = fit < 1 ? Math.max(0.1F, fit) : Math.max(1, (int) Math.min((float) width / COMFORT_WIDTH, (float) height / COMFORT_HEIGHT));
         int left = left(), top = top();
-        int x = left + 92;
+        int x = left + TITLE_ROOM;
         for (Tab each : Tab.values()) {
             Component label = Component.translatable("screen.howlingwerewolf.companion.tab." + each.name().toLowerCase(java.util.Locale.ROOT));
-            int tabWidth = Math.clamp(font.width(label) + 20, 52, 84);
-            UiButton button = new UiButton(x, top + 7, tabWidth, 20, label, Look.TAB, () -> openTab(each));
+            int tabWidth = Math.clamp(font.width(label) + 16, 40, 76);
+            UiButton button = new UiButton(x, top + 3, tabWidth, 20, label, Look.TAB, () -> openTab(each));
             button.selected(each == tab());
             tabs.put(each, addRenderableWidget(button));
-            x += tabWidth + 2;
+            x += tabWidth;
         }
-        addRenderableWidget(new UiButton(left + WIDTH - 26, top + 7, 20, 20, Component.literal("×"), Look.TAB, this::onClose)
+        addRenderableWidget(new MoonUi.ThemeToggle(left + WIDTH - 40, top + 6, this::rebuildWidgets));
+        addRenderableWidget(new UiButton(left + WIDTH - 22, top + 5, 14, 16, Component.literal("×"), Look.TAB, this::onClose)
                 .hint(() -> Component.translatable("gui.done")));
         build(left, top);
         updateTabs();
@@ -159,37 +177,83 @@ abstract class CompanionFrameScreen extends Screen {
     }
 
     @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractTransparentBackground(graphics);
+        long now = Util.getMillis();
+        lastDrawn = now;
+        float rise = MoonUi.smooth((now - opened) / 120F);
+        graphics.fillGradient(0, 0, width, height, MoonUi.alpha(0x66060509, rise), MoonUi.alpha(0x99060509, rise));
         float logicalX = mouseX / scale, logicalY = mouseY / scale;
         int left = left(), top = top();
+        MoonUi.Theme theme = MoonUi.theme();
         graphics.pose().pushMatrix();
         try {
             graphics.pose().scale(scale, scale);
-            CompanionUi.card(graphics, left, top, WIDTH, HEIGHT, CompanionUi.PANEL, CompanionUi.LINE);
-            graphics.fill(left + 1, top + 29, left + WIDTH - 1, top + 30, CompanionUi.LINE);
-            graphics.item(new ItemStack(ModItems.MOONBANE_PEARL.get()), left + 8, top + 7);
-            CompanionUi.label(graphics, font, Component.translatable("screen.howlingwerewolf.companions"), left + 28, top + 13, 60, CompanionUi.MOON);
+            graphics.pose().translate(0, (1 - rise) * 6);
+            MoonUi.pool(graphics, left + WIDTH / 2F, top + HEIGHT / 2F + 5, WIDTH * 0.66F, HEIGHT * 0.70F, 0x60000000);
+            MoonUi.round(graphics, left, top, WIDTH, HEIGHT, 8, MoonUi.BAND);
+            int canvasBottom = top + HEIGHT - LOWER_BAND;
+            graphics.fillGradient(left, top + TOP_BAND, left + WIDTH, canvasBottom, theme.top(), theme.bottom());
+            body(graphics, theme, left, top, logicalX, logicalY);
+            Component heading = Component.translatable("screen.howlingwerewolf.companions");
+            if (font.width(heading) * 2 <= TITLE_ROOM - 18) MoonUi.large(graphics, font, heading, left + 12, top + 5, 2, MoonUi.BAND_TEXT);
+            else CompanionUi.label(graphics, font, heading, left + 12, top + 9, TITLE_ROOM - 18, MoonUi.BAND_TEXT);
             drawUnderline(graphics, top);
-            body(graphics, left, top, logicalX, logicalY);
+            drawFocus(graphics, left, top, logicalX, logicalY);
             super.extractRenderState(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
-            overlay(graphics, left, top, logicalX, logicalY);
-            Component hint = null;
-            for (var child : children()) {
-                if (child instanceof UiButton button && button.visible && button.isHovered()) hint = button.hintText();
-            }
-            if (hint == null) hint = areaHint(left, top, logicalX, logicalY);
-            if (hint != null) graphics.setTooltipForNextFrame(font, font.split(hint, 210), mouseX, mouseY);
+            overlay(graphics, theme, left, top, logicalX, logicalY);
         } finally { graphics.pose().popMatrix(); }
     }
     private void drawUnderline(GuiGraphicsExtractor graphics, int top) {
         UiButton active = tabs.get(tab());
         if (active == null) return;
         long now = Util.getMillis();
-        float blend = Math.min(1, (now - lastFrame) / 70F);
+        float blend = 1 - (float) Math.exp(-Math.min(now - lastFrame, 100) / 60F);
         lastFrame = now;
-        float goal = active.getX() + 10;
-        underlineX = underlineX < 0 ? goal : Mth.lerp(blend, underlineX, goal);
-        graphics.fill(Math.round(underlineX), top + 27, Math.round(underlineX) + active.getWidth() - 20, top + 29, CompanionUi.MOON);
+        float goalX = active.getX() + 8, goalWidth = active.getWidth() - 16;
+        underlineX = underlineX < 0 ? goalX : Mth.lerp(blend, underlineX, goalX);
+        underlineWidth = underlineWidth <= 0 ? goalWidth : Mth.lerp(blend, underlineWidth, goalWidth);
+        graphics.fill(Math.round(underlineX), top + 21, Math.round(underlineX + underlineWidth), top + 23, MoonUi.BLOOD);
+    }
+    /** The pointer's subject first, then the page's own resting text. */
+    private void drawFocus(GuiGraphicsExtractor graphics, int left, int top, float mouseX, float mouseY) {
+        Component heading = null, body = null;
+        for (var child : children()) {
+            if (child instanceof UiButton button && button.visible && button.isMouseOver(mouseX, mouseY)) {
+                Component hint = button.hintText();
+                if (hint != null) {
+                    boolean named = !button.getMessage().getString().isEmpty() && button.look() != Look.TAB;
+                    heading = named ? button.getMessage() : null;
+                    body = hint;
+                }
+            } else if (child instanceof MoonUi.ThemeToggle toggle && toggle.isMouseOver(mouseX, mouseY)) {
+                body = toggle.getMessage();
+            }
+        }
+        if (body == null) body = areaHint(left, top, mouseX, mouseY);
+        if (body == null) {
+            Focus resting = focus();
+            heading = resting.heading();
+            body = resting.body();
+        }
+        int room = WIDTH - 24 - actionsWidth(), y = top + HEIGHT - LOWER_BAND + 6;
+        if (heading != null) {
+            CompanionUi.label(graphics, font, heading, left + 12, y, room, MoonUi.BAND_TEXT);
+            y += 11;
+        }
+        if (body != null) CompanionUi.wrapped(graphics, font, body, left + 12, y, room, MoonUi.BAND_SUB, heading != null ? 2 : 3);
+    }
+    /** Draws lines that dissolve at whichever edge has more text beyond it. */
+    protected final void reading(GuiGraphicsExtractor graphics, List<FormattedCharSequence> lines, int x, int width, int top, int bottom, float offset, int maximum, int color) {
+        graphics.enableScissor(x, top, x + width, bottom);
+        try {
+            for (int i = 0; i < lines.size(); i++) {
+                int y = top + i * 11 - Math.round(offset);
+                if (y + 10 <= top || y >= bottom) continue;
+                float fade = 1;
+                if (offset > 1) fade = Math.min(fade, (y - top + 2) / 12F);
+                if (offset < maximum - 1) fade = Math.min(fade, (bottom - y - 8) / 12F);
+                graphics.text(font, lines.get(i), x, y, MoonUi.alpha(color, Mth.clamp(fade, 0, 1)), false);
+            }
+        } finally { graphics.disableScissor(); }
     }
     @Override public void extractBackground(GuiGraphicsExtractor graphics, int x, int y, float partialTick) {}
 
@@ -209,6 +273,11 @@ abstract class CompanionFrameScreen extends Screen {
     }
     @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
         return previewActive && preview.scroll(x / scale, y / scale, dy) || super.mouseScrolled(x / scale, y / scale, dx, dy);
+    }
+    /** The key that opens this window also closes it, unless a name is being typed. */
+    @Override public boolean keyPressed(KeyEvent event) {
+        if (!(getFocused() instanceof EditBox) && ClientModEvents.OPEN_COMPANIONS.matches(event)) { onClose(); return true; }
+        return super.keyPressed(event);
     }
     @Override public void onClose() { minecraft.setScreen(parent); }
     @Override public boolean isPauseScreen() { return false; }

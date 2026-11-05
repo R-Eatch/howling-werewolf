@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.7-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.0-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -17,21 +17,37 @@
 
 > This branch contains the NeoForge edition for Minecraft 26.1.2. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
-Howling Werewolf **1.2.7** makes companions do the sorting by hand: start the job and yours walks to each chest or barrel within 16 blocks, opens the lid and carries items across, with no containers to register. The companion screens are rebuilt around four tabs with a live storage radar, the guide is rewritten, the Modern Beast gallops like a wolf and drops to all fours when crouching, companions now swing when they attack, and `/werewolf unlockalpha` unlocks Alpha in one command. See the [1.2.7 guide](docs/COMPANIONS-1.2.7.md) ([简体中文](docs/COMPANIONS-1.2.7-zh.md)).
+Howling Werewolf is an independently developed transformation and progression mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, the Alpha Trial and a pack of companions.
 
-Howling Werewolf **1.2.6** added companion **Sort**: register allowed chests or barrels, merge partial stacks and optionally consolidate matching items. Servers can disable sorting independently. Modern models now emit their final authored UV polygons directly; the Beast sprint uses paired forelimbs followed by the hind pair. See the [1.2.6 guide](docs/COMPANIONS-1.2.6.md) ([简体中文](docs/COMPANIONS-1.2.6-zh.md)).
+## What's new in 1.3.0
 
-Howling Werewolf **1.2.5** improves companion controls: **C** opens the overview, right-click opens an individual page with an appearance preview, and sneak-right-click retains direct access to the nine-slot inventory. The guide covers rituals, recruitment, commands, upgrades and revival. Owners can customize their title; companion dialogue is private to its owner. Following companions reject hostile target acquisition and never retaliate. See the [1.2.5 companion guide](docs/COMPANIONS-1.2.5-zh.md), [loot and trade tables](docs/COMPANION-TABLES-1.2.4.md), and [implementation provenance](docs/COMPANION-PROVENANCE.md).
+- **A new progression screen.** Press **K** and the world falls away to moonlight: your own form stands before tonight's moon, ringed by experience, with your skills floating around you. A crescent at the top right switches between the white **Moonlight** canvas and the dark **Nightfall** canvas. The Skins and Reset screens match it.
+- **A new companion window.** The same look in a lighter form: a panel floating over the game that opens at once, with orders on number keys and a dark band that explains whatever the pointer rests on. Hunts now show a progress bar.
+- **Attacks with weight and rhythm.** With both hands free, the Werewolf rakes with the right claw and then the left. The Beast smashes down with both arms, then answers with a wide sweep. The Quadruped lunges and bites, then tears. Each form has its own timing, chained blows trade the lead, and first-person view shows both claws. Companions fight the same way.
+- **Item frames direct sorting.** Hang a filled item frame on a chest or barrel and it keeps only that item: matching items come in and everything else moves out.
+- **Trapped chests and shulker boxes stay yours.** Sorting passes over them, so they make a safe place for anything you want left as it is.
+- **Companions speak in an older voice.** Every merchant and companion line is rewritten in both languages, with new lines for sorting. See the [dialogue catalog](docs/COMPANION-DIALOGUE.md).
+- **Elbow fur fix.** The fur on the forearm now lies along the arm when it folds in a crouch, gallop or strike.
 
-The 1.2.3 framework retains altar merchants, badge-confirmed recruitment, nine-slot inventories, follow/guard/rest/hunt, cross-dimension recall, upgrades, revival, names and skins. Owner UUID records persist independently of live entities; models follow the world NPC setting. See the [1.2.3 framework guide (Chinese)](docs/COMPANIONS-1.2.3-zh.md).
+## Earlier versions
 
-Howling Werewolf **1.2.2** moves Modern hand-held items slightly below the palm center and raises the Quadruped mouth item into the bite line. The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
+- **1.2.7**: companions walk to containers and sort by hand; four-tab companion window; wolf-like Beast gallop; `/werewolf unlockalpha`.
+- **1.2.6**: companion Sort order and Modern UV submission rework.
+- **1.2.5**: **C** opens the companion window, right-click opens a companion, custom address, private dialogue.
+- **1.2.3–1.2.4**: the companion system: altar merchants, badge-confirmed recruiting, nine-slot inventories, follow, guard, rest and hunt, cross-dimension recall, upgrades, revival, names and coats.
+- **1.2.2**: Modern hand-held item anchors and the **Classic — By R_Eatch / Modern — By thewolfulti** credits. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
+- **1.1.8**: fixed-height Auto Step: 1.0 block for Quadruped, 1.5 for Werewolf, 2.0 for Beast. `gameplay.enableWerewolfAutoStep` defaults to `true`.
 
-Howling Werewolf 1.1.8 adds fixed-height Auto Step: **1.0 block** for Quadruped Wolf, **1.5 blocks** for Werewolf, and **2.0 blocks** for Beast. In `config/howlingwerewolf-common.toml`, `gameplay.enableWerewolfAutoStep` defaults to `true`; set it to `false` to restore normal stepping. Manual jumping retains its existing skill and form rules. The 1.1.7 Fire Claws cooked-loot fix, Alpha combat timing and 16×16 item/block textures are retained.
+## Documentation
 
-This build retains the NeoForge 1.21.1 Long Claws splash formula, including Moonrend in normal-form splash damage. Long Claws secondary hits still do not trigger Lifesteal.
-
-Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
+| Guide | Contents |
+|---|---|
+| [Companion guide](docs/COMPANIONS.md) ([简体中文](docs/COMPANIONS-zh.md)) | Summoning, recruiting, orders, sorting, hunting, settings |
+| [Hunt and trade tables](docs/COMPANION-TABLES.md) ([简体中文](docs/COMPANION-TABLES-zh.md)) | Every hunt entry, tier factor and merchant trade |
+| [Dialogue catalog](docs/COMPANION-DIALOGUE.md) | Every merchant and companion line in both languages |
+| [Custom skins](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)) | Painting templates and skin resource packs |
+| [Administrator commands](ADMIN_COMMANDS.md) ([简体中文](ADMIN_COMMANDS-zh.md)) | `/werewolf` for testers and server operators |
+| [Architecture provenance](docs/COMPANION-PROVENANCE.md) | What the companion system drew on and how it differs |
 
 ## Requirements
 
@@ -40,18 +56,18 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.2.7 (Hands-on sorting, new companion screens) |
+| Howling Werewolf | 1.3.0 |
 
 ## Werewolf skins
 
 - Open the werewolf menu with **K** by default → **Skins**. Switch **Classic / Modern** in the upper-right corner, then select **Apply** to save. Classic retains Adrian, Ashen, Onyx and Ivory. Modern includes Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods. Each coat covers all three forms.
 - New players default to **Modern / Ashen**. Existing Classic choices are preserved when upgrading.
-- Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is below the skill list on the Skill Tree page.
+- Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is in the lower band of the Skill Tree page.
 - Modern camera height follows standing, crouching and quadrupedal sprinting. Weapons retain native size and palm anchors; armor and elytra follow the imported bones under the existing equipment rules.
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.2.7** (protocol 17). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.3.0** (protocol 18). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -67,11 +83,11 @@ npcModelSet = "modern"
 - Merchants and companions follow this model setting too. Merchants choose random coats; recruited companions support renaming and skin selection, remembering separate Classic and Modern choices.
 - Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
 
-Merchants stay **10 minutes** and announce this when summoned. A Moonbane Pearl costs either **6 Wolfsbane + 1 Diamond** or **12 Emeralds + 4 Wolfsbane**. See the [complete dialogue catalog](docs/COMPANION-DIALOGUE-1.2.4-zh.md).
+Merchants stay **10 minutes** and announce this when summoned. A Moonbane Pearl costs either **6 Wolfsbane + 1 Diamond** or **12 Emeralds + 4 Wolfsbane**. See the [dialogue catalog](docs/COMPANION-DIALOGUE.md).
 
-## Companion setting and controls
+## Companion settings and controls
 
-Press **C** to manage companions, remappable in Controls. The K-menu shortcut sits directly above Skill Tree. In the server's `config/howlingwerewolf-common.toml`:
+Press **C** to manage companions, remappable in Controls; **Pack** at the top of the K screen leads there too. In the server's `config/howlingwerewolf-common.toml`:
 
 ```toml
 [gameplay]
@@ -79,9 +95,9 @@ enableCompanions = true
 enableCompanionSorting = true
 ```
 
-Set to `false` to park companions and block interactions while retaining records/inventories and pausing hunt/cooldown timers. Enabled by default; multiplayer uses the server setting. See the [full rules](docs/COMPANIONS-1.2.4-zh.md).
+`enableCompanions = false` parks companions and blocks interactions while keeping records and inventories and pausing hunt and cooldown timers. `enableCompanionSorting = false` turns off sorting alone. Multiplayer uses the server's setting. The [companion guide](docs/COMPANIONS.md) has the full rules.
 
-Set only `enableCompanionSorting = false` to turn off sorting while other companion features carry on. To use sorting, bring a companion to your storage, open the Sorting tab and choose Start sorting; it tidies chests and barrels within 16 blocks. See the [1.2.7 guide](docs/COMPANIONS-1.2.7.md).
+The Moonlight or Nightfall choice is a personal preference, stored in `config/howlingwerewolf-client.toml`.
 
 ## Spawn eggs and item animations
 
@@ -95,7 +111,7 @@ Set only `enableCompanionSorting = false` to turn off sorting while other compan
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.2.7** (hands-on sorting, new companion screens and Beast gait).
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.3.0**.
 
 ## Build from source
 
@@ -105,9 +121,11 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.2.7-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.3.0-neoforge-26.1.2.jar`.
 
-Current source version is **1.2.7**, protocol 17. The build passes, as do 2243 artifact checks, including every line of dialogue matching 1.2.6 byte for byte. 478 native NeoForge server checks pass, first upgrading from the real save 1.2.6 left behind, then through a real save and restart. 20842 model, NPC and UI checks pass. On NeoForge 26.1.2.122 with an RTX 4060 Laptop GPU, a real client in an isolated game directory ran the full script in Chinese at GUI scales 2 and 4 and in English at scale 3: the companion walked, opened containers and carried 99 items, item totals were conserved, containers out of range or out of reach stayed untouched, reachable lids really opened, and the attack swing advanced. Beast sprinting and prowling were checked in the world and in rendered frames. Feel and long play sessions await the author's in-game review; this version was not checked with Sodium, shader packs, claim plugins or two real clients.
+Current source version is **1.3.0**, protocol 18.
+
+The final build passes, as do 21028 model, NPC and UI checks and 2624 artifact checks, including every line of progression text matching 1.2.7 byte for byte. 759 native NeoForge server checks pass, first upgrading from the real save 1.2.7 left behind, then through a real save and restart; they cover item frames on real chests, trapped chests and shulker boxes. On NeoForge 26.1.2.122 with an RTX 4060 Laptop GPU, a real client in an isolated game directory ran the full script in Chinese at GUI scale 2 and in English at scale 3: the companion walked, opened containers and carried items, item totals were conserved, the framed chest ended with only its item, the trapped chest stayed untouched, and first- and third-person strikes were captured for all three forms. A few small client-side adjustments made after those runs passed the build and regression only. Attack feel and long play sessions await the author's in-game review; this version was not checked with Sodium, shader packs, claim plugins or two real clients.
 
 ## Administrator commands
 
