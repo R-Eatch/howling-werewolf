@@ -13,15 +13,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Requests a cosmetic change; the server validates and broadcasts the resulting state. */
-public record SetWerewolfSkinPacket(String modelSetId, String skinId) implements CustomPacketPayload {
+public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment) implements CustomPacketPayload {
     public static final Type<SetWerewolfSkinPacket> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "set_werewolf_skin"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SetWerewolfSkinPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> {
                 buf.writeUtf(packet.modelSetId(), 16);
                 buf.writeUtf(packet.skinId(), WerewolfSkinIds.MAX_ID_LENGTH);
+                buf.writeBoolean(packet.showEquipment());
             },
-            buf -> new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH)));
+            buf -> new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH), buf.readBoolean()));
+
+    public SetWerewolfSkinPacket(String modelSetId, String skinId) {
+        this(modelSetId, skinId, true);
+    }
 
     public SetWerewolfSkinPacket(WerewolfSkin skin) {
         this(WerewolfModelSet.CLASSIC.id(), WerewolfSkinIds.normalize(skin.getId()));
@@ -42,6 +47,7 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId) implements
             WerewolfApi.get(sender).ifPresent(data -> {
                 if (!data.isWerewolf()) return;
                 data.setAppearance(modelSet, skinId);
+                data.setEquipmentShown(packet.showEquipment());
                 sender.refreshDimensions();
                 ModNetwork.sync(sender, data);
             });

@@ -1,116 +1,18 @@
-# Howling Werewolf — NeoForge 1.21.1
+# Howling Werewolf · NeoForge 1.21.1
 
-<p align="center">
-  <img src="src/main/resources/logo.png" alt="Howling Werewolf logo" width="128">
-</p>
+[简体中文](README-zh.md)
 
-<p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="Latest mod version 1.3.2"></a>
-  <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
-  <img src="https://img.shields.io/badge/NeoForge-21.1.248%2B-E04E14?style=flat-square" alt="NeoForge 21.1.248 or later">
-  <img src="https://img.shields.io/badge/Java-21-007396?style=flat-square" alt="Java 21">
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
-  <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="Asset license: CC BY-SA 4.0"></a>
-</p>
+This is the source of Howling Werewolf for **Minecraft 1.21.1**, branch `1.21.1-neoforge`.
 
-<p align="center"><a href="README-zh.md">简体中文</a></p>
-
-> This branch contains the NeoForge edition for Minecraft 1.21.1. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
-
-Howling Werewolf **1.3.2** brings the updates since 1.2.2 to NeoForge 1.21.1:
-
-- **Werewolf companions.** Summon a werewolf merchant at the altars and recruit companions with an Alpha Werewolf Badge. Each companion has a nine-slot pack and can follow, guard, rest, go hunting and sort nearby chests. You can recall them across dimensions, raise their tier, revive them, rename them, change their coat, or dismiss them (after a separate confirmation, with their pack handed back to you). Press **C** for the companion window. See the [companion guide](docs/COMPANIONS.md).
-- **Sorting.** Your companion walks to chests and barrels, opens them and carries items by hand. A container wearing a filled item frame keeps only that item, and trapped chests and shulker boxes stay out of it. Containers it cannot walk up to are still tidied from where it stands within 32 blocks (server-adjustable).
-- **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases. The Skins and Reset screens match.
-- **Long, Tool and Fire Claws can be switched off.** Select one on the Abilities page and use **Turn off / Turn on**; it costs and refunds nothing.
-- **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
-- A new **Pack Oath** skill-tree entry (companion slots and their highest tier) and the administrator command `/werewolf unlockalpha`.
-
-For the 1.2.2 held-item adjustments, see the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md). The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**.
-
-Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
-
-## Requirements
-
-| Component | Version |
+| | |
 |---|---|
+| Mod version | **1.3.3** |
 | Minecraft Java Edition | 1.21.1 |
-| Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
+| NeoForge | 21.1.248 or a later 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.3.2 |
 
-## Werewolf skins
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.3.3-neoforge.jar`. Install the same version on the server and on every client.
 
-- Open the werewolf menu with **K** by default → **Skins**. Switch **Classic / Modern** in the upper-right corner, then select **Apply** to save. Classic retains Adrian, Ashen, Onyx and Ivory. Modern includes Ashen, Black, Chestnut, Pale, Rusty, Snowy, Spotted, Stripped and Woods. Each coat covers all three forms.
-- New players default to **Modern / Ashen**. Existing Classic choices are preserved when upgrading.
-- Preview with mouse tracking, drag rotation, scroll-wheel zoom, and an equipment toggle, then apply your selection. Previewing does not unlock or activate a form. Level Reset is below the skill list on the Skill Tree page.
-- Modern camera height follows standing, crouching and quadrupedal sprinting. Weapons retain native size and palm anchors; armor and elytra follow the imported bones under the existing equipment rules.
-- Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
-- Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
+The gameplay guide, the other editions and downloads are on the [main branch](https://github.com/R-Eatch/howling-werewolf).
 
-Update both server and clients to **1.3.2** (network protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
-
-## NPC model configuration
-
-In `config/howlingwerewolf-common.toml`:
-
-```toml
-[gameplay]
-npcModelSet = "modern"
-```
-
-- `modern` (default): Alpha and its summoned pack use Ashen; wild and spawn-egg werewolves receive one of the nine saved coats.
-- `classic`: all affected NPCs use the Classic model and Adrian texture for their form.
-- Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
-
-## Companion and interface settings
-
-Under `[gameplay]` in `config/howlingwerewolf-common.toml`:
-
-- `enableCompanions = true` switches companions as a whole.
-- `enableCompanionSorting = true` switches sorting alone.
-- `companionSortingReach = 32` (3–64) is how far a companion can still sort a container it cannot walk up to.
-
-Press **C** for the companion window; the key can be changed in Controls. The Moonlight / Nightfall choice is saved on the client in `config/howlingwerewolf-client.toml`.
-
-## Spawn eggs and texture updates
-
-![Werewolf, Hunter and Moon-Crowned Alpha Werewolf spawn eggs](docs/spawn-eggs.png)
-
-- Werewolf and Hunter spawn eggs now have dedicated 16×16 icons.
-- The new **Moon-Crowned Alpha Werewolf Spawn Egg** is in the mod's creative tab as `howlingwerewolf:alpha_werewolf_spawn_egg`. It spawns the same boss used by the Alpha Trial; a separately spawned boss does not bind to a ritual or award trial-completion rewards.
-- The Alpha Badge, Moonbane Pearl, Wolfsbane flower, Silver Ore and Deepslate Silver Ore now use 16×16 artwork. All 18 runtime item and block textures use this size; existing werewolf coats and model appearances are retained.
-
-## Automatic stepping
-
-Automatic stepping uses fixed heights: **Werewolf 1.5 blocks**, **Quadruped Wolf 1 block**, and **Beast 2 blocks**. These heights do not scale with Jump rank, armor or potion effects; manual jumping retains its existing skill effects.
-
-In `config/howlingwerewolf-common.toml`, `[gameplay]` contains `enableWerewolfAutoStep = true` by default. Set it to `false` to disable the added step height. Returning to human form also removes this bonus.
-
-## Supported versions
-
-Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**; this branch is **1.3.2**. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
-
-## Build from source
-
-Download or clone this branch, then use the Gradle wrapper with a Java 21 toolchain:
-
-```powershell
-./gradlew.bat clean build
-```
-
-The distributable JAR is written to `build/libs/howlingwerewolf-1.3.2-neoforge.jar`.
-
-## Release status
-
-The maintainer completed a full gameplay test pass for 1.1.3. The 1.3.1 content was first tested in game by the owner on Minecraft 26.1.2, then ported to this branch. The 1.3.1 port on this branch builds locally and passed scripted checks with a real client on a new world in the owner's NeoForge 1.21.1 modpack instance (about 35 mods, including Create, Iron's Spells, Sophisticated Backpacks and JourneyMap): the companion window, sorting (item totals unchanged), dismissal, merchant trades, ability switches, Modern Beast movement and first/third-person swings. A full survival playthrough and two-client multiplayer testing have not been done. Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) for the latest news.
-
-Back up every important world before adding or updating any Mod.
-
-## Administrator commands
-
-Server operators and testers can consult the [administrator command guide](ADMIN_COMMANDS.md), also available in [Simplified Chinese](ADMIN_COMMANDS-zh.md).
-
-## License
-
-Source code is licensed under the [Mozilla Public License 2.0](LICENSE.md). Original project art is licensed separately under [CC BY-SA 4.0](LICENSE-ASSETS.md). See [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) and [CREDITS.txt](CREDITS.txt) for attribution and provenance.
+Code is licensed under MPL-2.0 and original art under CC BY-SA 4.0; see [LICENSE.md](LICENSE.md) and [LICENSE-ASSETS.md](LICENSE-ASSETS.md).

@@ -101,7 +101,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
     private void layout(@Nullable WerewolfData data) {
         boolean stage = page == Page.TREE || page == Page.ABILITIES;
         if (stage && data != null && data.isWerewolf()) band = Math.max(60, 26 + longestDescription() * 10 + 6);
-        else band = stage ? 30 : THIN_BAND;
+        else band = stage ? 30 + 11 * notWerewolfLines(data).size() : THIN_BAND;
         stageBottom = tall - band;
         int height = stageBottom - TOP_BAND;
         if (stage) {
@@ -510,10 +510,24 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         }
         if (page != Page.TREE && page != Page.ABILITIES) return;
         if (data == null || !data.isWerewolf()) {
-            MoonUi.centered(graphics, font, Component.translatable(KEY + "not_werewolf"), wide / 2, stageBottom + 11, MoonUi.BAND_TEXT);
+            int y = stageBottom + 10;
+            MoonUi.centered(graphics, font, Component.translatable(KEY + "not_werewolf"), wide / 2, y, MoonUi.BAND_TEXT);
+            for (FormattedCharSequence line : notWerewolfLines(data)) {
+                y += 11;
+                graphics.text(font, line, wide / 2 - font.width(line) / 2, y, MoonUi.BAND_SUB, false);
+            }
             return;
         }
         drawFocus(graphics, data, mouseX, mouseY);
+    }
+
+    /** The ways into the bloodline, or the wait for the first night once bitten. */
+    private List<FormattedCharSequence> notWerewolfLines(@Nullable WerewolfData data) {
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        int room = Math.max(120, wide - MARGIN * 2);
+        lines.addAll(font.split(Component.translatable(KEY + (data != null && data.isInfected() ? "not_werewolf.infected" : "not_werewolf.bite")), room));
+        lines.addAll(font.split(Component.translatable(KEY + "not_werewolf.potion"), room));
+        return lines;
     }
 
     /** The lower band reads out whatever the pointer rests on, falling back to the selected node. */
