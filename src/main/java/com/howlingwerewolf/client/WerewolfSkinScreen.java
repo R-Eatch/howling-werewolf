@@ -57,6 +57,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     private int wide, tall, stageX, stageWidth, moonX, moonY, moonRadius;
     private boolean initializedSelection;
     private boolean showEquipment = true;
+    private boolean pendingEquipment;
     private boolean draggingPreview;
     private boolean confirmationTimedOut;
     private int pendingTicks;
@@ -129,6 +130,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         if (!initializedSelection && data != null) {
             selectedSkin = data.getSkinId();
             modelSet = data.getModelSet();
+            showEquipment = data.showsEquipment();
             rememberedSkins.put(modelSet, selectedSkin);
             List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries(modelSet);
             for (int index = 0; index < skins.size(); index++) {
@@ -151,9 +153,10 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
                 || WerewolfSkinCatalog.find(selectedSkin) == null) return;
         pendingSkin = selectedSkin;
         pendingModelSet = modelSet;
+        pendingEquipment = showEquipment;
         pendingTicks = 0;
         confirmationTimedOut = false;
-        ModNetwork.CHANNEL.sendToServer(new SetWerewolfSkinPacket(modelSet.id(), selectedSkin));
+        ModNetwork.CHANNEL.sendToServer(new SetWerewolfSkinPacket(modelSet.id(), selectedSkin, showEquipment));
         updateButtons();
     }
 
@@ -165,7 +168,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         if ((!hadSelection && initializedSelection) || catalogRevision != WerewolfSkinCatalog.revision()) rebuildWidgets();
         if (noticeTicks > 0 && --noticeTicks == 0) notice = null;
         if (pendingSkin != null) {
-            if (data != null && pendingModelSet == data.getModelSet() && pendingSkin.equals(data.getSkinId())) {
+            if (data != null && pendingModelSet == data.getModelSet() && pendingSkin.equals(data.getSkinId()) && pendingEquipment == data.showsEquipment()) {
                 pendingSkin = null;
                 confirmationTimedOut = false;
             } else if (++pendingTicks >= 200) {
@@ -189,6 +192,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         }
         if (equipmentButton != null) equipmentButton.setMessage(equipmentLabel());
         if (modelButton != null) modelButton.active = pendingSkin == null;
+        if (equipmentButton != null) equipmentButton.active = pendingSkin == null;
         formButtons.forEach((form, button) -> {
             button.active = form != previewForm;
             button.selected(form == previewForm);
@@ -207,7 +211,8 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         previewPlayer.setMainArm(minecraft.player.getMainArm());
         previewPlayer.tickCount = minecraft.player.tickCount;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            ItemStack stack = showEquipment ? minecraft.player.getItemBySlot(slot) : ItemStack.EMPTY;
+            // Hidden equipment means worn armour and elytra; held items always show, as in the world.
+            ItemStack stack = showEquipment || !isArmorSlot(slot) ? minecraft.player.getItemBySlot(slot) : ItemStack.EMPTY;
             if (!ItemStack.matches(previewPlayer.getItemBySlot(slot), stack)) {
                 previewPlayer.setItemSlot(slot, stack.copy());
             }
@@ -421,7 +426,11 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     private int pageCount() { return Math.max(1, (WerewolfSkinCatalog.entries(modelSet).size() + 3) / 4); }
 
     private boolean isCurrent(WerewolfData data) {
-        return data != null && modelSet == data.getModelSet() && selectedSkin.equals(data.getSkinId());
+        return data != null && modelSet == data.getModelSet() && selectedSkin.equals(data.getSkinId()) && showEquipment == data.showsEquipment();
+    }
+
+    private static boolean isArmorSlot(EquipmentSlot slot) {
+        return slot == EquipmentSlot.HEAD || slot == EquipmentSlot.CHEST || slot == EquipmentSlot.LEGS || slot == EquipmentSlot.FEET;
     }
 
     private void switchModelSet() {

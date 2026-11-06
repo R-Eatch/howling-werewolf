@@ -148,7 +148,7 @@ public final class ClientForgeEvents {
                 renderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,
                         event.getMultiBufferSource(), event.getPackedLight());
                 boolean armoredInstinct = WerewolfSkinRenderContext.isPreview(player) || WerewolfApi.get(player)
-                        .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false);
+                        .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT) && data.showsEquipment()).orElse(false);
                 if (armoredInstinct && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
                     equipmentRenderer.prepare(player, event.getRenderer(), event.getPartialTick());
                     equipmentRenderer.render(player, player.getYRot(), event.getPartialTick(), poseStack,

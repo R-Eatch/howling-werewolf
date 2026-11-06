@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.2. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.3. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [every line of dialogue](COMPANION-DIALOGUE.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -61,8 +61,8 @@ Companions out hunting or fallen still count toward the party limit. Respeccing 
 |---|---|
 | Follow | Stays close and keeps moving. Monsters ignore it, and switching to Follow clears existing aggro. Area, environmental and player damage still apply, so use Guard in dangerous places. It returns to you when too far away or across dimensions. |
 | Guard | Follows and fights: it joins whatever you attack or whatever attacks you, and strikes back when attacked itself. It spares creepers, you, your companions and pets, teammates and PvP-protected players. |
-| Rest | Waits on the spot and may look at nearby players. |
-| Sort | See the next section. |
+| Rest | Waits on the spot and may look at nearby players. Like a follower, monsters ignore it and switching to Rest clears existing aggro; it does not strike back. |
+| Sort | See the next section. Monsters ignore a sorting companion too, and starting a job clears existing aggro. |
 | Hunt | Leaves the world while its record and timer carry on. You can recall it at any time. |
 | Recall | Works from any dimension and any chunk. It returns to safe ground beside you, and recalling a hunter settles the hunt early. A fallen companion needs reviving first. |
 | Upgrade | Spends Moonbane Pearls, within the skill's tier limit. |

@@ -53,6 +53,7 @@ public final class WerewolfData {
     private final EnumSet<WerewolfAbility> abilities = EnumSet.noneOf(WerewolfAbility.class);
     /** Learned switchable abilities the player has turned off; everything else stays on. */
     private final EnumSet<WerewolfAbility> disabledAbilities = EnumSet.noneOf(WerewolfAbility.class);
+    private boolean equipmentShown = true;
     private final List<UUID> spiritWolfIds = new ArrayList<>();
 
     public boolean isWerewolf() { return werewolf; }
@@ -63,6 +64,9 @@ public final class WerewolfData {
     public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
     public String getSkinId() { return skinId; }
     public WerewolfModelSet getModelSet() { return modelSet; }
+    /** Whether worn armour and elytra show on the transformed werewolf model; a cosmetic preference like the coat. */
+    public boolean showsEquipment() { return equipmentShown; }
+    public void setEquipmentShown(boolean value) { equipmentShown = value; }
     public boolean isBeastMode() { return form == WerewolfForm.BEAST; }
     public boolean isQuadrupedMode() { return form == WerewolfForm.QUADRUPED; }
     public boolean hasDefeatedAlpha() { return alphaDefeated; }
@@ -281,7 +285,7 @@ public final class WerewolfData {
     /** Returns true only for a fully default state, including cosmetic preferences. */
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
-                && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId())
+                && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId()) && equipmentShown
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -328,6 +332,7 @@ public final class WerewolfData {
         form = other.form;
         skinId = other.skinId;
         modelSet = other.modelSet;
+        equipmentShown = other.equipmentShown;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
         level = other.level;
@@ -359,6 +364,7 @@ public final class WerewolfData {
         tag.putString("Form", form.id());
         tag.putString("Skin", skinId);
         tag.putString("ModelSet", modelSet.id());
+        tag.putBoolean("ShowEquipment", equipmentShown);
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
         tag.putInt("Level", level);
@@ -401,6 +407,8 @@ public final class WerewolfData {
         moonForced = tag.getBoolean("MoonForced");
         form = WerewolfForm.byName(tag.getString("Form"));
         setAppearance(WerewolfModelSet.byId(tag.contains("ModelSet") ? tag.getString("ModelSet") : fresh ? "modern" : "classic"), tag.getString("Skin"));
+        // Optional since 1.3.3: older saves show their equipment.
+        equipmentShown = !tag.contains("ShowEquipment") || tag.getBoolean("ShowEquipment");
         alphaDefeated = tag.getBoolean("AlphaDefeated");
         nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBoolean("NightVisionEnabled");
         level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getInt("Level")));

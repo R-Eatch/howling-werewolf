@@ -91,8 +91,16 @@ final class MoonGraphics {
             dispatcher.overrideCameraOrientation(conjugate);
         }
         dispatcher.setRenderShadow(false);
-        RenderSystem.runAsFancy(() -> dispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, stack, raw.bufferSource(), 15728880));
-        raw.flush();
+        // A preview figure is not the camera entity, so 1.20.1 would draw its name tag; hide it as 26.1.2 does.
+        var options = Minecraft.getInstance().options;
+        boolean hideGui = options.hideGui;
+        options.hideGui = true;
+        try {
+            RenderSystem.runAsFancy(() -> dispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, stack, raw.bufferSource(), 15728880));
+            raw.flush();
+        } finally {
+            options.hideGui = hideGui;
+        }
         dispatcher.setRenderShadow(true);
         stack.popPose();
         Lighting.setupFor3DItems();

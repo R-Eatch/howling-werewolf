@@ -48,7 +48,7 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
 
     static boolean enabled(AbstractClientPlayer player) {
         return HWConfig.SHOW_WEREWOLF_EQUIPMENT.get() && (WerewolfSkinRenderContext.isPreview(player)
-                || WerewolfApi.get(player).map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false));
+                || WerewolfApi.get(player).map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT) && data.showsEquipment()).orElse(false));
     }
 
     @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
