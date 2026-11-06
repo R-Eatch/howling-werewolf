@@ -2,7 +2,7 @@
 
 [English](ADMIN_COMMANDS.md)
 
-本文适用于 Howling Werewolf 1.2.2（Minecraft 1.20.1 / Forge 47.4.16）。这些命令主要用于开发、验收、服务器管理和存档诊断。
+本文适用于 Howling Werewolf 1.3.2（Minecraft 1.20.1 / Forge 47.4.16）。这些命令主要用于开发、验收、服务器管理和存档诊断。
 
 ## 使用条件
 
@@ -127,8 +127,18 @@
 | `satiety` | 3 |
 | `claw_efficiency` | 3 |
 | `hunting_mastery` | 2 |
+| `pack_oath` | 3 |
 
 示例：`/werewolf settree Steve damage 6`
+
+### `/werewolf unlockalpha <target> [state]`
+
+一条命令解锁 Alpha，方便调试。
+
+- 省略 `state` 或填 `true`：目标成为狼人，并永久解锁野兽形态和 Alpha 相关的随从名额。
+- `false`：撤销解锁并退出野兽形态。
+- 不发放徽章和试炼奖励。
+- 示例：`/werewolf unlockalpha Steve`
 
 ### `/werewolf resettree <target>`
 

@@ -265,7 +265,7 @@ public final class WerewolfGameplayEvents {
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
         if (!melee) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
-            if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
+            if (!data.isTransformed() || !data.usesAbility(WerewolfAbility.LONG_CLAWS)) return;
             float rawAmount = event.getAmount();
             if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) && data.isBeastMode()
                     && HWConfig.BEAST_VOID_DAMAGE.get()) {
@@ -379,7 +379,7 @@ public final class WerewolfGameplayEvents {
                 || rawHit.targetId() != event.getEntity().getId()) return;
         RAW_CLAW_HIT.remove();
         WerewolfApi.get(attacker).ifPresent(data -> {
-            if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
+            if (!data.isTransformed() || !data.usesAbility(WerewolfAbility.LONG_CLAWS)) return;
             // The secondary hit starts with half of the primary hit's pre-mitigation
             // damage. Each secondary target then applies its own armor and reductions.
             float splashDamage = rawHit.amount() * 0.5F;
@@ -390,6 +390,7 @@ public final class WerewolfGameplayEvents {
                 for (LivingEntity secondary : primaryTarget.level().getEntitiesOfClass(LivingEntity.class,
                         primaryTarget.getBoundingBox().inflate(2.0D, 1.0D, 2.0D), entity ->
                                 entity != primaryTarget && entity != attacker && entity.isAlive()
+                                        && !(entity instanceof com.howlingwerewolf.entity.WerewolfCompanionEntity companion && companion.isRecruited())
                                         && !attacker.isAlliedTo(entity) && !isOwnedBy(entity, attacker))) {
                     secondary.hurt(event.getSource(), splashDamage);
                 }
@@ -408,7 +409,7 @@ public final class WerewolfGameplayEvents {
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
         if (!melee) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
-            if (data.isTransformed() && data.hasAbility(WerewolfAbility.FIRE_CLAWS)) {
+            if (data.isTransformed() && data.usesAbility(WerewolfAbility.FIRE_CLAWS)) {
                 event.getEntity().setSecondsOnFire(8);
             }
         });
@@ -1219,7 +1220,7 @@ public final class WerewolfGameplayEvents {
     }
 
     private static boolean canUseToolClaws(net.minecraft.world.entity.player.Player player, WerewolfData data) {
-        return data.isTransformed() && data.hasAbility(WerewolfAbility.TOOL_CLAWS)
+        return data.isTransformed() && data.usesAbility(WerewolfAbility.TOOL_CLAWS)
                 && player.getMainHandItem().isEmpty();
     }
 

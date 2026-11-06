@@ -5,6 +5,7 @@ import com.howlingwerewolf.entity.HunterEntity;
 import com.howlingwerewolf.entity.AlphaWerewolfEntity;
 import com.howlingwerewolf.entity.AlphaMinionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
+import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.registries.DeferredRegister;
@@ -38,6 +39,12 @@ public final class ModEntities {
                             .sized(0.6F, 0.85F)
                             .clientTrackingRange(10)
                             .build("alpha_minion"));
+    public static final RegistryObject<EntityType<WerewolfCompanionEntity>> WEREWOLF_COMPANION =
+            ENTITIES.register("werewolf_companion",
+                    () -> EntityType.Builder.of(WerewolfCompanionEntity::new, MobCategory.CREATURE)
+                            .sized(0.9F, 2.0F)
+                            .clientTrackingRange(10)
+                            .build("werewolf_companion"));
 
     private ModEntities() {}
 }

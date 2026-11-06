@@ -332,7 +332,7 @@ public final class WerewolfPlayerModel<T extends LivingEntity> extends EntityMod
     private void animateAttack(T player) {
         if (attackTime <= 0.0F || player.isUsingItem()) return;
 
-        boolean left = player.getMainArm() == HumanoidArm.LEFT;
+        boolean left = (player.swingingArm == net.minecraft.world.InteractionHand.OFF_HAND ? player.getMainArm().getOpposite() : player.getMainArm()) == HumanoidArm.LEFT;
         ModelPart attackingArm = left ? leftArm : rightArm;
 
         // Follow vanilla HumanoidModel's attack curve rather than throwing the arm straight

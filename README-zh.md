@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="当前 Mod 版本：1.2.2"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="当前 Mod 版本：1.3.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 或更高版本">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,7 +21,16 @@
 
 ## 当前版本与更新
 
-Howling Werewolf **1.2.2** 修复 Minecraft 1.20.1 在 Xenon / Embeddium 等缓存方块构造 UV 的实体渲染器下 Modern 三形态的纹理错配，并补齐 Modern 皮肤描述。模型切换与内置皮肤署名统一为 **Classic — By R_Eatch / Modern — By thewolfulti**。详见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
+Howling Werewolf **1.3.2** 把 1.2.2 之后的更新带到 Forge 1.20.1：
+
+- **狼人随从。** 在祭坛召唤狼人商人，用 Alpha 狼人徽章招募随从。随从有九格背包，可以跟随、守护、休息、外出狩猎和整理附近的箱子，能跨维度召回、升阶、复活、改名换毛色，也能遣散（遣散前单独确认，背包物品交还给你）。按 **C** 打开随从窗口。完整玩法见[随从指南](docs/COMPANIONS-zh.md)。
+- **整理。** 随从亲自走到箱子和木桶前开盖搬运；挂着放了物品的展示框的容器只存放框里的物品；陷阱箱和潜影盒不参与。走不到跟前的容器，32 格以内也能站在原地整理（服务器可调）。
+- **全新的进阶界面与随从窗口。** 按 **K**，世界退入月光，技能漂浮在今夜的月亮四周；右上角月牙切换白色“月白”和深色“夜幕”。皮肤页和重置页同款。
+- **长爪、工具爪和火焰爪可以关闭。** 在技能页选中后用“关闭／开启”切换，不消耗也不退还技能点。
+- **野兽形态动作。** Modern 野兽冲刺时四足狼式奔跑，下蹲时四足潜行，下蹲视角随之降低。
+- 管理员命令新增 `/werewolf unlockalpha`。
+
+1.2.2 的 Modern 纹理修复见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
 
 ## 新的刷怪蛋
 
@@ -36,7 +45,7 @@ Howling Werewolf **1.2.2** 修复 Minecraft 1.20.1 在 Xenon / Embeddium 等缓�
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 **1.2.2**。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
+联机时服务端与客户端都需更新至 **1.3.2**（网络协议 19）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
 
 ## NPC 模型配置
 
@@ -77,7 +86,7 @@ npcModelSet = "modern"
 | Minecraft Java 版 | 1.20.1 |
 | Mod 加载器 | 推荐 Forge 47.4.16 或更高版本 |
 | Java | 17 |
-| 月厄狼人 | 1.2.2 |
+| 月厄狼人 | 1.3.2 |
 
 推荐使用 Forge 47.4.16 或更高的兼容 Forge 47.x 版本；Forge 47.4.16 仍是当前正式发布的主要测试目标。
 
@@ -89,6 +98,7 @@ npcModelSet = "modern"
 - 技能树、主动与被动技能、形态解锁条件，以及月誓仪式指引。
 - 空手利爪战斗，以及随成长提升的伤害与自然减伤。
 - 吸血、长爪、火焰爪、工具爪、血腥撕咬和月血沸腾。
+- 狼人随从：召唤、招募、跟随、守护、狩猎、整理箱子、升阶与复活。
 - 野生失控狼人、中立猎人、村庄巡猎队、银制装备、狼毒花和两种对立药水。
 - 完整的单人 Alpha 试炼：祭坛结构、猎人阶段、多阶段首领战、重复奖励，以及永久野兽形态成长。
 - 完整英文与简体中文本地化。
@@ -97,7 +107,7 @@ npcModelSet = "modern"
 ## 安装
 
 1. 安装 Minecraft Java 版 1.20.1 和 Forge 47.4.16 或更高的兼容 Forge 47.x 版本。
-2. 将 `howlingwerewolf-1.2.2-forge.jar` 放入游戏的 `mods` 目录。
+2. 将 `howlingwerewolf-1.3.2-forge.jar` 放入游戏的 `mods` 目录。
 3. 启动游戏。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -144,7 +154,8 @@ npcModelSet = "modern"
 
 - 利爪伤害与按目标最大生命计算的裂月伤害；
 - 自然防御、速度、跳跃、再生、击退抗性和摔落抗性；
-- 吸血、饱食控制、利爪距离/抢夺，以及更多狩猎经验。
+- 吸血、饱食控制、利爪距离/抢夺，以及更多狩猎经验；
+- 狼群誓约：决定随从名额和最高阶数。
 
 能力用于解锁新的操作和规则，包括：
 
@@ -159,6 +170,8 @@ npcModelSet = "modern"
 - 工具爪；
 - 火焰爪；
 - 血腥撕咬。
+
+长爪、工具爪和火焰爪学会后，可以在技能页随时关闭或重新开启。
 
 ### Alpha 狼人徽章
 
@@ -185,6 +198,7 @@ Alpha 狼人徽章放在快捷栏任意位置时具有两种效果：
 | `N` | 召唤狼灵 |
 | `B` | 使用血腥撕咬 |
 | `R` | 释放月血沸腾 |
+| `C` | 打开随从窗口 |
 
 ## 猎人、银、狼毒花、月厄珍珠与野外遭遇
 
@@ -224,6 +238,8 @@ Alpha 试炼是狼人养成的终局挑战。
 
 `gameplay.enableWerewolfAutoStep` 默认 **true**：四足狼自动跨步高度为 **1.0 格**，普通狼人为 **1.5 格**，野兽为 **2.0 格**。这些数值固定，不随技能、护甲或药水变化。设为 **false** 恢复普通跨步；手动跳跃保持原有规则。
 
+随从相关设置：`gameplay.enableCompanions`（默认 **true**）统一开关随从；`gameplay.enableCompanionSorting`（默认 **true**）单独开关整理；`gameplay.companionSortingReach`（默认 **32**，3–64）是随从走不到跟前时仍能整理的最远距离。界面的月白／夜幕选择保存在客户端文件 `config/howlingwerewolf-client.toml`。
+
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
 数据包可以扩展以下物品标签：
@@ -235,7 +251,7 @@ Alpha 试炼是狼人养成的终局挑战。
 
 ## 测试与兼容性
 
-**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。**1.1.8 更新内容已测试；本次 1.2.2 移植已完成本地构建和模型/数据检查，实机及双客户端测试待维护者完成。**
+**v1.1.3** 已通过作者从新存档常规生存开始、击败末影龙并取得鞘翅的完整流程实机验证。1.3.1 的内容先在 Minecraft 26.1.2 上由作者实机测试，再移植到本分支。1.3.1 移植后在作者授权的 Forge 47.4.16 实例中（含 JEI、Xenon、Oculus、Lootr、Curios 等共 29 个模组）用真实客户端在新世界里跑完了脚本检查，中文 GUI 缩放 2 和英文缩放 3 各一次：随从窗口各页、整理（物品总数不变，陷阱箱和区域外的箱子保持原样，挂框箱子只剩框内物品）、遣散后物品交还、商人六项交易、技能页开关长爪、进阶界面两种画布、三种形态攻击和野兽奔跑与潜行都截取了画面。**没有进行两个真实客户端的多人测试，也没有测试光影包效果和领地插件。**
 
 **本 Mod 尚未完成完整的多人游戏测试。** 因此，在长期多人存档中的表现仍属于未完全验证范围。服务器和客户端应使用相同的 Mod 版本，更新前请查阅对应版本的更新日志，确认兼容性说明。
 

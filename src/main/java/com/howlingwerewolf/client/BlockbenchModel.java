@@ -54,7 +54,9 @@ final class BlockbenchModel {
         }
     }
 
-    record Baked(ModelPart root, Map<String, ModelPart> bones, Map<String, List<ModelPart>> paths, float scale) {
+    /** {@code flats} lists the zero-thickness fur cards each bone carries directly. */
+    record Baked(ModelPart root, Map<String, ModelPart> bones, Map<String, List<ModelPart>> paths,
+                 Map<String, List<ModelPart>> flats, float scale) {
         ModelPart bone(String name) {
             ModelPart part = bones.get(name);
             if (part == null) throw new IllegalArgumentException("Missing Blockbench bone: " + name);
@@ -68,8 +70,9 @@ final class BlockbenchModel {
     Baked bake(float height) {
         Map<String, ModelPart> bones = new LinkedHashMap<>();
         Map<String, List<ModelPart>> paths = new HashMap<>();
+        Map<String, List<ModelPart>> flats = new HashMap<>();
         ModelPart root = new ModelPart(List.of(), children(document.getAsJsonArray("outliner"),
-                new float[3], bones, paths, new HashSet<>(), 0));
+                new float[3], bones, paths, flats, "", new HashSet<>(), 0));
         float[] bounds = bounds(root);
         float scale = height * 16.0F / (bounds[4] - bounds[1]);
         if (!Float.isFinite(scale) || scale <= 0.0F) throw new IllegalArgumentException("Empty model bounds");
@@ -83,11 +86,12 @@ final class BlockbenchModel {
             path.addAll(paths.get(name));
             paths.put(name, List.copyOf(path));
         }
-        return new Baked(root, Map.copyOf(bones), Map.copyOf(paths), scale);
+        return new Baked(root, Map.copyOf(bones), Map.copyOf(paths), Map.copyOf(flats), scale);
     }
 
     private Map<String, ModelPart> children(JsonArray outliner, float[] parentOrigin,
                                            Map<String, ModelPart> bones, Map<String, List<ModelPart>> paths,
+                                           Map<String, List<ModelPart>> flats, String owner,
                                            Set<String> visited, int depth) {
         if (depth > 64) throw new IllegalArgumentException("Model hierarchy is too deep");
         Map<String, ModelPart> result = new LinkedHashMap<>();
@@ -102,16 +106,17 @@ final class BlockbenchModel {
                 ModelPart part = new ModelPart(List.of(cube(cube, origin)), Map.of());
                 setPose(part, origin, parentOrigin, vector(cube, "rotation"));
                 result.put("cube_" + uuid, part);
+                if (vector(cube, "to")[1] == vector(cube, "from")[1]) flats.computeIfAbsent(owner, ignored -> new ArrayList<>()).add(part);
             } else {
                 JsonObject group = groups.get(uuid);
                 if (group == null) throw new IllegalArgumentException("Missing group: " + uuid);
                 if (!GsonHelper.getAsBoolean(group, "export", true)) continue;
                 float[] origin = vector(group, "origin");
                 Set<String> before = new HashSet<>(paths.keySet());
-                ModelPart part = new ModelPart(List.of(), children(entry.getAsJsonObject().getAsJsonArray("children"),
-                        origin, bones, paths, visited, depth + 1));
-                setPose(part, origin, parentOrigin, vector(group, "rotation"));
                 String name = GsonHelper.getAsString(group, "name");
+                ModelPart part = new ModelPart(List.of(), children(entry.getAsJsonObject().getAsJsonArray("children"),
+                        origin, bones, paths, flats, name, visited, depth + 1));
+                setPose(part, origin, parentOrigin, vector(group, "rotation"));
                 if (bones.put(name, part) != null) throw new IllegalArgumentException("Duplicate bone name: " + name);
                 for (String child : paths.keySet()) {
                     if (!before.contains(child)) {

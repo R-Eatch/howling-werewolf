@@ -1,6 +1,8 @@
 package com.howlingwerewolf.trial;
 
 import com.howlingwerewolf.content.ModItems;
+import com.howlingwerewolf.content.ModBlocks;
+import com.howlingwerewolf.companion.CompanionRitual;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -58,8 +60,8 @@ public final class RitualAltarBlock extends BaseEntityBlock {
         }
 
         boolean validOffering = central
-                ? held.is(ModItems.ALPHA_WEREWOLF_BADGE.get())
-                : held.is(ModItems.MOONBANE_PEARL.get());
+                ? held.is(ModItems.ALPHA_WEREWOLF_BADGE.get()) || held.is(ModItems.MOONBANE_PEARL.get())
+                : held.is(ModItems.MOONBANE_PEARL.get()) || held.is(ModBlocks.WOLFSBANE.get().asItem());
         if (altar.getOffering().isEmpty() && validOffering) {
             if (!level.isClientSide) {
                 altar.setOffering(held.copyWithCount(1));
@@ -75,6 +77,11 @@ public final class RitualAltarBlock extends BaseEntityBlock {
             AlphaTrialManager.tryStart(serverPlayer, pos);
             return InteractionResult.CONSUME;
         }
+        if (central && altar.getOffering().is(ModItems.MOONBANE_PEARL.get())
+                && player instanceof ServerPlayer serverPlayer && !level.isClientSide) {
+            CompanionRitual.tryStart(serverPlayer, pos);
+            return InteractionResult.CONSUME;
+        }
         return InteractionResult.PASS;
     }
 
@@ -87,6 +94,7 @@ public final class RitualAltarBlock extends BaseEntityBlock {
                 AlphaTrialManager.fail(altar, AlphaTrialManager.FailureReason.ALTAR_BROKEN);
             }
             altar.dropOffering();
+            CompanionRitual.cancel(altar);
         }
         super.onRemove(oldState, level, pos, newState, moving);
     }

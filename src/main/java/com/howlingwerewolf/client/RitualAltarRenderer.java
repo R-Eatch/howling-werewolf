@@ -24,6 +24,19 @@ public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAlta
     @Override
     public void render(RitualAltarBlockEntity altar, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (altar.isCentral() && altar.isCompanionRitualActive()) {
+            float ticks = altar.getCompanionRitualTicks() + partialTick;
+            float progress = Math.min(1, ticks / com.howlingwerewolf.companion.CompanionRitual.DURATION);
+            renderStack(new ItemStack(ModItems.MOONBANE_PEARL.get()), poseStack, buffer, packedLight, 0.5, 1 + progress * 2, 0.5, ticks * 4, 0.8F);
+            ItemStack flower = new ItemStack(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get());
+            for (int i = 0; i < 4; i++) {
+                double angle = i * Math.PI / 2 + ticks * 0.04;
+                double radius = 3 * (1 - progress);
+                renderStack(flower, poseStack, buffer, packedLight, 0.5 + Math.cos(angle) * radius,
+                        1 + progress * 1.8, 0.5 + Math.sin(angle) * radius, ticks * 3, 0.6F);
+            }
+            return;
+        }
         if (altar.isCentral() && altar.getTrialPhase() == RitualAltarBlockEntity.PHASE_ACTIVATION) {
             renderActivation(altar, partialTick, poseStack, buffer, packedLight);
             return;

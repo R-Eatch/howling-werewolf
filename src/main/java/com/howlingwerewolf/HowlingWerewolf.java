@@ -70,6 +70,7 @@ public final class HowlingWerewolf {
         TABS.register(modBus);
         modBus.addListener(this::commonSetup);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, HWClientConfig.SPEC, MOD_ID + "-client.toml");
         MinecraftForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
         MinecraftForge.EVENT_BUS.register(this);
     }

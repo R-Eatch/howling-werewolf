@@ -13,11 +13,18 @@ public final class WerewolfModelPose {
                 && !player.isAutoSpinAttack() && !player.isUsingItem();
     }
 
+    /** Holding an item up keeps the upright crouch; otherwise a crouching Modern Beast drops to all fours. */
+    public static boolean isBeastProwl(Player player, WerewolfData data) {
+        return data.getModelSet() == WerewolfModelSet.MODERN && data.getForm() == WerewolfForm.BEAST
+                && player.isCrouching() && !player.isPassenger() && !player.isInWater() && !player.isVisuallySwimming()
+                && !player.isFallFlying() && !player.isAutoSpinAttack() && !player.isUsingItem();
+    }
+
     public static float eyeHeight(WerewolfForm form, Pose pose, boolean sprinting) {
         if (pose == Pose.SWIMMING || pose == Pose.FALL_FLYING || pose == Pose.SPIN_ATTACK) return 0.4F;
         if (pose == Pose.SLEEPING) return 0.2F;
         if (form == WerewolfForm.QUADRUPED) return 0.6F;
-        if (form == WerewolfForm.BEAST) return pose == Pose.CROUCHING ? 1.8F : sprinting ? 1.45F : 2.55F;
+        if (form == WerewolfForm.BEAST) return pose == Pose.CROUCHING ? 1.2F : sprinting ? 1.45F : 2.55F;
         return pose == Pose.CROUCHING ? 1.27F : 1.62F;
     }
 

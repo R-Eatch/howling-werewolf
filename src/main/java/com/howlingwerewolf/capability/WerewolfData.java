@@ -51,6 +51,8 @@ public final class WerewolfData {
     private int syncedMaxLevel;
     private final EnumMap<WerewolfTreeSkill, Integer> treeSkills = new EnumMap<>(WerewolfTreeSkill.class);
     private final EnumSet<WerewolfAbility> abilities = EnumSet.noneOf(WerewolfAbility.class);
+    /** Learned switchable abilities the player has turned off; everything else stays on. */
+    private final EnumSet<WerewolfAbility> disabledAbilities = EnumSet.noneOf(WerewolfAbility.class);
     private final List<UUID> spiritWolfIds = new ArrayList<>();
 
     public boolean isWerewolf() { return werewolf; }
@@ -141,8 +143,18 @@ public final class WerewolfData {
         else treeSkills.put(skill, clamped);
     }
     public boolean hasAbility(WerewolfAbility ability) { return abilities.contains(ability); }
+    /** Learned and switched on: what gameplay checks for a switchable ability. */
+    public boolean usesAbility(WerewolfAbility ability) { return abilities.contains(ability) && !disabledAbilities.contains(ability); }
+    public boolean isAbilityDisabled(WerewolfAbility ability) { return disabledAbilities.contains(ability); }
+    /** Flips a learned switchable ability on or off; returns false when there is nothing to flip. */
+    public boolean toggleAbility(WerewolfAbility ability) {
+        if (ability == null || !ability.switchable() || !abilities.contains(ability)) return false;
+        if (!disabledAbilities.remove(ability)) disabledAbilities.add(ability);
+        return true;
+    }
     public void setAbility(WerewolfAbility ability, boolean unlocked) {
         if (unlocked) abilities.add(ability); else abilities.remove(ability);
+        if (!unlocked) disabledAbilities.remove(ability);
         if (!abilities.contains(WerewolfAbility.QUADRUPED_FORM) && form == WerewolfForm.QUADRUPED) {
             form = WerewolfForm.WEREWOLF;
         }
@@ -191,6 +203,7 @@ public final class WerewolfData {
     public boolean unlockAbility(WerewolfAbility ability) {
         if (!werewolf || abilities.contains(ability) || getAvailableSkillPoints() < ability.cost()) return false;
         abilities.add(ability);
+        disabledAbilities.remove(ability);
         return true;
     }
 
@@ -241,6 +254,7 @@ public final class WerewolfData {
     public void resetTreeSkills() { treeSkills.clear(); }
     public void resetAbilities() {
         abilities.clear();
+        disabledAbilities.clear();
         if (form == WerewolfForm.QUADRUPED) form = WerewolfForm.WEREWOLF;
     }
     public boolean canResetProgression() { return werewolf && level > 5; }
@@ -253,6 +267,7 @@ public final class WerewolfData {
         bonusTreePoints = 0;
         treeSkills.clear();
         abilities.clear();
+        disabledAbilities.clear();
         if (form != WerewolfForm.HUMAN) form = WerewolfForm.WEREWOLF;
         wolfSpiritCooldownEnd = 0L;
         wolfSpiritExpireTime = 0L;
@@ -274,6 +289,7 @@ public final class WerewolfData {
                 && wolfSpiritExpireTime == 0L && bloodyBiteCooldownEnd == 0L
                 && moonbloodSurgeCooldownEnd == 0L && moonbloodCrashTime == 0L
                 && totemExperienceTicks == 0 && getSpentTreePoints() == 0 && abilities.isEmpty()
+                && disabledAbilities.isEmpty()
                 && spiritWolfIds.isEmpty();
     }
 
@@ -300,6 +316,7 @@ public final class WerewolfData {
         totemExperienceTicks = 0;
         treeSkills.clear();
         abilities.clear();
+        disabledAbilities.clear();
         spiritWolfIds.clear();
         syncedMaxLevel = 0;
     }
@@ -329,6 +346,7 @@ public final class WerewolfData {
         syncedMaxLevel = other.syncedMaxLevel;
         treeSkills.clear(); treeSkills.putAll(other.treeSkills);
         abilities.clear(); abilities.addAll(other.abilities);
+        disabledAbilities.clear(); disabledAbilities.addAll(other.disabledAbilities);
         spiritWolfIds.clear(); spiritWolfIds.addAll(other.spiritWolfIds);
     }
 
@@ -364,6 +382,9 @@ public final class WerewolfData {
         ListTag abilityTag = new ListTag();
         for (WerewolfAbility ability : abilities) abilityTag.add(StringTag.valueOf(ability.id()));
         tag.put("Abilities", abilityTag);
+        ListTag disabledTag = new ListTag();
+        for (WerewolfAbility ability : disabledAbilities) disabledTag.add(StringTag.valueOf(ability.id()));
+        tag.put("DisabledAbilities", disabledTag);
         ListTag spiritTag = new ListTag();
         for (UUID id : spiritWolfIds) spiritTag.add(StringTag.valueOf(id.toString()));
         tag.put("SpiritWolves", spiritTag);
@@ -407,6 +428,13 @@ public final class WerewolfData {
         for (int i = 0; i < abilityTag.size(); i++) {
             WerewolfAbility ability = WerewolfAbility.byName(abilityTag.getString(i));
             if (ability != null) abilities.add(ability);
+        }
+        // Optional since 1.3.1: older saves have no switched-off abilities.
+        disabledAbilities.clear();
+        ListTag disabledTag = tag.getList("DisabledAbilities", Tag.TAG_STRING);
+        for (int i = 0; i < disabledTag.size(); i++) {
+            WerewolfAbility ability = WerewolfAbility.byName(disabledTag.getString(i));
+            if (ability != null && ability.switchable() && abilities.contains(ability)) disabledAbilities.add(ability);
         }
         spiritWolfIds.clear();
         ListTag spiritTag = tag.getList("SpiritWolves", Tag.TAG_STRING);

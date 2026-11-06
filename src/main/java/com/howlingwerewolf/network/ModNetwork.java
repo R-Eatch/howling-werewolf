@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "12";
+    private static final String PROTOCOL = "19";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(HowlingWerewolf.MOD_ID, "main"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -65,6 +65,15 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(SetWerewolfSkinPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(SetWerewolfSkinPacket::encode).decoder(SetWerewolfSkinPacket::decode)
                 .consumerMainThread(SetWerewolfSkinPacket::handle).add();
+        CHANNEL.messageBuilder(CompanionActionPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(CompanionActionPacket::encode).decoder(CompanionActionPacket::decode)
+                .consumerMainThread(CompanionActionPacket::handle).add();
+        CHANNEL.messageBuilder(CompanionViewPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CompanionViewPacket::encode).decoder(CompanionViewPacket::decode)
+                .consumerMainThread(CompanionViewPacket::handle).add();
+        CHANNEL.messageBuilder(ToggleAbilityPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ToggleAbilityPacket::encode).decoder(ToggleAbilityPacket::decode)
+                .consumerMainThread(ToggleAbilityPacket::handle).add();
     }
 
     public static void sync(ServerPlayer player, WerewolfData data) {

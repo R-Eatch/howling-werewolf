@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="Current mod version: 1.2.2"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="Current mod version: 1.3.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1-62B47A?style=flat-square" alt="Minecraft 1.20.1">
   <img src="https://img.shields.io/badge/Forge-47.4.16%2B-E04E14?style=flat-square" alt="Forge 47.4.16 or later">
   <img src="https://img.shields.io/badge/Java-17-007396?style=flat-square" alt="Java 17">
@@ -21,7 +21,16 @@
 
 ## Current version and updates
 
-Howling Werewolf **1.2.2** fixes Modern model UVs with constructor-caching entity renderers such as Xenon / Embeddium on Minecraft 1.20.1 and restores the missing Modern coat description. The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
+Howling Werewolf **1.3.2** brings the updates since 1.2.2 to Forge 1.20.1:
+
+- **Werewolf companions.** Summon a werewolf merchant at the altars and recruit companions with an Alpha Werewolf Badge. Each companion has a nine-slot pack and can follow, guard, rest, go hunting and sort nearby chests. You can recall them across dimensions, raise their tier, revive them, rename them, change their coat, or dismiss them (after a separate confirmation, with their pack handed back to you). Press **C** for the companion window. See the [companion guide](docs/COMPANIONS.md).
+- **Sorting.** Your companion walks to chests and barrels, opens them and carries items by hand. A container wearing a filled item frame keeps only that item, and trapped chests and shulker boxes stay out of it. Containers it cannot walk up to are still tidied from where it stands within 32 blocks (server-adjustable).
+- **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases. The Skins and Reset screens match.
+- **Long, Tool and Fire Claws can be switched off.** Select one on the Abilities page and use **Turn off / Turn on**; it costs and refunds nothing.
+- **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
+- New administrator command `/werewolf unlockalpha`.
+
+For the 1.2.2 Modern texture fix, see the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
 
 ## New spawn eggs
 
@@ -36,7 +45,7 @@ Werewolf and Hunter spawn eggs now use dedicated **16×16** artwork. The new **M
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.2.2**. Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.3.2** (network protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -77,7 +86,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 | Minecraft Java Edition | 1.20.1 |
 | Mod loader | Forge 47.4.16 or later recommended |
 | Java | 17 |
-| Howling Werewolf | 1.2.2 |
+| Howling Werewolf | 1.3.2 |
 
 Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.4.16 remains the primary test target for the current official release.
 
@@ -89,6 +98,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 - A skill tree, active and passive skills, form-unlock requirements, and Moon-Oath ritual guidance.
 - Empty-hand claw combat, with damage and natural damage reduction that grow as you progress.
 - Lifesteal, Long Claws, Fire Claws, Tool Claws, Bloody Bite, and Moonblood Surge.
+- Werewolf companions: summoning, recruiting, following, guarding, hunting, chest sorting, tiers and revival.
 - Wild Feral Werewolves, neutral Hunters, village patrols, Silver equipment, Wolfsbane, and two opposing potions.
 - A complete single-player Alpha Trial: altar construction, a Hunter phase, a multi-stage boss fight, repeat rewards, and permanent Beast Form progression.
 - Complete English and Simplified Chinese localization.
@@ -97,7 +107,7 @@ Forge 47.4.16 or a newer compatible Forge 47.x release is recommended. Forge 47.
 ## Installation
 
 1. Install Minecraft Java Edition 1.20.1 and Forge 47.4.16 or a newer compatible Forge 47.x release.
-2. Place `howlingwerewolf-1.2.2-forge.jar` in the game's `mods` directory.
+2. Place `howlingwerewolf-1.3.2-forge.jar` in the game's `mods` directory.
 3. Start the game.
 
 Back up important worlds before adding or updating any Mod.
@@ -144,7 +154,8 @@ The skill tree strengthens long-term attributes and passive effects, including:
 
 - claw damage and Moonrend damage based on the target's maximum health;
 - natural defense, speed, jumping, regeneration, knockback resistance, and fall resistance;
-- lifesteal, satiety control, claw reach and looting, and additional hunting experience.
+- lifesteal, satiety control, claw reach and looting, and additional hunting experience;
+- Pack Oath, which sets your companion slots and their highest tier.
 
 Skills unlock new actions and rules, including:
 
@@ -159,6 +170,8 @@ Skills unlock new actions and rules, including:
 - Tool Claws;
 - Fire Claws;
 - Bloody Bite.
+
+Once learned, Long Claws, Tool Claws and Fire Claws can be switched off and on again at any time on the Abilities page.
 
 ### Alpha Werewolf Badge
 
@@ -185,6 +198,7 @@ All key bindings can be changed in Minecraft's Controls settings.
 | `N` | Summon Wolf Spirits |
 | `B` | Use Bloody Bite |
 | `R` | Release Moonblood Surge |
+| `C` | Open the companion window |
 
 ## Hunters, Silver, Wolfsbane, Moonbane Pearls, and wild encounters
 
@@ -224,6 +238,8 @@ Configuration file: `config/howlingwerewolf-common.toml`.
 
 `gameplay.enableWerewolfAutoStep` defaults to **true**. Fixed Auto Step heights are **1.0 block for Quadruped Wolf**, **1.5 blocks for Werewolf**, and **2.0 blocks for Beast**. Skills, armor and potions do not change these values. Set it to **false** to restore normal stepping; manual jumping retains its existing rules.
 
+Companion settings: `gameplay.enableCompanions` (default **true**) switches companions as a whole; `gameplay.enableCompanionSorting` (default **true**) switches sorting alone; `gameplay.companionSortingReach` (default **32**, 3–64) is how far a companion can still sort a container it cannot walk up to. The Moonlight / Nightfall choice is saved on the client in `config/howlingwerewolf-client.toml`.
+
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
 Datapacks can extend the following item tags:
@@ -235,7 +251,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. **The 1.1.8 changes were tested; this 1.2.2 port has local build/model/data checks, with in-game and two-client testing pending the maintainer.**
+**v1.1.3** passed the owner's complete normal-survival playthrough on a new world, including defeating the Ender Dragon and obtaining elytra. The 1.3.1 content was first tested in game by the owner on Minecraft 26.1.2, then ported to this branch. After the port, a real client ran the full scripted check in a new world inside the owner's authorized Forge 47.4.16 instance (29 mods including JEI, Xenon, Oculus, Lootr and Curios), once in Chinese at GUI scale 2 and once in English at scale 3: every companion window page, sorting (item totals conserved, the trapped chest and the chest outside the area left alone, the framed chest keeping only its item), items handed back on dismissal, the merchant's six trades, switching Long Claws on the Abilities page, both progression canvases, all three forms' attacks, and the Beast's gallop and prowl were captured. **No two-real-client multiplayer test was run, and shader effects and claim plugins were not tested.**
 
 **The Mod has not yet completed comprehensive multiplayer testing.** Its behavior in long-running multiplayer worlds therefore remains not fully verified. Use the same Mod version on the server and clients, and check the release notes for compatibility information before updating.
 

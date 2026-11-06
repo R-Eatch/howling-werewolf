@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf 1.2.2 for Minecraft 1.20.1 / Forge 47.4.16. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf 1.3.2 for Minecraft 1.20.1 / Forge 47.4.16. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements and notation
 
@@ -100,9 +100,18 @@ Sets one skill-tree rank without spending points. Rank `0` removes the skill. Th
 | `jump` | 3 | `knockback_resistance` | 2 |
 | `fall_resistance` | 2 | `lifesteal` | 3 |
 | `satiety` | 3 | `claw_efficiency` | 3 |
-| `hunting_mastery` | 2 |  |  |
+| `hunting_mastery` | 2 | `pack_oath` | 3 |
 
 Example: `/werewolf settree Steve damage 6`
+
+### `/werewolf unlockalpha <target> [state]`
+
+Unlocks Alpha in one command, for testing.
+
+- Omitting `state` or giving `true` makes the target a werewolf with Beast form and the Alpha companion slots permanently unlocked.
+- `false` removes the unlock and leaves Beast form.
+- Gives no badge or trial rewards.
+- Example: `/werewolf unlockalpha Steve`
 
 ### `/werewolf resettree <target>`
 
