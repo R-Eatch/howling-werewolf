@@ -57,6 +57,10 @@ public final class WerewolfCommands {
                                 .then(Commands.argument("unlocked", BoolArgumentType.bool())
                                         .executes(ctx -> setAbility(ctx, player(ctx), StringArgumentType.getString(ctx, "ability"),
                                                 BoolArgumentType.getBool(ctx, "unlocked")))))))
+                .then(Commands.literal("unlockalpha").then(Commands.argument("target", EntityArgument.player())
+                        .executes(ctx -> unlockAlpha(ctx, player(ctx), true))
+                        .then(Commands.argument("state", BoolArgumentType.bool())
+                                .executes(ctx -> unlockAlpha(ctx, player(ctx), BoolArgumentType.getBool(ctx, "state"))))))
                 .then(Commands.literal("resettree").then(target(ctx -> mutate(ctx, player(ctx), WerewolfData::resetTreeSkills, "tree reset"))))
                 .then(Commands.literal("resetabilities").then(target(ctx -> mutate(ctx, player(ctx), WerewolfData::resetAbilities, "abilities reset"))))
                 .then(Commands.literal("reset").then(target(ctx -> reset(ctx, player(ctx)))))
@@ -143,6 +147,14 @@ public final class WerewolfCommands {
         WerewolfAbility ability = WerewolfAbility.byName(name);
         if (ability == null) { ctx.getSource().sendFailure(Component.literal("Unknown ability.")); return 0; }
         return mutate(ctx, player, data -> data.setAbility(ability, unlocked), ability.id() + "=" + unlocked);
+    }
+
+    /** Grants the same permanent unlock as a first Alpha victory, without its badge or chat rewards. */
+    private static int unlockAlpha(CommandContext<CommandSourceStack> ctx, ServerPlayer player, boolean unlocked) {
+        return mutate(ctx, player, data -> {
+            if (unlocked) prepareWerewolf(data);
+            data.setAlphaDefeated(unlocked);
+        }, "alphaDefeated=" + unlocked);
     }
 
     private static int reset(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {

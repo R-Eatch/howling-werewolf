@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf `1.2.2` for Minecraft 1.21.1 / NeoForge 21.1.248. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf `1.3.2` for Minecraft 1.21.1 / NeoForge 21.1.248. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements
 
@@ -27,6 +27,7 @@ This guide applies to Howling Werewolf `1.2.2` for Minecraft 1.21.1 / NeoForge 2
 | `/werewolf settreepoints <target> <amount>` | Sets currently available skill-tree points to 0–100; it does not add a delta. |
 | `/werewolf settree <target> <skill> <rank>` | Sets a skill-tree rank without spending points. Rank `0` clears it, and the value cannot exceed that skill's maximum. |
 | `/werewolf setability <target> <ability> <unlocked>` | Unlocks or removes an ability without spending points. Removing Quadruped form exits that form. |
+| `/werewolf unlockalpha <target> [state]` | Unlocks Alpha in one command, for testing. Omitted or `true` makes the target a werewolf with Beast form and the Alpha companion slots permanently unlocked; `false` removes the unlock and leaves Beast form. Gives no badge or trial rewards. |
 | `/werewolf resettree <target>` | Clears all skill-tree ranks while retaining identity, level, and abilities. |
 | `/werewolf resetabilities <target>` | Clears all abilities while retaining identity, level, and the skill tree. |
 | `/werewolf reset <target>` | Restores all werewolf data to new-player defaults. |
@@ -43,7 +44,7 @@ This guide applies to Howling Werewolf `1.2.2` for Minecraft 1.21.1 / NeoForge 2
 | `jump` | 3 | `knockback_resistance` | 2 |
 | `fall_resistance` | 2 | `lifesteal` | 3 |
 | `satiety` | 3 | `claw_efficiency` | 3 |
-| `hunting_mastery` | 2 |  |  |
+| `hunting_mastery` | 2 | `pack_oath` | 3 |
 
 ## Ability IDs
 
@@ -65,6 +66,7 @@ The `persistedMirror` field reported by `/werewolf status [target]` means:
 /werewolf settreepoints @s 50
 /werewolf setskillpoints @s 30
 /werewolf settree @s damage 6
+/werewolf unlockalpha @s
 /werewolf setability @s quadruped_form true
 /werewolf status @s
 /werewolf reset @s

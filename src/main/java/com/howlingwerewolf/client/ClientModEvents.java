@@ -45,6 +45,9 @@ public final class ClientModEvents {
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R,
             "key.categories.howlingwerewolf");
+    public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
+            "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
+            "key.categories.howlingwerewolf");
 
     @SubscribeEvent
     public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {
@@ -62,6 +65,7 @@ public final class ClientModEvents {
         event.register(SUMMON_WOLF_SPIRIT);
         event.register(BLOODY_BITE);
         event.register(MOONBLOOD_SURGE);
+        event.register(OPEN_COMPANIONS);
     }
 
     @SubscribeEvent
@@ -78,6 +82,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.ALPHA_MINION.get(),
                 context -> new WerewolfNpcRenderer<com.howlingwerewolf.entity.AlphaMinionEntity>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F));
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
+        event.registerEntityRenderer(ModEntities.WEREWOLF_COMPANION.get(), CompanionRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.RITUAL_ALTAR.get(),
                 RitualAltarRenderer::new);
     }

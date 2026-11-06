@@ -326,7 +326,7 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
     private void animateAttack(T player) {
         if (attackTime <= 0.0F || player.isUsingItem()) return;
 
-        boolean left = player.getMainArm() == HumanoidArm.LEFT;
+        boolean left = (player.swingingArm == net.minecraft.world.InteractionHand.OFF_HAND ? player.getMainArm().getOpposite() : player.getMainArm()) == HumanoidArm.LEFT;
         ModelPart upper = left ? leftUpperArm : rightUpperArm;
         ModelPart fore = left ? leftForearm : rightForearm;
 

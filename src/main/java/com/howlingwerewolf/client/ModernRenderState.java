@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionHand;
 
 /** Frame-local inputs for the imported rig on the entity-based rendering API. */
 final class ModernRenderState {
-    float ageInTicks, walkAnimationPos, walkAnimationSpeed, xRot, attackTime, beastRunAmount, partialTick;
+    float ageInTicks, walkAnimationPos, walkAnimationSpeed, xRot, attackTime, beastRunAmount, beastProwlAmount, beastLeapAmount, partialTick;
     boolean isCrouching, isPassenger, isInWater, isFallFlying, isVisuallySwimming, isAutoSpinAttack, isUsingItem;
     HumanoidArm attackArm;
     ItemStack leftHandItemStack, rightHandItemStack;
@@ -33,8 +33,12 @@ final class ModernRenderState {
         boolean right = entity.getMainArm() == HumanoidArm.RIGHT;
         state.rightHandItemStack = right ? entity.getMainHandItem() : entity.getOffhandItem();
         state.leftHandItemStack = right ? entity.getOffhandItem() : entity.getMainHandItem();
-        state.beastRunAmount = entity instanceof AbstractClientPlayer player && !WerewolfSkinRenderContext.isPreview(player)
-                ? ModernBeastRunState.sample(player, state.partialTick) : 0;
+        if (entity instanceof AbstractClientPlayer player && !WerewolfSkinRenderContext.isPreview(player)) {
+            var motion = ModernBeastRunState.sample(player, state.partialTick);
+            state.beastRunAmount = motion.run();
+            state.beastProwlAmount = motion.prowl();
+            state.beastLeapAmount = motion.leap();
+        }
         return state;
     }
 }

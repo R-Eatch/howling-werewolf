@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.2.2-blue?style=flat-square" alt="Latest mod version 1.2.2"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="Latest mod version 1.3.2"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
   <img src="https://img.shields.io/badge/NeoForge-21.1.248%2B-E04E14?style=flat-square" alt="NeoForge 21.1.248 or later">
   <img src="https://img.shields.io/badge/Java-21-007396?style=flat-square" alt="Java 21">
@@ -17,7 +17,16 @@
 
 > This branch contains the NeoForge edition for Minecraft 1.21.1. The Forge edition for Minecraft 1.20.1 is maintained on the [`1.20.1-forge`](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge) branch.
 
-Howling Werewolf **1.2.2** moves Modern hand-held items slightly below the palm center and raises the Quadruped mouth item into the bite line. The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
+Howling Werewolf **1.3.2** brings the updates since 1.2.2 to NeoForge 1.21.1:
+
+- **Werewolf companions.** Summon a werewolf merchant at the altars and recruit companions with an Alpha Werewolf Badge. Each companion has a nine-slot pack and can follow, guard, rest, go hunting and sort nearby chests. You can recall them across dimensions, raise their tier, revive them, rename them, change their coat, or dismiss them (after a separate confirmation, with their pack handed back to you). Press **C** for the companion window. See the [companion guide](docs/COMPANIONS.md).
+- **Sorting.** Your companion walks to chests and barrels, opens them and carries items by hand. A container wearing a filled item frame keeps only that item, and trapped chests and shulker boxes stay out of it. Containers it cannot walk up to are still tidied from where it stands within 32 blocks (server-adjustable).
+- **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases. The Skins and Reset screens match.
+- **Long, Tool and Fire Claws can be switched off.** Select one on the Abilities page and use **Turn off / Turn on**; it costs and refunds nothing.
+- **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
+- A new **Pack Oath** skill-tree entry (companion slots and their highest tier) and the administrator command `/werewolf unlockalpha`.
+
+For the 1.2.2 held-item adjustments, see the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md). The model switch and built-in coat credits are **Classic — By R_Eatch / Modern — By thewolfulti**.
 
 Howling Werewolf is an independently developed transformation and progression Mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -28,7 +37,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 | Minecraft Java Edition | 1.21.1 |
 | Mod loader | NeoForge 21.1.248 or later compatible 21.1.x release |
 | Java | 21 |
-| Howling Werewolf | 1.2.2 |
+| Howling Werewolf | 1.3.2 |
 
 ## Werewolf skins
 
@@ -39,7 +48,7 @@ Howling Werewolf is an independently developed transformation and progression Mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.2.2**. Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.3.2** (network protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -53,6 +62,16 @@ npcModelSet = "modern"
 - `modern` (default): Alpha and its summoned pack use Ashen; wild and spawn-egg werewolves receive one of the nine saved coats.
 - `classic`: all affected NPCs use the Classic model and Adrian texture for their form.
 - Single-player uses the integrated server's config; multiplayer uses the dedicated server's config. Existing NPCs update after the config file reloads. Clients receive the model and coat through entity tracking, regardless of their own config. This setting does not change player-selected skins.
+
+## Companion and interface settings
+
+Under `[gameplay]` in `config/howlingwerewolf-common.toml`:
+
+- `enableCompanions = true` switches companions as a whole.
+- `enableCompanionSorting = true` switches sorting alone.
+- `companionSortingReach = 32` (3–64) is how far a companion can still sort a container it cannot walk up to.
+
+Press **C** for the companion window; the key can be changed in Controls. The Moonlight / Nightfall choice is saved on the client in `config/howlingwerewolf-client.toml`.
 
 ## Spawn eggs and texture updates
 
@@ -70,7 +89,7 @@ In `config/howlingwerewolf-common.toml`, `[gameplay]` contains `enableWerewolfAu
 
 ## Supported versions
 
-Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**, with **1.2.2** as the latest mod version. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
+Available for Minecraft **1.20.1 / Forge**, **1.21.1 / NeoForge**, and **26.1.2 / NeoForge**; this branch is **1.3.2**. The [GitHub project page](https://github.com/R-Eatch/howling-werewolf) links to each source branch.
 
 ## Build from source
 
@@ -80,11 +99,11 @@ Download or clone this branch, then use the Gradle wrapper with a Java 21 toolch
 ./gradlew.bat clean build
 ```
 
-The distributable JAR is written to `build/libs/howlingwerewolf-1.2.2-neoforge.jar`.
+The distributable JAR is written to `build/libs/howlingwerewolf-1.3.2-neoforge.jar`.
 
 ## Release status
 
-**The maintainer completed a full gameplay test pass for 1.1.3 and tested the 1.1.8 changes. This 1.2.2 port has been built and checked with independent data/model regressions; in-game and two-client testing remain with the maintainer.** Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) and [version changelog](docs/CHANGELOG-1.2.2.md) for the latest update news and notes.
+The maintainer completed a full gameplay test pass for 1.1.3. The 1.3.1 content was first tested in game by the owner on Minecraft 26.1.2, then ported to this branch. The 1.3.1 port on this branch builds locally and passed scripted checks with a real client on a new world in the owner's NeoForge 1.21.1 modpack instance (about 35 mods, including Create, Iron's Spells, Sophisticated Backpacks and JourneyMap): the companion window, sorting (item totals unchanged), dismissal, merchant trades, ability switches, Modern Beast movement and first/third-person swings. A full survival playthrough and two-client multiplayer testing have not been done. Follow the [GitHub project page](https://github.com/R-Eatch/howling-werewolf) for the latest news.
 
 Back up every important world before adding or updating any Mod.
 

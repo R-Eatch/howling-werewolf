@@ -89,6 +89,11 @@ public final class ClientForgeEvents {
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }
+        while (ClientModEvents.OPEN_COMPANIONS.consumeClick()) {
+            PacketDistributor.sendToServer(new com.howlingwerewolf.network.CompanionActionPacket(
+                    com.howlingwerewolf.network.CompanionActionPacket.Action.OPEN,
+                    com.howlingwerewolf.network.CompanionActionPacket.NO_TARGET));
+        }
     }
 
     static void useBloodyBite() {

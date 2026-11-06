@@ -34,6 +34,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     private int ritualTicks;
     private final List<UUID> hunterIds = new ArrayList<>();
     private UUID alphaId;
+    private UUID companionSummoner;
+    private int companionRitualTicks;
 
     public RitualAltarBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.RITUAL_ALTAR.get(), pos, state);
@@ -42,6 +44,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state,
                                   RitualAltarBlockEntity altar) {
         if (altar.isCentral() && altar.isTrialActive()) AlphaTrialManager.tick(altar);
+        if (altar.isCentral() && altar.isCompanionRitualActive()) com.howlingwerewolf.companion.CompanionRitual.tick(altar);
     }
 
     public boolean isCentral() {
@@ -127,6 +130,25 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         changedAndSync();
     }
 
+    public boolean isCompanionRitualActive() { return companionSummoner != null; }
+    public UUID getCompanionSummoner() { return companionSummoner; }
+    public int getCompanionRitualTicks() { return companionRitualTicks; }
+    public void startCompanionRitual(UUID owner) {
+        companionSummoner = owner;
+        companionRitualTicks = 0;
+        changedAndSync();
+    }
+    public int advanceCompanionRitual() {
+        companionRitualTicks++;
+        if (companionRitualTicks % 5 == 0) changedAndSync(); else setChanged();
+        return companionRitualTicks;
+    }
+    public void resetCompanionRitual() {
+        companionSummoner = null;
+        companionRitualTicks = 0;
+        changedAndSync();
+    }
+
     private void changedAndSync() {
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -143,6 +165,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
         for (UUID id : hunterIds) hunters.add(StringTag.valueOf(id.toString()));
         tag.put("HunterIds", hunters);
         if (alphaId != null) tag.putUUID("AlphaId", alphaId);
+        if (companionSummoner != null) tag.putUUID("CompanionSummoner", companionSummoner);
+        tag.putInt("CompanionRitualTicks", companionRitualTicks);
     }
 
     @Override
@@ -161,6 +185,8 @@ public final class RitualAltarBlockEntity extends BlockEntity {
             catch (IllegalArgumentException ignored) {}
         }
         alphaId = tag.hasUUID("AlphaId") ? tag.getUUID("AlphaId") : null;
+        companionSummoner = tag.hasUUID("CompanionSummoner") ? tag.getUUID("CompanionSummoner") : null;
+        companionRitualTicks = Math.clamp(tag.getInt("CompanionRitualTicks"), 0, com.howlingwerewolf.companion.CompanionRitual.DURATION);
     }
 
     @Override
