@@ -6,12 +6,12 @@
 
 | | |
 |---|---|
-| Mod 版本 | **1.3.3** |
+| Mod 版本 | **1.3.4** |
 | Minecraft Java 版 | 1.20.1 |
 | Forge | 47.4.16 或更新版本 |
 | Java | 17 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.3-forge.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.4-forge.jar`。服务端和每个客户端需安装同一版本。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 
