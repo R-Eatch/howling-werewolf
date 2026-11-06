@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf `1.3.2` for Minecraft 26.1.2 / NeoForge 26.1.2.122. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf `1.3.3` for Minecraft 26.1.2 / NeoForge 26.1.2.122. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements
 
@@ -44,7 +44,7 @@ This guide applies to Howling Werewolf `1.3.2` for Minecraft 26.1.2 / NeoForge 2
 | `jump` | 3 | `knockback_resistance` | 2 |
 | `fall_resistance` | 2 | `lifesteal` | 3 |
 | `satiety` | 3 | `claw_efficiency` | 3 |
-| `hunting_mastery` | 2 |  |  |
+| `hunting_mastery` | 2 | `pack_oath` | 3 |
 
 ## Ability IDs
 

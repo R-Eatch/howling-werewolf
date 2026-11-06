@@ -217,8 +217,10 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         return record != null && record.mode == CompanionMode.GUARD && player != null
                 && CompanionManager.enabled(player, record) && getTarget() != null && CompanionManager.mayAttack(player, getTarget());
     }
+    /** Following, resting or sorting: monsters leave it alone, and like a follower it does not fight back (only Guard fights). */
     public boolean isFollowingPassively() {
-        return isRecruited() && record != null && record.mode == CompanionMode.FOLLOW;
+        return isRecruited() && record != null
+                && (record.mode == CompanionMode.FOLLOW || record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT);
     }
     public static boolean ignoresFollowingCompanion(LivingEntity attacker, @Nullable LivingEntity target) {
         return attacker instanceof Mob && !(attacker instanceof WerewolfCompanionEntity)
@@ -374,6 +376,14 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (HWConfig.ENABLE_COMPANIONS.get() && !isRecruited()) addOffersFromTradeSet(level, getOffers(), TRADES);
     }
     @Override protected void rewardTradeXp(MerchantOffer offer) {}
+    // A werewolf merchant barks, pants and whines instead of haggling like a villager.
+    @Override public net.minecraft.sounds.SoundEvent getNotifyTradeSound() {
+        return net.minecraft.sounds.SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().ambientSound().value();
+    }
+    @Override protected net.minecraft.sounds.SoundEvent getTradeUpdatedSound(boolean validTrade) {
+        var sounds = net.minecraft.sounds.SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds();
+        return (validTrade ? sounds.pantSound() : sounds.whineSound()).value();
+    }
     @Override public boolean showProgressBar() { return false; }
     @Override public void notifyTrade(MerchantOffer offer) {
         if (isRecruited() || !HWConfig.ENABLE_COMPANIONS.get()) return;
