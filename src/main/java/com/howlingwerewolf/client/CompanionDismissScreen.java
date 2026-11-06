@@ -14,7 +14,7 @@ import java.util.UUID;
 /** Dismissal cannot be undone, so it asks once more on a page of its own, as the progression reset does. */
 final class CompanionDismissScreen extends Screen {
     private static final String KEY = "screen.howlingwerewolf.companion.dismiss.";
-    private static final int TOP_BAND = 28, BOTTOM_BAND = 40, TEXT_WIDTH = 300;
+    private static final int TOP_BAND = 28, BOTTOM_BAND = 40, TEXT_WIDTH = 320;
     private final Screen parent;
     private final UUID companion;
     private final String name;

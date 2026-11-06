@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.1-blue?style=flat-square" alt="开发版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -54,7 +54,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 26.1.2 |
 | Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
-| Howling Werewolf | 1.3.1 |
+| Howling Werewolf | 1.3.2 |
 
 ## 狼人皮肤
 
@@ -65,7 +65,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 **1.3.1**（协议 19）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
+联机时服务端与客户端都需更新至 **1.3.2**（协议 19）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
 
 ## NPC 模型配置
 
@@ -109,7 +109,7 @@ enableCompanionSorting = true
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.3.1**。
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.3.2**。
 
 ## 从源码构建
 
@@ -119,9 +119,9 @@ enableCompanionSorting = true
 ./gradlew build -x test
 ```
 
-Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.3.1-neoforge-26.1.2.jar`。
+Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.3.2-neoforge-26.1.2.jar`。
 
-当前 Mod 源码版本为 **1.3.1**，网络协议 19。
+当前 Mod 源码版本为 **1.3.2**，网络协议 19。
 
 构建通过；模型/NPC/UI 回归 21089 项、成品检查 2704 项通过：与 1.3.0 相比，文本只改了三段随从教程并新增 15 个键，其余逐字节一致。原生 NeoForge 服务端 793 项通过：先从 1.3.0 留下的真实存档启动，再做一次真实重启，覆盖遣散（物品交还、背包满时掉在脚边、阵亡和狩猎中的随从）、三种爪技能的开关（真实的伤害、点燃和挖掘事件，以及存档和同步）和新的冷却与攻击数值。这一版没有在真实客户端中运行，攻击动作、遣散确认页和技能开关的实际观感由作者实机验收；没有测试 Sodium、光影包、领地插件或两个真实客户端。
 

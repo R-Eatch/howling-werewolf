@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.1. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.2. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [every line of dialogue](COMPANION-DIALOGUE.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -114,7 +114,9 @@ Gray dots on the radar are containers skipped for now, and hovering shows their 
 - open by another player;
 - locked, obstructed or interaction-protected;
 - loot chests yet to be opened;
-- out of reach (tried again after a minute, and your companion mentions it once).
+- impossible to walk up to and beyond the sorting reach (32 blocks by default; tried again after a minute, and your companion mentions it once).
+
+A container your companion cannot walk up to is still tidied from where it stands, as long as it lies within the sorting reach.
 
 Protection checks cover vanilla spawn and access rules plus NeoForge's right-click interaction event. Whether a claim plugin uses that event depends on the plugin, so try it on yours.
 
@@ -157,11 +159,13 @@ Each companion then rests for two Minecraft days (48000 game ticks), early recal
 [gameplay]
 enableCompanions = true
 enableCompanionSorting = true
+companionSortingReach = 32
 npcModelSet = "modern"
 ```
 
 - `enableCompanions = false` stops rites, trading, recruiting, inventories and all companion actions. Entities are put away, records and items are kept, and hunt and rest timers pause. The window still opens and explains why. Pack Oath takes new points again once this is back on, and learned ranks are kept. Other werewolf features carry on.
 - `enableCompanionSorting = false` turns off sorting alone.
+- `companionSortingReach` is how far a companion can still reach into a container it cannot walk up to: 3–64 blocks, 32 by default. At 3, anything it cannot reach on foot is skipped.
 - Data packs can override `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`, `data/howlingwerewolf/trade_set/werewolf_brother.json` and `data/howlingwerewolf/villager_trade/werewolf_brother/*.json`.
 
 ## Combat detail

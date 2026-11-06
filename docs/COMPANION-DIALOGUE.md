@@ -56,11 +56,11 @@
 | 键 / Key | 中文 | English |
 |---|---|---|
 | `sort.0` | %s放心，这些箱中之物，容我一一归置。 | Rest easy, %s. I shall set these stores in good order. |
-| `sort.1` | 这些箱笼久未清点，%s，且交与我吧。 | These chests have long wanted tending, %s. Leave them in my care. |
+| `sort.1` | 这些箱子久未清点，%s，且交与我吧。 | These chests have long wanted tending, %s. Leave them in my care. |
 | `sort.2` | 遵命，%s。待我逐一开箱，清点归位。 | As you command, %s. I shall open each in turn and see all things to their place. |
 | `sorted` | %s，诸般物资皆已归置停当。 | It is done, %s. All your stores lie in good order. |
-| `sort_unreachable` | %s，有一处箱笼我无路可至，只得暂且搁下。 | One chest lies beyond my reach, %s. I must leave it be for now. |
-| `sort_idle_found.0` | %s，又有新物入库，容我前去料理。 | New goods have come to the stores, %s. I shall see to them. |
+| `sort_unreachable` | %s，有一处箱子我无路可至，只得暂且搁下。 | One chest lies beyond my reach, %s. I must leave it be for now. |
+| `sort_idle_found.0` | %s，又有新物入库，容我前去收拾。 | New goods have come to the stores, %s. I shall see to them. |
 | `sort_idle_found.1` | 箱中又添了些东西，%s，我这便去归置。 | The stores have grown again, %s. Let me put them right. |
 
 ## 背包、升级与外观 / Packs, growth and looks

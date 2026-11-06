@@ -1,6 +1,6 @@
 # 随从指南
 
-适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.3.1。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
+适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.3.2。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
 配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [全部对白](COMPANION-DIALOGUE.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
@@ -114,7 +114,9 @@
 - 正被其他玩家打开；
 - 上锁、被挡住或受交互保护；
 - 尚未开启过的战利品箱；
-- 走不到（一分钟后重试，这种情况它会提醒你一次）。
+- 走不到跟前、而且超出整理距离（默认 32 格；一分钟后重试，这种情况它会提醒你一次）。
+
+走不到跟前的容器只要在整理距离以内，随从会站在原地伸手整理，不再跳过。
 
 保护检查包括原版出生点保护、访问规则，以及 NeoForge 的右键交互事件。领地插件是否经过这个事件要看插件本身，建议实际试一下。
 
@@ -157,11 +159,13 @@
 [gameplay]
 enableCompanions = true
 enableCompanionSorting = true
+companionSortingReach = 32
 npcModelSet = "modern"
 ```
 
 - `enableCompanions = false`：停用仪式、交易、招募、背包和所有随从操作，实体收起，档案和物品保留，狩猎与休整计时暂停。窗口仍可查看并显示提示。“狼群誓约”暂停加点，已学等级保留。其他狼人玩法照常。
 - `enableCompanionSorting = false`：只关闭整理。
+- `companionSortingReach`：随从走不到跟前时，仍能伸手整理的最远距离，3–64 格，默认 32。设为 3 时，走不到的容器一律跳过。
 - 数据包可覆盖 `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`、`data/howlingwerewolf/trade_set/werewolf_brother.json` 和 `data/howlingwerewolf/villager_trade/werewolf_brother/*.json`。
 
 ## 战斗细节

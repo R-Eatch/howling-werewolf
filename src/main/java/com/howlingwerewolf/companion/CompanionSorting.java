@@ -423,20 +423,31 @@ public final class CompanionSorting {
     private static void walk(State state, WerewolfCompanionEntity entity, CompanionRecord record, ServerPlayer player, Task task, long now) {
         Endpoint destination = destination(task);
         BlockPos pos = nearestMember(entity, destination);
-        if (inReach(entity, pos)) {
-            entity.getNavigation().stop();
-            Endpoint current = resolve(player, entity, record.sorting, destination.id());
-            if (!destination.matches(current)) { abandon(state, record.id, task, entity, now + RETRY); return; }
-            entity.openSortContainers(current.members);
-            task.phase = Phase.OPENING; task.timer = LID_TICKS;
-            return;
-        }
-        if (++task.walked > WALK_LIMIT) { skipUnreachable(state, entity, record, player, task, now, destination); return; }
-        if (entity.getNavigation().isDone()) {
+        if (inReach(entity, pos)) { beginWork(state, entity, record, player, task, now, destination); return; }
+        boolean stuck = ++task.walked > WALK_LIMIT;
+        if (!stuck && entity.getNavigation().isDone()) {
             Path path = entity.getNavigation().createPath(pos, 2);
-            if (path == null || !path.canReach()) { skipUnreachable(state, entity, record, player, task, now, destination); return; }
-            entity.getNavigation().moveTo(path, 1.0);
+            if (path != null && path.canReach()) { entity.getNavigation().moveTo(path, 1.0); return; }
+            stuck = true;
         }
+        if (!stuck) return;
+        // No way up to it on foot: within its long reach it works from where it stands.
+        if (inLongReach(entity, pos)) beginWork(state, entity, record, player, task, now, destination);
+        else skipUnreachable(state, entity, record, player, task, now, destination);
+    }
+
+    private static void beginWork(State state, WerewolfCompanionEntity entity, CompanionRecord record, ServerPlayer player, Task task, long now, Endpoint destination) {
+        entity.getNavigation().stop();
+        Endpoint current = resolve(player, entity, record.sorting, destination.id());
+        if (!destination.matches(current)) { abandon(state, record.id, task, entity, now + RETRY); return; }
+        entity.openSortContainers(current.members);
+        task.phase = Phase.OPENING; task.timer = LID_TICKS;
+    }
+
+    /** The server-set distance a companion can reach into a container it cannot walk up to. */
+    private static boolean inLongReach(WerewolfCompanionEntity entity, BlockPos pos) {
+        double reach = HWConfig.COMPANION_SORTING_REACH.get();
+        return entity.position().distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= reach * reach;
     }
 
     /** Skips this container for the current pass and keeps working through the others. */

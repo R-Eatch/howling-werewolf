@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.1-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.2-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -54,7 +54,7 @@ Howling Werewolf is an independently developed transformation and progression mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.3.1 |
+| Howling Werewolf | 1.3.2 |
 
 ## Werewolf skins
 
@@ -65,7 +65,7 @@ Howling Werewolf is an independently developed transformation and progression mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.3.1** (protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.3.2** (protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -109,7 +109,7 @@ The Moonlight or Nightfall choice is a personal preference, stored in `config/ho
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.3.1**.
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.3.2**.
 
 ## Build from source
 
@@ -119,9 +119,9 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.3.1-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.3.2-neoforge-26.1.2.jar`.
 
-Current source version is **1.3.1**, protocol 19.
+Current source version is **1.3.2**, protocol 19.
 
 The build passes, as do 21089 model, NPC and UI checks and 2704 artifact checks: compared with 1.3.0, only three companion guide passages changed and 15 keys were added, with every other line of text byte for byte the same. 793 native NeoForge server checks pass, first starting from the real save 1.3.0 left behind, then through a real restart. They cover dismissal (items handed back, dropped at the feet of an owner with a full inventory, fallen and hunting companions), the three claw switches (real damage, ignition and mining events, plus saving and sync) and the new cooldown and attack values. This version was not run in a real client: the restored attack animation, the dismissal page and the claw switches await the author's in-game review. It was not checked with Sodium, shader packs, claim plugins or two real clients.
 
