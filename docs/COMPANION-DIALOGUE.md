@@ -12,6 +12,7 @@
 - 整理：一轮完成报告一次；走不到容器时一项工作最多提醒一次；一轮做完后又有新物品时提一句，五分钟内最多一次，避免漏斗持续进货时刷屏。 / Sorting: a report when a round finishes; one mention per job when a container is out of reach; a remark when new goods arrive after a finished round, at most once in five minutes, so a steady hopper cannot flood chat.
 - 迎敌、重伤、胜利、阵亡：随战斗自动触发，有节流。 / Battle lines: triggered by combat, with throttling.
 - 闲谈：靠近主人八格内、无目标、五秒未受伤，且主人没有睡觉、旁观或打开其他容器时才说；同一主人的所有随从共享至少一分钟的间隔。 / Idle words: only within eight blocks of the owner, with no target, five seconds unhurt, and the owner not sleeping, spectating or in another container; all of an owner's companions share a gap of at least a minute.
+- 遣散：确认遣散时道别一句；阵亡或外出狩猎的随从不说话。 / Dismissal: one farewell when it is confirmed; a fallen or hunting companion stays silent.
 - 对白只发给主人本人。 / Dialogue goes only to the owner.
 
 ## 商人 / The merchant
@@ -34,6 +35,7 @@
 | `recalled` | %s，我已归来，侍立左右。 | I am returned to your side, %s. |
 | `returned` | %s，此行不虚，猎获尽在此处。 | The hunt is done, %s, and I return laden with its spoils. |
 | `revived` | 再造之恩，没齿难忘。此命仍归%s所有。 | You have given me life anew, %s. It is yours, as it ever was. |
+| `dismissed` | %s，誓约至此已尽。此去月路各自珍重，后会有期。 | Here our oath is fulfilled, %s. Fare well on your moonlit road, until we meet again. |
 
 ## 指令回应 / Answering orders
 

@@ -59,9 +59,9 @@ A tier 0 companion on a 2-day hunt rolls 8 times and a tier 3 companion rolls 16
 
 Rewards merge into existing stacks in the nine slots, then fill empty slots, and anything left drops where the companion returns. Settling clears the hunt at once, so repeated recalls pay out once.
 
-## The three-day cooldown
+## The two-day cooldown
 
-Each companion keeps its own cooldown of **72000 game ticks**, 60 minutes at 20 TPS.
+Each companion keeps its own cooldown of **48000 game ticks**, 40 minutes at 20 TPS.
 
 - Natural end: counted from the planned end. If delivery was delayed by an offline owner or a lack of space, that time still counts.
 - Early recall: counted from the recall, even when an immediate recall earned nothing.

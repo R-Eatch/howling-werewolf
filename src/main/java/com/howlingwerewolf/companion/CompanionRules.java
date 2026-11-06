@@ -10,7 +10,7 @@ public final class CompanionRules {
     public static final int MERCHANT_LIFETIME = 20 * 60 * 10;
     public static final int MIN_HUNT_TICKS = 36_000;
     public static final int MAX_HUNT_TICKS = 72_000;
-    public static final int HUNT_COOLDOWN_TICKS = 72_000;
+    public static final int HUNT_COOLDOWN_TICKS = 48_000;
     private static final int[] REWARD_WEIGHTS = {4, 5, 6, 8};
 
     public static int tier(int value) { return Math.clamp(value, 0, MAX_TIER); }
@@ -21,7 +21,7 @@ public final class CompanionRules {
         return currentTier >= 0 && currentTier < MAX_TIER ? 2 << currentTier : 0;
     }
     public static double maxHealth(int tier) { return 30 + 10 * tier(tier); }
-    public static double attackDamage(int tier) { return 4 + 2 * tier(tier); }
+    public static double attackDamage(int tier) { return 6 + 2 * tier(tier); }
     public static float damageMultiplier(int tier) { return 1.0F - 0.10F * tier(tier); }
     public static float regeneration(int tier) { return 1.0F + 0.5F * tier(tier); }
     public static long huntElapsed(long now, long start, long end) {

@@ -7,7 +7,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.HumanoidArm;
@@ -18,21 +17,18 @@ public final class WerewolfFirstPersonClawRenderer {
     private static final ModelPart BEAST_ROOT = createBeastLayer().bakeRoot();
 
     public static void render(RenderArmEvent event, WerewolfRenderData data) {
-        draw(event.getPoseStack(), event.getSubmitNodeCollector(), event.getPackedLight(), event.getArm(), data);
-        event.setCanceled(true);
-    }
-
-    static void draw(PoseStack pose, SubmitNodeCollector collector, int light, HumanoidArm side, WerewolfRenderData data) {
         boolean beastMode = data.form() == WerewolfForm.BEAST;
         ModelPart modelRoot = beastMode ? BEAST_ROOT : ROOT;
-        ModelPart arm = modelRoot.getChild(side == HumanoidArm.RIGHT ? "right_arm" : "left_arm");
+        ModelPart arm = modelRoot.getChild(event.getArm() == HumanoidArm.RIGHT ? "right_arm" : "left_arm");
         arm.resetPose();
+        PoseStack pose = event.getPoseStack();
         pose.pushPose();
-        collector.submitModelPart(arm, pose,
+        event.getSubmitNodeCollector().submitModelPart(arm, pose,
                 RenderTypes.entityCutout(WerewolfSkinTextures.get(data.skinId(),
                         beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)),
-                light, OverlayTexture.NO_OVERLAY, null);
+                event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
         pose.popPose();
+        event.setCanceled(true);
     }
 
     private static LayerDefinition createLayer() {

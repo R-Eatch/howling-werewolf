@@ -251,9 +251,6 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         return target instanceof LivingEntity living && canAttack(living) && super.doHurtTarget(level, target);
     }
 
-    /** Seen from outside, the player's snappy six-tick swing is over before it reads as a blow. */
-    @Override public int getCurrentSwingDuration() { return super.getCurrentSwingDuration() + 6; }
-
     @Override public void aiStep() {
         if (!level().isClientSide() && !HWConfig.ENABLE_COMPANIONS.get()) { park(); return; }
         // Vanilla only advances the swing timer for monsters and players; villagers never attack.

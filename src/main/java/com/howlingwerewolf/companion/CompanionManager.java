@@ -99,6 +99,7 @@ public final class CompanionManager {
                     case RENAME -> rename(player, record, packet.value());
                     case SKIN -> changeSkin(player, record, packet.value());
                     case SORT -> CompanionSorting.action(player, record, packet.value());
+                    case DISMISS -> dismiss(player, record);
                     default -> {}
                 }
                 sendView(player, false);
@@ -235,6 +236,27 @@ public final class CompanionManager {
         record.mode = enabled(player, record) ? CompanionMode.FOLLOW : CompanionMode.REST;
         CompanionSavedData.get(player.level().getServer()).setDirty();
         entity.sayTo(player, "revived");
+    }
+
+    /**
+     * Releases a companion for good: the record, tier and coat are gone, and nothing spent on it
+     * is refunded. Whatever it carried goes back to the owner, so a dismissal never destroys items.
+     */
+    private static void dismiss(ServerPlayer player, CompanionRecord record) {
+        MinecraftServer server = player.level().getServer();
+        CompanionSavedData data = CompanionSavedData.get(server);
+        CompanionSorting.cancel(server, record.id);
+        closeInventory(player, record);
+        String name = record.name();
+        if (record.mode.hasEntity()) say(player, record, "dismissed");
+        WerewolfCompanionEntity entity = data.loaded(record.id);
+        if (entity != null) entity.discard();
+        data.remove(record);
+        for (int slot = 0; slot < record.inventory.getContainerSize(); slot++) {
+            ItemStack stack = record.inventory.removeItemNoUpdate(slot);
+            if (!stack.isEmpty()) player.getInventory().placeItemBackInInventory(stack);
+        }
+        message(player, "dismissed", name);
     }
 
     public static void openControls(ServerPlayer player, WerewolfCompanionEntity entity) {

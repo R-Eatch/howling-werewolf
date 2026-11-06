@@ -38,7 +38,7 @@ public final class CompanionScreen extends CompanionFrameScreen {
     private final Map<CompanionActionPacket.Action, UiButton> commands = new EnumMap<>(CompanionActionPacket.Action.class);
     private final List<UiButton> slots = new ArrayList<>();
     private EditBox address;
-    private UiButton saveAddress, resetAddress, appearance;
+    private UiButton saveAddress, resetAddress, appearance, dismiss;
     private int actionDelay;
 
     public CompanionScreen(@Nullable Screen parent, CompoundTag snapshot) { this(parent, snapshot, null); }
@@ -89,6 +89,10 @@ public final class CompanionScreen extends CompanionFrameScreen {
                     .icon(orderIcons.get(i)).hint(() -> disabledReason(action));
             commands.put(action, addRenderableWidget(row));
         }
+        // Set apart below the orders: dismissal is final, so it asks again on a page of its own.
+        dismiss = addRenderableWidget(new UiButton(orderX, top + ORDER_TOP + ORDERS.length * ORDER_STEP + 2, ORDER_W, 16,
+                Component.translatable(KEY + "dismiss"), Look.SOFT, this::askDismiss)
+                .hint(() -> Component.translatable(KEY + "dismiss_hint")));
         int bandTop = canvasBottom + 5, right = left + WIDTH - 12;
         for (int i = 0; i < DEEDS.length; i++) {
             CompanionActionPacket.Action action = DEEDS[i];
@@ -129,6 +133,12 @@ public final class CompanionScreen extends CompanionFrameScreen {
         int index = 0;
         for (int i = 0; i < entries.size(); i++) if (selected != null && selected.toString().equals(entries.getCompoundOrEmpty(i).getStringOr("Id", ""))) index = i;
         choose(Math.floorMod(index + direction, entries.size()));
+    }
+    private void askDismiss() {
+        CompoundTag record = selectedRecord();
+        if (record == null || selected == null) return;
+        minecraft.setScreen(new CompanionDismissScreen(this, selected, record.getStringOr("Name", ""),
+                record.getIntOr("Tier", 0), mode(record)));
     }
     private void requestAddress(String value) {
         send(CompanionActionPacket.Action.ADDRESS, CompanionActionPacket.NO_TARGET, value);
@@ -185,6 +195,8 @@ public final class CompanionScreen extends CompanionFrameScreen {
         resetAddress.active = system && actionDelay == 0 && (!address.getValue().isEmpty() || !snapshot.getStringOr("Address", "").isEmpty());
         appearance.active = system && record != null && mode(record).hasEntity();
         appearance.visible = record != null && mode(record) != CompanionMode.DEAD;
+        dismiss.visible = record != null;
+        dismiss.active = system && record != null && actionDelay == 0;
         ListTag entries = snapshot.getListOrEmpty("Companions");
         for (int i = 0; i < slots.size(); i++) {
             UiButton slot = slots.get(i);

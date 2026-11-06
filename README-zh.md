@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.0-blue?style=flat-square" alt="开发版本"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.1-blue?style=flat-square" alt="开发版本"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 或更高版本">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -19,18 +19,16 @@
 
 Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围绕感染、月相变身、两套成长系统、三种狼人形态、猎人与银制品、狼毒花、Alpha 试炼以及随从狼群展开。
 
-## 1.3.0 更新内容
+## 1.3.1 更新内容
 
-- **全新的进阶界面。** 按 **K**，世界退入月光：你自己的形态站在今夜的月亮前，经验环绕月轮，技能漂浮在四周。右上角的月牙可以在白色“月白”和深色“夜幕”两种画布之间切换。皮肤页和重置页也换成了同样的样式。
-- **全新的随从窗口。** 同一套风格的轻量版：一块浮在游戏画面上的面板，打开很快，数字键直接下令，下方黑色栏说明指针所指的内容。狩猎现在有进度条。
-- **更有分量和节奏的攻击。** 双手都空着时，狼人先挥右爪再挥左爪；野兽双臂砸下，连击时接一记横扫；四足狼扑咬，连击时撕扯。三种形态各有节奏，连击时左右爪轮流领先，第一人称也能看到双爪。随从用同样的方式战斗。
-- **用展示框指定存放。** 在箱子或木桶上挂一个放了物品的展示框，这个容器就只放框里的物品：同种物品会搬进来，其他物品会搬出去。
-- **陷阱箱和潜影盒留给你自己。** 整理时随从会绕开它们，想原样留着的东西放进去就好。
-- **随从说话更古雅。** 商人和随从的全部对白都重写了，中英文同步，并给整理加了新台词。见[对白目录](docs/COMPANION-DIALOGUE.md)。
-- **肘部毛发修复。** 手臂在下蹲、奔跑和攻击中折叠时，前臂上的毛发顺着手臂贴合。
+- **攻击动作恢复为 1.2.2 的样式。** 1.3.0 的新挥爪动作撤下，狼人、野兽和四足狼重新使用原来的单臂挥击，第一人称也恢复原样；随从、Alpha 和野生狼人一起恢复。伤害和攻击冷却没有变化。
+- **长爪、工具爪和火焰爪可以关闭。** 按 **K** → 技能页选中它们，用下方的“关闭／开启”切换。默认开启；关闭不退还也不消耗技能点，随时可以重新开启，开关随存档保存。
+- **随从可以遣散。** 狼群页指令栏下方新增“遣散”，点下后进入单独的确认页。遣散后档案、阶数和外观一并消失，背包里的物品交还给你（放不下的落在脚边），名额随即空出。阵亡或正在狩猎的随从也可以遣散。
+- **随从更强，休整更短。** 0–3 阶攻击改为 6／8／10／12；每次狩猎后的休整从三个 MC 日缩短为两个。
 
 ## 早期版本
 
+- **1.3.0**：月光风格的进阶界面和随从窗口，狩猎进度条，展示框指定整理，陷阱箱和潜影盒不参与整理，古雅风格对白，肘部毛发修复。
 - **1.2.7**：随从亲自走动整理；四页签随从窗口；Beast 改为狼式奔跑；`/werewolf unlockalpha`。
 - **1.2.6**：随从“整理”指令；Modern UV 提交方式调整。
 - **1.2.5**：**C** 打开随从窗口，右键打开单个随从，自定义称呼，对白只发给主人。
@@ -56,7 +54,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 | Minecraft Java 版 | 26.1.2 |
 | Mod 加载器 | NeoForge 26.1.2.122 或兼容的更高 26.1.2.x 版本 |
 | Java | 25 |
-| Howling Werewolf | 1.3.0 |
+| Howling Werewolf | 1.3.1 |
 
 ## 狼人皮肤
 
@@ -67,7 +65,7 @@ Howling Werewolf 是一款独立开发的狼人变身与成长 Mod，内容围�
 - 皮肤选择会随玩家数据保存，死亡、换维度、重置等级、治愈后再觉醒均保留；第三人称、背包预览和第一人称爪使用同一套皮肤。
 - 可在皮肤页创建绘画模板、打开资源包列表，启用自己的 PNG 皮肤；编辑后按 **F3 + T** 重载。详见[自定义皮肤教程](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
 
-联机时服务端与客户端都需更新至 **1.3.0**（协议 18）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
+联机时服务端与客户端都需更新至 **1.3.1**（协议 19）。每个玩家的模型系列和皮肤独立同步：A 使用 Modern、B 使用 Classic 时，双方都能看到 A 的 Modern 模型和 B 的 Classic 模型。内置九套配色无需额外资源包。自定义皮肤仍需观察者启用同一资源包；缺少资源包时，Classic 回退 Adrian，Modern 回退 Ashen，保存的选择仍保留。
 
 ## NPC 模型配置
 
@@ -111,7 +109,7 @@ enableCompanionSorting = true
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.3.0**。
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge)：本分支，版本 **1.3.1**。
 
 ## 从源码构建
 
@@ -121,11 +119,11 @@ enableCompanionSorting = true
 ./gradlew build -x test
 ```
 
-Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.3.0-neoforge-26.1.2.jar`。
+Windows 使用 `gradlew.bat build -x test`。可分发 JAR 位于 `build/libs/howlingwerewolf-1.3.1-neoforge-26.1.2.jar`。
 
-当前 Mod 源码版本为 **1.3.0**，网络协议 18。
+当前 Mod 源码版本为 **1.3.1**，网络协议 19。
 
-最终构建通过；模型/NPC/UI 回归 21028 项、成品检查 2624 项通过，其中全部进阶文本与 1.2.7 逐字节一致。原生 NeoForge 服务端 759 项通过：先从 1.2.7 留下的真实存档升级，再做一次真实重启，覆盖真实箱子上的展示框、陷阱箱和潜影盒。在 NeoForge 26.1.2.122 和 RTX 4060 Laptop GPU 上，真实客户端在隔离目录中跑完全部脚本（中文 GUI 缩放 2，英文 3）：随从走动、开箱、搬运，物品总数不变，挂框箱子最后只剩框内物品，陷阱箱保持原样，三种形态的第一人称和第三人称攻击都截取了画面。这些实机测试之后又做了几处客户端小调整，只经过构建和回归。攻击手感和长时间游玩由作者实机验收；这一版没有测试 Sodium、光影包、领地插件或两个真实客户端。
+构建通过；模型/NPC/UI 回归 21089 项、成品检查 2704 项通过：与 1.3.0 相比，文本只改了三段随从教程并新增 15 个键，其余逐字节一致。原生 NeoForge 服务端 793 项通过：先从 1.3.0 留下的真实存档启动，再做一次真实重启，覆盖遣散（物品交还、背包满时掉在脚边、阵亡和狩猎中的随从）、三种爪技能的开关（真实的伤害、点燃和挖掘事件，以及存档和同步）和新的冷却与攻击数值。这一版没有在真实客户端中运行，攻击动作、遣散确认页和技能开关的实际观感由作者实机验收；没有测试 Sodium、光影包、领地插件或两个真实客户端。
 
 ## 管理员命令
 

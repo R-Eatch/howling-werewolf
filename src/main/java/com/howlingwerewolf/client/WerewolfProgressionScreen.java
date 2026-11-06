@@ -10,6 +10,7 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import com.howlingwerewolf.network.SetClawSlotPacket;
+import com.howlingwerewolf.network.ToggleAbilityPacket;
 import com.howlingwerewolf.network.ToggleBeastModePacket;
 import com.howlingwerewolf.network.ToggleNightVisionPacket;
 import com.howlingwerewolf.network.ToggleQuadrupedModePacket;
@@ -61,7 +62,7 @@ public final class WerewolfProgressionScreen extends Screen {
     private final List<Line> article = new ArrayList<>();
     private final MoonUi.Backdrop backdrop = new MoonUi.Backdrop();
 
-    private MoonUi.Pill upgrade, reset, unlock, summon, toggleForm, toggleVision, clawLeft, clawRight, bite, surge, beast;
+    private MoonUi.Pill upgrade, reset, unlock, summon, toggleForm, toggleVision, clawLeft, clawRight, bite, surge, beast, clawSwitch;
     private float uiScale = 1;
     private int wide, tall, band, stageBottom, moonY, moonRadius, orbitX, orbitY, rowGap;
     private int articleX, articleY, articleWidth, articleHeight, articleLength;
@@ -82,7 +83,7 @@ public final class WerewolfProgressionScreen extends Screen {
         clearWidgets();
         nodes.clear();
         tabs.clear();
-        upgrade = reset = unlock = summon = toggleForm = toggleVision = clawLeft = clawRight = bite = surge = beast = null;
+        upgrade = reset = unlock = summon = toggleForm = toggleVision = clawLeft = clawRight = bite = surge = beast = clawSwitch = null;
         float fit = Math.min((float) width / MIN_WIDTH, (float) height / MIN_HEIGHT);
         uiScale = fit < 1 ? fit : Math.max(1, (int) Math.min((float) width / COMFORT_WIDTH, (float) height / COMFORT_HEIGHT));
         wide = Math.round(width / uiScale);
@@ -194,6 +195,9 @@ public final class WerewolfProgressionScreen extends Screen {
         bite = addRenderableWidget(new MoonUi.Pill(right - 30, row, 30, 16, Component.literal("B"), false, ClientForgeEvents::useBloodyBite));
         surge = addRenderableWidget(new MoonUi.Pill(right - 30, row, 30, 16, Component.literal("R"), false,
                 () -> ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE))));
+        // Long, Tool and Fire Claws can be switched off once learned, and on again at no cost.
+        clawSwitch = addRenderableWidget(new MoonUi.Pill(right - 80, row, 80, 16, Component.translatable(KEY + "ability_disable"), false,
+                () -> ClientPacketDistributor.sendToServer(new ToggleAbilityPacket(selectedAbility))));
     }
 
     private void buildInfo(@Nullable WerewolfData data) {
@@ -299,6 +303,10 @@ public final class WerewolfProgressionScreen extends Screen {
             control(clawRight, data, WerewolfAbility.EMPTY_CLAW_SLOT);
             control(bite, data, WerewolfAbility.BLOODY_BITE);
             control(surge, data, WerewolfAbility.MOONBLOOD_SURGE);
+            clawSwitch.visible = selectedAbility.switchable();
+            clawSwitch.active = data != null && data.hasAbility(selectedAbility);
+            clawSwitch.setMessage(Component.translatable(data != null && data.isAbilityDisabled(selectedAbility)
+                    ? KEY + "ability_enable" : KEY + "ability_disable"));
         }
         if (beast != null) beast.active = data != null && data.isTransformed() && data.hasDefeatedAlpha();
     }
@@ -553,6 +561,7 @@ public final class WerewolfProgressionScreen extends Screen {
                 if (data.hasAbility(shown.ability)) {
                     if (shown.ability == WerewolfAbility.QUADRUPED_FORM) state = Component.translatable(data.isQuadrupedMode() ? KEY + "active" : KEY + "inactive");
                     else if (shown.ability == WerewolfAbility.EMPTY_CLAW_SLOT) state = Component.translatable(KEY + "claw_slot", data.getClawHotbarSlot() + 1);
+                    else if (shown.ability.switchable()) state = Component.translatable(data.isAbilityDisabled(shown.ability) ? KEY + "inactive" : KEY + "active");
                 }
                 if (state != null) graphics.text(font, state, x, top, 0xFFEE7A8C, false);
             }
@@ -569,7 +578,7 @@ public final class WerewolfProgressionScreen extends Screen {
         if (unlock != null) {
             unlock.visible = visible;
             refresh();
-            if (!visible) for (MoonUi.Pill pill : List.of(summon, toggleForm, toggleVision, clawLeft, clawRight, bite, surge)) pill.visible = false;
+            if (!visible) for (MoonUi.Pill pill : List.of(summon, toggleForm, toggleVision, clawLeft, clawRight, bite, surge, clawSwitch)) pill.visible = false;
         }
     }
 
@@ -810,7 +819,7 @@ public final class WerewolfProgressionScreen extends Screen {
                     pipX += pipWidth + gap;
                 }
             } else {
-                int color = owned ? theme.accent() : theme.line();
+                int color = owned ? data.isAbilityDisabled(ability) ? theme.sub() : theme.accent() : theme.line();
                 int barX = left ? Math.round(targetX) - NODE_RADIUS - 6 - 12 : textX;
                 graphics.fill(barX, textY + 11, barX + 12, textY + 14, MoonUi.alpha(color, textAlpha));
             }

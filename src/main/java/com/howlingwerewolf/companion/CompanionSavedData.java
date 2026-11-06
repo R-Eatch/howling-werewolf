@@ -96,6 +96,14 @@ public final class CompanionSavedData extends SavedData {
     }
     @Nullable public CompanionRecord find(UUID id) { return records.get(id); }
     public void add(CompanionRecord record) { attach(record); setDirty(); }
+    public void remove(CompanionRecord record) {
+        if (records.remove(record.id, record)) {
+            record.onInventoryChanged(() -> {});
+            loaded.remove(record.id);
+            lastSpeech.remove(record.id);
+            setDirty();
+        }
+    }
     private void attach(CompanionRecord record) {
         if (records.putIfAbsent(record.id, record) != null) throw new IllegalStateException("Duplicate companion UUID");
         record.onInventoryChanged(this::setDirty);

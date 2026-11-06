@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.0. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.1. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [every line of dialogue](COMPANION-DIALOGUE.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -46,10 +46,10 @@ Companions start at tier 0. Tiers 1, 2 and 3 cost 2, 4 and 8 Moonbane Pearls, 14
 
 | Tier | Max health | Melee damage | Natural reduction | Regen per second | Rolls on a full hunt |
 |---|---:|---:|---:|---:|---:|
-| 0 | 30 | 4 | 0% | 1 | 6–12 |
-| 1 | 40 | 6 | 10% | 1.5 | 7–15 |
-| 2 | 50 | 8 | 20% | 2 | 9–18 |
-| 3 | 60 | 10 | 30% | 2.5 | 12–24 |
+| 0 | 30 | 6 | 0% | 1 | 6–12 |
+| 1 | 40 | 8 | 10% | 1.5 | 7–15 |
+| 2 | 50 | 10 | 20% | 2 | 9–18 |
+| 3 | 60 | 12 | 30% | 2.5 | 12–24 |
 
 Regeneration starts five seconds after the last hit. An upgrade raises the health cap and leaves current health as it is.
 
@@ -67,6 +67,7 @@ Companions out hunting or fallen still count toward the party limit. Respeccing 
 | Recall | Works from any dimension and any chunk. It returns to safe ground beside you, and recalling a hunter settles the hunt early. A fallen companion needs reviving first. |
 | Upgrade | Spends Moonbane Pearls, within the skill's tier limit. |
 | Revive | Spends one Alpha Werewolf Badge and returns it at full health beside you, with tier, name, coat and inventory intact. |
+| Dismiss | Below the orders; opens a separate confirmation page. Once confirmed, the companion leaves the pack and its record, tier, name and coat are gone, with nothing spent on it refunded. Whatever it carries is handed back to you, and anything that does not fit drops at your feet. Its slot is free again. Fallen and hunting companions can be dismissed too; a hunt in progress is not settled. |
 
 When there is no safe ground nearby, recall, revival and returning hunters wait for space. Badges and rewards are settled when it succeeds.
 
@@ -131,7 +132,7 @@ A hunt lasts a random 1.5–3 Minecraft days (36000–72000 game ticks, about 30
 
 Rewards are drawn when it ends: `floor(elapsed ticks × tier factor / 24000)` rolls, with tier factors 4, 5, 6 and 8. An early recall uses the same formula. Rewards fill the nine slots first and the rest drop where the companion returns.
 
-Each companion then rests for three Minecraft days (72000 game ticks), early recalls included, and that rest keeps counting through ordinary recalls, falling and revival. See the [hunt table](COMPANION-TABLES.md) for odds.
+Each companion then rests for two Minecraft days (48000 game ticks), early recalls included, and that rest keeps counting through ordinary recalls, falling and revival. See the [hunt table](COMPANION-TABLES.md) for odds.
 
 ## Looks and address
 

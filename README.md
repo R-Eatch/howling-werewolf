@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.0-blue?style=flat-square" alt="Development version"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge"><img src="https://img.shields.io/badge/Mod-1.3.1-blue?style=flat-square" alt="Development version"></a>
   <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=flat-square" alt="Minecraft 26.1.2">
   <img src="https://img.shields.io/badge/NeoForge-26.1.2.122%2B-E04E14?style=flat-square" alt="NeoForge 26.1.2.122 or later">
   <img src="https://img.shields.io/badge/Java-25-007396?style=flat-square" alt="Java 25">
@@ -19,18 +19,16 @@
 
 Howling Werewolf is an independently developed transformation and progression mod built around infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, the Alpha Trial and a pack of companions.
 
-## What's new in 1.3.0
+## What's new in 1.3.1
 
-- **A new progression screen.** Press **K** and the world falls away to moonlight: your own form stands before tonight's moon, ringed by experience, with your skills floating around you. A crescent at the top right switches between the white **Moonlight** canvas and the dark **Nightfall** canvas. The Skins and Reset screens match it.
-- **A new companion window.** The same look in a lighter form: a panel floating over the game that opens at once, with orders on number keys and a dark band that explains whatever the pointer rests on. Hunts now show a progress bar.
-- **Attacks with weight and rhythm.** With both hands free, the Werewolf rakes with the right claw and then the left. The Beast smashes down with both arms, then answers with a wide sweep. The Quadruped lunges and bites, then tears. Each form has its own timing, chained blows trade the lead, and first-person view shows both claws. Companions fight the same way.
-- **Item frames direct sorting.** Hang a filled item frame on a chest or barrel and it keeps only that item: matching items come in and everything else moves out.
-- **Trapped chests and shulker boxes stay yours.** Sorting passes over them, so they make a safe place for anything you want left as it is.
-- **Companions speak in an older voice.** Every merchant and companion line is rewritten in both languages, with new lines for sorting. See the [dialogue catalog](docs/COMPANION-DIALOGUE.md).
-- **Elbow fur fix.** The fur on the forearm now lies along the arm when it folds in a crouch, gallop or strike.
+- **Attacks return to their 1.2.2 look.** The new claw strikes from 1.3.0 are withdrawn: the Werewolf, Beast and Quadruped swing one arm as they used to, first-person view is back to how it was, and companions, the Alpha and wild werewolves follow suit. Damage and attack cooldowns are unchanged.
+- **Long Claws, Tool Claws and Fire Claws can be switched off.** Select one under **K** → Abilities and use **Turn off / Turn on** below it. They start on; switching costs and refunds nothing, can be undone at any time and is saved with the world.
+- **Companions can be dismissed.** A **Dismiss** button below the orders on the Pack tab opens a separate confirmation page. A dismissed companion's record, tier and coat are gone, whatever it carries is handed back to you (anything that does not fit drops at your feet), and its slot is free again. Fallen and hunting companions can be dismissed too.
+- **Stronger companions, shorter rest.** Attack by tier 0–3 is now 6, 8, 10 and 12, and the rest after each hunt drops from three Minecraft days to two.
 
 ## Earlier versions
 
+- **1.3.0**: moonlit progression screen and companion window, hunt progress bars, item frames direct sorting, trapped chests and shulker boxes left alone, older-voiced dialogue, elbow fur fix.
 - **1.2.7**: companions walk to containers and sort by hand; four-tab companion window; wolf-like Beast gallop; `/werewolf unlockalpha`.
 - **1.2.6**: companion Sort order and Modern UV submission rework.
 - **1.2.5**: **C** opens the companion window, right-click opens a companion, custom address, private dialogue.
@@ -56,7 +54,7 @@ Howling Werewolf is an independently developed transformation and progression mo
 | Minecraft Java Edition | 26.1.2 |
 | Mod loader | NeoForge 26.1.2.122 or later compatible 26.1.2.x release |
 | Java | 25 |
-| Howling Werewolf | 1.3.0 |
+| Howling Werewolf | 1.3.1 |
 
 ## Werewolf skins
 
@@ -67,7 +65,7 @@ Howling Werewolf is an independently developed transformation and progression mo
 - Your selection persists through death, dimension changes, level resets, and curing/reawakening. Third-person rendering, inventory previews, and first-person claws share the same skin.
 - Create a painting template and open Resource Packs from the skin screen to enable your own PNG skins. Reload edits with **F3 + T**. See the [custom skin guide](CUSTOM_SKINS.md) ([简体中文](CUSTOM_SKINS-zh.md)).
 
-Update both server and clients to **1.3.0** (protocol 18). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
+Update both server and clients to **1.3.1** (protocol 19). Player model and coat choices are independent: when A selects Modern and B selects Classic, both clients render A with Modern and B with Classic. Built-in coats need no extra pack. Custom coats require the same resource pack on observing clients; a missing pack falls back to Adrian for Classic or Ashen for Modern while preserving the saved choice.
 
 ## NPC model configuration
 
@@ -111,7 +109,7 @@ The Moonlight or Nightfall choice is a personal preference, stored in `config/ho
 
 - [Minecraft 1.20.1 · Forge](https://github.com/R-Eatch/howling-werewolf/tree/1.20.1-forge)
 - [Minecraft 1.21.1 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/1.21.1-neoforge)
-- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.3.0**.
+- [Minecraft 26.1.2 · NeoForge](https://github.com/R-Eatch/howling-werewolf/tree/26.1.2-neoforge) — this branch, version **1.3.1**.
 
 ## Build from source
 
@@ -121,11 +119,11 @@ Install a Java 25 JDK, then run:
 ./gradlew build -x test
 ```
 
-On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.3.0-neoforge-26.1.2.jar`.
+On Windows, use `gradlew.bat build -x test`. The distributable JAR is `build/libs/howlingwerewolf-1.3.1-neoforge-26.1.2.jar`.
 
-Current source version is **1.3.0**, protocol 18.
+Current source version is **1.3.1**, protocol 19.
 
-The final build passes, as do 21028 model, NPC and UI checks and 2624 artifact checks, including every line of progression text matching 1.2.7 byte for byte. 759 native NeoForge server checks pass, first upgrading from the real save 1.2.7 left behind, then through a real save and restart; they cover item frames on real chests, trapped chests and shulker boxes. On NeoForge 26.1.2.122 with an RTX 4060 Laptop GPU, a real client in an isolated game directory ran the full script in Chinese at GUI scale 2 and in English at scale 3: the companion walked, opened containers and carried items, item totals were conserved, the framed chest ended with only its item, the trapped chest stayed untouched, and first- and third-person strikes were captured for all three forms. A few small client-side adjustments made after those runs passed the build and regression only. Attack feel and long play sessions await the author's in-game review; this version was not checked with Sodium, shader packs, claim plugins or two real clients.
+The build passes, as do 21089 model, NPC and UI checks and 2704 artifact checks: compared with 1.3.0, only three companion guide passages changed and 15 keys were added, with every other line of text byte for byte the same. 793 native NeoForge server checks pass, first starting from the real save 1.3.0 left behind, then through a real restart. They cover dismissal (items handed back, dropped at the feet of an owner with a full inventory, fallen and hunting companions), the three claw switches (real damage, ignition and mining events, plus saving and sync) and the new cooldown and attack values. This version was not run in a real client: the restored attack animation, the dismissal page and the claw switches await the author's in-game review. It was not checked with Sodium, shader packs, claim plugins or two real clients.
 
 ## Administrator commands
 
