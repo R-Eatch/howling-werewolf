@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "19";
+    private static final String PROTOCOL = "20";
 
     public static void register() {
         PayloadTypeRegistry.playS2C().register(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC);

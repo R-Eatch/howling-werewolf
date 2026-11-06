@@ -23,7 +23,7 @@ public final class WerewolfFirstPersonClawRenderer {
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         event.getSubmitNodeCollector().submitModelPart(arm, pose,
-                RenderTypes.entityCutout(WerewolfSkinTextures.get(data.skinId(),
+                RenderTypes.entityCutoutNoCull(WerewolfSkinTextures.get(data.skinId(),
                         beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
         pose.popPose();

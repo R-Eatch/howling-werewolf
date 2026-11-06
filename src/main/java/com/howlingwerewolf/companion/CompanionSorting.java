@@ -139,6 +139,7 @@ public final class CompanionSorting {
                 record.mode = CompanionMode.SORT;
                 CompanionDialogue.say(player, record, "sort");
                 entity.setTarget(null); entity.setAggressive(false); entity.getNavigation().stop(); entity.resetIdleDialogue();
+                entity.clearHostileTargets();
             }
             default -> { return; }
         }

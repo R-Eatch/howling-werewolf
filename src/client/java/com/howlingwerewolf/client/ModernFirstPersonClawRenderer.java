@@ -28,7 +28,7 @@ final class ModernFirstPersonClawRenderer {
         arm.setRotation(0, 0, 0);
         float scale = data.form() == WerewolfForm.BEAST ? 0.65F : 0.9F;
         arm.xScale = arm.yScale = arm.zScale = scale;
-        event.getSubmitNodeCollector().submitModelPart(arm, event.getPoseStack(), RenderTypes.entityCutout(
+        event.getSubmitNodeCollector().submitModelPart(arm, event.getPoseStack(), RenderTypes.entityCutoutNoCull(
                 WerewolfSkinCatalog.texture(data.skinId(), WerewolfModelSet.MODERN, data.form())),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
         event.setCanceled(true);

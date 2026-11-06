@@ -39,7 +39,7 @@ record WerewolfRenderData(WerewolfForm form, WerewolfModelSet modelSet, String s
             var motion = preview ? new ModernBeastRunState.Sample(0, 0, 0) : ModernBeastRunState.sample(player, partialTick);
             return new WerewolfRenderData(WerewolfSkinRenderContext.getForm(player),
                     WerewolfSkinRenderContext.getModelSet(player), WerewolfSkinRenderContext.getSkinId(player), preview,
-                    preview || WerewolfApi.get(player).map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT)).orElse(false),
+                    preview || WerewolfApi.get(player).map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT) && data.showsEquipment()).orElse(false),
                     player.isSprinting(), motion.run(), motion.prowl(), motion.leap(), new ItemStackRenderState());
         }
         return new WerewolfRenderData(WerewolfForm.HUMAN, WerewolfModelSet.CLASSIC, WerewolfSkinIds.DEFAULT_ID,
