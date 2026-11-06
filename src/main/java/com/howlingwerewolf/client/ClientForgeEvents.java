@@ -125,6 +125,8 @@ public final class ClientForgeEvents {
         WerewolfForm form = data.form();
         if (form == WerewolfForm.HUMAN || renderer == null) return;
         event.setCanceled(true);
+        // Another mod is drawing our body in first person: a werewolf body would fill the camera.
+        if (FirstPersonBodyCompat.active(state)) return;
         var camera = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
         if (camera == null) camera = new net.minecraft.client.renderer.state.level.CameraRenderState();
         PoseStack pose = event.getPoseStack();

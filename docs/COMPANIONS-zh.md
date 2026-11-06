@@ -1,6 +1,6 @@
 # 随从指南
 
-适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.3.3。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
+适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.3.4。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
 配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [全部对白](COMPANION-DIALOGUE.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
@@ -140,7 +140,7 @@
 
 - **名字**：最多 32 个字符，留空恢复为毛色名。
 - **毛色**：外观页点一下即可预览，应用后生效。Classic 四套、Modern 九套，两个模型各记各的选择。随从的模型由世界设置 `gameplay.npcModelSet` 决定。
-- **称呼**：在狼群页设置随从怎么叫你，最多 16 个字符，对你所有随从生效；点“默认”恢复为“主人”（英文 my lord）。
+- **称呼**：在狼群页设置随从怎么叫你，最多 16 个字符，对你所有随从生效；点“默认”恢复为“主人”（英文 my Alpha）。
 
 ## 窗口与按键
 
