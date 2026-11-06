@@ -338,7 +338,7 @@ public final class WerewolfPlayerModel<S extends HumanoidRenderState> extends En
     private void animateAttack(S player) {
         if (attackTime <= 0.0F || player.isUsingItem) return;
 
-        boolean left = player.mainArm == HumanoidArm.LEFT;
+        boolean left = player.attackArm == HumanoidArm.LEFT;
         ModelPart attackingArm = left ? leftArm : rightArm;
 
         // Follow vanilla HumanoidModel's attack curve rather than throwing the arm straight

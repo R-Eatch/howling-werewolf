@@ -55,6 +55,9 @@ public final class WerewolfData implements ValueIOSerializable {
     private int syncedMaxLevel;
     private final EnumMap<WerewolfTreeSkill, Integer> treeSkills = new EnumMap<>(WerewolfTreeSkill.class);
     private final EnumSet<WerewolfAbility> abilities = EnumSet.noneOf(WerewolfAbility.class);
+    /** Learned switchable abilities the player has turned off; everything else stays on. */
+    private final EnumSet<WerewolfAbility> disabledAbilities = EnumSet.noneOf(WerewolfAbility.class);
+    private boolean equipmentShown = true;
     private final List<UUID> spiritWolfIds = new ArrayList<>();
 
     public boolean isWerewolf() { return werewolf; }
@@ -65,6 +68,9 @@ public final class WerewolfData implements ValueIOSerializable {
     public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
     public String getSkinId() { return skinId; }
     public WerewolfModelSet getModelSet() { return modelSet; }
+    /** Whether worn armour and elytra show on the transformed werewolf model; a cosmetic preference like the coat. */
+    public boolean showsEquipment() { return equipmentShown; }
+    public void setEquipmentShown(boolean value) { equipmentShown = value; }
     public boolean isBeastMode() { return form == WerewolfForm.BEAST; }
     public boolean isQuadrupedMode() { return form == WerewolfForm.QUADRUPED; }
     public boolean hasDefeatedAlpha() { return alphaDefeated; }
@@ -145,8 +151,18 @@ public final class WerewolfData implements ValueIOSerializable {
         else treeSkills.put(skill, clamped);
     }
     public boolean hasAbility(WerewolfAbility ability) { return abilities.contains(ability); }
+    /** Learned and switched on: what gameplay checks for a switchable ability. */
+    public boolean usesAbility(WerewolfAbility ability) { return abilities.contains(ability) && !disabledAbilities.contains(ability); }
+    public boolean isAbilityDisabled(WerewolfAbility ability) { return disabledAbilities.contains(ability); }
+    /** Flips a learned switchable ability on or off; returns false when there is nothing to flip. */
+    public boolean toggleAbility(WerewolfAbility ability) {
+        if (ability == null || !ability.switchable() || !abilities.contains(ability)) return false;
+        if (!disabledAbilities.remove(ability)) disabledAbilities.add(ability);
+        return true;
+    }
     public void setAbility(WerewolfAbility ability, boolean unlocked) {
         if (unlocked) abilities.add(ability); else abilities.remove(ability);
+        if (!unlocked) disabledAbilities.remove(ability);
         if (!abilities.contains(WerewolfAbility.QUADRUPED_FORM) && form == WerewolfForm.QUADRUPED) {
             form = WerewolfForm.WEREWOLF;
         }
@@ -195,6 +211,7 @@ public final class WerewolfData implements ValueIOSerializable {
     public boolean unlockAbility(WerewolfAbility ability) {
         if (!werewolf || abilities.contains(ability) || getAvailableSkillPoints() < ability.cost()) return false;
         abilities.add(ability);
+        disabledAbilities.remove(ability);
         return true;
     }
 
@@ -245,6 +262,7 @@ public final class WerewolfData implements ValueIOSerializable {
     public void resetTreeSkills() { treeSkills.clear(); }
     public void resetAbilities() {
         abilities.clear();
+        disabledAbilities.clear();
         if (form == WerewolfForm.QUADRUPED) form = WerewolfForm.WEREWOLF;
     }
     public boolean canResetProgression() { return werewolf && level > 5; }
@@ -257,6 +275,7 @@ public final class WerewolfData implements ValueIOSerializable {
         bonusTreePoints = 0;
         treeSkills.clear();
         abilities.clear();
+        disabledAbilities.clear();
         if (form != WerewolfForm.HUMAN) form = WerewolfForm.WEREWOLF;
         wolfSpiritCooldownEnd = 0L;
         wolfSpiritExpireTime = 0L;
@@ -270,7 +289,7 @@ public final class WerewolfData implements ValueIOSerializable {
     /** Returns true only for a fully default state, including cosmetic preferences. */
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
-                && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId())
+                && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId()) && equipmentShown
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -278,6 +297,7 @@ public final class WerewolfData implements ValueIOSerializable {
                 && wolfSpiritExpireTime == 0L && bloodyBiteCooldownEnd == 0L
                 && moonbloodSurgeCooldownEnd == 0L && moonbloodCrashTime == 0L
                 && totemExperienceTicks == 0 && getSpentTreePoints() == 0 && abilities.isEmpty()
+                && disabledAbilities.isEmpty()
                 && spiritWolfIds.isEmpty();
     }
 
@@ -304,6 +324,7 @@ public final class WerewolfData implements ValueIOSerializable {
         totemExperienceTicks = 0;
         treeSkills.clear();
         abilities.clear();
+        disabledAbilities.clear();
         spiritWolfIds.clear();
         syncedMaxLevel = 0;
     }
@@ -315,6 +336,7 @@ public final class WerewolfData implements ValueIOSerializable {
         form = other.form;
         skinId = other.skinId;
         modelSet = other.modelSet;
+        equipmentShown = other.equipmentShown;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
         level = other.level;
@@ -333,6 +355,7 @@ public final class WerewolfData implements ValueIOSerializable {
         syncedMaxLevel = other.syncedMaxLevel;
         treeSkills.clear(); treeSkills.putAll(other.treeSkills);
         abilities.clear(); abilities.addAll(other.abilities);
+        disabledAbilities.clear(); disabledAbilities.addAll(other.disabledAbilities);
         spiritWolfIds.clear(); spiritWolfIds.addAll(other.spiritWolfIds);
     }
 
@@ -345,6 +368,7 @@ public final class WerewolfData implements ValueIOSerializable {
         tag.putString("Form", form.id());
         tag.putString("Skin", skinId);
         tag.putString("ModelSet", modelSet.id());
+        tag.putBoolean("ShowEquipment", equipmentShown);
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
         tag.putInt("Level", level);
@@ -368,6 +392,9 @@ public final class WerewolfData implements ValueIOSerializable {
         ListTag abilityTag = new ListTag();
         for (WerewolfAbility ability : abilities) abilityTag.add(StringTag.valueOf(ability.id()));
         tag.put("Abilities", abilityTag);
+        ListTag disabledTag = new ListTag();
+        for (WerewolfAbility ability : disabledAbilities) disabledTag.add(StringTag.valueOf(ability.id()));
+        tag.put("DisabledAbilities", disabledTag);
         ListTag spiritTag = new ListTag();
         for (UUID id : spiritWolfIds) spiritTag.add(StringTag.valueOf(id.toString()));
         tag.put("SpiritWolves", spiritTag);
@@ -389,6 +416,8 @@ public final class WerewolfData implements ValueIOSerializable {
         moonForced = tag.getBooleanOr("MoonForced", false);
         form = WerewolfForm.byName(tag.getStringOr("Form", ""));
         setAppearance(WerewolfModelSet.byId(tag.getStringOr("ModelSet", fresh ? "modern" : "classic")), tag.getStringOr("Skin", ""));
+        // Optional since 1.3.3: older saves show their equipment.
+        equipmentShown = !tag.contains("ShowEquipment") || tag.getBooleanOr("ShowEquipment", true);
         alphaDefeated = tag.getBooleanOr("AlphaDefeated", false);
         nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBooleanOr("NightVisionEnabled", false);
         level = Math.max(1, Math.min(getEffectiveMaxLevel(), tag.getIntOr("Level", 0)));
@@ -416,6 +445,13 @@ public final class WerewolfData implements ValueIOSerializable {
         for (int i = 0; i < abilityTag.size(); i++) {
             WerewolfAbility ability = WerewolfAbility.byName(abilityTag.getStringOr(i, ""));
             if (ability != null) abilities.add(ability);
+        }
+        // Optional since 1.3.1: older saves have no switched-off abilities.
+        disabledAbilities.clear();
+        ListTag disabledTag = tag.getListOrEmpty("DisabledAbilities");
+        for (int i = 0; i < disabledTag.size(); i++) {
+            WerewolfAbility ability = WerewolfAbility.byName(disabledTag.getStringOr(i, ""));
+            if (ability != null && ability.switchable() && abilities.contains(ability)) disabledAbilities.add(ability);
         }
         spiritWolfIds.clear();
         ListTag spiritTag = tag.getListOrEmpty("SpiritWolves");

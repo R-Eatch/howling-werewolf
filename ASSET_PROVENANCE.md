@@ -245,3 +245,8 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
   artwork remain credited to **R_Eatch**. Source project bytes remain unchanged;
   attribution and distribution terms are recorded in the public guides and
   [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+
+## 1.3.0 progression screen textures
+
+- `assets/howlingwerewolf/textures/gui/moon/` holds `moon.png`, `moon_phase.png`, `soft.png`, `disc.png` and `ring.png`. All five are original procedural images generated for this project with a deterministic NumPy script: value noise, Gaussian shading and analytic disc, ring and phase shapes. They use no reference images or third-party art. The script is retained locally as authoring material.
+- The layout of the screen takes its broad idea, a world-hiding canvas with options floating around the player, from the public description of the Shooting Star mod. No code, images or other assets from that mod were used.

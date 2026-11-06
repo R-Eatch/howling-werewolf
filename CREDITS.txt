@@ -15,6 +15,13 @@ licensed under CC-BY-SA-4.0 as defined in LICENSE-ASSETS.md, except for the offi
 and project branding. Minecraft Forge and other third-party materials retain their own
 licenses and credits below.
 
+Companion architecture reference:
+- Vampirism / Team Lapen: owner-bound data separated from live minion entities.
+  https://github.com/TeamLapen/Vampirism
+  The companion module is independently implemented; no upstream business code or
+  art is included. Scoped review and implementation differences:
+  docs/COMPANION-PROVENANCE.md
+
 =========================================================================
 
 Minecraft Forge: Credits/Thank You

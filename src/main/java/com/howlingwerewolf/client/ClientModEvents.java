@@ -28,6 +28,9 @@ public final class ClientModEvents {
     public static final KeyMapping TRANSFORM = new KeyMapping(
             "key.howlingwerewolf.transform", InputConstants.Type.KEYSYM, InputConstants.KEY_J,
             KEY_CATEGORY);
+    public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
+            "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, InputConstants.KEY_C,
+            KEY_CATEGORY);
     public static final KeyMapping BEAST_MODE = new KeyMapping(
             "key.howlingwerewolf.beast_mode", InputConstants.Type.KEYSYM, InputConstants.KEY_H,
             KEY_CATEGORY);
@@ -59,6 +62,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_PROGRESSION);
+        event.register(OPEN_COMPANIONS);
         event.register(TRANSFORM);
         event.register(BEAST_MODE);
         event.register(QUADRUPED_MODE);
@@ -81,6 +85,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.ALPHA_WEREWOLF.get(), AlphaWerewolfRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_MINION.get(), AlphaMinionRenderer::new);
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
+        event.registerEntityRenderer(ModEntities.WEREWOLF_COMPANION.get(), CompanionRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.RITUAL_ALTAR.get(),
                 RitualAltarRenderer::new);
     }

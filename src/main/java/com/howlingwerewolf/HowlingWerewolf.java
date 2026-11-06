@@ -72,6 +72,7 @@ public final class HowlingWerewolf {
         NeoForge.EVENT_BUS.addListener(ModEntityEvents::filterPotentialSpawns);
         NeoForge.EVENT_BUS.addListener(HowlingWerewolf::registerBrewingRecipes);
         modContainer.registerConfig(ModConfig.Type.COMMON, HWConfig.SPEC, MOD_ID + "-common.toml");
+        modContainer.registerConfig(ModConfig.Type.CLIENT, HWClientConfig.SPEC, MOD_ID + "-client.toml");
     }
 
     private static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {

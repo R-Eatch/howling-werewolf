@@ -338,7 +338,7 @@ public final class BeastPlayerModel<S extends HumanoidRenderState> extends Entit
     private void animateAttack(S player) {
         if (attackTime <= 0.0F || player.isUsingItem) return;
 
-        boolean left = player.mainArm == HumanoidArm.LEFT;
+        boolean left = player.attackArm == HumanoidArm.LEFT;
         ModelPart upper = left ? leftUpperArm : rightUpperArm;
         ModelPart fore = left ? leftForearm : rightForearm;
 

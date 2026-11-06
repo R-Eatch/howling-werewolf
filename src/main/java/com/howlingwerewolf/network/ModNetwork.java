@@ -10,11 +10,13 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "12";
+    private static final String PROTOCOL = "20";
 
     /** Registers all gameplay payloads; handlers run on the main game thread by default. */
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(PROTOCOL);
+        registrar.playToServer(CompanionActionPacket.TYPE, CompanionActionPacket.STREAM_CODEC, CompanionActionPacket::handle);
+        registrar.playToClient(CompanionViewPacket.TYPE, CompanionViewPacket.STREAM_CODEC, CompanionViewPacket::handle);
         registrar.playToClient(SyncWerewolfDataPacket.TYPE, SyncWerewolfDataPacket.STREAM_CODEC,
                 SyncWerewolfDataPacket::handle);
         registrar.playToClient(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC,
@@ -25,6 +27,8 @@ public final class ModNetwork {
                 UpgradeTreeSkillPacket::handle);
         registrar.playToServer(UnlockAbilityPacket.TYPE, UnlockAbilityPacket.STREAM_CODEC,
                 UnlockAbilityPacket::handle);
+        registrar.playToServer(ToggleAbilityPacket.TYPE, ToggleAbilityPacket.STREAM_CODEC,
+                ToggleAbilityPacket::handle);
         registrar.playToServer(ToggleBeastModePacket.TYPE, ToggleBeastModePacket.STREAM_CODEC,
                 ToggleBeastModePacket::handle);
         registrar.playToServer(ToggleQuadrupedModePacket.TYPE, ToggleQuadrupedModePacket.STREAM_CODEC,

@@ -351,7 +351,7 @@ public final class WerewolfGameplayEvents {
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
         if (!melee || !attacker.getMainHandItem().isEmpty()) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
-            if (!data.isTransformed() || !data.hasAbility(WerewolfAbility.LONG_CLAWS)) return;
+            if (!data.isTransformed() || !data.usesAbility(WerewolfAbility.LONG_CLAWS)) return;
             // Restore the 1.21.1 splash formula; each secondary target still applies its own reductions.
             boolean convertedVoidHit = event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)
                     && data.isBeastMode() && HWConfig.BEAST_VOID_DAMAGE.get();
@@ -365,6 +365,7 @@ public final class WerewolfGameplayEvents {
                 for (LivingEntity secondary : primaryTarget.level().getEntitiesOfClass(LivingEntity.class,
                         primaryTarget.getBoundingBox().inflate(2.0D, 1.0D, 2.0D), entity ->
                                 entity != primaryTarget && entity != attacker && entity.isAlive()
+                                        && !(entity instanceof com.howlingwerewolf.entity.WerewolfCompanionEntity companion && companion.isRecruited())
                                         && !attacker.isAlliedTo(entity) && !isOwnedBy(entity, attacker))) {
                     secondary.hurtServer(attacker.level(), event.getSource(), splashDamage);
                 }
@@ -385,7 +386,7 @@ public final class WerewolfGameplayEvents {
                 || event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD);
         if (!melee) return;
         WerewolfApi.get(attacker).ifPresent(data -> {
-            if (data.isTransformed() && data.hasAbility(WerewolfAbility.FIRE_CLAWS)) {
+            if (data.isTransformed() && data.usesAbility(WerewolfAbility.FIRE_CLAWS)) {
                 event.getEntity().igniteForSeconds(8.0F);
             }
         });
@@ -1215,7 +1216,7 @@ public final class WerewolfGameplayEvents {
     }
 
     private static boolean canUseToolClaws(net.minecraft.world.entity.player.Player player, WerewolfData data) {
-        return data.isTransformed() && data.hasAbility(WerewolfAbility.TOOL_CLAWS)
+        return data.isTransformed() && data.usesAbility(WerewolfAbility.TOOL_CLAWS)
                 && player.getMainHandItem().isEmpty();
     }
 

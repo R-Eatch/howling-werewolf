@@ -13,6 +13,8 @@ public enum WerewolfAbility {
     public int cost() { return cost; }
     public String id() { return name().toLowerCase(Locale.ROOT); }
     public String translationKey() { return "ability.howlingwerewolf." + id(); }
+    /** Passive claw abilities a player may switch off after learning them. */
+    public boolean switchable() { return this == LONG_CLAWS || this == TOOL_CLAWS || this == FIRE_CLAWS; }
 
     public static WerewolfAbility byName(String value) {
         for (WerewolfAbility ability : values()) {

@@ -33,6 +33,7 @@ public final class ModEntityEvents {
             event.put(ModEntities.ALPHA_MINION.get(),
                     com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes().build());
             event.put(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes().build());
+            event.put(ModEntities.WEREWOLF_COMPANION.get(), com.howlingwerewolf.entity.WerewolfCompanionEntity.createAttributes().build());
         }
     }
 
