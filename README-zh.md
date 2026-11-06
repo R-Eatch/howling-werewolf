@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.3-blue?style=flat-square" alt="最新源码： 1.3.3"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.4-blue?style=flat-square" alt="最新源码： 1.3.4"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
@@ -22,7 +22,7 @@
 
 ## 1.3 更新：狼人随从
 
-1.2.2 之后的更新都在 **1.3.x**（当前 **1.3.3**）：
+1.2.2 之后的更新都在 **1.3.x**（当前 **1.3.4**）：
 
 - **狼人商人与随从。** 用月誓祭坛召来一位狼人兄弟，和他交易；手持狼人徽章招募他，他就成为你的长期同伴。见下方“[狼人兄弟：商人与随从](#狼人兄弟商人与随从)”。
 - **整理仓库。** 随从会亲自走到箱子和木桶前，开盖、搬运、合盖，把同类物品归到一起。
@@ -30,6 +30,7 @@
 - **长爪、工具爪和火焰爪可以关闭**；**装备显示**可以在皮肤页切换，随皮肤一起应用。
 - **野兽形态动作。** Modern 野兽冲刺时四足狼式奔跑，下蹲时四足潜行，下蹲视角随之降低。
 - 新增 **Minecraft 1.21.11 Fabric** 版。
+- **兼容 Iron's Spells 与 Better Combat。** 它们在第一人称画出玩家身体时，狼人身体不再挡住镜头。
 
 1.2.2 带来了 **thewolfulti** 设计制作的 **Modern** 三形态模型（普通狼人、四足狼、野兽，各 9 套皮肤），Classic 系列继续保留。详见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
 
@@ -295,7 +296,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 测试与兼容性
 
-1.1.3 已完成全流程实机测试：从新存档常规生存到击败末影龙、取得鞘翅。1.3.x 先在 Minecraft 26.1.2 上由作者实机测试，再移植到其他版本。1.3.3 在 26.1.2 上用独立服务端跑了 806 项检查和 21089 项模型与界面回归；1.20.1 Forge（带 Xenon 等 29 个模组）、1.21.1 NeoForge（约 35 个模组的整合包）和 1.21.11 Fabric（另在 Sodium 下跑过一遍）都用真实客户端在新世界里完整走过随从窗口、整理、遣散、交易、技能与装备开关、死亡与重生、进出下界、升级与重置、感染与觉醒和随从寻路，Fabric 还检查了世界生成和刷怪。遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
+1.1.3 已完成全流程实机测试：从新存档常规生存到击败末影龙、取得鞘翅。1.3.x 先在 Minecraft 26.1.2 上由作者实机测试，再移植到其他版本。1.3.3 在 26.1.2 上用独立服务端跑了 806 项检查和 21089 项模型与界面回归；1.20.1 Forge（带 Xenon 等 29 个模组）、1.21.1 NeoForge（约 35 个模组的整合包）和 1.21.11 Fabric（另在 Sodium 下跑过一遍）都用真实客户端在新世界里完整走过随从窗口、整理、遣散、交易、技能与装备开关、死亡与重生、进出下界、升级与重置、感染与觉醒和随从寻路，Fabric 还检查了世界生成和刷怪。1.3.4 在 1.21.1 整合包里同时装上 Iron's Spells 和 Better Combat 测过：持续施法时第一人称画面不再被狼人模型挡住。遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 反馈问题时，请提供：
 
@@ -308,7 +309,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码、更新日志与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.3**。
+项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.4**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.3-blue?style=flat-square" alt="Latest source: 1.3.3"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.4-blue?style=flat-square" alt="Latest source: 1.3.4"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
@@ -21,7 +21,7 @@
 
 ## The 1.3 update: werewolf companions
 
-Everything after 1.2.2 lives in **1.3.x** (currently **1.3.3**):
+Everything after 1.2.2 lives in **1.3.x** (currently **1.3.4**):
 
 - **Werewolf merchants and companions.** Call a werewolf brother at the Moon-Oath altars, trade with him, and recruit him with an Alpha Werewolf Badge to keep him as a lasting companion. See [Werewolf brothers: merchants and companions](#werewolf-brothers-merchants-and-companions).
 - **Storage sorting.** Your companion walks to chests and barrels, opens them, carries items by hand and gathers like with like.
@@ -29,6 +29,7 @@ Everything after 1.2.2 lives in **1.3.x** (currently **1.3.3**):
 - **Long, Tool and Fire Claws can be switched off**, and **equipment display** can be switched on the Skins page and applied with your coat.
 - **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
 - A new **Minecraft 1.21.11 Fabric** edition.
+- **Works with Iron's Spells and Better Combat.** When they draw the player's body in first person, the werewolf body no longer blocks the camera.
 
 1.2.2 brought the **Modern** models for all three forms (Werewolf, Quadruped Wolf and Beast, nine coats each) by **thewolfulti**; the Classic set remains. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
 
@@ -294,7 +295,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-Version 1.1.3 completed a full in-game playthrough, from a new survival world to defeating the Ender Dragon and obtaining elytra. The 1.3.x content was first tested in game by the author on Minecraft 26.1.2 and then ported. For 1.3.3, 26.1.2 passed 806 checks on an isolated server and 21089 model and interface regressions; 1.20.1 Forge (with Xenon among 29 mods), 1.21.1 NeoForge (a modpack of about 35 mods) and 1.21.11 Fabric (also run with Sodium) each ran a real client through the companion window, sorting, dismissal, trading, ability and equipment switches, death and respawn, the Nether and back, levelling and reset, infection and awakening and companion pathfinding on a new world, and the Fabric world generation and spawning were checked too. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
+Version 1.1.3 completed a full in-game playthrough, from a new survival world to defeating the Ender Dragon and obtaining elytra. The 1.3.x content was first tested in game by the author on Minecraft 26.1.2 and then ported. For 1.3.3, 26.1.2 passed 806 checks on an isolated server and 21089 model and interface regressions; 1.20.1 Forge (with Xenon among 29 mods), 1.21.1 NeoForge (a modpack of about 35 mods) and 1.21.11 Fabric (also run with Sodium) each ran a real client through the companion window, sorting, dismissal, trading, ability and equipment switches, death and respawn, the Nether and back, levelling and reset, infection and awakening and companion pathfinding on a new world, and the Fabric world generation and spawning were checked too. 1.3.4 was tested on 1.21.1 with Iron's Spells and Better Combat installed together: casting in first person no longer has the view blocked by the werewolf model. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 When reporting an issue, provide:
 
@@ -307,7 +308,7 @@ When reporting an issue, provide:
 
 ## Source, changelogs, and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.11**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.3**.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.11**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.4**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 
