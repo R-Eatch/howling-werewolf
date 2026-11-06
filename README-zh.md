@@ -6,12 +6,12 @@
 
 | | |
 |---|---|
-| Mod 版本 | **1.3.3** |
+| Mod 版本 | **1.3.4** |
 | Minecraft Java 版 | 1.21.1 |
 | NeoForge | 21.1.248 或更新的 21.1.x |
 | Java | 21 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.3-neoforge.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.4-neoforge.jar`。服务端和每个客户端需安装同一版本。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 

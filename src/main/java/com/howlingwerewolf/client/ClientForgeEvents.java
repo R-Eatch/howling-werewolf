@@ -110,6 +110,8 @@ public final class ClientForgeEvents {
         if (form == WerewolfForm.HUMAN) return;
 
         event.setCanceled(true);
+        // Another mod is drawing our body in first person: a werewolf body would fill the camera.
+        if (FirstPersonBodyCompat.active(null)) return;
         if (renderer == null || beastRenderer == null || quadrupedRenderer == null
                 || equipmentRenderer == null) {
             Minecraft minecraft = Minecraft.getInstance();

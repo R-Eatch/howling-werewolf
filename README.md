@@ -6,12 +6,12 @@ This is the source of Howling Werewolf for **Minecraft 1.21.1**, branch `1.21.1-
 
 | | |
 |---|---|
-| Mod version | **1.3.3** |
+| Mod version | **1.3.4** |
 | Minecraft Java Edition | 1.21.1 |
 | NeoForge | 21.1.248 or a later 21.1.x release |
 | Java | 21 |
 
-Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.3.3-neoforge.jar`. Install the same version on the server and on every client.
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.3.4-neoforge.jar`. Install the same version on the server and on every client.
 
 The gameplay guide, the other editions and downloads are on the [main branch](https://github.com/R-Eatch/howling-werewolf).
 

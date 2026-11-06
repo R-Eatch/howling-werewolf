@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf `1.3.3` for Minecraft 1.21.1 / NeoForge 21.1.248. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf `1.3.4` for Minecraft 1.21.1 / NeoForge 21.1.248. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements
 
