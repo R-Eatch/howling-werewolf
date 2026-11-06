@@ -21,6 +21,9 @@ public final class ClientModEvents {
     public static final KeyMapping TRANSFORM = new KeyMapping(
             "key.howlingwerewolf.transform", InputConstants.Type.KEYSYM, InputConstants.KEY_J,
             KEY_CATEGORY);
+    public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
+            "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, InputConstants.KEY_C,
+            KEY_CATEGORY);
     public static final KeyMapping BEAST_MODE = new KeyMapping(
             "key.howlingwerewolf.beast_mode", InputConstants.Type.KEYSYM, InputConstants.KEY_H,
             KEY_CATEGORY);
@@ -43,7 +46,7 @@ public final class ClientModEvents {
     public static void initialize() {
         net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap.putBlock(
                 com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get(),net.minecraft.client.renderer.chunk.ChunkSectionLayer.CUTOUT);
-        for (KeyMapping key : new KeyMapping[]{OPEN_PROGRESSION,TRANSFORM,BEAST_MODE,QUADRUPED_MODE,NIGHT_VISION,SUMMON_WOLF_SPIRIT,BLOODY_BITE,MOONBLOOD_SURGE})
+        for (KeyMapping key : new KeyMapping[]{OPEN_PROGRESSION,OPEN_COMPANIONS,TRANSFORM,BEAST_MODE,QUADRUPED_MODE,NIGHT_VISION,SUMMON_WOLF_SPIRIT,BLOODY_BITE,MOONBLOOD_SURGE})
             net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(key);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(HUNTER_LAYER,HunterModel::createBodyLayer);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(QUADRUPED_WEREWOLF_LAYER,QuadrupedWerewolfModel::createBodyLayer);
@@ -51,6 +54,7 @@ public final class ClientModEvents {
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.WEREWOLF.get(),WerewolfEntityRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.ALPHA_WEREWOLF.get(),AlphaWerewolfRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.ALPHA_MINION.get(),AlphaMinionRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.WEREWOLF_COMPANION.get(),CompanionRenderer::new);
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(ModBlockEntities.RITUAL_ALTAR.get(),RitualAltarRenderer::new);
         var loader=net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES);
         var models=Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID,"modern_models");

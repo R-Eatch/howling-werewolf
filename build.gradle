@@ -43,4 +43,4 @@ tasks.named('jar', Jar) {
     }
 }
 def releaseVersion = project.mod_version.toString().split('-')[0]
-tasks.named('remapJar') { archiveFileName = "${project.archives_base_name}-${releaseVersion}-fabric-${project.minecraft_version}-beta.jar" }
+tasks.named('remapJar') { archiveFileName = "${project.archives_base_name}-${releaseVersion}-fabric-${project.minecraft_version}.jar" }

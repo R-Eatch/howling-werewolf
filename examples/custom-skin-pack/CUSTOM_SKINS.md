@@ -1,6 +1,6 @@
 # Make your own werewolf skin
 
-For **Howling Werewolf 1.2.3-beta.1 · Minecraft 1.21.11 Fabric**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
+For **Howling Werewolf 1.3.2 · Minecraft 1.21.11 Fabric**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
 
 ## Start in the game
 

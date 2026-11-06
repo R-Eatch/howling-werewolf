@@ -43,6 +43,7 @@ public final class HowlingWerewolf implements ModInitializer {
         ModEntityEvents.register();
         ModNetwork.register();
         FabricEvents.register();
+        com.howlingwerewolf.companion.CompanionEvents.register();
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) ->
             com.howlingwerewolf.command.WerewolfCommands.register(dispatcher));
     }

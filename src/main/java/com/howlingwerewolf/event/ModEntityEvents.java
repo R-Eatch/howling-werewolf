@@ -24,6 +24,7 @@ public final class ModEntityEvents {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_WEREWOLF.get(), com.howlingwerewolf.entity.AlphaWerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_MINION.get(), com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF_COMPANION.get(), com.howlingwerewolf.entity.WerewolfCompanionEntity.createAttributes());
         net.minecraft.world.entity.SpawnPlacements.register(ModEntities.HUNTER.get(), SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntityEvents::hunterSpawnRules);
         net.minecraft.world.entity.SpawnPlacements.register(ModEntities.WEREWOLF.get(), SpawnPlacementTypes.ON_GROUND,

@@ -15,20 +15,26 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> 此分支为 **Minecraft 1.21.11 / Fabric 的 1.2.3-beta.1 测试移植版**，分支名为 `1.21.11-fabric`。下方保留完整玩法介绍及其他正式版本的信息。
+> 此分支为 **Minecraft 1.21.11 / Fabric 的 1.3.2 移植版**，分支名为 `1.21.11-fabric`。下方保留完整玩法介绍及其他正式版本的信息。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
 
-## Fabric 1.21.11 Beta
+## Fabric 1.21.11 · 1.3.2
 
-**1.2.3-beta.1** 让创造模式更容易找到所有物品：Fabric 把月厄狼人分页放在创造栏第 2 页，现在第 1 页的原料、战斗用品、食物与饮品、刷怪蛋、自然方块和功能方块分类里也都能找到它们。
+Howling Werewolf **1.3.2** 把 1.2.2 之后的更新带到 Fabric 1.21.11：
 
-本移植以已发布的 **1.2.2** 为基线，保留 Classic / Modern 三形态、技能与技能树、猎人、Alpha 试炼、皮肤与模板导出。它不包含尚未发布的 NeoForge 同伴系统。
+- **狼人随从。** 在祭坛召唤狼人商人，用 Alpha 狼人徽章招募随从。随从有九格背包，可以跟随、守护、休息、外出狩猎和整理附近的箱子，能跨维度召回、升阶、复活、改名换毛色，也能遣散（遣散前单独确认，背包物品交还给你）。按 **C** 打开随从窗口。完整玩法见[随从指南](docs/COMPANIONS-zh.md)。
+- **整理。** 随从亲自走到箱子、铜箱和木桶前开盖搬运；挂着放了物品的展示框的容器只存放框里的物品；陷阱箱和潜影盒不参与。走不到跟前的容器，32 格以内也能站在原地整理（服务器可调）。
+- **全新的进阶界面与随从窗口。** 按 **K**，世界退入月光，技能漂浮在今夜的月亮四周；右上角月牙切换白色“月白”和深色“夜幕”。皮肤页和重置页同款。
+- **长爪、工具爪和火焰爪可以关闭。** 在技能页选中后用“关闭／开启”切换，不消耗也不退还技能点。
+- **野兽形态动作。** Modern 野兽冲刺时四足狼式奔跑，下蹲时四足潜行，下蹲视角随之降低。
+- 管理员命令新增 `/werewolf unlockalpha`。
+- 1.2.3-beta.1 的创造栏改动保留：除第 2 页的月厄狼人分页外，第 1 页的原料、战斗用品、食物与饮品、刷怪蛋、自然方块和功能方块分类里也能找到本 Mod 的物品。
 
 - 环境：Minecraft **1.21.11**、Java **21**、Fabric Loader **0.20.1 或更新版本**、Fabric API **0.141.6+1.21.11**。
-- 测试版文件：`howlingwerewolf-1.2.3-fabric-1.21.11-beta.jar`。客户端和服务端均需安装相同版本与对应 Fabric API。
-- Fabric 配置文件为 `config/howlingwerewolf-common.json`，键名保留 `gameplay.*`、`worldGeneration.*` 的分类；修改后重启世界或服务器。原 Forge/NeoForge TOML 不会被覆盖。
+- 文件：`howlingwerewolf-1.3.2-fabric-1.21.11.jar`。客户端和服务端均需安装相同版本与对应 Fabric API。
+- Fabric 配置文件为 `config/howlingwerewolf-common.json`，键名保留 `gameplay.*`、`worldGeneration.*` 的分类；修改后重启世界或服务器。原 Forge/NeoForge TOML 不会被覆盖。界面的月白／夜幕选择保存在客户端文件 `config/howlingwerewolf-client.json`。
 - 本 JAR 的 Minecraft 依赖限定为 `~1.21.11`。后续 Minecraft 的 Fabric 版本需要独立适配、构建和验收。
 - 本地构建：在 Java 21 环境运行 `./gradlew build`；可分发 JAR 位于 `build/libs/`。构建固定使用 Loom 1.16.1 / Gradle 9.4.1 和官方 Mojang 映射，通用逻辑与客户端渲染分开编译。
 
@@ -65,6 +71,7 @@
 - 技能树、主动与被动技能、形态解锁条件，以及月誓仪式指引。
 - 空手利爪战斗，以及随成长提升的伤害与自然减伤。
 - 吸血、长爪、火焰爪、工具爪、血腥撕咬和月血沸腾。
+- 狼人随从：召唤、招募、跟随、守护、狩猎、整理箱子、升阶与复活。
 - 野生失控狼人、中立猎人、村庄巡猎队、银制装备、狼毒花和两种对立药水。
 - 完整的单人 Alpha 试炼：祭坛结构、猎人阶段、多阶段首领战、重复奖励，以及永久野兽形态成长。
 - 内置狼人皮肤、游戏内预览，以及资源包自定义皮肤和绘画模板。
@@ -87,7 +94,7 @@
 ## 安装
 
 1. 此分支请使用 Minecraft 1.21.11、Java 21 和 Fabric Loader 0.20.1 或更新版本，并安装对应 1.21.11 的 Fabric API。
-2. 此 Beta 可从源码构建，将 `build/libs/howlingwerewolf-1.2.3-fabric-1.21.11-beta.jar` 放入 `mods`。其他正式版本可从 [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases)、[Modrinth](https://modrinth.com/mod/howling-werewolf) 或 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 下载与该版本对应的 Mod JAR，放入游戏的 `mods` 目录。
+2. 可从源码构建，将 `build/libs/howlingwerewolf-1.3.2-fabric-1.21.11.jar` 放入 `mods`。其他正式版本可从 [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases)、[Modrinth](https://modrinth.com/mod/howling-werewolf) 或 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) 下载与该版本对应的 Mod JAR，放入游戏的 `mods` 目录。
 3. 启动游戏。联机时客户端与服务端应安装对应游戏版本的相同 Mod 版本。
 
 添加或更新任何 Mod 前，建议先备份重要世界。
@@ -128,7 +135,8 @@
 
 - 利爪伤害与按目标最大生命计算的裂月伤害；
 - 自然防御、速度、跳跃、再生、击退抗性和摔落抗性；
-- 吸血、饱食控制、利爪距离/抢夺，以及更多狩猎经验。
+- 吸血、饱食控制、利爪距离/抢夺，以及更多狩猎经验；
+- 狼群誓约：决定随从名额和最高阶数。
 
 能力用于解锁新的操作和规则，包括：
 
@@ -143,6 +151,8 @@
 - 工具爪；
 - 火焰爪；
 - 血腥撕咬。
+
+长爪、工具爪和火焰爪学会后，可以在技能页随时关闭或重新开启。
 
 ### Alpha 狼人徽章
 
@@ -169,6 +179,7 @@ Alpha 狼人徽章放在快捷栏任意位置时具有两种效果：
 | `N` | 召唤狼灵 |
 | `B` | 使用血腥撕咬 |
 | `R` | 释放月血沸腾 |
+| `C` | 打开随从窗口 |
 
 ## 猎人、银、狼毒花、月厄珍珠与野外遭遇
 
@@ -247,6 +258,8 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 配置文件：`config/howlingwerewolf-common.json`（此 Fabric 分支；Forge / NeoForge 版仍使用 TOML）。
 
+随从相关设置：`gameplay.enableCompanions`（默认 **true**）统一开关随从；`gameplay.enableCompanionSorting`（默认 **true**）单独开关整理；`gameplay.companionSortingReach`（默认 **32**，3–64）是随从走不到跟前时仍能整理的最远距离。
+
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
 数据包可以扩展以下物品标签：
@@ -258,7 +271,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 测试与兼容性
 
-**Fabric Beta 已执行原生 GameTest 和真实图形客户端检查，覆盖属性与技能、试炼、存档、重生、跨维度同步、模型预览及资源重载。多人观察测试使用真实客户端与模拟的第二名服务端玩家。另已通过 Sodium 0.8.14 的图形客户端回归、模板资源包导出/应用及存档退出重进检查；长期多人整合包仍需进一步验收。** 历史正式版的测试基线为 1.1.3 全流程与 1.1.8 更新内容。 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
+1.2.3-beta.1 时，本分支已执行原生 GameTest 和真实图形客户端检查，覆盖属性与技能、试炼、存档、重生、跨维度同步、模型预览及资源重载，并通过 Sodium 0.8.14 的图形客户端回归。1.3.1 的内容先在 Minecraft 26.1.2 上由作者实机测试，再移植到本分支。本分支的 1.3.1 移植已通过本地构建，并在 Fabric 1.21.11 实例（Fabric API、Mod Menu）中用真实客户端在新建世界跑过脚本检查：随从窗口、整理（物品总数不变，铜箱参与）、遣散、商人交易、技能开关、Modern 野兽动作和第一/第三人称挥击。完整生存流程与双客户端联机测试尚未进行。 历史正式版的测试基线为 1.1.3 全流程与 1.1.8 更新内容。 遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 完整流程测试基线包括从新存档进行常规生存、击败末影龙并取得鞘翅。
 
@@ -275,7 +288,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码、更新日志与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**，本分支提供 **Minecraft 1.21.11 Fabric / 1.2.3-beta.1** 移植；其他正式分支最新已发布源码为 **1.2.2**。
+项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge** 与 **Minecraft 26.1.2 NeoForge**，本分支提供 **Minecraft 1.21.11 Fabric / 1.3.2** 移植；其他正式分支最新已发布源码为 **1.2.2**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 

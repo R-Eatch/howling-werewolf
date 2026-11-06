@@ -1,6 +1,8 @@
 package com.howlingwerewolf.trial;
 
 import com.howlingwerewolf.content.ModItems;
+import com.howlingwerewolf.content.ModBlocks;
+import com.howlingwerewolf.companion.CompanionRitual;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -68,8 +70,8 @@ public final class RitualAltarBlock extends BaseEntityBlock {
         }
 
         boolean validOffering = central
-                ? held.is(ModItems.ALPHA_WEREWOLF_BADGE.get())
-                : held.is(ModItems.MOONBANE_PEARL.get());
+                ? held.is(ModItems.ALPHA_WEREWOLF_BADGE.get()) || held.is(ModItems.MOONBANE_PEARL.get())
+                : held.is(ModItems.MOONBANE_PEARL.get()) || held.is(ModBlocks.WOLFSBANE.get().asItem());
         if (altar.getOffering().isEmpty() && validOffering) {
             if (!level.isClientSide()) {
                 altar.setOffering(held.copyWithCount(1));
@@ -100,6 +102,11 @@ public final class RitualAltarBlock extends BaseEntityBlock {
         if (central && altar.hasExpectedOffering()
                 && player instanceof ServerPlayer serverPlayer && !level.isClientSide()) {
             AlphaTrialManager.tryStart(serverPlayer, pos);
+            return InteractionResult.CONSUME;
+        }
+        if (central && altar.getOffering().is(ModItems.MOONBANE_PEARL.get())
+                && player instanceof ServerPlayer serverPlayer && !level.isClientSide()) {
+            CompanionRitual.tryStart(serverPlayer, pos);
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;

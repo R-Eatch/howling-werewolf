@@ -62,7 +62,7 @@ public final class AlphaTrialManager {
         }
         if (!(level.getBlockEntity(center) instanceof RitualAltarBlockEntity central)
                 || !central.isCentral()) return;
-        if (central.isTrialActive()) {
+        if (central.isTrialActive() || central.isCompanionRitualActive()) {
             reject(player, "message.howlingwerewolf.trial.already_active");
             return;
         }

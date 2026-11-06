@@ -8,6 +8,7 @@ public final class HowlingWerewolfClient implements ClientModInitializer {
         ClientModEvents.initialize();
         ClientTickEvents.END_CLIENT_TICK.register(ClientEvents::clientTick);
         ClientPlayNetworking.registerGlobalReceiver(SyncWerewolfDataPacket.TYPE,(packet,context) -> context.client().execute(() -> ClientPacketHandlers.applySync(packet)));
+        ClientPlayNetworking.registerGlobalReceiver(CompanionViewPacket.TYPE,(packet,context) -> context.client().execute(() -> ClientPacketHandlers.companionView(packet)));
         ClientPlayNetworking.registerGlobalReceiver(BadgeActivationPacket.TYPE,(packet,context) -> context.client().execute(ClientPacketHandlers::showBadgeActivation));
     }
 }

@@ -15,19 +15,25 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> This branch contains **1.2.3-beta.1 for Minecraft 1.21.11 / Fabric** (`1.21.11-fabric`). The complete gameplay introduction and information about the other released editions are retained below.
+> This branch contains **1.3.2 for Minecraft 1.21.11 / Fabric** (`1.21.11-fabric`). The complete gameplay introduction and information about the other released editions are retained below.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
-## Fabric 1.21.11 Beta
+## Fabric 1.21.11 · 1.3.2
 
-**1.2.3-beta.1** makes every item easy to find in Creative mode: alongside the Howling Werewolf tab, which Fabric places on the second page of the creative inventory, items now also appear on the first page in Ingredients, Combat, Food & Drinks, Spawn Eggs, Natural Blocks and Functional Blocks.
+Howling Werewolf **1.3.2** brings the updates since 1.2.2 to Fabric 1.21.11:
 
-This port uses the published **1.2.2** baseline, retaining Classic / Modern forms, abilities and skill trees, hunters, the Alpha Trial, skins and template export. The unpublished NeoForge companion system is outside this baseline.
+- **Werewolf companions.** Summon a werewolf merchant at the altars and recruit companions with an Alpha Werewolf Badge. Each companion has a nine-slot pack and can follow, guard, rest, go hunting and sort nearby chests. You can recall them across dimensions, raise their tier, revive them, rename them, change their coat, or dismiss them (after a separate confirmation, with their pack handed back to you). Press **C** for the companion window. See the [companion guide](docs/COMPANIONS.md).
+- **Sorting.** Your companion walks to chests, copper chests and barrels, opens them and carries items by hand. A container wearing a filled item frame keeps only that item, and trapped chests and shulker boxes stay out of it. Containers it cannot walk up to are still tidied from where it stands within 32 blocks (server-adjustable).
+- **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases. The Skins and Reset screens match.
+- **Long, Tool and Fire Claws can be switched off.** Select one on the Abilities page and use **Turn off / Turn on**; it costs and refunds nothing.
+- **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
+- New administrator command `/werewolf unlockalpha`.
+- The 1.2.3-beta.1 Creative change stays: alongside the Howling Werewolf tab on the second page, the items also appear on the first page in Ingredients, Combat, Food & Drinks, Spawn Eggs, Natural Blocks and Functional Blocks.
 
 - Requires Minecraft **1.21.11**, Java **21**, Fabric Loader **0.20.1 or newer** and Fabric API **0.141.6+1.21.11**.
-- Test artifact: `howlingwerewolf-1.2.3-fabric-1.21.11-beta.jar`. Install the same version and matching Fabric API on the client and server.
-- Fabric configuration: `config/howlingwerewolf-common.json`, with `gameplay.*` and `worldGeneration.*` keys. Restart the world/server after changes. Existing Forge/NeoForge TOML files are preserved.
+- File: `howlingwerewolf-1.3.2-fabric-1.21.11.jar`. Install the same version and matching Fabric API on the client and server.
+- Fabric configuration: `config/howlingwerewolf-common.json`, with `gameplay.*` and `worldGeneration.*` keys. Restart the world/server after changes. Existing Forge/NeoForge TOML files are preserved. The Moonlight / Nightfall choice is saved on the client in `config/howlingwerewolf-client.json`.
 - This JAR declares Minecraft `~1.21.11`. Later Minecraft releases require their own port, build and validation.
 - Build with Java 21 and `./gradlew build`; the distributable JAR is in `build/libs/`. Pins Loom 1.16.1 / Gradle 9.4.1, with official Mojang mappings and separate common/client source sets.
 
@@ -64,6 +70,7 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 - A skill tree, active and passive skills, form-unlock requirements, and Moon-Oath ritual guidance.
 - Empty-hand claw combat, with damage and natural damage reduction that grow as you progress.
 - Lifesteal, Long Claws, Fire Claws, Tool Claws, Bloody Bite, and Moonblood Surge.
+- Werewolf companions: summoning, recruiting, following, guarding, hunting, chest sorting, tiers and revival.
 - Wild Feral Werewolves, neutral Hunters, village patrols, Silver equipment, Wolfsbane, and two opposing potions.
 - A complete single-player Alpha Trial: altar construction, a Hunter phase, a multi-stage boss fight, repeat rewards, and permanent Beast Form progression.
 - Built-in werewolf skins, in-game previews, and resource-pack custom skins with drawing templates.
@@ -86,7 +93,7 @@ See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chin
 ## Installation
 
 1. For this branch, install Minecraft 1.21.11, Java 21, Fabric Loader 0.20.1 or newer, and Fabric API for 1.21.11.
-2. Build this Beta from source and place `build/libs/howlingwerewolf-1.2.3-fabric-1.21.11-beta.jar` in `mods`. Other released editions are available from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf).
+2. Build from source and place `build/libs/howlingwerewolf-1.3.2-fabric-1.21.11.jar` in `mods`. Other released editions are available from [GitHub Releases](https://github.com/R-Eatch/howling-werewolf/releases), [Modrinth](https://modrinth.com/mod/howling-werewolf), or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf).
 3. Start the game. Clients and servers should use the same Mod version for their Minecraft edition.
 
 Back up important worlds before adding or updating any Mod.
@@ -127,7 +134,8 @@ The skill tree strengthens long-term attributes and passive effects, including:
 
 - claw damage and Moonrend damage based on the target's maximum health;
 - natural defense, speed, jumping, regeneration, knockback resistance, and fall resistance;
-- lifesteal, satiety control, claw reach and looting, and additional hunting experience.
+- lifesteal, satiety control, claw reach and looting, and additional hunting experience;
+- Pack Oath, which sets your companion slots and their highest tier.
 
 Skills unlock new actions and rules, including:
 
@@ -142,6 +150,8 @@ Skills unlock new actions and rules, including:
 - Tool Claws;
 - Fire Claws;
 - Bloody Bite.
+
+Once learned, Long Claws, Tool Claws and Fire Claws can be switched off and on again at any time on the Abilities page.
 
 ### Alpha Werewolf Badge
 
@@ -168,6 +178,7 @@ All key bindings can be changed in Minecraft's Controls settings.
 | `N` | Summon Wolf Spirits |
 | `B` | Use Bloody Bite |
 | `R` | Release Moonblood Surge |
+| `C` | Open the companion window |
 
 ## Hunters, Silver, Wolfsbane, Moonbane Pearls, and wild encounters
 
@@ -246,6 +257,8 @@ Each edition's common configuration allows you to adjust infection chance, exper
 
 Configuration file: `config/howlingwerewolf-common.json` on this Fabric branch (Forge/NeoForge editions still use TOML).
 
+Companion settings: `gameplay.enableCompanions` (default **true**) switches companions as a whole; `gameplay.enableCompanionSorting` (default **true**) switches sorting alone; `gameplay.companionSortingReach` (default **32**, 3–64) is how far a companion can still sort a container it cannot walk up to.
+
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
 Datapacks can extend the following item tags:
@@ -257,7 +270,7 @@ Server operators and testers can consult the [administrator command guide](ADMIN
 
 ## Testing and compatibility
 
-**This Fabric Beta has native GameTest and real graphics-client checks covering attributes/skills, the trial, persistence, respawn, dimension synchronization, model previews and resource reloads. Observer tests use a real client and a simulated second server player. Sodium 0.8.14, exported resource-pack activation and real world reopen checks also pass.** Historical released-edition coverage includes the 1.1.3 playthrough and the 1.1.8 changes. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
+At 1.2.3-beta.1 this branch passed native GameTest and real graphics-client checks covering attributes/skills, the trial, persistence, respawn, dimension synchronization, model previews and resource reloads, plus a Sodium 0.8.14 graphics regression. The 1.3.1 content was first tested in game by the owner on Minecraft 26.1.2, then ported to this branch. The 1.3.1 port on this branch builds locally and passed scripted checks with a real client on a new world in a Fabric 1.21.11 instance (Fabric API, Mod Menu): the companion window, sorting (item totals unchanged, copper chests included), dismissal, merchant trades, ability switches, Modern Beast movement and first/third-person swings. A full survival playthrough and two-client multiplayer testing have not been done. Historical released-edition coverage includes the 1.1.3 playthrough and the 1.1.8 changes. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 The full-playthrough testing baseline includes starting normal survival in a new world, defeating the Ender Dragon, and obtaining elytra.
 
@@ -274,7 +287,7 @@ When reporting an issue, provide:
 
 ## Source, changelogs, and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. This branch adds the **Minecraft 1.21.11 Fabric / 1.2.3-beta.1** port; the latest published source on the other release branches is **1.2.2**.
+The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. This branch adds the **Minecraft 1.21.11 Fabric / 1.3.2** port; the latest published source on the other release branches is **1.2.2**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

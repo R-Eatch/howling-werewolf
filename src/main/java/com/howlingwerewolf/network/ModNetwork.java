@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "12";
+    private static final String PROTOCOL = "19";
 
     public static void register() {
         PayloadTypeRegistry.playS2C().register(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC);
@@ -34,6 +34,11 @@ public final class ModNetwork {
         PayloadTypeRegistry.playC2S().register(UpgradeTreeSkillPacket.TYPE, UpgradeTreeSkillPacket.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(UpgradeTreeSkillPacket.TYPE, (packet, context) -> context.server().execute(() -> UpgradeTreeSkillPacket.handle(packet, context)));
         PayloadTypeRegistry.playC2S().register(UseAbilityPacket.TYPE, UseAbilityPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(ToggleAbilityPacket.TYPE, ToggleAbilityPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ToggleAbilityPacket.TYPE, (packet, context) -> context.server().execute(() -> ToggleAbilityPacket.handle(packet, context)));
+        PayloadTypeRegistry.playC2S().register(CompanionActionPacket.TYPE, CompanionActionPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(CompanionActionPacket.TYPE, (packet, context) -> context.server().execute(() -> CompanionActionPacket.handle(packet, context)));
+        PayloadTypeRegistry.playS2C().register(CompanionViewPacket.TYPE, CompanionViewPacket.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(UseAbilityPacket.TYPE, (packet, context) -> context.server().execute(() -> UseAbilityPacket.handle(packet, context)));
     }
 

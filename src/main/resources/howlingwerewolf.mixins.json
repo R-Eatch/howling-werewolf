@@ -10,7 +10,8 @@
     "BrewingStandMixin",
     "BrewingPotionSlotMixin",
     "NaturalSpawnerMixin",
-    "LootingMixin"
+    "LootingMixin",
+    "MobMixin"
   ],
   "injectors": {
     "defaultRequire": 1

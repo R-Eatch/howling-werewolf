@@ -26,6 +26,10 @@ public record UpgradeTreeSkillPacket(WerewolfTreeSkill skill) implements CustomP
 
     public static void handle(UpgradeTreeSkillPacket packet, ServerPlayNetworking.Context context) {
         ServerPlayer sender = context.player(); WerewolfApi.get(sender).ifPresent(data -> {
+            if (packet.skill() == WerewolfTreeSkill.PACK_OATH && !com.howlingwerewolf.HWConfig.ENABLE_COMPANIONS.get()) {
+                com.howlingwerewolf.companion.CompanionManager.message(sender, "disabled");
+                return;
+            }
             if (data.upgradeTreeSkill(packet.skill())) {
                 WerewolfGameplayEvents.refreshWerewolfModifiers(sender, data);
                 WerewolfGuide.firstPoint(sender);

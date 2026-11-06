@@ -6,6 +6,7 @@ import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.network.SyncWerewolfDataPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -67,4 +68,24 @@ public final class ClientPacketHandlers {
     }
 
     private ClientPacketHandlers() {}
+    public static void companionView(com.howlingwerewolf.network.CompanionViewPacket packet) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.level == null) return;
+        CompoundTag data = packet.data();
+        if (data.getStringOr("View", "").equals("recruit") && packet.open()) {
+            java.util.UUID npc;
+            try { npc = java.util.UUID.fromString(data.getStringOr("Npc", "")); }
+            catch (IllegalArgumentException invalid) { return; }
+            minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(confirmed -> {
+                minecraft.setScreen(null);
+                if (confirmed) net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
+                        new com.howlingwerewolf.network.CompanionActionPacket(
+                                com.howlingwerewolf.network.CompanionActionPacket.Action.RECRUIT, npc));
+            }, Component.translatable("screen.howlingwerewolf.companion.recruit_title"),
+                    Component.translatable("screen.howlingwerewolf.companion.recruit_body", data.getStringOr("Name", ""))));
+        } else if (data.getStringOr("View", "").equals("manage")) {
+            if (minecraft.screen instanceof CompanionFrameScreen screen) screen.receive(data, packet.open());
+            else if (packet.open()) minecraft.setScreen(new CompanionScreen(minecraft.screen, data));
+        }
+    }
 }

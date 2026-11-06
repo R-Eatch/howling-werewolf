@@ -63,6 +63,11 @@ public final class ClientEvents {
         while (ClientModEvents.OPEN_PROGRESSION.consumeClick()) {
             minecraft.setScreen(new WerewolfProgressionScreen());
         }
+        while (ClientModEvents.OPEN_COMPANIONS.consumeClick()) {
+            ClientPlayNetworking.send(new com.howlingwerewolf.network.CompanionActionPacket(
+                    com.howlingwerewolf.network.CompanionActionPacket.Action.OPEN,
+                    com.howlingwerewolf.network.CompanionActionPacket.NO_TARGET));
+        }
         while (ClientModEvents.TRANSFORM.consumeClick()) {
             ClientPlayNetworking.send(new TransformRequestPacket());
         }
