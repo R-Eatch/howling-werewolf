@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.21.11, Fabric Loader 0.20.1, Fabric API 0.141.6 and Java 21, Howling Werewolf 1.3.3. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.21.11, Fabric Loader 0.20.1, Fabric API 0.141.6 and Java 21, Howling Werewolf 1.3.4. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [every line of dialogue](COMPANION-DIALOGUE.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -140,7 +140,7 @@ Each companion then rests for two Minecraft days (48000 game ticks), early recal
 
 - **Name**: up to 32 characters; leave it blank for the coat's name.
 - **Coat**: one click previews it on the Appearance tab, then apply. Classic has four, Modern has nine, and each model family remembers its own choice. The world setting `gameplay.npcModelSet` decides which model companions use.
-- **Address**: set how your companions address you on the Pack tab, up to 16 characters, for all of yours. Default restores “my lord” (“主人” in Chinese).
+- **Address**: set how your companions address you on the Pack tab, up to 16 characters, for all of yours. Default restores “my Alpha” (“主人” in Chinese).
 
 ## Window and keys
 

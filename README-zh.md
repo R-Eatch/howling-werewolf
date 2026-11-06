@@ -6,13 +6,13 @@
 
 | | |
 |---|---|
-| Mod 版本 | **1.3.3** |
+| Mod 版本 | **1.3.4** |
 | Minecraft Java 版 | 1.21.11 |
 | Fabric Loader | 0.20.1 或更新版本 |
 | Fabric API | 0.141.6+1.21.11 或更新版本 |
 | Java | 21 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.3-fabric-1.21.11.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.4-fabric-1.21.11.jar`。服务端和每个客户端需安装同一版本。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 

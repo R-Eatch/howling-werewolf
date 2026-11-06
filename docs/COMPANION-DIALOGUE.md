@@ -1,8 +1,8 @@
 # 商人与随从对白 / Merchant and companion dialogue
 
-`%s` 是玩家设置的称呼，中文默认“主人”，英文默认“my lord”。商人以“兄弟”称呼玩家，这几句不带称呼。翻译键前缀为 `dialogue.howlingwerewolf.companion.`。
+`%s` 是玩家设置的称呼，中文默认“主人”，英文默认“my Alpha”。商人以“兄弟”称呼玩家，这几句不带称呼。翻译键前缀为 `dialogue.howlingwerewolf.companion.`。
 
-`%s` is the address the player sets, “my lord” by default in English and “主人” in Chinese. The merchant calls the player “brother”, so its lines take no address. Translation keys start with `dialogue.howlingwerewolf.companion.`.
+`%s` is the address the player sets, “my Alpha” by default in English and “主人” in Chinese. The merchant calls the player “brother”, so its lines take no address. Translation keys start with `dialogue.howlingwerewolf.companion.`.
 
 [随从指南](COMPANIONS-zh.md) · [Companion guide](COMPANIONS.md)
 

@@ -2,7 +2,7 @@
 
 [English](ADMIN_COMMANDS.md)
 
-本文适用于 Howling Werewolf `1.3.3`（Minecraft 1.21.11 / Fabric Loader 0.20.1 / Fabric API 0.141.6+1.21.11）。这些命令用于开发、验收、服务器管理和存档诊断。
+本文适用于 Howling Werewolf `1.3.4`（Minecraft 1.21.11 / Fabric Loader 0.20.1 / Fabric API 0.141.6+1.21.11）。这些命令用于开发、验收、服务器管理和存档诊断。
 
 ## 使用条件
 

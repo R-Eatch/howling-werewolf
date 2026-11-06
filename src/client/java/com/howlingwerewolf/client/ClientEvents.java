@@ -117,6 +117,8 @@ public final class ClientEvents {
         var data=WerewolfRenderData.get(state);
         WerewolfForm form=data.form();
         if (form==WerewolfForm.HUMAN || renderer==null) return false;
+        // Another mod is drawing our body in first person: a werewolf body would fill the camera.
+        if (FirstPersonBodyCompat.active(state)) return true;
         pose.pushPose();
         try {
             if (data.modelSet()==WerewolfModelSet.MODERN) modernRenderers.get(form).submit(state,pose,collector,camera);
