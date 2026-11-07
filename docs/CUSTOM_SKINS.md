@@ -30,7 +30,7 @@ In-game exports replace `mywolf` with a unique `wolfskin_…` namespace to keep 
 
 The source repository also includes `examples/custom-skin-pack`; copy that whole folder to `resourcepacks` to start manually.
 
-Classic template artwork is by R_Eatch under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). When sharing adaptations, credit the original artist, identify changes and retain the same license. See [the asset license](LICENSE-ASSETS.md).
+Classic template artwork is by R_Eatch under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). When sharing adaptations, credit the original artist, identify changes and retain the same license. See [the asset license](../LICENSE-ASSETS.md).
 
 Modern Werewolf, Quadruped Wolf, and Beast models and their nine skins per model
 were designed, created, and shared by **thewolfulti**. These assets and their

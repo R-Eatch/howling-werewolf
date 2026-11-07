@@ -7,6 +7,8 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.4-blue?style=flat-square" alt="Latest source: 1.3.4"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge downloads"></a>
+  <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth downloads"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="Code license: MPL-2.0"></a>
@@ -31,7 +33,7 @@ Everything after 1.2.2 lives in **1.3.x** (currently **1.3.4**):
 - A new **Minecraft 1.21.11 Fabric** edition.
 - **Works with Iron's Spells and Better Combat.** When they draw the player's body in first person, the werewolf body no longer blocks the camera.
 
-1.2.2 brought the **Modern** models for all three forms (Werewolf, Quadruped Wolf and Beast, nine coats each) by **thewolfulti**; the Classic set remains. See the [1.2.2 changelog](docs/CHANGELOG-1.2.2.md).
+1.2.2 brought the **Modern** models for all three forms (Werewolf, Quadruped Wolf and Beast, nine coats each) by **thewolfulti**; the Classic set remains.
 
 ## Before the first howl
 
@@ -78,7 +80,7 @@ Choose **Create Template** to export PNGs, Blockbench drawing templates, and res
 
 Multiplayer synchronizes each player's model set and skin ID without uploading images. Built-in coats need no extra pack. Custom coats require the same pack on observing clients; missing resources fall back to Classic Adrian or Modern Ashen while preserving the saved selection. Resource-pack formats differ between Minecraft editions, so use templates from the matching branch.
 
-See the [custom-skin guide](CUSTOM_SKINS.md), also available in [Simplified Chinese](CUSTOM_SKINS-zh.md).
+See the [custom-skin guide](docs/CUSTOM_SKINS.md), also available in [Simplified Chinese](docs/CUSTOM_SKINS-zh.md).
 
 ## Installation
 
@@ -142,6 +144,8 @@ Skills unlock new actions and rules, including:
 - Bloody Bite.
 
 Once learned, Long Claws, Tool Claws and Fire Claws can be switched off and on again at any time on the Abilities page; it costs and refunds nothing.
+
+For the experience, points and exact numbers of every level, skill-tree entry and skill, and the form multipliers, see [Levels, skill tree and skills: the numbers](docs/PROGRESSION.md).
 
 ### Alpha Werewolf Badge
 
@@ -241,6 +245,10 @@ I do not recommend the following methods, since they skip part of the gameplay e
 - **Use a boat:** Trap the Alpha in a boat, just as you would force an Enderman into one. (Poor Alpha, stuck in a boat and toyed with at your leisure—how humiliating. I left the Alpha able to ride boats partly to give some players a cheese option, though I might prevent it from being trapped in boats in a future update :>)
 - **Tune the challenge to your pace:** The configuration includes powerful optional settings that are disabled by default, such as keeping a badge after revival. Some settings can substantially reduce the challenge, making them useful for a relaxed playthrough or practicing the fight.
 
+### Alpha Trial ritual and drops
+
+The Alpha's numbers and moves on each difficulty, the Silver-Oath Watchers, the summoned werewolves, the starting and failure conditions and the rewards are in [Alpha Trial: the numbers](docs/ALPHA-TRIAL.md).
+
 ## Werewolf brothers: merchants and companions
 
 The Moon-Oath altars are not only for the Alpha. With a different set of offerings they call a wandering werewolf brother.
@@ -248,7 +256,7 @@ The Moon-Oath altars are not only for the Alpha. With a different set of offerin
 **Summoning**
 
 1. Learn **Pack Oath** on the skill tree.
-2. Build the five altars in the Moon-Oath layout: one in the centre and one three blocks away to the north, south, east and west, all at the same height.
+2. Build the altars the same way as for the Alpha Trial.
 3. Place a **Wolfsbane** flower on each outer altar and a **Moonbane Pearl** on the central one, then right-click the central altar with an empty hand.
 
 | Ritual | Centre | Four outer altars |
@@ -256,9 +264,9 @@ The Moon-Oath altars are not only for the Alpha. With a different set of offerin
 | Summon a werewolf brother | Moonbane Pearl | Wolfsbane |
 | Alpha Trial | Alpha Werewolf Badge | Moonbane Pearl |
 
-Summoning works at any time of day and any moon phase. The brother runs to you from afar and stays for ten minutes.
+Summoning works at any time of day and any moon phase. A werewolf brother runs to you from afar and stays for 10min.
 
-**Trading**: right-click him to trade. Each merchant brings six of nine trades, covering Silver Ingots, Wolfsbane, Moonbane Pearls, Werewolf Potions and Wolfsbane Potions, each with limited uses and no restocking.
+**Trading**: right-click him to trade. Each merchant brings six of nine trades, covering Silver Ingots, Wolfsbane, Moonbane Pearls, Werewolf Potions and Wolfsbane Potions, each with limited uses; they do not restock.
 
 **Recruiting**: right-click him holding an Alpha Werewolf Badge and confirm; one badge is used and he becomes your lasting companion. Before you pass the Alpha Trial you can keep one companion; afterwards each Pack Oath rank adds a slot, up to three. A companion's highest tier equals your Pack Oath rank.
 
@@ -266,7 +274,7 @@ Summoning works at any time of day and any moon phase. The brother runs to you f
 
 | Order | What it does |
 |---|---|
-| Follow | Stays close, and rejoins you across dimensions. Monsters ignore it. |
+| Follow | Stays close, and rejoins you across dimensions. Monsters do not turn hostile toward a companion that is following you. |
 | Guard | Fights at your side: joins your attacks, protects you when you are hit, and strikes back. |
 | Rest | Waits on the spot. Monsters ignore it. |
 | Sort | Walks around and tidies chests and barrels within 16 blocks. A filled item frame on a container sets what it keeps; trapped chests and shulker boxes stay out of it. |
@@ -280,9 +288,7 @@ See the [companion guide](docs/COMPANIONS.md) and the [hunt and trade tables](do
 
 Each edition's common configuration allows you to adjust infection chance, experience multiplier, maximum level, and many other values, letting you change the pace of the entire werewolf journey to suit your preferences.
 
-Configuration file: `config/howlingwerewolf-common.toml` (`config/howlingwerewolf-common.json` on Fabric).
-
-Companions: `gameplay.enableCompanions` (default true) switches companions as a whole; `gameplay.enableCompanionSorting` (default true) switches sorting alone; `gameplay.companionSortingReach` (default 32, 3–64) is how far a companion can still sort a container it cannot walk up to. The Moonlight / Nightfall choice is saved on the client in `config/howlingwerewolf-client.toml` (`.json` on Fabric).
+Configuration file: `config/howlingwerewolf-common.toml` (`config/howlingwerewolf-common.json` on Fabric). For every entry's default, range and effect, and for the client config, see the [configuration guide](docs/CONFIG.md).
 
 Take care when changing settings that affect world generation or existing saves, and back up important worlds before making major adjustments.
 
@@ -291,11 +297,11 @@ Datapacks can extend the following item tags:
 - `howlingwerewolf:silver_weapons`
 - `howlingwerewolf:werewolf_meat`
 
-Server operators and testers can consult the [administrator command guide](ADMIN_COMMANDS.md), also available in [Simplified Chinese](ADMIN_COMMANDS-zh.md).
+Server operators and testers can consult the [administrator command guide](docs/ADMIN_COMMANDS.md), also available in [Simplified Chinese](docs/ADMIN_COMMANDS-zh.md).
 
 ## Testing and compatibility
 
-Version 1.1.3 completed a full in-game playthrough, from a new survival world to defeating the Ender Dragon and obtaining elytra. The 1.3.x content was first tested in game by the author on Minecraft 26.1.2 and then ported. For 1.3.3, 26.1.2 passed 806 checks on an isolated server and 21089 model and interface regressions; 1.20.1 Forge (with Xenon among 29 mods), 1.21.1 NeoForge (a modpack of about 35 mods) and 1.21.11 Fabric (also run with Sodium) each ran a real client through the companion window, sorting, dismissal, trading, ability and equipment switches, death and respawn, the Nether and back, levelling and reset, infection and awakening and companion pathfinding on a new world, and the Fabric world generation and spawning were checked too. 1.3.4 was tested on 1.21.1 with Iron's Spells and Better Combat installed together: casting in first person no longer has the view blocked by the werewolf model. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
+Version 1.1.3 completed a full in-game playthrough, from a new survival world to defeating the Ender Dragon and obtaining elytra. Please report bugs through [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues).
 
 When reporting an issue, provide:
 
@@ -306,11 +312,13 @@ When reporting an issue, provide:
 - the list of installed Mods;
 - the latest log or crash report.
 
-## Source, changelogs, and building
+## Source and building
 
-The project maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.11**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.4**.
+The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.11**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.4**.
 
-[GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
+[GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
+
+Changelogs for each version are on the [releases page](https://github.com/R-Eatch/howling-werewolf/releases).
 
 ## Credits
 
@@ -328,7 +336,7 @@ Unless otherwise stated, the project's original art assets are licensed under th
 
 Forks, ports, and continued development are welcome and do not require prior authorization. If you publish a port, fork, or significant derivative project, you are also welcome to let me know through GitHub or email.
 
-The official logo and the Howling Werewolf project branding are not automatically included within the scope of the CC BY-SA 4.0 license. Third-party code and materials remain subject to their original licenses. See [LICENSE.md](LICENSE.md), [LICENSE-ASSETS.md](LICENSE-ASSETS.md), and [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) for details.
+The official logo and the Howling Werewolf project branding are not automatically included within the scope of the CC BY-SA 4.0 license. Third-party code and materials remain subject to their original licenses. See [LICENSE.md](LICENSE.md), [LICENSE-ASSETS.md](LICENSE-ASSETS.md), and [ASSET_PROVENANCE.md](docs/ASSET_PROVENANCE.md) for details.
 
 ## Project independence
 

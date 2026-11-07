@@ -244,7 +244,7 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 - Credit **thewolfulti** for the Modern models and skins. Classic models and
   artwork remain credited to **R_Eatch**. Source project bytes remain unchanged;
   attribution and distribution terms are recorded in the public guides and
-  [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+  [LICENSE-ASSETS.md](../LICENSE-ASSETS.md).
 
 ## 1.3.0 progression screen textures
 

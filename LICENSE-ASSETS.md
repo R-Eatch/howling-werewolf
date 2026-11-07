@@ -2,7 +2,7 @@
 
 Copyright © 2026 R_Eatch.
 
-Except where a file or [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) states otherwise, the
+Except where a file or [ASSET_PROVENANCE.md](docs/ASSET_PROVENANCE.md) states otherwise, the
 original art assets created for **Howling Werewolf / 月厄狼人** are licensed under the
 [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/)
 (`CC-BY-SA-4.0`).
@@ -45,5 +45,5 @@ The following are not licensed under CC BY-SA 4.0 by this file:
   materials, which remain under their respective terms.
 
 This asset license does not grant trademark rights or permission to imply endorsement,
-official status, or affiliation. See [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) for the
+official status, or affiliation. See [ASSET_PROVENANCE.md](docs/ASSET_PROVENANCE.md) for the
 origin and classification of distributed assets.

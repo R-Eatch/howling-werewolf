@@ -86,14 +86,7 @@
 
 月厄珍珠有两条交易：**6 狼毒花＋1 钻石**或 **12 绿宝石＋4 狼毒花**，每项最多四次。
 
-商人自然存在 **12000 游戏刻**，正常 20 TPS 时为 **10 分钟**，交易不暂停寿命，区块卸载仍会消失。召唤时先问候，再告知只停留十分钟。全部对白见[对白目录](COMPANION-DIALOGUE.md)。
+商人自然存在 **12000 游戏刻**，正常 20 TPS 时为 **10 分钟**，交易不暂停寿命，区块卸载仍会消失。召唤时先问候，再告知只停留十分钟。
 
 银锭与狼毒花的两条互换交易都是 4 换 2，不能循环套利。
 
-## 数据包入口与代码
-
-- 狩猎表：`data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`。
-- 商人抽选：`data/howlingwerewolf/trade_set/werewolf_brother.json`。
-- 单条交易：`data/howlingwerewolf/villager_trade/werewolf_brother/*.json`。
-- 阶数、时长与冷却规则：[CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java)。
-- 结算、背包合并和溢出：[CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java)。

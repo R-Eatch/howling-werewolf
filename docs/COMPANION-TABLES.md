@@ -86,12 +86,4 @@ The pool holds **9 trades**, and each merchant evenly draws **6 different ones**
 
 The two Silver and Wolfsbane exchanges are both 4 for 2, so they cannot be cycled for profit.
 
-A merchant stays **12000 game ticks**, ten minutes at 20 TPS. Trading does not pause this, and it also leaves if its chunk unloads. It greets you first and then says how long it can stay. See the [dialogue catalog](COMPANION-DIALOGUE.md).
-
-## Data pack paths and code
-
-- Hunt table: `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`.
-- Merchant draw: `data/howlingwerewolf/trade_set/werewolf_brother.json`.
-- Individual trades: `data/howlingwerewolf/villager_trade/werewolf_brother/*.json`.
-- Tier, length and cooldown rules: [CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java).
-- Settlement, inventory merging and overflow: [CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java).
+A merchant stays **12000 game ticks**, ten minutes at 20 TPS. Trading does not pause this, and it also leaves if its chunk unloads. It greets you first and then says how long it can stay.

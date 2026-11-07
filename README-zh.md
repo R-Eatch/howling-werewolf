@@ -7,6 +7,8 @@
 <p align="center">
   <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.4-blue?style=flat-square" alt="最新源码： 1.3.4"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge 下载量"></a>
+  <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth 下载量"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证： MPL-2.0"></a>
@@ -32,7 +34,7 @@
 - 新增 **Minecraft 1.21.11 Fabric** 版。
 - **兼容 Iron's Spells 与 Better Combat。** 它们在第一人称画出玩家身体时，狼人身体不再挡住镜头。
 
-1.2.2 带来了 **thewolfulti** 设计制作的 **Modern** 三形态模型（普通狼人、四足狼、野兽，各 9 套皮肤），Classic 系列继续保留。详见 [1.2.2 更新日志](docs/CHANGELOG-1.2.2.md)。
+1.2.2 带来了 **thewolfulti** 设计制作的 **Modern** 三形态模型（普通狼人、四足狼、野兽，各 9 套皮肤），Classic 系列继续保留。
 
 ## 当第一声嚎叫尚未响起
 
@@ -79,7 +81,7 @@
 
 联机同步每名玩家的模型系列和皮肤 ID，不会自动上传图片。内置皮肤无需额外资源包；自定义皮肤需要观察者启用相同资源包，缺失时按系列回退到 Classic Adrian 或 Modern Ashen，保存的选择仍然保留。各游戏版本的资源包格式不同，请使用对应分支的模板。
 
-完整教程见[自定义皮肤指南](CUSTOM_SKINS-zh.md)（[English](CUSTOM_SKINS.md)）。
+完整教程见[自定义皮肤指南](docs/CUSTOM_SKINS-zh.md)（[English](docs/CUSTOM_SKINS.md)）。
 
 ## 安装
 
@@ -143,6 +145,8 @@
 - 血腥撕咬。
 
 长爪、工具爪和火焰爪学会后，可以在技能页随时关闭或重新开启，不消耗也不退还技能点。
+
+每一级的经验、点数、技能树与技能的具体数值，以及各形态倍率，见[等级、技能树与技能数值](docs/PROGRESSION-zh.md)。
 
 ### Alpha 狼人徽章
 
@@ -242,6 +246,10 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 - **使用船** 使用船控制住 Alpha ，正如强迫末影人坐在船上一样（可怜的Alpha被羞辱般的困在船上肆意玩弄，我没有禁止Alpha乘坐船也是考虑了部分玩家的逃课需求，不过也许我会在后续更新中让Alpha不能再被船困住 :> ）
 - **按自己的节奏调整配置：** 配置中提供了默认关闭的强力可选参数，例如复活保留徽章。部分参数可以明显降低挑战压力，适合希望轻松体验或练习打法的玩家。
 
+### Alpha试炼仪式与掉落
+
+各难度的 Alpha 数值与招式、银誓守夜人、召唤狼人、开始与失败条件以及奖励，见 [Alpha 试炼数值](docs/ALPHA-TRIAL-zh.md)。
+
 ## 狼人兄弟：商人与随从
 
 月誓祭坛不只用来挑战 Alpha。换一组供品，就能召来一位游荡的狼人兄弟。
@@ -249,7 +257,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 **召唤**
 
 1. 在技能树中学会 **狼群誓约**。
-2. 按月誓的布局摆好五座祭坛：中央一座，东南西北各隔三格一座，五座同高。
+2. 按Alpha试炼的方式摆好祭坛
 3. 四座外坛各放一朵 **狼毒花**，中央放一颗 **月厄珍珠**，空手右键中央祭坛。
 
 | 仪式 | 中央 | 四座外坛 |
@@ -257,9 +265,9 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 | 召唤狼人兄弟 | 月厄珍珠 | 狼毒花 |
 | Alpha 试炼 | 狼人徽章 | 月厄珍珠 |
 
-召唤不限昼夜和月相。狼人兄弟会从远处赶到你身边，停留十分钟。
+召唤不限昼夜和月相。狼人兄弟会从远处跑来，停留10min。
 
-**交易**：普通右键打开交易。每位商人从九种交易里抽六种，涉及银锭、狼毒花、月厄珍珠、狼人药水和狼毒花药水，次数有限、不补货。
+**交易**：普通右键打开交易。每位商人从九种交易里抽六种，涉及银锭、狼毒花、月厄珍珠、狼人药水和狼毒花药水，次数有限、不会补货。
 
 **招募**：手持狼人徽章右键商人并确认，消耗一枚徽章，他就成为你的长期同伴。通过 Alpha 试炼前最多一名随从；通过后，狼群誓约每升一级多一个名额，最多三名。随从的最高阶数等于狼群誓约的等级。
 
@@ -267,7 +275,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 | 指令 | 说明 |
 |---|---|
-| 跟随 | 紧跟在你身边，跨维度也会回来。怪物会忽略它。 |
+| 跟随 | 紧跟在你身边，跨维度也会回来。怪物不会对处于跟随状态的随从有仇恨。 |
 | 守护 | 与你并肩作战：协助你攻击、保护受击的你，也会反击。 |
 | 休息 | 留在原地等候。怪物会忽略它。 |
 | 整理 | 亲自走动，归整半径 16 格内的箱子和木桶。挂上放了物品的展示框可以指定容器存放什么；陷阱箱和潜影盒不参与。 |
@@ -281,9 +289,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 各版本的通用配置中可以调整感染率、经验倍率、最高等级等多个参数，你可以根据自己的喜好来改变整段狼人旅程的节奏。
 
-配置文件：`config/howlingwerewolf-common.toml`（Fabric 版为 `config/howlingwerewolf-common.json`）。
-
-随从相关：`gameplay.enableCompanions`（默认 true）统一开关随从；`gameplay.enableCompanionSorting`（默认 true）单独开关整理；`gameplay.companionSortingReach`（默认 32，3–64）是随从走不到跟前时仍能整理的最远距离。界面的月白／夜幕选择保存在客户端文件 `config/howlingwerewolf-client.toml`（Fabric 为 `.json`）。
+配置文件：`config/howlingwerewolf-common.toml`（Fabric 版为 `config/howlingwerewolf-common.json`）。每一项的默认值、范围和作用，以及客户端配置，见[配置文件指南](docs/CONFIG-zh.md)。
 
 涉及世界生成或已有存档的设置应谨慎修改；进行较大调整前，建议先备份重要世界。
 
@@ -292,11 +298,11 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 - `howlingwerewolf:silver_weapons`
 - `howlingwerewolf:werewolf_meat`
 
-服务器管理员与测试人员可以查阅[管理员命令指南](ADMIN_COMMANDS-zh.md)，该文档也提供[英文版本](ADMIN_COMMANDS.md)。
+服务器管理员与测试人员可以查阅[管理员命令指南](docs/ADMIN_COMMANDS-zh.md)，该文档也提供[英文版本](docs/ADMIN_COMMANDS.md)。
 
 ## 测试与兼容性
 
-1.1.3 已完成全流程实机测试：从新存档常规生存到击败末影龙、取得鞘翅。1.3.x 先在 Minecraft 26.1.2 上由作者实机测试，再移植到其他版本。1.3.3 在 26.1.2 上用独立服务端跑了 806 项检查和 21089 项模型与界面回归；1.20.1 Forge（带 Xenon 等 29 个模组）、1.21.1 NeoForge（约 35 个模组的整合包）和 1.21.11 Fabric（另在 Sodium 下跑过一遍）都用真实客户端在新世界里完整走过随从窗口、整理、遣散、交易、技能与装备开关、死亡与重生、进出下界、升级与重置、感染与觉醒和随从寻路，Fabric 还检查了世界生成和刷怪。1.3.4 在 1.21.1 整合包里同时装上 Iron's Spells 和 Better Combat 测过：持续施法时第一人称画面不再被狼人模型挡住。遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
+1.1.3 已完成全流程实机测试：从新存档常规生存到击败末影龙、取得鞘翅。遇到问题请到 [GitHub Issues](https://github.com/R-Eatch/howling-werewolf/issues) 反馈。
 
 反馈问题时，请提供：
 
@@ -307,11 +313,13 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 - 已安装 Mod 列表；
 - 最新日志或崩溃报告。
 
-## 源码、更新日志与构建
+## 源码与构建
 
-项目持续维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.4**。
+项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.4**。
 
-[GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
+[GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
+
+各版本的更新日志详见[发布页](https://github.com/R-Eatch/howling-werewolf/releases)。
 
 ## 致谢 / Credits
 
@@ -329,7 +337,7 @@ Copyright © 2026 R_Eatch.
 
 欢迎创建分支、移植版本以及继续开发，无需事先获得授权。如果你发布了移植版、分支或重要衍生项目，也欢迎通过 GitHub 或邮件告诉我。
 
-官方 Logo、Howling Werewolf / 月厄狼人项目品牌标识不自动包含在 CC BY-SA 4.0 授权范围内。第三方代码与素材继续适用其各自的原始许可证。详细规则见 [LICENSE.md](LICENSE.md)、[LICENSE-ASSETS.md](LICENSE-ASSETS.md) 与 [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md)。
+官方 Logo、Howling Werewolf / 月厄狼人项目品牌标识不自动包含在 CC BY-SA 4.0 授权范围内。第三方代码与素材继续适用其各自的原始许可证。详细规则见 [LICENSE.md](LICENSE.md)、[LICENSE-ASSETS.md](LICENSE-ASSETS.md) 与 [ASSET_PROVENANCE.md](docs/ASSET_PROVENANCE.md)。
 
 ## 项目独立性声明
 
