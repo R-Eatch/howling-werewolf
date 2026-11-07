@@ -30,4 +30,4 @@
 
 公开模板也在源码的 `examples/custom-skin-pack` 文件夹中；手动复制整个文件夹到 `resourcepacks` 即可使用。
 
-Classic 模板美术由 R_Eatch 创作，采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。分享基于模板绘制的作品时请署名、注明修改并保留相同许可，详见 [美术许可](LICENSE-ASSETS.md)。
+Classic 模板美术由 R_Eatch 创作，采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。分享基于模板绘制的作品时请署名、注明修改并保留相同许可，详见 [美术许可](../LICENSE-ASSETS.md)。

@@ -196,7 +196,7 @@ tasks.named('jar', Jar).configure {
         into 'META-INF'
         rename { "LICENSE-ASSETS_${mod_id}.md" }
     }
-    from('ASSET_PROVENANCE.md') {
+    from('docs/ASSET_PROVENANCE.md') {
         into 'META-INF'
         rename { "ASSET_PROVENANCE_${mod_id}.md" }
     }

@@ -86,7 +86,7 @@ The pool holds **9 trades**, and each merchant evenly draws **6 different ones**
 
 The two Silver and Wolfsbane exchanges are both 4 for 2, so they cannot be cycled for profit.
 
-A merchant stays **12000 game ticks**, ten minutes at 20 TPS. Trading does not pause this, and it also leaves if its chunk unloads. It greets you first and then says how long it can stay. See the [dialogue catalog](COMPANION-DIALOGUE.md).
+A merchant stays **12000 game ticks**, ten minutes at 20 TPS. Trading does not pause this, and it also leaves if its chunk unloads. It greets you first and then says how long it can stay.
 
 ## Data pack paths and code
 

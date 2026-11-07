@@ -2,7 +2,7 @@
 
 适用于 Minecraft 1.20.1 / Forge 47.4.16 / Java 17，Howling Werewolf 1.3.4。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
-配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [全部对白](COMPANION-DIALOGUE.md) · [架构来源核查](COMPANION-PROVENANCE.md)
+配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
 游戏内按 **C** 打开随从窗口，“教程”页有同样内容的简明版。
 
