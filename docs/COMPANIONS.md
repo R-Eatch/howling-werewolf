@@ -2,7 +2,7 @@
 
 For Minecraft 1.21.11, Fabric Loader 0.20.1, Fabric API 0.141.6 and Java 21, Howling Werewolf 1.3.4. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
-Related: [hunt and trade tables](COMPANION-TABLES.md) · [every line of dialogue](COMPANION-DIALOGUE.md) · [architecture provenance](COMPANION-PROVENANCE.md)
+Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
 Press **C** in game to open the companion window; its Guide tab covers the same ground in short form.
 

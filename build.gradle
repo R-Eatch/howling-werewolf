@@ -38,7 +38,7 @@ processResources {
     from('examples/custom-skin-pack') { into 'howlingwerewolf_skin_template' }
 }
 tasks.named('jar', Jar) {
-    from(project.files('LICENSE.md', 'LICENSE-CODE.md', 'LICENSE-ASSETS.md', 'ASSET_PROVENANCE.md', 'CREDITS.txt')) {
+    from(project.files('LICENSE.md', 'LICENSE-CODE.md', 'LICENSE-ASSETS.md', 'docs/ASSET_PROVENANCE.md', 'CREDITS.txt')) {
         into 'META-INF'
     }
 }

@@ -30,7 +30,7 @@
 
 公开模板也在源码的 `examples/custom-skin-pack` 文件夹中；手动复制整个文件夹到 `resourcepacks` 即可使用。
 
-Classic 模板美术由 R_Eatch 创作，采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。分享基于模板绘制的作品时请署名、注明修改并保留相同许可，详见 [美术许可](LICENSE-ASSETS.md)。
+Classic 模板美术由 R_Eatch 创作，采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。分享基于模板绘制的作品时请署名、注明修改并保留相同许可，详见 [美术许可](../LICENSE-ASSETS.md)。
 
 Modern 普通狼人、四足狼和野兽三个模型，以及每个模型的九套皮肤，由 **thewolfulti**
 设计、制作并分享。这批资源及其绘画模板同样遵循 **CC BY-SA 4.0** 协议。分享改编作品时，
