@@ -145,7 +145,7 @@ Skills unlock new actions and rules, including:
 
 Once learned, Long Claws, Tool Claws and Fire Claws can be switched off and on again at any time on the Abilities page; it costs and refunds nothing.
 
-For the experience, points and exact numbers of every level, skill-tree entry and skill, and the form multipliers, see [Levels, skill tree and skills: the numbers](docs/PROGRESSION.md).
+For the experience and points of every level and the exact numbers of every skill-tree entry and skill, see [Levels, skill tree and skills: the numbers](docs/PROGRESSION.md).
 
 ### Alpha Werewolf Badge
 
