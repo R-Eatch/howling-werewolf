@@ -180,7 +180,7 @@ tasks.named('jar', Jar).configure {
         into 'META-INF'
         rename { "LICENSE-ASSETS_${packagedModId}.md" }
     }
-    from('ASSET_PROVENANCE.md') {
+    from('docs/ASSET_PROVENANCE.md') {
         into 'META-INF'
         rename { "ASSET_PROVENANCE_${packagedModId}.md" }
     }
