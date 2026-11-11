@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.5. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.6. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -173,7 +173,7 @@ npcModelSet = "modern"
 
 The splash damage of a player's Long Claws passes over every recruited companion. A companion hit directly takes that hit under the usual rules, unless its Ignore My Hits switch is on.
 
-Moonblood Surge also reaches your own recruited companions within 16 blocks in the same dimension. They get the same effects as you, and the same weakness and fatigue when it ends; your Resistance rank clears the matching penalties for them too.
+When you cast Moonblood Surge, your recruited companions within 16 blocks in the same dimension share its effects and the crash that follows. Your Resistance rank clears the matching penalties for them too. Each affected companion keeps its remaining time when recalled or loaded again. Temporary hearts already spent stay spent.
 
 ## Data and multiplayer
 

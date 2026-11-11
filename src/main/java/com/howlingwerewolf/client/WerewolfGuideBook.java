@@ -4,10 +4,12 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -27,7 +30,7 @@ final class WerewolfGuideBook {
      */
     record Chapter(String id, String title, Supplier<ItemLike> icon, List<String> lines) {}
     record Entry(String id, Supplier<ItemLike> item) {}
-    enum Method { CRAFT, SMELT, BREW }
+    enum Method { CRAFT, SMELT, BLAST, BREW }
     /** Ingredient slots in reading order (nine for crafting), each cycling through its alternatives. */
     record Shown(Method method, List<List<ItemStack>> slots, ItemStack result) {}
 
@@ -53,6 +56,7 @@ final class WerewolfGuideBook {
     static final List<Entry> ITEMS = List.of(
             new Entry("wolfsbane", ModBlocks.WOLFSBANE::get),
             new Entry("silver_ore", ModBlocks.SILVER_ORE::get),
+            new Entry("deepslate_silver_ore", ModBlocks.DEEPSLATE_SILVER_ORE::get),
             new Entry("silver_ingot", ModItems.SILVER_INGOT::get),
             new Entry("silver_sword", ModItems.SILVER_SWORD::get),
             new Entry("wolfsbane_potion", ModItems.WOLFSBANE_POTION::get),
@@ -74,34 +78,47 @@ final class WerewolfGuideBook {
         return index(data.getLevel() >= 10 ? "trial" : "growth");
     }
 
-    /** How an item is made: a crafting or smelting recipe from the world, or the two brews of this mod. */
-    static @Nullable Shown recipe(ItemLike target) {
+    /** Read crafting and cooking recipes from the world. The mod's two brews are registered separately. */
+    static List<Shown> recipes(ItemLike target) {
         var level = Minecraft.getInstance().level;
-        if (level == null) return null;
+        if (level == null) return List.of();
         if (target.asItem() == ModItems.WOLFSBANE_POTION.get()) {
-            return brew(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD), new ItemStack(ModBlocks.WOLFSBANE.get()), target);
+            return List.of(brew(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD),
+                    new ItemStack(ModBlocks.WOLFSBANE.get()), target));
         }
         if (target.asItem() == ModItems.WEREWOLF_POTION.get()) {
-            return brew(new ItemStack(ModItems.WOLFSBANE_POTION.get()), new ItemStack(Items.FERMENTED_SPIDER_EYE), target);
+            return List.of(brew(new ItemStack(ModItems.WOLFSBANE_POTION.get()),
+                    new ItemStack(Items.FERMENTED_SPIDER_EYE), target));
         }
         var manager = level.getRecipeManager();
-        for (Recipe<?> recipe : manager.getAllRecipesFor(RecipeType.CRAFTING)) {
-            if (!recipe.getResultItem(level.registryAccess()).is(target.asItem())) continue;
-            List<List<ItemStack>> slots = new ArrayList<>();
-            for (int i = 0; i < 9; i++) slots.add(List.of());
+        RegistryAccess registries = level.registryAccess();
+        List<Shown> shown = new ArrayList<>();
+        for (Recipe<?> recipe : manager.getAllRecipesFor(RecipeType.CRAFTING).stream()
+                .sorted(Comparator.comparing(Recipe::getId)).toList()) {
+            ItemStack result = recipe.getResultItem(registries);
+            if (!result.is(target.asItem())) continue;
             List<Ingredient> ingredients = recipe.getIngredients();
             int width = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
-            for (int i = 0; i < ingredients.size() && i < 9; i++) {
+            if (width < 1 || width > 3 || ingredients.isEmpty() || ingredients.size() > width * 3) continue;
+            List<List<ItemStack>> slots = new ArrayList<>();
+            for (int i = 0; i < 9; i++) slots.add(List.of());
+            for (int i = 0; i < ingredients.size(); i++) {
                 slots.set(i / width * 3 + i % width, List.of(ingredients.get(i).getItems()));
             }
-            return new Shown(Method.CRAFT, slots, recipe.getResultItem(level.registryAccess()));
+            shown.add(new Shown(Method.CRAFT, slots, result));
         }
-        for (Recipe<?> recipe : manager.getAllRecipesFor(RecipeType.SMELTING)) {
-            if (!recipe.getResultItem(level.registryAccess()).is(target.asItem()) || recipe.getIngredients().isEmpty()) continue;
-            return new Shown(Method.SMELT, List.of(List.of(recipe.getIngredients().get(0).getItems())),
-                    recipe.getResultItem(level.registryAccess()));
+        addCooking(shown, manager.getAllRecipesFor(RecipeType.SMELTING), Method.SMELT, target, registries);
+        addCooking(shown, manager.getAllRecipesFor(RecipeType.BLASTING), Method.BLAST, target, registries);
+        return List.copyOf(shown);
+    }
+
+    private static void addCooking(List<Shown> shown, List<? extends AbstractCookingRecipe> recipes,
+                                   Method method, ItemLike target, RegistryAccess registries) {
+        for (AbstractCookingRecipe recipe : recipes.stream().sorted(Comparator.comparing(Recipe::getId)).toList()) {
+            ItemStack result = recipe.getResultItem(registries);
+            if (!result.is(target.asItem()) || recipe.getIngredients().isEmpty()) continue;
+            shown.add(new Shown(method, List.of(List.of(recipe.getIngredients().get(0).getItems())), result));
         }
-        return null;
     }
 
     private static Shown brew(ItemStack base, ItemStack reagent, ItemLike result) {

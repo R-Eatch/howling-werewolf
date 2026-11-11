@@ -19,6 +19,7 @@ import com.howlingwerewolf.network.UpgradeTreeSkillPacket;
 import com.howlingwerewolf.network.UseAbilityPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import com.howlingwerewolf.client.MoonInput.KeyEvent;
@@ -67,7 +68,8 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
     private int wide, tall, band, stageBottom, moonY, moonRadius, orbitX, orbitY, rowGap;
     private int articleX, articleY, articleWidth, articleHeight, articleLength;
     private int railX, railWidth, cardX, cardY, cardWidth, cardHeight, figureWidth;
-    private @Nullable WerewolfGuideBook.Shown recipe;
+    private List<WerewolfGuideBook.Shown> recipes = List.of();
+    private int recipeIndex;
     private ItemStack hoveredStack = ItemStack.EMPTY;
     private float frameBlend, moonX = -1, scroll, scrollGoal, underlineX = -1, underlineWidth, rotation = -24;
     private boolean dragging, draggingScroll;
@@ -228,7 +230,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
             int width = font.width(label) + 14;
             addRenderableWidget(new CompanionUi.UiButton(right + 6 - width, footer, width, 16, label, CompanionUi.Look.GHOST, () -> openChapter(chapter + 1)));
         }
-        recipe = null;
+        recipes = List.of();
         switch (shown.id()) {
             case "beast" -> beast = addRenderableWidget(headerPill(KEY + "guide.beast.toggle", () -> ModNetwork.CHANNEL.sendToServer(new ToggleBeastModePacket())));
             case "companions" -> addRenderableWidget(headerPill(KEY + "guide.companions.open", () -> ModNetwork.CHANNEL.sendToServer(
@@ -238,7 +240,14 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
                 for (int i = 0; i < WerewolfGuideBook.ITEMS.size(); i++) {
                     addRenderableWidget(new ItemChip(i, cardX + 16 + i % perRow * 26, cardY + GUIDE_HEADER + i / perRow * 26));
                 }
-                recipe = WerewolfGuideBook.recipe(WerewolfGuideBook.ITEMS.get(itemEntry).item().get());
+                recipes = WerewolfGuideBook.recipes(WerewolfGuideBook.ITEMS.get(itemEntry).item().get());
+                recipeIndex = Mth.clamp(recipeIndex, 0, Math.max(0, recipes.size() - 1));
+                if (recipes.size() > 1) {
+                    int x = cardX + cardWidth - 16 - figureWidth;
+                    int y = articleY + 80;
+                    addRenderableWidget(recipeButton(x, y, "‹", "previous", -1));
+                    addRenderableWidget(recipeButton(x + RECIPE_WIDTH - 18, y, "›", "next", 1));
+                }
             }
             default -> {}
         }
@@ -273,6 +282,13 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
 
     private int itemsPerRow() { return Math.max(1, (cardWidth - 32) / 26); }
 
+    private CompanionUi.UiButton recipeButton(int x, int y, String arrow, String direction, int step) {
+        CompanionUi.UiButton button = new CompanionUi.UiButton(x, y, 18, 16, Component.literal(arrow), CompanionUi.Look.SOFT,
+                () -> recipeIndex = Math.floorMod(recipeIndex + step, recipes.size()));
+        button.setTooltip(Tooltip.create(Component.translatable(KEY + "guide.recipe." + direction)));
+        return button;
+    }
+
     private static String statusKey(@Nullable WerewolfData data) {
         if (data != null && data.isBeastMode()) return "beast";
         if (data != null && data.isQuadrupedMode()) return "quadruped";
@@ -289,6 +305,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
 
     private void openItem(int index) {
         itemEntry = index;
+        recipeIndex = 0;
         pageOpened = Util.getMillis();
         scroll = scrollGoal = 0;
         rebuildWidgets();
@@ -526,11 +543,15 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         if (shown.id().equals("items")) drawRecipe(graphics, theme, cardX + cardWidth - 16 - figureWidth, articleY, mouseX, mouseY);
     }
 
-    /** The selected item's recipe: a crafting grid, a smelt or a brew, read from the world's recipes. */
+    /** The selected recipe and its required crafting station. */
     private void drawRecipe(MoonGraphics graphics, MoonUi.Theme theme, int x, int y, float mouseX, float mouseY) {
+        WerewolfGuideBook.Shown recipe = recipes.isEmpty() ? null : recipes.get(recipeIndex);
         String method = recipe == null ? "none" : recipe.method().name().toLowerCase(java.util.Locale.ROOT);
         ItemLike station = recipe == null ? Items.COMPASS : switch (recipe.method()) {
-            case CRAFT -> Items.CRAFTING_TABLE; case SMELT -> Items.FURNACE; case BREW -> Items.BREWING_STAND;
+            case CRAFT -> Items.CRAFTING_TABLE;
+            case SMELT -> Items.FURNACE;
+            case BLAST -> Items.BLAST_FURNACE;
+            case BREW -> Items.BREWING_STAND;
         };
         graphics.item(new ItemStack(station), x, y - 4);
         graphics.text(font, CompanionUi.fit(font, Component.translatable(KEY + "guide.method." + method).getString(), RECIPE_WIDTH - 20), x + 20, y, theme.sub(), false);
@@ -539,7 +560,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         List<List<ItemStack>> slots = recipe.slots();
         switch (recipe.method()) {
             case CRAFT -> { for (int i = 0; i < 9; i++) slot(graphics, theme, x + i % 3 * 19, top + i / 3 * 19, slots.get(i), mouseX, mouseY); }
-            case SMELT -> slot(graphics, theme, x + 19, top + 19, slots.get(0), mouseX, mouseY);
+            case SMELT, BLAST -> slot(graphics, theme, x + 19, top + 19, slots.get(0), mouseX, mouseY);
             case BREW -> {
                 slot(graphics, theme, x + 19, top + 4, slots.get(0), mouseX, mouseY);
                 slot(graphics, theme, x + 19, top + 34, slots.get(1), mouseX, mouseY);
@@ -551,6 +572,10 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         MoonUi.line(graphics, x + 69, arrowY + 3.5F, x + 73, arrowY, 1.2F, theme.sub());
         slot(graphics, theme, x + 78, top + 19, List.of(recipe.result()), mouseX, mouseY);
         if (recipe.result().getCount() > 1) graphics.text(font, "\u00D7" + recipe.result().getCount(), x + 80, top + 39, theme.faint(), false);
+        if (recipes.size() > 1) {
+            String page = (recipeIndex + 1) + " / " + recipes.size();
+            graphics.text(font, page, x + (RECIPE_WIDTH - font.width(page)) / 2, y + 84, theme.sub(), false);
+        }
     }
 
     private void slot(MoonGraphics graphics, MoonUi.Theme theme, int x, int y, List<ItemStack> choices, float mouseX, float mouseY) {

@@ -6,6 +6,8 @@ import com.howlingwerewolf.ModernSkin;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.WerewolfSkin;
+import com.howlingwerewolf.WerewolfTreeSkill;
+import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.companion.CompanionDialogue;
 import com.howlingwerewolf.companion.CompanionManager;
 import com.howlingwerewolf.companion.CompanionMode;
@@ -15,6 +17,7 @@ import com.howlingwerewolf.companion.CompanionSavedData;
 import com.howlingwerewolf.companion.CompanionSorting;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
+import com.howlingwerewolf.event.WerewolfGameplayEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -97,7 +100,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             new Trade(() -> ModBlocks.WOLFSBANE.get(), 4, null, 0, () -> ModItems.SILVER_INGOT.get(), 2, 8));
     private static final int OFFERED = 6;
     private CompanionRecord record;
-    private long moonbloodCrashTime;
+    private boolean moonbloodCrashPending;
     private int generation;
     private long expiresAt;
     private UUID offeredTo;
@@ -156,8 +159,39 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     @Override public WerewolfForm getNpcForm() { return WerewolfForm.WEREWOLF; }
     @Nullable public CompanionRecord record() { return record; }
-    /** Transient like the surge's effects: companions are rebuilt from records, never saved as entities. */
-    public void scheduleMoonbloodCrash(long gameTime) { moonbloodCrashTime = gameTime; }
+    public void startMoonblood(long gameTime) {
+        if (record == null || !(level() instanceof ServerLevel level)) return;
+        CompanionSavedData data = CompanionSavedData.get(level.getServer());
+        if (!data.isCurrent(record, this)) return;
+        WerewolfGameplayEvents.applyMoonbloodSurge(this, 0);
+        record.moonblood = new CompanionRecord.Moonblood(
+                gameTime + WerewolfGameplayEvents.MOONBLOOD_SURGE_TICKS, getAbsorptionAmount());
+        moonbloodCrashPending = true;
+        data.setDirty();
+    }
+
+    /** Rebuild just the time remaining on the owner record after this entity has joined the world. */
+    public void restoreMoonblood() {
+        if (record.moonblood.surgeEnd() == 0L) return;
+        long ticksSinceSurge = level().getGameTime() - record.moonblood.surgeEnd();
+        moonbloodCrashPending = ticksSinceSurge < 0L;
+        if (moonbloodCrashPending) {
+            int surgeTicks = WerewolfGameplayEvents.MOONBLOOD_SURGE_TICKS;
+            int elapsed = surgeTicks + (int) Math.max(-surgeTicks, ticksSinceSurge);
+            WerewolfGameplayEvents.applyMoonbloodSurge(this, elapsed);
+            setAbsorptionAmount(Math.min(getAbsorptionAmount(), record.moonblood.absorption()));
+        } else {
+            applyMoonbloodCrash(owner(), ticksSinceSurge);
+        }
+    }
+
+    private void applyMoonbloodCrash(@Nullable ServerPlayer player, long elapsed) {
+        if (elapsed >= WerewolfGameplayEvents.MOONBLOOD_CRASH_TICKS) return;
+        int resistanceRank = player == null ? 0 : WerewolfApi.get(player)
+                .map(data -> data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE)).orElse(0);
+        WerewolfGameplayEvents.applyMoonbloodCrash(this, resistanceRank,
+                WerewolfGameplayEvents.MOONBLOOD_CRASH_TICKS - (int) elapsed);
+    }
     public int generation() { return generation; }
     public boolean isRecruited() { return entityData.get(RECRUITED); }
     public void refreshAppearance() {
@@ -303,11 +337,9 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (record.mode != CompanionMode.SORT) endSortVisuals();
         ServerPlayer player = owner();
         if (player == null) { CompanionManager.remember(this); discard(); return; }
-        if (moonbloodCrashTime > 0 && level.getGameTime() >= moonbloodCrashTime) {
-            moonbloodCrashTime = 0;
-            com.howlingwerewolf.event.WerewolfGameplayEvents.applyMoonbloodCrash(this,
-                    com.howlingwerewolf.capability.WerewolfApi.get(player)
-                            .map(owner -> owner.getTreeSkillRank(com.howlingwerewolf.WerewolfTreeSkill.RESISTANCE)).orElse(0));
+        if (moonbloodCrashPending && level.getGameTime() >= record.moonblood.surgeEnd()) {
+            moonbloodCrashPending = false;
+            applyMoonbloodCrash(player, level.getGameTime() - record.moonblood.surgeEnd());
         }
         if (getTarget() != null && !canAttack(getTarget())) setTarget(null);
         if (tickCount % 20 == 0) {

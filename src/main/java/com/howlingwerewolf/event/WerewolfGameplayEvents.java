@@ -30,6 +30,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -105,8 +106,8 @@ public final class WerewolfGameplayEvents {
     private static final int MOONBLOOD_RESISTANCE_I_TICKS = 20 * 60;
     private static final int MOONBLOOD_RESISTANCE_II_TICKS = 20 * 25;
     private static final int MOONBLOOD_RESISTANCE_III_TICKS = 20 * 10;
-    private static final int MOONBLOOD_SURGE_TICKS = 20 * 90;
-    private static final int MOONBLOOD_CRASH_TICKS = 20 * 60;
+    public static final int MOONBLOOD_SURGE_TICKS = 20 * 90;
+    public static final int MOONBLOOD_CRASH_TICKS = 20 * 60;
     private static final int MOONBLOOD_COOLDOWN_TICKS = 20 * 60 * 4;
     private static final double MOONBLOOD_COMPANION_RADIUS = 16.0D;
     private static final int BEAST_TRANSITION_HUNGER_TICKS = 20 * 60;
@@ -835,7 +836,7 @@ public final class WerewolfGameplayEvents {
                 return;
             }
 
-            applyMoonbloodSurge(player);
+            applyMoonbloodSurge(player, 0);
             data.setMoonbloodCrashTime(gameTime + MOONBLOOD_SURGE_TICKS);
             data.setMoonbloodSurgeCooldownEnd(gameTime + MOONBLOOD_COOLDOWN_TICKS);
             ServerLevel level = player.serverLevel();
@@ -846,8 +847,7 @@ public final class WerewolfGameplayEvents {
                             && companion.isRecruited() && companion.record() != null
                             && companion.record().belongsTo(player.getUUID())
                             && companion.distanceToSqr(player) <= MOONBLOOD_COMPANION_RADIUS * MOONBLOOD_COMPANION_RADIUS)) {
-                applyMoonbloodSurge(companion);
-                companion.scheduleMoonbloodCrash(gameTime + MOONBLOOD_SURGE_TICKS);
+                companion.startMoonblood(gameTime);
                 level.sendParticles(ParticleTypes.CRIMSON_SPORE, companion.getX(), companion.getY() + 1.0D,
                         companion.getZ(), 24, 0.45D, 0.7D, 0.45D, 0.025D);
             }
@@ -863,50 +863,45 @@ public final class WerewolfGameplayEvents {
         });
     }
 
-    /** Moonblood Surge's buffs, shared by the caster and the companions it reaches. */
-    public static void applyMoonbloodSurge(LivingEntity target) {
-        target.addEffect(new MobEffectInstance(MobEffects.REGENERATION,
-                MOONBLOOD_REGENERATION_TICKS, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.ABSORPTION,
-                MOONBLOOD_ABSORPTION_TICKS, 3));
+    /** Apply the remaining part of the original surge, including the current resistance stage. */
+    public static void applyMoonbloodSurge(LivingEntity target, int elapsedTicks) {
+        addRemainingEffect(target, MobEffects.REGENERATION, MOONBLOOD_REGENERATION_TICKS - elapsedTicks, 2);
+        addRemainingEffect(target, MobEffects.ABSORPTION, MOONBLOOD_ABSORPTION_TICKS - elapsedTicks, 3);
         // Add the resistance stages from weakest/longest to strongest/shortest. Vanilla's
         // hidden-effect chain counts all durations down together, yielding 10s III, 15s II,
         // then 35s I without custom timers. / 从弱到强叠加隐藏效果，得到 10 秒 III、
         // 15 秒 II、35 秒 I 的连续递减抗性。
-        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                MOONBLOOD_RESISTANCE_I_TICKS, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                MOONBLOOD_RESISTANCE_II_TICKS, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                MOONBLOOD_RESISTANCE_III_TICKS, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
-                MOONBLOOD_SURGE_TICKS, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
-                MOONBLOOD_SURGE_TICKS, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.JUMP,
-                MOONBLOOD_SURGE_TICKS, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,
-                MOONBLOOD_SURGE_TICKS, 0));
+        addRemainingEffect(target, MobEffects.DAMAGE_RESISTANCE, MOONBLOOD_RESISTANCE_I_TICKS - elapsedTicks, 0);
+        addRemainingEffect(target, MobEffects.DAMAGE_RESISTANCE, MOONBLOOD_RESISTANCE_II_TICKS - elapsedTicks, 1);
+        addRemainingEffect(target, MobEffects.DAMAGE_RESISTANCE, MOONBLOOD_RESISTANCE_III_TICKS - elapsedTicks, 2);
+        int remaining = MOONBLOOD_SURGE_TICKS - elapsedTicks;
+        addRemainingEffect(target, MobEffects.DAMAGE_BOOST, remaining, 1);
+        addRemainingEffect(target, MobEffects.MOVEMENT_SPEED, remaining, 1);
+        addRemainingEffect(target, MobEffects.JUMP, remaining, 0);
+        addRemainingEffect(target, MobEffects.FIRE_RESISTANCE, remaining, 0);
+    }
+
+    private static void addRemainingEffect(LivingEntity target, MobEffect effect, int duration, int amplifier) {
+        if (duration > 0) target.addEffect(new MobEffectInstance(effect, duration, amplifier));
     }
 
     /** The crash after a surge; the caster's Resistance rank still clears the penalties it resists. */
-    public static void applyMoonbloodCrash(LivingEntity target, int resistanceRank) {
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
-                MOONBLOOD_CRASH_TICKS, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
-                MOONBLOOD_CRASH_TICKS, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
-                MOONBLOOD_CRASH_TICKS, 0));
+    public static void applyMoonbloodCrash(LivingEntity target, int resistanceRank, int remainingTicks) {
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, remainingTicks, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, remainingTicks, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, remainingTicks, 0));
         removeResistedEffects(target, resistanceRank);
-        if (target.level() instanceof ServerLevel level) level.sendParticles(ParticleTypes.ASH, target.getX(),
-                target.getY() + 1.0D, target.getZ(), 42, 0.5D, 0.7D, 0.5D, 0.02D);
+        if (remainingTicks == MOONBLOOD_CRASH_TICKS && target.level() instanceof ServerLevel level) {
+            level.sendParticles(ParticleTypes.ASH, target.getX(), target.getY() + 1.0D, target.getZ(),
+                    42, 0.5D, 0.7D, 0.5D, 0.02D);
+        }
     }
 
     private static void processMoonbloodCrash(ServerPlayer player, WerewolfData data) {
         long crashTime = data.getMoonbloodCrashTime();
         if (crashTime <= 0L || player.serverLevel().getGameTime() < crashTime) return;
         data.setMoonbloodCrashTime(0L);
-        applyMoonbloodCrash(player, data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE));
+        applyMoonbloodCrash(player, data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE), MOONBLOOD_CRASH_TICKS);
         player.playNotifySound(SoundEvents.WOLF_WHINE, SoundSource.PLAYERS, 1.0F, 0.65F);
         player.sendSystemMessage(Component.translatable("message.howlingwerewolf.moonblood_crash")
                 .withStyle(ChatFormatting.DARK_GRAY));

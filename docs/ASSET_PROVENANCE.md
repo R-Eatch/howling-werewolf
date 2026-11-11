@@ -231,3 +231,8 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 - The maintainer identified the Modern model/texture artist as thewolfulti and the Classic artist as R_Eatch. The skin-screen switch and built-in coat attribution use these credits. Source project bytes remain unchanged.
 - The public/runtime family name is Modern, with `modern` used for IDs, resource paths and skin-pack model fields.
 - Modern Ashen is used for the Alpha and its summoned pack, while wild/spawn-egg werewolf palettes are selected by the server and saved. The server NPC model setting can switch all of these to Classic Adrian.
+
+## 1.3.6 altar and potion textures, Modern Beast muzzle
+
+- The four 16 × 16 altar side and top PNGs and the 16 × 16 Wolfsbane and Werewolf potion PNGs use the project's original texture drafts, under CC BY-SA 4.0. The altar designs depict their stone brick, wolfsbane, gold and diamond ingredients.
+- The Modern Beast project mirrors its existing cheek fur onto the other side of the muzzle. The original model and embedded palettes are by thewolfulti. All nine embedded palette images are retained.
