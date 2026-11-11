@@ -100,6 +100,7 @@ public final class CompanionManager {
                     case SKIN -> changeSkin(player, record, packet.value());
                     case SORT -> CompanionSorting.action(player, record, packet.value());
                     case DISMISS -> dismiss(player, record);
+                    case OWNER_DAMAGE -> { record.ignoreOwnerDamage = !record.ignoreOwnerDamage; data.setDirty(); }
                     default -> {}
                 }
                 sendView(player, false);
@@ -505,6 +506,7 @@ public final class CompanionManager {
             entry.putString("Skin", record.skin());
             entry.putInt("Tier", record.tier);
             entry.putInt("Mode", record.mode.ordinal());
+            entry.putBoolean("IgnoreOwnerDamage", record.ignoreOwnerDamage);
             entry.putBoolean("SortNearby", entity != null && entity.level() == player.level() && entity.distanceToSqr(player) <= 16 * 16);
             CompanionSorting.writeView(entry, record, player.getServer());
             entry.putFloat("Health", record.health);

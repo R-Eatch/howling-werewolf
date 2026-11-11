@@ -70,7 +70,8 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         super(type, level);
         xpReward = 50;
         setPersistenceRequired();
-        NpcAppearanceData.initialize(this, APPEARANCE, false);
+        // Each trial rolls one of the Modern coats; its summons wear the same one for the whole fight.
+        NpcAppearanceData.initialize(this, APPEARANCE, true);
     }
 
     @Override protected void defineSynchedData() {
@@ -79,7 +80,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     }
 
     @Override public com.howlingwerewolf.WerewolfModelSet getNpcModelSet() { return NpcAppearanceData.modelSet(entityData, APPEARANCE); }
-    @Override public com.howlingwerewolf.ModernSkin getNpcCoat() { return com.howlingwerewolf.ModernSkin.ASHEN; }
+    @Override public com.howlingwerewolf.ModernSkin getNpcCoat() { return NpcAppearanceData.coat(entityData, APPEARANCE); }
     @Override public com.howlingwerewolf.WerewolfForm getNpcForm() { return com.howlingwerewolf.WerewolfForm.BEAST; }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -268,7 +269,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
             double angle = Math.PI * 2.0D * i / 4.0D;
             minion.moveTo(getX() + Math.cos(angle) * 2.5D, getY(),
                     getZ() + Math.sin(angle) * 2.5D, getYRot(), 0.0F);
-            minion.configureForAlpha(getUUID(), target);
+            minion.configureForAlpha(getUUID(), getNpcCoat(), target);
             serverLevel.addFreshEntity(minion);
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF,
                     minion.getX(), minion.getY() + 0.5D, minion.getZ(),
@@ -402,6 +403,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         tag.putInt("PendingForcedSummons", pendingForcedSummons);
         tag.putInt("NextAllowedDamageDelay", Math.max(0, nextAllowedDamageTick - tickCount));
         tag.putBoolean("Revived", revived);
+        NpcAppearanceData.save(this, APPEARANCE, tag);
     }
 
     @Override
@@ -419,6 +421,8 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
                 : tag.getBoolean("PendingForcedSummon") ? 1 : 0;
         nextAllowedDamageTick = tickCount + Math.max(0, tag.getInt("NextAllowedDamageDelay"));
         revived = tag.getBoolean("Revived");
+        // Alphas saved before 1.3.5 have no coat and keep the Ashen they were fought in.
+        NpcAppearanceData.load(this, APPEARANCE, tag, !tag.contains("ModernCoat"));
     }
 
     /**

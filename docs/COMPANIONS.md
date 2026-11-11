@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.4. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.5. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -67,6 +67,7 @@ Companions out hunting or fallen still count toward the party limit. Respeccing 
 | Recall | Works from any dimension and any chunk. It returns to safe ground beside you, and recalling a hunter settles the hunt early. A fallen companion needs reviving first. |
 | Upgrade | Spends Moonbane Pearls, within the skill's tier limit. |
 | Revive | Spends one Alpha Werewolf Badge and returns it at full health beside you, with tier, name, coat and inventory intact. |
+| Ignore My Hits | A switch below the orders, off by default and kept per companion. While it is on, nothing you cause can hurt this companion: melee, projectiles, potions and your Beast void claws all miss, with no hurt sound or knockback. Other players, monsters and `/kill` still can. |
 | Dismiss | Below the orders; opens a separate confirmation page. Once confirmed, the companion leaves the pack and its record, tier, name and coat are gone, with nothing spent on it refunded. Whatever it carries is handed back to you, and anything that does not fit drops at your feet. Its slot is free again. Fallen and hunting companions can be dismissed too; a hunt in progress is not settled. |
 
 When there is no safe ground nearby, recall, revival and returning hunters wait for space. Badges and rewards are settled when it succeeds.
@@ -170,7 +171,9 @@ npcModelSet = "modern"
 
 ## Combat detail
 
-The splash damage of a player's Long Claws passes over every recruited companion. A companion hit directly takes that hit under the usual rules.
+The splash damage of a player's Long Claws passes over every recruited companion. A companion hit directly takes that hit under the usual rules, unless its Ignore My Hits switch is on.
+
+Moonblood Surge also reaches your own recruited companions within 16 blocks in the same dimension. They get the same effects as you, and the same weakness and fatigue when it ends; your Resistance rank clears the matching penalties for them too.
 
 ## Data and multiplayer
 

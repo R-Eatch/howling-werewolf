@@ -10,10 +10,13 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.content.ModTags;
+import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.network.ModNetwork;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -50,6 +53,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -100,6 +108,7 @@ public final class WerewolfGameplayEvents {
     private static final int MOONBLOOD_SURGE_TICKS = 20 * 90;
     private static final int MOONBLOOD_CRASH_TICKS = 20 * 60;
     private static final int MOONBLOOD_COOLDOWN_TICKS = 20 * 60 * 4;
+    private static final double MOONBLOOD_COMPANION_RADIUS = 16.0D;
     private static final int BEAST_TRANSITION_HUNGER_TICKS = 20 * 60;
     private static final int HUMAN_TO_WEREWOLF_STRENGTH_TICKS = 20 * 30;
     private static final int WEREWOLF_TO_HUMAN_WEAKNESS_TICKS = 20 * 30;
@@ -128,6 +137,8 @@ public final class WerewolfGameplayEvents {
     private static final Map<UUID, FoodSnapshot> FOOD_SNAPSHOTS = new HashMap<>();
     private static final Map<UUID, Float> LAST_EXHAUSTION = new HashMap<>();
     private static final Set<UUID> AUTOMATIC_NIGHT_VISION = new HashSet<>();
+    private static final Map<UUID, SafeGround> SAFE_GROUND = new HashMap<>();
+    private static final Set<UUID> VOID_RETURNS = new HashSet<>();
 
     @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
@@ -156,8 +167,42 @@ public final class WerewolfGameplayEvents {
             if (data.getLevel() >= WerewolfData.getMaxLevel() && player.tickCount % 20 == 0) {
                 WerewolfGuide.lastAlpha(player);
             }
+            if (player.tickCount % 5 == 0 && data.isWerewolf() && HWConfig.PRESERVE_ALPHA_BADGE_ON_REVIVAL.get()
+                    && player.onGround() && !player.isPassenger() && !player.isInLava() && !player.isOnFire()) {
+                SAFE_GROUND.put(player.getUUID(), new SafeGround(player.level().dimension(), player.position()));
+            }
         });
+        if (!VOID_RETURNS.isEmpty() && VOID_RETURNS.remove(player.getUUID())) returnFromVoid(player);
         finishHungerTracking(player);
+    }
+
+    private record SafeGround(ResourceKey<Level> dimension, Vec3 position) {}
+
+    /** Moves a badge-revived player out of the void: last safe ground, then respawn point, then world spawn. */
+    private static void returnFromVoid(ServerPlayer player) {
+        MinecraftServer server = player.server;
+        SafeGround ground = SAFE_GROUND.get(player.getUUID());
+        ServerLevel level = ground == null ? null : server.getLevel(ground.dimension());
+        Vec3 target = level != null && standable(level, player, ground.position()) ? ground.position() : null;
+        if (target == null && player.getRespawnPosition() != null
+                && (level = server.getLevel(player.getRespawnDimension())) != null) {
+            target = Player.findRespawnPositionAndUseSpawnBlock(level, player.getRespawnPosition(),
+                    player.getRespawnAngle(), player.isRespawnForced(), true).orElse(null);
+        }
+        if (target == null) {
+            level = server.overworld();
+            target = Vec3.atBottomCenterOf(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    level.getSharedSpawnPos()));
+        }
+        player.teleportTo(level, target.x, target.y, target.z, player.getYRot(), player.getXRot());
+        player.resetFallDistance();
+        player.setDeltaMovement(Vec3.ZERO);
+        player.hurtMarked = true;
+    }
+
+    private static boolean standable(ServerLevel level, ServerPlayer player, Vec3 position) {
+        AABB box = player.getDimensions(Pose.STANDING).makeBoundingBox(position);
+        return level.noCollision(player, box) && !level.noCollision(player, box.expandTowards(0.0D, -0.25D, 0.0D));
     }
 
     private static void processFormRules(ServerPlayer player, WerewolfData data) {
@@ -324,7 +369,10 @@ public final class WerewolfGameplayEvents {
                 amount *= 1.5F;
                 victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
             }
-            if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            // Only kill bypasses the werewolf reduction; void keeps half of it, and every other
+            // type, including other mods' additions to bypasses_invulnerability, is reduced normally.
+            // 只有 kill 完全不减；虚空减伤减半；其他类型（包括其他模组加进该标签的）正常减免。
+            if (!event.getSource().is(DamageTypes.GENERIC_KILL)) {
                 double rawReduction = data.getLevel() * 0.02D
                         + data.getTreeSkillRank(WerewolfTreeSkill.DEFENSE) * 0.08D;
                 int armorPieces = data.getForm() == WerewolfForm.WEREWOLF
@@ -337,7 +385,9 @@ public final class WerewolfGameplayEvents {
                 double formMultiplier = data.isBeastMode() ? BEAST_DEFENSE_MULTIPLIER : 1.0D;
                 double reduction = Math.min(reductionCap,
                         rawReduction * armorSuppression * formMultiplier);
-                amount *= (float)(1.0D - reduction);
+                if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) reduction *= 0.5D;
+                // Full reduction returns 0 directly: infinite damage times zero would be NaN.
+                amount = reduction >= 1.0D ? 0.0F : amount * (float)(1.0D - reduction);
             }
             if (event.getSource().is(DamageTypes.FALL)) {
                 int fallResistance = data.getTreeSkillRank(WerewolfTreeSkill.FALL_RESISTANCE);
@@ -417,13 +467,19 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void preventDeathWithBadge(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)
-                || event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        // A preserved badge ignores damage types; a consumed one keeps the totem-like limits.
+        // 不消耗徽章时不看伤害类型；消耗徽章时保持和不死图腾一致的限制。
+        boolean preserve = HWConfig.PRESERVE_ALPHA_BADGE_ON_REVIVAL.get();
+        if (!preserve && event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         WerewolfApi.get(player).ifPresent(data -> {
             ItemStack badge = findAlphaBadgeInHotbar(player);
             if (!data.isWerewolf() || !data.isTransformed() || badge.isEmpty()) return;
             event.setCanceled(true);
-            if (!HWConfig.PRESERVE_ALPHA_BADGE_ON_REVIVAL.get()) badge.shrink(1);
+            if (!preserve) badge.shrink(1);
+            // Only a real fall below the world returns the player; void-typed attacks inside it do not.
+            if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)
+                    && player.getY() < player.level().getMinBuildHeight()) VOID_RETURNS.add(player.getUUID());
             player.setHealth(1.0F);
             player.removeAllEffects();
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
@@ -779,31 +835,22 @@ public final class WerewolfGameplayEvents {
                 return;
             }
 
-            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION,
-                    MOONBLOOD_REGENERATION_TICKS, 2));
-            player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION,
-                    MOONBLOOD_ABSORPTION_TICKS, 3));
-            // Add the resistance stages from weakest/longest to strongest/shortest. Vanilla's
-            // hidden-effect chain counts all durations down together, yielding 10s III, 15s II,
-            // then 35s I without custom timers. / 从弱到强叠加隐藏效果，得到 10 秒 III、
-            // 15 秒 II、35 秒 I 的连续递减抗性。
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                    MOONBLOOD_RESISTANCE_I_TICKS, 0));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                    MOONBLOOD_RESISTANCE_II_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
-                    MOONBLOOD_RESISTANCE_III_TICKS, 2));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
-                    MOONBLOOD_SURGE_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
-                    MOONBLOOD_SURGE_TICKS, 1));
-            player.addEffect(new MobEffectInstance(MobEffects.JUMP,
-                    MOONBLOOD_SURGE_TICKS, 0));
-            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,
-                    MOONBLOOD_SURGE_TICKS, 0));
+            applyMoonbloodSurge(player);
             data.setMoonbloodCrashTime(gameTime + MOONBLOOD_SURGE_TICKS);
             data.setMoonbloodSurgeCooldownEnd(gameTime + MOONBLOOD_COOLDOWN_TICKS);
             ServerLevel level = player.serverLevel();
+            // The surge also reaches the caster's own recruited companions nearby, crash included.
+            // 月血沸腾同时作用于附近属于施放者的已招募随从，结束后的虚脱也一样。
+            for (WerewolfCompanionEntity companion : level.getEntitiesOfClass(WerewolfCompanionEntity.class,
+                    player.getBoundingBox().inflate(MOONBLOOD_COMPANION_RADIUS), companion -> companion.isAlive()
+                            && companion.isRecruited() && companion.record() != null
+                            && companion.record().belongsTo(player.getUUID())
+                            && companion.distanceToSqr(player) <= MOONBLOOD_COMPANION_RADIUS * MOONBLOOD_COMPANION_RADIUS)) {
+                applyMoonbloodSurge(companion);
+                companion.scheduleMoonbloodCrash(gameTime + MOONBLOOD_SURGE_TICKS);
+                level.sendParticles(ParticleTypes.CRIMSON_SPORE, companion.getX(), companion.getY() + 1.0D,
+                        companion.getZ(), 24, 0.45D, 0.7D, 0.45D, 0.025D);
+            }
             level.sendParticles(ParticleTypes.CRIMSON_SPORE, player.getX(), player.getY() + 1.0D,
                     player.getZ(), 48, 0.55D, 0.8D, 0.55D, 0.025D);
             level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0D,
@@ -816,19 +863,50 @@ public final class WerewolfGameplayEvents {
         });
     }
 
+    /** Moonblood Surge's buffs, shared by the caster and the companions it reaches. */
+    public static void applyMoonbloodSurge(LivingEntity target) {
+        target.addEffect(new MobEffectInstance(MobEffects.REGENERATION,
+                MOONBLOOD_REGENERATION_TICKS, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.ABSORPTION,
+                MOONBLOOD_ABSORPTION_TICKS, 3));
+        // Add the resistance stages from weakest/longest to strongest/shortest. Vanilla's
+        // hidden-effect chain counts all durations down together, yielding 10s III, 15s II,
+        // then 35s I without custom timers. / 从弱到强叠加隐藏效果，得到 10 秒 III、
+        // 15 秒 II、35 秒 I 的连续递减抗性。
+        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+                MOONBLOOD_RESISTANCE_I_TICKS, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+                MOONBLOOD_RESISTANCE_II_TICKS, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+                MOONBLOOD_RESISTANCE_III_TICKS, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
+                MOONBLOOD_SURGE_TICKS, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
+                MOONBLOOD_SURGE_TICKS, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.JUMP,
+                MOONBLOOD_SURGE_TICKS, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,
+                MOONBLOOD_SURGE_TICKS, 0));
+    }
+
+    /** The crash after a surge; the caster's Resistance rank still clears the penalties it resists. */
+    public static void applyMoonbloodCrash(LivingEntity target, int resistanceRank) {
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
+                MOONBLOOD_CRASH_TICKS, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
+                MOONBLOOD_CRASH_TICKS, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
+                MOONBLOOD_CRASH_TICKS, 0));
+        removeResistedEffects(target, resistanceRank);
+        if (target.level() instanceof ServerLevel level) level.sendParticles(ParticleTypes.ASH, target.getX(),
+                target.getY() + 1.0D, target.getZ(), 42, 0.5D, 0.7D, 0.5D, 0.02D);
+    }
+
     private static void processMoonbloodCrash(ServerPlayer player, WerewolfData data) {
         long crashTime = data.getMoonbloodCrashTime();
         if (crashTime <= 0L || player.serverLevel().getGameTime() < crashTime) return;
         data.setMoonbloodCrashTime(0L);
-        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
-                MOONBLOOD_CRASH_TICKS, 1));
-        player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,
-                MOONBLOOD_CRASH_TICKS, 2));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
-                MOONBLOOD_CRASH_TICKS, 0));
-        removeResistedEffects(player, data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE));
-        player.serverLevel().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0D,
-                player.getZ(), 42, 0.5D, 0.7D, 0.5D, 0.02D);
+        applyMoonbloodCrash(player, data.getTreeSkillRank(WerewolfTreeSkill.RESISTANCE));
         player.playNotifySound(SoundEvents.WOLF_WHINE, SoundSource.PLAYERS, 1.0F, 0.65F);
         player.sendSystemMessage(Component.translatable("message.howlingwerewolf.moonblood_crash")
                 .withStyle(ChatFormatting.DARK_GRAY));
@@ -942,6 +1020,8 @@ public final class WerewolfGameplayEvents {
         FOOD_SNAPSHOTS.remove(id);
         LAST_EXHAUSTION.remove(id);
         AUTOMATIC_NIGHT_VISION.remove(id);
+        SAFE_GROUND.remove(id);
+        VOID_RETURNS.remove(id);
     }
 
     private static void processSpiritWolves(ServerPlayer player, WerewolfData data) {
@@ -1242,7 +1322,7 @@ public final class WerewolfGameplayEvents {
                 : dayTime + (24000L - timeOfDay) + 13000L;
     }
 
-    private static void removeResistedEffects(ServerPlayer player, int rank) {
+    private static void removeResistedEffects(LivingEntity player, int rank) {
         if (rank >= 1) player.removeEffect(MobEffects.WEAKNESS);
         if (rank >= 2) player.removeEffect(MobEffects.POISON);
         if (rank >= 3) player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);

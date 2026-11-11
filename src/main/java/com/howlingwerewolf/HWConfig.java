@@ -65,7 +65,7 @@ public final class HWConfig {
                         "Minimum interval in ticks between successful damage events received by the Alpha Trial boss. Set to 0 to disable the extra limit. Attackerless damage that bypasses invulnerability and player-caused Beast Mode void damage are unaffected. Default is 10 ticks.")
                 .defineInRange("alphaTrialDamageFrequencyLimitTicks", 10, 0, Integer.MAX_VALUE);
         PRESERVE_ALPHA_BADGE_ON_REVIVAL = builder.comment(
-                        "Keep the Alpha Werewolf Badge after it prevents fatal damage. When false, one badge is consumed and revival matches a Totem of Undying. Default is false.")
+                        "Keep the Alpha Werewolf Badge after it prevents fatal damage. When false, one badge is consumed and revival matches a Totem of Undying. When true, revival also works against /kill, the void and other damage that bypasses invulnerability, and a player revived after falling out of the world returns to their last safe ground, their respawn point or the world spawn. Default is false.")
                 .define("preserveAlphaBadgeOnRevival", false);
         SHOW_WEREWOLF_EQUIPMENT = builder.comment(
                         "Render worn armor and elytra on the normal transformed werewolf model. Held items are always rendered. Default is true.")

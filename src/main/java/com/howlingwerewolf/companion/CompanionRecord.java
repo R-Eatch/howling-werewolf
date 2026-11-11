@@ -5,6 +5,7 @@ import com.howlingwerewolf.ModernSkin;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.WerewolfSkin;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -43,7 +44,10 @@ public final class CompanionRecord {
             ResourceLocation.CODEC.fieldOf("dimension").forGetter(record -> record.dimension),
             BlockPos.CODEC.fieldOf("position").forGetter(record -> record.position),
             INVENTORY_CODEC.fieldOf("inventory").forGetter(CompanionRecord::items),
-            CompanionSortSettings.CODEC.optionalFieldOf("sorting", CompanionSortSettings.EMPTY).forGetter(record -> record.sorting)
+            // Paired so the record stays within the builder's sixteen fields; both keys remain top-level and optional.
+            Codec.mapPair(CompanionSortSettings.CODEC.optionalFieldOf("sorting", CompanionSortSettings.EMPTY),
+                    Codec.BOOL.optionalFieldOf("ignore_owner_damage", false))
+                    .forGetter(record -> Pair.of(record.sorting, record.ignoreOwnerDamage))
     ).apply(instance, CompanionRecord::new));
 
     public final UUID id;
@@ -61,6 +65,8 @@ public final class CompanionRecord {
     public ResourceLocation dimension;
     public BlockPos position;
     public CompanionSortSettings sorting;
+    /** When set, nothing the owner causes can hurt this companion. Off by default and in older saves. */
+    public boolean ignoreOwnerDamage;
     private Runnable inventoryChanged = () -> {};
     public final SimpleContainer inventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE) {
         @Override public void setChanged() { super.setChanged(); inventoryChanged.run(); }
@@ -69,7 +75,7 @@ public final class CompanionRecord {
 
     private CompanionRecord(UUID id, UUID owner, String classicSkin, String modernSkin, String customName, int tier, CompanionMode mode, float health,
                             long huntStart, long huntEnd, long huntCooldownEnd, int generation, ResourceLocation dimension,
-                            BlockPos position, List<ItemStack> items, CompanionSortSettings sorting) {
+                            BlockPos position, List<ItemStack> items, Pair<CompanionSortSettings, Boolean> settings) {
         this.id = id;
         this.owner = owner;
         this.classicSkin = "howlingwerewolf:" + WerewolfSkin.byId(classicSkin).getId();
@@ -84,7 +90,8 @@ public final class CompanionRecord {
         this.generation = generation;
         this.dimension = dimension;
         this.position = position.immutable();
-        this.sorting = sorting;
+        this.sorting = settings.getFirst();
+        this.ignoreOwnerDamage = settings.getSecond();
         for (int slot = 0; slot < items.size(); slot++) inventory.setItem(slot, items.get(slot).copy());
     }
 
@@ -92,7 +99,7 @@ public final class CompanionRecord {
         this(UUID.randomUUID(), owner, "howlingwerewolf:" + WerewolfSkin.byId(skin).getId(),
                 ModernSkin.bySkinId(skin) == null ? ModernSkin.ASHEN.skinId() : skin, "", 0, CompanionMode.FOLLOW,
                 (float) CompanionRules.maxHealth(0), 0, 0, 0, 0, dimension, position,
-                java.util.Collections.nCopies(CompanionRules.INVENTORY_SIZE, ItemStack.EMPTY), CompanionSortSettings.EMPTY);
+                java.util.Collections.nCopies(CompanionRules.INVENTORY_SIZE, ItemStack.EMPTY), Pair.of(CompanionSortSettings.EMPTY, false));
     }
 
     public static String normalizeSkin(String skin) {

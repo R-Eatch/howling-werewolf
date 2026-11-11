@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 /** Requests carry only intent and identity. Costs, ownership, time and rewards are server-owned. */
 public record CompanionActionPacket(Action action, UUID target, String value) {
-    public enum Action { OPEN, REFRESH, RECRUIT, FOLLOW, GUARD, REST, HUNT, RECALL, UPGRADE, REVIVE, INVENTORY, RENAME, SKIN, ADDRESS, SORT, DISMISS }
+    public enum Action { OPEN, REFRESH, RECRUIT, FOLLOW, GUARD, REST, HUNT, RECALL, UPGRADE, REVIVE, INVENTORY, RENAME, SKIN, ADDRESS, SORT, DISMISS, OWNER_DAMAGE }
     public CompanionActionPacket(Action action, UUID target) { this(action, target, ""); }
     public static final UUID NO_TARGET = new UUID(0, 0);
 

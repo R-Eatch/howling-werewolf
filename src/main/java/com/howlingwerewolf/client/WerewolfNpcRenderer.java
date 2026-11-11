@@ -43,6 +43,12 @@ class WerewolfNpcRenderer<T extends LivingEntity & WerewolfNpcAppearance> extend
         super.render(entity, yaw, partial, pose, buffers, light);
     }
 
+    /** Mob name rules: no tag without a custom name, and a custom name shows when aimed at or marked visible. */
+    @Override protected boolean shouldShowName(T entity) {
+        return super.shouldShowName(entity) && (entity.shouldShowName()
+                || entity.hasCustomName() && entity == entityRenderDispatcher.crosshairPickEntity);
+    }
+
     @Override public ResourceLocation getTextureLocation(T entity) {
         return WerewolfSkinCatalog.texture(entity.getNpcSkinId(), entity.getNpcModelSet(), form);
     }

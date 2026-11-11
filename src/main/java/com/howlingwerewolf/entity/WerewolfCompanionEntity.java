@@ -97,6 +97,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             new Trade(() -> ModBlocks.WOLFSBANE.get(), 4, null, 0, () -> ModItems.SILVER_INGOT.get(), 2, 8));
     private static final int OFFERED = 6;
     private CompanionRecord record;
+    private long moonbloodCrashTime;
     private int generation;
     private long expiresAt;
     private UUID offeredTo;
@@ -155,6 +156,8 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     @Override public WerewolfForm getNpcForm() { return WerewolfForm.WEREWOLF; }
     @Nullable public CompanionRecord record() { return record; }
+    /** Transient like the surge's effects: companions are rebuilt from records, never saved as entities. */
+    public void scheduleMoonbloodCrash(long gameTime) { moonbloodCrashTime = gameTime; }
     public int generation() { return generation; }
     public boolean isRecruited() { return entityData.get(RECRUITED); }
     public void refreshAppearance() {
@@ -300,6 +303,12 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (record.mode != CompanionMode.SORT) endSortVisuals();
         ServerPlayer player = owner();
         if (player == null) { CompanionManager.remember(this); discard(); return; }
+        if (moonbloodCrashTime > 0 && level.getGameTime() >= moonbloodCrashTime) {
+            moonbloodCrashTime = 0;
+            com.howlingwerewolf.event.WerewolfGameplayEvents.applyMoonbloodCrash(this,
+                    com.howlingwerewolf.capability.WerewolfApi.get(player)
+                            .map(owner -> owner.getTreeSkillRank(com.howlingwerewolf.WerewolfTreeSkill.RESISTANCE)).orElse(0));
+        }
         if (getTarget() != null && !canAttack(getTarget())) setTarget(null);
         if (tickCount % 20 == 0) {
             refreshStats();
@@ -437,6 +446,13 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     @Override public boolean wantsToPickUp(ItemStack stack) { return false; }
     @Override public boolean canBeLeashed(Player player) { return false; }
     @Override public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) { return null; }
+
+    /** Owner protection stops the hit before hurt sounds or knockback; it covers projectiles and potions too. */
+    @Override public boolean hurt(DamageSource source, float amount) {
+        if (record != null && record.ignoreOwnerDamage && source.getEntity() != null
+                && record.belongsTo(source.getEntity().getUUID())) return false;
+        return super.hurt(source, amount);
+    }
 
     @Override protected void actuallyHurt(DamageSource source, float amount) {
         float previousHealth = getHealth();

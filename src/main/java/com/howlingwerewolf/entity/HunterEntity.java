@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class HunterEntity extends PathfinderMob {
     private static final int TRIAL_EFFECT_DURATION = 20 * 60 * 30;
+    private static final String TRIAL_NAME_KEY = "entity.howlingwerewolf.trial_hunter";
     private static final ResourceLocation HUNTER_LOOT = new ResourceLocation(
             HowlingWerewolf.MOD_ID, "entities/hunter");
     private boolean trialHunter;
@@ -115,8 +116,7 @@ public final class HunterEntity extends PathfinderMob {
     public void configureForTrial() {
         trialHunter = true;
         setPersistenceRequired();
-        setCustomName(Component.translatable("entity.howlingwerewolf.trial_hunter"));
-        setCustomNameVisible(true);
+        setCustomName(Component.translatable(TRIAL_NAME_KEY));
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         setHealth(getMaxHealth());
@@ -168,5 +168,9 @@ public final class HunterEntity extends PathfinderMob {
         villagePatrol = tag.getBoolean("VillagePatrol");
         villageKey = tag.getLong("VillageKey");
         if (villagePatrol) restrictTo(BlockPos.of(villageKey), 48);
+        // Saves before 1.3.5 pinned the trial name tag; a name-tag rename is left alone.
+        if (trialHunter && getCustomName() != null && getCustomName().getContents()
+                instanceof net.minecraft.network.chat.contents.TranslatableContents name
+                && TRIAL_NAME_KEY.equals(name.getKey())) setCustomNameVisible(false);
     }
 }
