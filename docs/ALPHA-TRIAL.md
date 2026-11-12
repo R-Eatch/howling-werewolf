@@ -2,7 +2,7 @@
 
 [简体中文](ALPHA-TRIAL-zh.md) · [Back to README](../README.md)
 
-This page lists numbers only and applies to all four editions of 1.3.4. For the ritual itself and tactics, see "The Moon-Oath and Alpha Trial" in the README.
+This page lists numbers only and applies to all four editions of 1.3.7. For the ritual itself and tactics, see "The Moon-Oath and Alpha Trial" in the README.
 
 Damage below is the mob's attack attribute. Vanilla also scales mob damage to players by game difficulty: about half plus 1 on Easy, unchanged on Normal and ×1.5 on Hard.
 

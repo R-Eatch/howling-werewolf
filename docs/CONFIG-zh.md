@@ -2,7 +2,7 @@
 
 [English](CONFIG.md) · [返回 README](../README-zh.md)
 
-本页适用于 1.3.4 的全部四个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.11 Fabric 和 26.1.2 NeoForge，各版本的配置项和默认值相同。
+本页适用于 1.3.7 的全部四个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.11 Fabric 和 26.1.2 NeoForge，各版本的配置项和默认值相同。
 
 ## 文件位置
 
@@ -30,9 +30,10 @@
 | `maxWerewolfLevel` | `20` | 1–25 | 狼人等级上限。调低后，存档里超出上限的等级会在加载时降到上限。 |
 | `beastModeVoidDamage` | `false` | true / false | 为 `true` 时，野兽形态的近战改用虚空伤害类型；为 `false` 时与普通狼人攻击相同。 |
 | `alphaTrialDamageFrequencyLimitTicks` | `10` | 0 起 | Alpha 试炼 Boss 两次受伤之间的最短间隔（游戏刻）。0 表示不额外限制。无来源且无视无敌时间的伤害、玩家野兽形态造成的虚空伤害不受此限。 |
-| `preserveAlphaBadgeOnRevival` | `false` | true / false | 为 `true` 时，Alpha 狼人徽章抵挡致命伤害后不被消耗；为 `false` 时消耗一枚，复活效果与不死图腾相同。 |
+| `preserveAlphaBadgeOnRevival` | `false` | true / false | 为 `true` 时，Alpha 狼人徽章抵挡致命伤害后不被消耗，且不看伤害类型（包括 `/kill` 和虚空）；掉出世界被救下的玩家会回到最近的安全地面，其次是重生点（不消耗重生锚），再次是世界出生点。为 `false` 时消耗一枚，复活效果与不死图腾相同。 |
 | `showWerewolfEquipment` | `true` | true / false | 是否在普通狼人形态的模型上画出护甲和鞘翅。手持物品总会显示。设为 `false` 会在本机隐藏所有狼人的装备，优先于皮肤页的“装备：显示”。 |
 | `enableWerewolfAutoStep` | `true` | true / false | 自动跨越台阶：四足狼 1.0 格、狼人 1.5 格、野兽 2.0 格。`false` 恢复原版高度。 |
+| `preventWerewolfFullMoonSleep` | `false` | true / false | 为 `true` 时，拥有狼人血脉的玩家在主世界满月之夜（黄昏 12000 刻起到天亮）无法入睡，不能靠睡觉跳过满月。 |
 
 ## 世界生成（worldGeneration）
 

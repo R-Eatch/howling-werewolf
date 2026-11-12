@@ -2,7 +2,7 @@
 
 [简体中文](CONFIG-zh.md) · [Back to README](../README.md)
 
-This page covers all four editions of 1.3.4: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.11 and NeoForge 26.1.2. They share the same keys and defaults.
+This page covers all four editions of 1.3.7: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.11 and NeoForge 26.1.2. They share the same keys and defaults.
 
 ## Where the files are
 
@@ -30,9 +30,10 @@ This page covers all four editions of 1.3.4: Forge 1.20.1, NeoForge 1.21.1, Fabr
 | `maxWerewolfLevel` | `20` | 1–25 | Maximum werewolf level. If you lower it, saved levels above the new limit are brought down to it on load. |
 | `beastModeVoidDamage` | `false` | true / false | When `true`, Beast Form melee uses the out-of-world damage type; when `false`, it uses the same type as normal werewolf attacks. |
 | `alphaTrialDamageFrequencyLimitTicks` | `10` | 0 and up | Minimum gap, in ticks, between two hits that damage the Alpha Trial boss. 0 removes the extra limit. Attackerless damage that bypasses invulnerability, and the player's Beast Form void damage, are not limited. |
-| `preserveAlphaBadgeOnRevival` | `false` | true / false | When `true`, the Alpha Werewolf Badge is kept after it prevents a fatal hit; when `false`, one badge is used up and the revival works like a Totem of Undying. |
+| `preserveAlphaBadgeOnRevival` | `false` | true / false | When `true`, the Alpha Werewolf Badge is kept after it prevents a fatal hit, whatever the damage, `/kill` and the void included; a player saved from falling out of the world is returned to the last safe ground, else the respawn point (a respawn anchor is not drained), else the world spawn. When `false`, one badge is used up and the revival works like a Totem of Undying. |
 | `showWerewolfEquipment` | `true` | true / false | Draws worn armor and elytra on the normal werewolf model. Held items are always shown. `false` hides every werewolf's equipment on this machine and overrides "Equipment: shown" on the skin page. |
 | `enableWerewolfAutoStep` | `true` | true / false | Steps up automatically: 1.0 block as a Quadruped Wolf, 1.5 as a Werewolf and 2.0 as a Beast. `false` restores normal stepping. |
+| `preventWerewolfFullMoonSleep` | `false` | true / false | When `true`, a player with werewolf blood cannot sleep in the Overworld on a full-moon night (from dusk, tick 12000, until morning), so the full moon cannot be skipped. |
 
 ## World generation (worldGeneration)
 

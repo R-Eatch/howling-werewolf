@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.4-blue?style=flat-square" alt="最新源码： 1.3.4"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.7-blue?style=flat-square" alt="最新源码： 1.3.7"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge 下载量"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth 下载量"></a>
@@ -24,7 +24,7 @@
 
 ## 1.3 更新：狼人随从
 
-1.2.2 之后的更新都在 **1.3.x**（当前 **1.3.4**）：
+1.2.2 之后的更新都在 **1.3.x**（当前 **1.3.7**）：
 
 - **狼人商人与随从。** 用月誓祭坛召来一位狼人兄弟，和他交易；手持狼人徽章招募他，他就成为你的长期同伴。见下方“[狼人兄弟：商人与随从](#狼人兄弟商人与随从)”。
 - **整理仓库。** 随从会亲自走到箱子和木桶前，开盖、搬运、合盖，把同类物品归到一起。
@@ -33,6 +33,11 @@
 - **野兽形态动作。** Modern 野兽冲刺时四足狼式奔跑，下蹲时四足潜行，下蹲视角随之降低。
 - 新增 **Minecraft 1.21.11 Fabric** 版。
 - **兼容 Iron's Spells 与 Better Combat。** 它们在第一人称画出玩家身体时，狼人身体不再挡住镜头。
+- **教程页。** 进阶界面的“特点”和“Alpha 试炼”合并为分 9 章的“教程”，从感染讲到随从；物品一章可查看每件物品的合成、熔炼或酿造配方。
+- **随从更多功能。** 每位随从都有单独的“不受主人伤害”开关；月血沸腾同时强化 16 格内你已招募的随从；新增两个进度：首次招募随从“血誓兄弟”，随从升至最高阶“狼影随行”。
+- **新外观与音效。** 月血沸腾会响起一声长长的狼嚎；猎人换上长风衣和宽檐帽，银誓守夜人更华丽；银剑、Alpha 狼人徽章、祭坛和两种药水重新绘制；Modern 模型下，试炼的 Alpha 及其狼人从九套毛色中随机抽取。
+- **可选的满月规则。** 配置 `preventWerewolfFullMoonSleep`（默认关闭），开启后狼人无法靠睡觉跳过满月。
+- **盔甲更贴合，兼容 MCA。** 原版盔甲在 Modern 模型上更贴身。Forge 与 NeoForge 版中，使用 MCA Reborn 村民外观的玩家变身后，身体和第一人称爪子正常显示。
 
 1.2.2 带来了 **thewolfulti** 设计制作的 **Modern** 三形态模型（普通狼人、四足狼、野兽，各 9 套皮肤），Classic 系列继续保留。
 
@@ -315,7 +320,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码与构建
 
-项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.4**。
+项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.11 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.7**。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 
