@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -51,6 +52,11 @@ final class ModernPlayerRenderer extends WerewolfLivingRenderer<AbstractClientPl
 
     @Override public Identifier getTextureLocation(AvatarRenderState state) {
         return WerewolfSkinCatalog.texture(WerewolfRenderData.get(state).skinId(), WerewolfModelSet.MODERN, form);
+    }
+
+    @Override
+    protected RenderType getRenderType(AvatarRenderState state, boolean visible, boolean translucent, boolean glowing) {
+        return WerewolfBodyRenderType.of(model, getTextureLocation(state), visible, translucent, glowing);
     }
 
     @Override protected boolean shouldShowName(AbstractClientPlayer player, double distance) {

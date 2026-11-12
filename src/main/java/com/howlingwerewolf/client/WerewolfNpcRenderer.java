@@ -38,6 +38,12 @@ abstract class WerewolfNpcRenderer<T extends LivingEntity>
         state.setRenderData(WerewolfRenderData.KEY, WerewolfRenderData.forEntity(entity, partialTick));
     }
 
+    /** Mob name rules: no tag without a custom name, and a custom name shows when aimed at or marked visible. */
+    @Override protected boolean shouldShowName(T entity, double distance) {
+        return super.shouldShowName(entity, distance) && (entity.shouldShowName()
+                || entity.hasCustomName() && entity == entityRenderDispatcher.crosshairPickEntity);
+    }
+
     @Override public void submit(HumanoidRenderState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
         model = WerewolfRenderData.get(state).modelSet() == WerewolfModelSet.MODERN ? modern : classic;
         super.submit(state, pose, collector, camera);
