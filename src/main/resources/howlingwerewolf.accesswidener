@@ -1,2 +1,4 @@
 accessWidener v2 named
 accessible field net/minecraft/world/food/FoodData exhaustionLevel F
+accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
+accessible field net/minecraft/client/model/geom/ModelPart children Ljava/util/Map;

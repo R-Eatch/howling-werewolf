@@ -9,7 +9,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 public final class FabricEvents {
     public static void register() {
-        ServerPlayConnectionEvents.JOIN.register((handler,sender,server) -> WerewolfCapabilityEvents.restoreAndSync(handler.player));
+        ServerPlayConnectionEvents.JOIN.register((handler,sender,server) -> {
+            WerewolfCapabilityEvents.restoreAndSync(handler.player);
+            WerewolfGuide.companions(handler.player);
+        });
+        EntitySleepEvents.ALLOW_SLEEPING.register((player,pos) -> WerewolfGameplayEvents.fullMoonSleep(player));
         ServerPlayConnectionEvents.DISCONNECT.register((handler,server) -> WerewolfCapabilityEvents.logout(handler.player));
         var lifecyclePhase=com.howlingwerewolf.content.ModRegistry.id("after_attachment_transfer");
         ServerPlayerEvents.AFTER_RESPAWN.addPhaseOrdering(net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE,lifecyclePhase);

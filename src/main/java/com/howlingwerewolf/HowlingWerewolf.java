@@ -28,6 +28,7 @@ public final class HowlingWerewolf implements ModInitializer {
         ModBlockEntities.BLOCK_ENTITIES.getClass();
         ModRecipes.SERIALIZERS.getClass();
         ModPlacementModifiers.PLACEMENT_MODIFIERS.getClass();
+        ModSounds.initialize();
         TrapezoidIntProvider.initialize();
         ModAttachments.initialize();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricItemGroup.builder()

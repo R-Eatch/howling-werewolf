@@ -245,3 +245,21 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
   artwork remain credited to **R_Eatch**. Source project bytes remain unchanged;
   attribution and distribution terms are recorded in the public guides and
   [LICENSE-ASSETS.md](../LICENSE-ASSETS.md).
+
+## 1.3.0 progression screen textures
+
+- `assets/howlingwerewolf/textures/gui/moon/` holds `moon.png`, `moon_phase.png`, `soft.png`, `disc.png` and `ring.png`. All five are original procedural images generated for this project with a deterministic NumPy script: value noise, Gaussian shading and analytic disc, ring and phase shapes. They use no reference images or third-party art. The script is retained locally as authoring material.
+- The layout of the screen takes its broad idea, a world-hiding canvas with options floating around the player, from the public description of the Shooting Star mod. No code, images or other assets from that mod were used.
+
+## 1.3.6 altar and potion textures, Modern Beast muzzle
+
+- The four 16 × 16 altar side and top PNGs and the 16 × 16 Wolfsbane and Werewolf potion PNGs use the project's original texture drafts, under CC BY-SA 4.0. The altar designs depict their stone brick, wolfsbane, gold and diamond ingredients.
+- The Modern Beast project mirrors its existing cheek fur onto the other side of the muzzle. The original model and embedded palettes are by thewolfulti. All nine embedded palette images are retained.
+
+## 1.3.7 Moonblood howl, altar sides, Hunter
+
+- `assets/howlingwerewolf/sounds/moonblood_howl.ogg` is cut from "Cooper Creek 20160313_014852 solitary wolf howl, very clear" by betchkal on Freesound (sound 500646, https://freesound.org/people/betchkal/sounds/500646/), released under CC0 1.0. One howl (29.2–31.3 s and 34.0–37.7 s of the recording) was joined by a crossfade, high-passed at 120 Hz, faded out, peak-normalised to −1.5 dBFS and encoded as mono Ogg Vorbis.
+- The two altar side PNGs drop the wolfsbane panel for plain stone brick; the central altar keeps its gold bands, gold frame and diamonds. Original 16 × 16 work under CC BY-SA 4.0. The top textures are unchanged.
+- The Hunter model (hat crown and brim, high collar, front and back coat tails on the vanilla humanoid skeleton) and its two 64 × 64 textures, `hunter.png` and `hunter_watcher.png` for the Silver-Oath Watcher, are original work under CC BY-SA 4.0 and replace the earlier Hunter look.
+- `textures/item/silver_sword.png` is redrawn: a slim silver blade with a fuller, a gold crescent guard, a white-wrapped grip and a moonstone pommel. Original 16 × 16 work under CC BY-SA 4.0.
+- `textures/item/alpha_werewolf_badge.png` is replaced by a 32 × 32 moon-oath seal: a silver wolf face on a dark teal medallion with gold studs and an amethyst. It was made for this project with the OpenAI image-generation workflow and chosen by the author; no third-party texture pixels were copied. CC BY-SA 4.0.

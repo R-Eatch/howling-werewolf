@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
@@ -53,6 +54,9 @@ public final class WerewolfProgressionScreen extends Screen {
     private static final int TOP_BAND = 28, THIN_BAND = 16, MARGIN = 12, NODE_RADIUS = 12, HEADER = 30;
     private static final int XP_TICKS = 64;
     private static final int TREE_ACTIONS = 104, ABILITY_ACTIONS = 142, BULLET_INDENT = 9;
+    private static final int GUIDE_HEADER = 50, GUIDE_FOOTER = 30, RECIPE_WIDTH = 104;
+    /** The open chapter and item are kept for the rest of the game session; a new session starts at the first. */
+    private static int chapter, itemEntry;
 
     private Page page = Page.TREE;
     private WerewolfTreeSkill selectedSkill = WerewolfTreeSkill.DAMAGE;
@@ -66,6 +70,10 @@ public final class WerewolfProgressionScreen extends Screen {
     private float uiScale = 1;
     private int wide, tall, band, stageBottom, moonY, moonRadius, orbitX, orbitY, rowGap;
     private int articleX, articleY, articleWidth, articleHeight, articleLength;
+    private int railX, railWidth, cardX, cardY, cardWidth, cardHeight, figureWidth;
+    private List<WerewolfGuideBook.Shown> recipes = List.of();
+    private int recipeIndex;
+    private ItemStack hoveredStack = ItemStack.EMPTY;
     private float frameBlend, moonX = -1, scroll, scrollGoal, underlineX = -1, underlineWidth, rotation = -24;
     private boolean dragging, draggingScroll;
     private long pageOpened = Util.getMillis(), lastFrame = pageOpened;
@@ -96,8 +104,7 @@ public final class WerewolfProgressionScreen extends Screen {
             if (page == Page.TREE) buildTree();
             else if (page == Page.ABILITIES) buildAbilities();
         }
-        if (page == Page.INFO) buildInfo(data);
-        if (page == Page.TRIAL) buildTrial(data);
+        if (page == Page.GUIDE) buildGuide(data);
         refresh();
     }
 
@@ -116,17 +123,28 @@ public final class WerewolfProgressionScreen extends Screen {
             orbitX = Math.max(moonRadius + 40, Math.round(wide * 0.25F));
             orbitY = rowGap * (rows - 1) / 2 + 34;
         } else {
-            articleX = Math.round(wide * 0.42F);
-            articleY = TOP_BAND + 10;
-            articleWidth = wide - articleX - MARGIN - 8;
-            articleHeight = stageBottom - articleY - 8;
-            moonRadius = Math.min(height / 2 - 26, Math.round(wide * 0.17F));
-            moonY = TOP_BAND + height / 2 - (page == Page.TRIAL ? 12 : 0);
+            String shown = WerewolfGuideBook.CHAPTERS.get(chapter).id();
+            railX = MARGIN;
+            railWidth = Math.min(150, Math.round(wide * 0.26F));
+            cardX = railX + railWidth + 12;
+            cardY = TOP_BAND + 10;
+            cardWidth = wide - MARGIN - cardX;
+            cardHeight = stageBottom - 10 - cardY;
+            figureWidth = shown.equals("trial") ? Math.round(cardWidth * 0.38F) : shown.equals("items") ? RECIPE_WIDTH : 0;
+            int chips = shown.equals("items") ? (WerewolfGuideBook.ITEMS.size() + itemsPerRow() - 1) / itemsPerRow() * 26 + 6 : 0;
+            articleX = cardX + 16;
+            articleY = cardY + GUIDE_HEADER + chips;
+            articleWidth = cardWidth - 40 - figureWidth;
+            articleHeight = cardY + cardHeight - GUIDE_FOOTER - articleY;
+            int room = cardHeight - GUIDE_HEADER - GUIDE_FOOTER;
+            moonRadius = Math.max(16, Math.min(figureWidth / 2 - 14, room / 2 - 10));
+            moonY = cardY + GUIDE_HEADER + room / 2;
         }
     }
 
     private int stageCenter() {
-        return page == Page.TREE || page == Page.ABILITIES ? wide / 2 : Math.round(wide * 0.21F);
+        if (page == Page.GUIDE) return figureWidth > 0 ? cardX + cardWidth - 16 - figureWidth / 2 : cardX + cardWidth / 2;
+        return wide / 2;
     }
 
     private int longestDescription() {
@@ -143,8 +161,7 @@ public final class WerewolfProgressionScreen extends Screen {
         List<Entry> entries = List.of(
                 new Entry(Component.translatable(KEY + "tab.tree"), () -> switchPage(Page.TREE), Page.TREE),
                 new Entry(Component.translatable(KEY + "tab.abilities"), () -> switchPage(Page.ABILITIES), Page.ABILITIES),
-                new Entry(Component.translatable(KEY + "tab.info"), () -> switchPage(Page.INFO), Page.INFO),
-                new Entry(Component.translatable(KEY + "tab.trial"), () -> switchPage(Page.TRIAL), Page.TRIAL),
+                new Entry(Component.translatable(KEY + "tab.guide"), () -> switchPage(Page.GUIDE), Page.GUIDE),
                 new Entry(Component.translatable(KEY + "tab.skins"), () -> minecraft.setScreen(new WerewolfSkinScreen(this)), null),
                 new Entry(Component.translatable(KEY + "companion.shortcut"), () -> ClientPlayNetworking.send(
                         new CompanionActionPacket(CompanionActionPacket.Action.OPEN, CompanionActionPacket.NO_TARGET)), null));
@@ -200,40 +217,100 @@ public final class WerewolfProgressionScreen extends Screen {
                 () -> ClientPlayNetworking.send(new ToggleAbilityPacket(selectedAbility))));
     }
 
-    private void buildInfo(@Nullable WerewolfData data) {
-        String statusKey;
-        int statusColor;
-        MoonUi.Theme theme = MoonUi.theme();
-        if (data != null && data.isBeastMode()) { statusKey = "beast"; statusColor = theme.accent(); }
-        else if (data != null && data.isQuadrupedMode()) { statusKey = "quadruped"; statusColor = theme.accent(); }
-        else if (data != null && data.isWerewolf()) { statusKey = "werewolf"; statusColor = theme.accent(); }
-        else if (data != null && data.isInfected()) { statusKey = "infected"; statusColor = theme.accent(); }
-        else { statusKey = "uninfected"; statusColor = theme.sub(); }
-        article.clear();
-        write(Component.translatable(KEY + "info.status", Component.translatable(KEY + "info.status." + statusKey)), statusColor, 4);
-        write(Component.translatable(KEY + "kill_xp_rule"), theme.sub(), 10);
-        write(Component.translatable(KEY + "info.features"), theme.ink(), 5);
-        for (String key : List.of("full_moon", "armor", "fire", "night_vision", "diet", "silver", "progression", "level_scaling", "quadruped", "beast")) {
-            writeBullet(Component.translatable(KEY + "info." + key), theme.sub(), 5);
+    /** The tutorial: the chapter rail, the open chapter's text and its own controls. */
+    private void buildGuide(@Nullable WerewolfData data) {
+        List<WerewolfGuideBook.Chapter> chapters = WerewolfGuideBook.CHAPTERS;
+        for (int i = 0; i < chapters.size(); i++) addRenderableWidget(new ChapterButton(i, railX, TOP_BAND + 36 + i * 22, railWidth, 20));
+        WerewolfGuideBook.Chapter shown = chapters.get(chapter);
+        int footer = cardY + cardHeight - 22, right = cardX + cardWidth - 14;
+        if (chapter > 0) {
+            Component label = Component.literal("\u2039 ").append(Component.translatable(KEY + chapters.get(chapter - 1).title()));
+            addRenderableWidget(new CompanionUi.UiButton(cardX + 8, footer, font.width(label) + 14, 16, label, CompanionUi.Look.GHOST, () -> openChapter(chapter - 1)));
         }
-        writeBullet(Component.translatable(KEY + "info.beast_warning"), theme.accent(), 0);
+        if (chapter < chapters.size() - 1) {
+            Component label = Component.translatable(KEY + chapters.get(chapter + 1).title()).copy().append(" \u203A");
+            int width = font.width(label) + 14;
+            addRenderableWidget(new CompanionUi.UiButton(right + 6 - width, footer, width, 16, label, CompanionUi.Look.GHOST, () -> openChapter(chapter + 1)));
+        }
+        recipes = List.of();
+        switch (shown.id()) {
+            case "beast" -> beast = addRenderableWidget(headerPill(KEY + "guide.beast.toggle", () -> ClientPlayNetworking.send(new ToggleBeastModePacket())));
+            case "companions" -> addRenderableWidget(headerPill(KEY + "guide.companions.open", () -> ClientPlayNetworking.send(
+                    new CompanionActionPacket(CompanionActionPacket.Action.OPEN, CompanionActionPacket.NO_TARGET))));
+            case "items" -> {
+                int perRow = itemsPerRow();
+                for (int i = 0; i < WerewolfGuideBook.ITEMS.size(); i++) {
+                    addRenderableWidget(new ItemChip(i, cardX + 16 + i % perRow * 26, cardY + GUIDE_HEADER + i / perRow * 26));
+                }
+                recipes = WerewolfGuideBook.recipes(WerewolfGuideBook.ITEMS.get(itemEntry).item().get());
+                recipeIndex = Mth.clamp(recipeIndex, 0, Math.max(0, recipes.size() - 1));
+                if (recipes.size() > 1) {
+                    int x = cardX + cardWidth - 16 - figureWidth;
+                    int y = articleY + 80;
+                    addRenderableWidget(recipeButton(x, y, "‹", "previous", -1));
+                    addRenderableWidget(recipeButton(x + RECIPE_WIDTH - 18, y, "›", "next", 1));
+                }
+            }
+            default -> {}
+        }
+        MoonUi.Theme theme = MoonUi.theme();
+        article.clear();
+        if (shown.id().equals("trial")) {
+            boolean won = data != null && data.hasDefeatedAlpha();
+            write(Component.translatable(won ? KEY + "trial.unlocked" : KEY + "trial.locked"), won ? theme.accent() : theme.faint(), 7);
+        }
+        if (shown.id().equals("items")) {
+            WerewolfGuideBook.Entry entry = WerewolfGuideBook.ITEMS.get(itemEntry);
+            write(Component.translatable(KEY + shown.lines().get(0)), theme.faint(), 7);
+            write(new ItemStack(entry.item().get()).getHoverName(), theme.ink(), 5);
+            write(Component.translatable(KEY + "guide.item." + entry.id()), theme.sub(), 0);
+        } else {
+            boolean lead = true;
+            for (String line : shown.lines()) {
+                if (line.startsWith("\u2022")) writeBullet(Component.translatable(KEY + line.substring(1)), theme.sub(), 6);
+                else if (line.startsWith("!")) writeBullet(Component.translatable(KEY + line.substring(1)), theme.accent(), 6);
+                else write(Component.translatable(KEY + line), lead ? theme.ink() : theme.sub(), 8);
+                lead = false;
+            }
+        }
         finishArticle();
     }
 
-    private void buildTrial(@Nullable WerewolfData data) {
-        MoonUi.Theme theme = MoonUi.theme();
-        boolean won = data != null && data.hasDefeatedAlpha();
-        article.clear();
-        write(Component.translatable(KEY + "trial.title"), theme.ink(), 3);
-        write(Component.translatable(won ? KEY + "trial.unlocked" : KEY + "trial.locked"), won ? theme.accent() : theme.faint(), 9);
-        write(Component.translatable(KEY + "trial.intro"), theme.sub(), 7);
-        write(Component.translatable(KEY + "trial.layout"), theme.sub(), 7);
-        write(Component.translatable(KEY + "trial.items"), theme.sub(), 7);
-        write(Component.translatable(KEY + "trial.requirements"), theme.sub(), 7);
-        write(Component.translatable(KEY + "trial.warning"), theme.accent(), 0);
-        finishArticle();
-        beast = addRenderableWidget(new MoonUi.Pill(stageCenter() - 22, moonY + moonRadius + 14, 44, 18, Component.literal("H"), true,
-                () -> ClientPlayNetworking.send(new ToggleBeastModePacket())));
+    private MoonUi.Pill headerPill(String key, Runnable action) {
+        Component label = Component.translatable(key);
+        int width = font.width(label) + 22;
+        return new MoonUi.Pill(cardX + cardWidth - 14 - width, cardY + 18, width, 18, label, true, action);
+    }
+
+    private int itemsPerRow() { return Math.max(1, (cardWidth - 32) / 26); }
+
+    private CompanionUi.UiButton recipeButton(int x, int y, String arrow, String direction, int step) {
+        CompanionUi.UiButton button = new CompanionUi.UiButton(x, y, 18, 16, Component.literal(arrow), CompanionUi.Look.SOFT,
+                () -> recipeIndex = Math.floorMod(recipeIndex + step, recipes.size()));
+        button.setTooltip(Tooltip.create(Component.translatable(KEY + "guide.recipe." + direction)));
+        return button;
+    }
+
+    private static String statusKey(@Nullable WerewolfData data) {
+        if (data != null && data.isBeastMode()) return "beast";
+        if (data != null && data.isQuadrupedMode()) return "quadruped";
+        if (data != null && data.isWerewolf()) return "werewolf";
+        return data != null && data.isInfected() ? "infected" : "uninfected";
+    }
+
+    private void openChapter(int index) {
+        chapter = Mth.clamp(index, 0, WerewolfGuideBook.CHAPTERS.size() - 1);
+        pageOpened = Util.getMillis();
+        scroll = scrollGoal = 0;
+        rebuildWidgets();
+    }
+
+    private void openItem(int index) {
+        itemEntry = index;
+        recipeIndex = 0;
+        pageOpened = Util.getMillis();
+        scroll = scrollGoal = 0;
+        rebuildWidgets();
     }
 
     private void write(Component text, int color, int gapAfter) {
@@ -333,12 +410,14 @@ public final class WerewolfProgressionScreen extends Screen {
             graphics.pose().scale(uiScale, uiScale);
             backdrop.draw(graphics, theme, wide, tall, moonX, moonY, logicalX, logicalY);
             boolean stage = page == Page.TREE || page == Page.ABILITIES;
-            if (page == Page.TRIAL) drawAltar(graphics, theme, data);
+            if (page == Page.GUIDE) drawGuide(graphics, theme, data, logicalX, logicalY);
             else drawMoonAndFigure(graphics, theme, data, stage, logicalX, logicalY);
             if (stage) drawStage(graphics, theme, data);
             else drawArticle(graphics, theme);
             drawBands(graphics, data, logicalX, logicalY);
             super.render(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
+            if (!hoveredStack.isEmpty()) graphics.setTooltipForNextFrame(font, List.of(hoveredStack.getHoverName().getVisualOrderText()),
+                    Math.round(logicalX), Math.round(logicalY));
             for (var child : children()) {
                 if (child instanceof MoonUi.ThemeToggle button && button.isHovered()) {
                     graphics.setTooltipForNextFrame(font, font.split(Component.translatable(KEY + "theme"), 160), mouseX, mouseY);
@@ -442,6 +521,74 @@ public final class WerewolfProgressionScreen extends Screen {
             MoonUi.line(graphics, x + nx * (NODE_RADIUS + 1), y + ny * (NODE_RADIUS + 1), center - nx * ringEdge, moonY - ny * ringEdge,
                     lit ? 1.1F : 0.6F, lit ? theme.accent() : MoonUi.alpha(theme.line(), 0.7F));
         }
+    }
+
+    /** The card around the open chapter, its heading, and the figure that belongs to it. */
+    private void drawGuide(GuiGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data, float mouseX, float mouseY) {
+        hoveredStack = ItemStack.EMPTY;
+        Component status = Component.translatable(KEY + "info.status", Component.translatable(KEY + "info.status." + statusKey(data)));
+        int chipWidth = Math.min(railWidth, font.width(status) + 20);
+        MoonUi.round(graphics, railX, TOP_BAND + 12, chipWidth, 16, 8, MoonUi.alpha(theme.accent(), 0.13F));
+        MoonUi.disc(graphics, railX + 8.5F, TOP_BAND + 20, 2.2F, theme.accent());
+        graphics.drawString(font, CompanionUi.fit(font, status.getString(), chipWidth - 20), railX + 15, TOP_BAND + 16, theme.accent(), false);
+        MoonUi.pool(graphics, cardX + cardWidth / 2F, cardY + cardHeight / 2F + 6, cardWidth * 0.56F, cardHeight * 0.56F, MoonUi.alpha(theme.shadow(), 0.45F));
+        MoonUi.round(graphics, cardX, cardY, cardWidth, cardHeight, 8, MoonUi.alpha(theme.node(), 0.94F));
+        WerewolfGuideBook.Chapter shown = WerewolfGuideBook.CHAPTERS.get(chapter);
+        float reveal = MoonUi.smooth((Util.getMillis() - pageOpened) / 220F);
+        graphics.drawString(font, Component.translatable(KEY + "guide.chapter", chapter + 1, WerewolfGuideBook.CHAPTERS.size()),
+                cardX + 40, cardY + 9, MoonUi.alpha(theme.faint(), reveal), false);
+        graphics.renderItem(new ItemStack(shown.icon().get()), cardX + 16, cardY + 21);
+        Component title = Component.translatable(KEY + shown.title());
+        int titleRoom = cardWidth - 56 - (shown.id().equals("beast") || shown.id().equals("companions") ? 130 : 0);
+        if (font.width(title) * 2 <= titleRoom) MoonUi.large(graphics, font, title, cardX + 40, cardY + 21, 2, MoonUi.alpha(theme.ink(), reveal));
+        else graphics.drawString(font, CompanionUi.fit(font, title.getString(), titleRoom), cardX + 40, cardY + 25, MoonUi.alpha(theme.ink(), reveal), false);
+        graphics.fill(cardX + 16, cardY + GUIDE_HEADER - 7, cardX + cardWidth - 16, cardY + GUIDE_HEADER - 6, MoonUi.alpha(theme.line(), 0.7F));
+        graphics.fill(cardX + 16, cardY + cardHeight - GUIDE_FOOTER + 2, cardX + cardWidth - 16, cardY + cardHeight - GUIDE_FOOTER + 3, MoonUi.alpha(theme.line(), 0.5F));
+        if (shown.id().equals("trial")) drawAltar(graphics, theme, data);
+        if (shown.id().equals("items")) drawRecipe(graphics, theme, cardX + cardWidth - 16 - figureWidth, articleY, mouseX, mouseY);
+    }
+
+    /** The selected recipe and its required crafting station. */
+    private void drawRecipe(GuiGraphics graphics, MoonUi.Theme theme, int x, int y, float mouseX, float mouseY) {
+        WerewolfGuideBook.Shown recipe = recipes.isEmpty() ? null : recipes.get(recipeIndex);
+        String method = recipe == null ? "none" : recipe.method().name().toLowerCase(java.util.Locale.ROOT);
+        ItemLike station = recipe == null ? Items.COMPASS : switch (recipe.method()) {
+            case CRAFT -> Items.CRAFTING_TABLE;
+            case SMELT -> Items.FURNACE;
+            case BLAST -> Items.BLAST_FURNACE;
+            case BREW -> Items.BREWING_STAND;
+        };
+        graphics.renderItem(new ItemStack(station), x, y - 4);
+        graphics.drawString(font, CompanionUi.fit(font, Component.translatable(KEY + "guide.method." + method).getString(), RECIPE_WIDTH - 20), x + 20, y, theme.sub(), false);
+        if (recipe == null) return;
+        int top = y + 18;
+        List<List<ItemStack>> slots = recipe.slots();
+        switch (recipe.method()) {
+            case CRAFT -> { for (int i = 0; i < 9; i++) slot(graphics, theme, x + i % 3 * 19, top + i / 3 * 19, slots.get(i), mouseX, mouseY); }
+            case SMELT, BLAST -> slot(graphics, theme, x + 19, top + 19, slots.get(0), mouseX, mouseY);
+            case BREW -> {
+                slot(graphics, theme, x + 19, top + 4, slots.get(0), mouseX, mouseY);
+                slot(graphics, theme, x + 19, top + 34, slots.get(1), mouseX, mouseY);
+            }
+        }
+        float arrowY = top + 28;
+        MoonUi.line(graphics, x + 61, arrowY, x + 73, arrowY, 1.2F, theme.sub());
+        MoonUi.line(graphics, x + 69, arrowY - 3.5F, x + 73, arrowY, 1.2F, theme.sub());
+        MoonUi.line(graphics, x + 69, arrowY + 3.5F, x + 73, arrowY, 1.2F, theme.sub());
+        slot(graphics, theme, x + 78, top + 19, List.of(recipe.result()), mouseX, mouseY);
+        if (recipe.result().getCount() > 1) graphics.drawString(font, "\u00D7" + recipe.result().getCount(), x + 80, top + 39, theme.faint(), false);
+        if (recipes.size() > 1) {
+            String page = (recipeIndex + 1) + " / " + recipes.size();
+            graphics.drawString(font, page, x + (RECIPE_WIDTH - font.width(page)) / 2, y + 84, theme.sub(), false);
+        }
+    }
+
+    private void slot(GuiGraphics graphics, MoonUi.Theme theme, int x, int y, List<ItemStack> choices, float mouseX, float mouseY) {
+        MoonUi.round(graphics, x, y, 18, 18, 4, MoonUi.alpha(theme.line(), 0.38F));
+        ItemStack stack = WerewolfGuideBook.cycle(choices);
+        if (stack.isEmpty()) return;
+        graphics.renderItem(stack, x + 1, y + 1);
+        if (mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) hoveredStack = stack;
     }
 
     private void drawArticle(GuiGraphics graphics, MoonUi.Theme theme) {
@@ -660,7 +807,7 @@ public final class WerewolfProgressionScreen extends Screen {
         if (super.mouseClicked(logical, doubleClick)) return true;
         if (event.button() != 0) return false;
         float dx = (float) logical.x() - moonX, dy = (float) logical.y() - moonY;
-        if (page != Page.TRIAL && dx * dx + dy * dy <= (moonRadius + 8) * (moonRadius + 8)) { dragging = true; return true; }
+        if (page != Page.GUIDE && dx * dx + dy * dy <= (moonRadius + 8) * (moonRadius + 8)) { dragging = true; return true; }
         if (articleLength > articleHeight && page != Page.TREE && page != Page.ABILITIES
                 && Math.abs(logical.x() - (articleX + articleWidth + 6)) <= 4 && logical.y() >= articleY && logical.y() <= articleY + articleHeight) {
             draggingScroll = true;
@@ -688,7 +835,7 @@ public final class WerewolfProgressionScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (page == Page.INFO || page == Page.TRIAL) {
+        if (page == Page.GUIDE) {
             scrollGoal = Mth.clamp(scrollGoal - (float) scrollY * 24, 0, Math.max(0, articleLength - articleHeight));
             return true;
         }
@@ -710,7 +857,7 @@ public final class WerewolfProgressionScreen extends Screen {
     // ------------------------------------------------------------------ parts
 
     private record Line(FormattedCharSequence text, int color, int gap, int indent, boolean marked) {}
-    private enum Page { TREE, ABILITIES, INFO, TRIAL }
+    private enum Page { TREE, ABILITIES, GUIDE }
 
     /** One word in the upper band; the screen draws the sliding underline. */
     private static final class TabButton extends AbstractButton {
@@ -733,6 +880,66 @@ public final class WerewolfProgressionScreen extends Screen {
             int ink = MoonUi.mix(MoonUi.BAND_SUB, MoonUi.BAND_TEXT, glow);
             graphics.drawString(font, CompanionUi.fit(font, getMessage().getString(), Math.max(8, getWidth() - 10)), getX() + (getWidth() < 20 ? 4 : 7), getY() + 6, ink, false);
             if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), MoonUi.BAND_TEXT);
+        }
+        @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
+    }
+
+    /** A chapter in the rail: number, icon and name. */
+    private final class ChapterButton extends AbstractButton {
+        private final int index;
+        private final ItemStack icon;
+        private float glow;
+        private long lastFrame = Util.getMillis();
+
+        ChapterButton(int index, int x, int y, int width, int height) {
+            super(x, y, width, height, Component.translatable(KEY + WerewolfGuideBook.CHAPTERS.get(index).title()));
+            this.index = index;
+            this.icon = new ItemStack(WerewolfGuideBook.CHAPTERS.get(index).icon().get());
+        }
+        @Override public void onPress(InputWithModifiers input) { openChapter(index); }
+        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            long now = Util.getMillis();
+            glow = Mth.clamp(glow + (isHovered() ? 1 : -1) * Math.min(now - lastFrame, 80) / 90F, 0, 1);
+            lastFrame = now;
+            MoonUi.Theme theme = MoonUi.theme();
+            boolean open = index == chapter;
+            int x = getX(), y = getY(), width = getWidth(), height = getHeight();
+            if (open || glow > 0.01F) MoonUi.round(graphics, x, y, width, height, 6, MoonUi.alpha(theme.node(), open ? 0.94F : 0.55F * glow));
+            if (open) graphics.fill(x, y + 4, x + 2, y + height - 4, theme.accent());
+            graphics.drawString(font, String.format("%02d", index + 1), x + 7, y + 6, open ? theme.accent() : theme.faint(), false);
+            graphics.renderItem(icon, x + 22, y + 2);
+            graphics.drawString(font, CompanionUi.fit(font, getMessage().getString(), width - 46), x + 42, y + 6,
+                    open ? theme.ink() : MoonUi.mix(theme.sub(), theme.ink(), glow), false);
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(x, y, width, height, theme.accent());
+        }
+        @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
+    }
+
+    /** One item of the item chapter; the selected one is ringed in the accent. */
+    private final class ItemChip extends AbstractButton {
+        private final int index;
+        private final ItemStack stack;
+        private float glow;
+        private long lastFrame = Util.getMillis();
+
+        ItemChip(int index, int x, int y) {
+            super(x, y, 22, 22, new ItemStack(WerewolfGuideBook.ITEMS.get(index).item().get()).getHoverName());
+            this.index = index;
+            this.stack = new ItemStack(WerewolfGuideBook.ITEMS.get(index).item().get());
+        }
+        @Override public void onPress(InputWithModifiers input) { openItem(index); }
+        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            long now = Util.getMillis();
+            glow = Mth.clamp(glow + (isHovered() ? 1 : -1) * Math.min(now - lastFrame, 80) / 90F, 0, 1);
+            lastFrame = now;
+            MoonUi.Theme theme = MoonUi.theme();
+            boolean open = index == itemEntry;
+            int x = getX(), y = getY();
+            MoonUi.round(graphics, x, y, 22, 22, 5, open ? theme.accent() : MoonUi.mix(theme.line(), theme.sub(), glow));
+            MoonUi.round(graphics, x + 1, y + 1, 20, 20, 4, theme.node());
+            graphics.renderItem(stack, x + 3, y + 3);
+            if (isHovered()) hoveredStack = stack;
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(x - 1, y - 1, 24, 24, theme.accent());
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }

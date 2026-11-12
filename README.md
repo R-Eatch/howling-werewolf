@@ -6,13 +6,15 @@ This is the source of Howling Werewolf for **Minecraft 1.21.11**, branch `1.21.1
 
 | | |
 |---|---|
-| Mod version | **1.3.4** |
+| Mod version | **1.3.7** |
 | Minecraft Java Edition | 1.21.11 |
 | Fabric Loader | 0.20.1 or later |
 | Fabric API | 0.141.6+1.21.11 or later |
 | Java | 21 |
 
-Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.3.4-fabric-1.21.11.jar`. Install the same version on the server and on every client.
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.3.7-fabric-1.21.11.jar`. Install the same version on the server and on every client.
+
+1.3.5–1.3.7 add a chaptered Guide tab with item and recipe pages, a per-companion "ignore owner damage" switch, Moonblood Surge for nearby companions, random coats for the Alpha trial in the Modern model and better vanilla armour fit. Moonblood Surge now sounds a long wolf howl; Hunters and the Silver-Oath Watcher wear a new long-coated look; the Silver Sword and the Alpha Werewolf Badge are redrawn; the altar sides and the central altar's underside are plain stone brick; and two new advancements mark your first companion and a companion raised to the highest tier. A new `preventWerewolfFullMoonSleep` option, off by default, keeps werewolves from sleeping through a full moon.
 
 The gameplay guide, the other editions and downloads are on the [main branch](https://github.com/R-Eatch/howling-werewolf).
 
