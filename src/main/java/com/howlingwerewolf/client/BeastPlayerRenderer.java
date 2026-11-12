@@ -3,6 +3,7 @@ package com.howlingwerewolf.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.howlingwerewolf.WerewolfForm;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
@@ -24,6 +25,11 @@ public final class BeastPlayerRenderer extends LivingEntityRenderer<AbstractClie
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
         return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.BEAST);
+    }
+
+    @Override
+    protected RenderType getRenderType(AbstractClientPlayer player, boolean visible, boolean translucent, boolean glowing) {
+        return WerewolfBodyRenderType.of(model, getTextureLocation(player), visible, translucent, glowing);
     }
 
     @Override

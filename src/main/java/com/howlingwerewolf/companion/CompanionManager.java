@@ -10,6 +10,8 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.content.ModEntities;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
+import com.howlingwerewolf.event.WerewolfGameplayEvents;
+import com.howlingwerewolf.event.WerewolfGuide;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import com.howlingwerewolf.network.CompanionViewPacket;
 import net.minecraft.core.BlockPos;
@@ -99,6 +101,7 @@ public final class CompanionManager {
                     case SKIN -> changeSkin(player, record, packet.value());
                     case SORT -> CompanionSorting.action(player, record, packet.value());
                     case DISMISS -> dismiss(player, record);
+                    case OWNER_DAMAGE -> { record.ignoreOwnerDamage = !record.ignoreOwnerDamage; data.setDirty(); }
                     default -> {}
                 }
                 sendView(player, false);
@@ -134,6 +137,7 @@ public final class CompanionManager {
         npc.clearHostileTargets();
         consume(player, ModItems.ALPHA_WEREWOLF_BADGE.get(), 1);
         data.setDirty();
+        WerewolfGuide.firstCompanion(player);
         npc.sayTo(player, "recruited");
         sendView(player, true);
     }
@@ -221,6 +225,7 @@ public final class CompanionManager {
         if (entity != null) entity.refreshStats();
         data.setDirty();
         message(player, "upgraded", record.name(), record.tier);
+        if (record.tier >= CompanionRules.MAX_TIER) WerewolfGuide.companionMaxTier(player);
         say(player, record, "upgrade");
     }
 
@@ -335,6 +340,7 @@ public final class CompanionManager {
         if (old != null) old.discard();
         record.generation = previousGeneration + 1;
         if (!data.claim(record, next)) { next.discard(); return null; }
+        next.restoreMoonblood();
         remember(next);
         data.setDirty();
         return next;
@@ -364,6 +370,16 @@ public final class CompanionManager {
         if (record == null || !(entity.level() instanceof ServerLevel level)) return;
         CompanionSavedData data = CompanionSavedData.get(level.getServer());
         if (!data.isCurrent(record, entity)) return;
+        if (record.moonblood.surgeEnd() > 0L) {
+            long ticksSinceSurge = level.getGameTime() - record.moonblood.surgeEnd();
+            if (ticksSinceSurge >= WerewolfGameplayEvents.MOONBLOOD_CRASH_TICKS) {
+                record.moonblood = CompanionRecord.Moonblood.NONE;
+                data.setDirty();
+            } else if (ticksSinceSurge < 0L && record.moonblood.absorption() != entity.getAbsorptionAmount()) {
+                record.moonblood = new CompanionRecord.Moonblood(record.moonblood.surgeEnd(), entity.getAbsorptionAmount());
+                data.setDirty();
+            }
+        }
         float health = record.mode == CompanionMode.DEAD ? 0 : entity.getHealth();
         ResourceLocation dimension = level.dimension().location();
         if (record.health != health || !record.position.equals(entity.blockPosition()) || !record.dimension.equals(dimension)) {
@@ -381,6 +397,7 @@ public final class CompanionManager {
         if (!data.isCurrent(record, entity) || record.mode == CompanionMode.DEAD) return;
         record.mode = CompanionMode.DEAD;
         record.health = 0;
+        record.moonblood = CompanionRecord.Moonblood.NONE;
         record.huntStart = record.huntEnd = 0;
         data.release(record, entity);
         data.setDirty();
@@ -434,7 +451,10 @@ public final class CompanionManager {
         record.generation++;
         entity.bind(record);
         CompanionSavedData data = CompanionSavedData.get(server);
-        if (data.claim(record, entity) && !level.addFreshEntity(entity)) data.release(record, entity);
+        if (data.claim(record, entity)) {
+            if (level.addFreshEntity(entity)) entity.restoreMoonblood();
+            else data.release(record, entity);
+        }
         data.setDirty();
     }
 
@@ -504,6 +524,7 @@ public final class CompanionManager {
             entry.putString("Skin", record.skin());
             entry.putInt("Tier", record.tier);
             entry.putInt("Mode", record.mode.ordinal());
+            entry.putBoolean("IgnoreOwnerDamage", record.ignoreOwnerDamage);
             entry.putBoolean("SortNearby", entity != null && entity.level() == player.serverLevel() && entity.distanceToSqr(player) <= 16 * 16);
             CompanionSorting.writeView(entry, record, player.serverLevel().getServer());
             entry.putFloat("Health", record.health);

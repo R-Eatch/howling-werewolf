@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 /** The pack page: roster on the left, the selected companion before the moon, its orders on the right. */
 public final class CompanionScreen extends CompanionFrameScreen {
     private static final String KEY = "screen.howlingwerewolf.companion.";
-    private static final int ROSTER_X = 12, ROSTER_W = 134, ROSTER_TOP = 34, ROSTER_STEP = 50, ORDER_W = 116, ORDER_TOP = 44, ORDER_STEP = 38;
+    private static final int ROSTER_X = 12, ROSTER_W = 134, ROSTER_TOP = 34, ROSTER_STEP = 50, ORDER_W = 116, ORDER_TOP = 44, ORDER_STEP = 35;
     private static final int MOON_RADIUS = 80, RING_TICKS = 64, DEED_W = 78, DEED_H = 17;
     private static final CompanionActionPacket.Action[] ORDERS = {CompanionActionPacket.Action.FOLLOW, CompanionActionPacket.Action.GUARD,
             CompanionActionPacket.Action.REST, CompanionActionPacket.Action.SORT, CompanionActionPacket.Action.HUNT};
@@ -38,7 +38,7 @@ public final class CompanionScreen extends CompanionFrameScreen {
     private final Map<CompanionActionPacket.Action, UiButton> commands = new EnumMap<>(CompanionActionPacket.Action.class);
     private final List<UiButton> slots = new ArrayList<>();
     private EditBox address;
-    private UiButton saveAddress, resetAddress, appearance, dismiss;
+    private UiButton saveAddress, resetAddress, appearance, ownerDamage, dismiss;
     private int actionDelay;
 
     public CompanionScreen(@Nullable Screen parent, CompoundTag snapshot) { this(parent, snapshot, null); }
@@ -88,8 +88,11 @@ public final class CompanionScreen extends CompanionFrameScreen {
                     .icon(orderIcons.get(i)).hint(() -> disabledReason(action));
             commands.put(action, addRenderableWidget(row));
         }
+        int settingsY = top + ORDER_TOP + ORDERS.length * ORDER_STEP + 2;
+        ownerDamage = addRenderableWidget(new UiButton(orderX, settingsY, ORDER_W, 16, Component.translatable(KEY + "owner_damage"), Look.CHIP,
+                () -> request(CompanionActionPacket.Action.OWNER_DAMAGE)).hint(() -> Component.translatable(KEY + "owner_damage_hint")));
         // Set apart below the orders: dismissal is final, so it asks again on a page of its own.
-        dismiss = addRenderableWidget(new UiButton(orderX, top + ORDER_TOP + ORDERS.length * ORDER_STEP + 2, ORDER_W, 16,
+        dismiss = addRenderableWidget(new UiButton(orderX, settingsY + 20, ORDER_W, 16,
                 Component.translatable(KEY + "dismiss"), Look.SOFT, this::askDismiss)
                 .hint(() -> Component.translatable(KEY + "dismiss_hint")));
         int bandTop = canvasBottom + 5, right = left + WIDTH - 12;
@@ -194,6 +197,9 @@ public final class CompanionScreen extends CompanionFrameScreen {
         resetAddress.active = system && actionDelay == 0 && (!address.getValue().isEmpty() || !snapshot.getString("Address").isEmpty());
         appearance.active = system && record != null && mode(record).hasEntity();
         appearance.visible = record != null && mode(record) != CompanionMode.DEAD;
+        ownerDamage.visible = record != null;
+        ownerDamage.active = system && record != null && actionDelay == 0;
+        ownerDamage.selected(record != null && record.getBoolean("IgnoreOwnerDamage"));
         dismiss.visible = record != null;
         dismiss.active = system && record != null && actionDelay == 0;
         ListTag entries = snapshot.getList("Companions", 10);

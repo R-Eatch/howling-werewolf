@@ -20,6 +20,7 @@ public final class HWConfig {
     public static final ModConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
     public static final ModConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
     public static final ModConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
+    public static final ModConfigSpec.BooleanValue PREVENT_FULL_MOON_SLEEP;
     public static final ModConfigSpec.BooleanValue ENABLE_COMPANIONS;
     public static final ModConfigSpec.BooleanValue ENABLE_COMPANION_SORTING;
     public static final ModConfigSpec.IntValue COMPANION_SORTING_REACH;
@@ -65,7 +66,7 @@ public final class HWConfig {
                         "Minimum interval in ticks between successful damage events received by the Alpha Trial boss. Set to 0 to disable the extra limit. Attackerless damage that bypasses invulnerability and player-caused Beast Mode void damage are unaffected. Default is 10 ticks.")
                 .defineInRange("alphaTrialDamageFrequencyLimitTicks", 10, 0, Integer.MAX_VALUE);
         PRESERVE_ALPHA_BADGE_ON_REVIVAL = builder.comment(
-                        "Keep the Alpha Werewolf Badge after it prevents fatal damage. When false, one badge is consumed and revival matches a Totem of Undying. Default is false.")
+                        "Keep the Alpha Werewolf Badge after it prevents fatal damage. When false, one badge is consumed and revival matches a Totem of Undying. When true, revival also works against /kill, the void and other damage that bypasses invulnerability, and a player revived after falling out of the world returns to their last safe ground, their respawn point or the world spawn. Default is false.")
                 .define("preserveAlphaBadgeOnRevival", false);
         SHOW_WEREWOLF_EQUIPMENT = builder.comment(
                         "Render worn armor and elytra on the normal transformed werewolf model. Held items are always rendered. Default is true.")
@@ -73,6 +74,9 @@ public final class HWConfig {
         ENABLE_WEREWOLF_AUTO_STEP = builder.comment(
                         "Automatically step up obstacles in transformed forms: Werewolf 1.5 blocks, Quadruped Wolf 1 block, Beast 2 blocks. Default is true; false disables the added step height.")
                 .define("enableWerewolfAutoStep", true);
+        PREVENT_FULL_MOON_SLEEP = builder.comment(
+                        "Werewolves cannot sleep through a full moon in the Overworld, from dusk until dawn, so the night cannot be skipped. Default is false: the choice stays with the player.")
+                .define("preventWerewolfFullMoonSleep", false);
         builder.pop();
         builder.push("worldGeneration");
         GENERATE_SILVER = builder.comment(

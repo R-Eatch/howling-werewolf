@@ -26,7 +26,8 @@ import java.util.List;
 /** Native armor passes draw joint segments attached to the imported skeleton. */
 final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, ModernPlayerModel<AbstractClientPlayer>> {
     private final HumanoidModel<AbstractClientPlayer> carrier;
-    private final HumanoidArmorLayer<AbstractClientPlayer, HumanoidModel<AbstractClientPlayer>, RigArmorModel> armor;
+    // The model type stays HumanoidModel so javac emits no casting bridge: armor mods may pass their own model here.
+    private final HumanoidArmorLayer<AbstractClientPlayer, HumanoidModel<AbstractClientPlayer>, HumanoidModel<AbstractClientPlayer>> armor;
 
     ModernEquipmentLayer(ModernPlayerRenderer parent, EntityRendererProvider.Context context) {
         super(parent);
@@ -39,9 +40,9 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
                 new RigArmorModel(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR), parent.getModel(), true),
                 new RigArmorModel(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR), parent.getModel(), false),
                 context.getModelManager()) {
-            @Override protected void setPartVisibility(RigArmorModel model, EquipmentSlot slot) {
+            @Override protected void setPartVisibility(HumanoidModel<AbstractClientPlayer> model, EquipmentSlot slot) {
                 super.setPartVisibility(model, slot);
-                model.slot = slot;
+                if (model instanceof RigArmorModel rig) rig.slot = slot;
             }
         };
     }
@@ -64,9 +65,11 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
         Matrix4f inverse = new Matrix4f(pose.last().pose()).invert();
         float[] bounds = null;
         float largest = -1;
-        final List<float[]> candidates = new ArrayList<>();
+        final List<float[]> candidates = new ArrayList<>(), upright = new ArrayList<>();
         bone.visit(new PoseStack(), (transform, path, index, cube) -> {
             if (!path.startsWith("/cube_") || path.indexOf('/', 1) >= 0) return;
+            ModelPart part = bone.getChild(path.substring(1));
+            boolean straight = part.xRot == 0 && part.yRot == 0 && part.zRot == 0;
             float[] box = {Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
                     Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
             for (var polygon : cube.polygons) for (var vertex : polygon.vertices) {
@@ -77,8 +80,10 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
                 box[2] = Math.min(box[2], point.z); box[5] = Math.max(box[5], point.z);
             }
             candidates.add(box);
+            if (straight) upright.add(box);
         });
-        for (float[] box : candidates) {
+        // Fur tufts are tilted blocks and cards; the torso or limb itself is the largest unrotated cube.
+        for (float[] box : upright.isEmpty() ? candidates : upright) {
             float volume = (box[3] - box[0]) * (box[4] - box[1]) * (box[5] - box[2]);
             if (volume > largest) { bounds = box; largest = volume; }
         }
@@ -90,33 +95,65 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
     private static final class RigArmorModel extends HumanoidModel<AbstractClientPlayer> {
         private final ModernPlayerModel<AbstractClientPlayer> rig;
         private final List<Piece> pieces = new ArrayList<>();
+        /** Room left around the bone: the outer layer sits outside the inner one, as vanilla inflates it more. */
+        private final float margin;
         private EquipmentSlot slot;
 
         RigArmorModel(ModelPart root, ModernPlayerModel<AbstractClientPlayer> rig, boolean inner) {
             super(root);
             this.rig = rig;
+            this.margin = inner ? 0.45F : 0.9F;
+            // Cuts follow the vanilla layer layout along a limb box: leggings cover its upper three
+            // quarters (thigh, then shin), boots its lower half (ankle, then paw), sleeves split at the elbow,
+            // and the chestplate covers the chest and the belly above the leggings' belt.
             if (inner) {
                 add(EquipmentSlot.LEGS, "body_lower_bone", body);
-                split(EquipmentSlot.LEGS, "right_leg_upper", "right_leg_lower", rightLeg);
-                split(EquipmentSlot.LEGS, "left_leg_upper", "left_leg_lower", leftLeg);
+                split(EquipmentSlot.LEGS, "right_leg_upper", "right_leg_lower", rightLeg, 0, 0.375F, 0.75F);
+                split(EquipmentSlot.LEGS, "left_leg_upper", "left_leg_lower", leftLeg, 0, 0.375F, 0.75F);
             } else {
                 add(EquipmentSlot.HEAD, "head", head);
-                add(EquipmentSlot.CHEST, "ribs", body);
-                split(EquipmentSlot.CHEST, "rightArmRotation", "right_forearn", rightArm);
-                split(EquipmentSlot.CHEST, "leftArmRotation", "left_forearn", leftArm);
-                split(EquipmentSlot.FEET, "right_foot_upper", "right_foot_lower", rightLeg);
-                split(EquipmentSlot.FEET, "left_foot_upper", "left_foot_lower", leftLeg);
+                split(EquipmentSlot.CHEST, "ribs", "body_lower_bone", body, 0, 0.5F, 1);
+                split(EquipmentSlot.CHEST, "rightArmRotation", "right_forearn", rightArm, 0, 0.5F, 1);
+                split(EquipmentSlot.CHEST, "leftArmRotation", "left_forearn", leftArm, 0, 0.5F, 1);
+                shoulder("rightArmRotation", rightArm);
+                shoulder("leftArmRotation", leftArm);
+                split(EquipmentSlot.FEET, "right_foot_upper", "right_foot_lower", rightLeg, 0.5F, 0.75F, 1);
+                split(EquipmentSlot.FEET, "left_foot_upper", "left_foot_lower", leftLeg, 0.5F, 0.75F, 1);
             }
         }
 
-        private void split(EquipmentSlot slot, String upper, String lower, ModelPart source) {
-        source.setInitialPose(PartPose.ZERO);
-        source.resetPose();
-        float[] bounds = BlockbenchModel.bounds(source);
-        float middle = (bounds[1] + bounds[4]) / 2;
-        add(slot, upper, clip(source, bounds[1], middle));
-        add(slot, lower, clip(source, middle, bounds[4]));
-    }
+        /** Cuts a vanilla limb at fractions of its height and fits each segment to one rig bone. */
+        private void split(EquipmentSlot slot, String upper, String lower, ModelPart source, float top, float joint, float bottom) {
+            source.setInitialPose(PartPose.ZERO);
+            source.resetPose();
+            float[] bounds = BlockbenchModel.bounds(source);
+            float height = bounds[4] - bounds[1];
+            add(slot, upper, clip(source, bounds[1] + height * top, bounds[1] + height * joint));
+            add(slot, lower, clip(source, bounds[1] + height * joint, bounds[1] + height * bottom));
+        }
+
+        /**
+         * Caps the shoulder fur: the sleeve's top is laid over the upper arm's tilted shoulder block in that
+         * block's own frame, so the fur no longer juts out above the sleeve and the plate swings with the arm.
+         */
+        private void shoulder(String bone, ModelPart sleeve) {
+            ModelPart block = null;
+            float largest = 0;
+            for (var entry : rig.rig.bone(bone).children.entrySet()) {
+                ModelPart part = entry.getValue();
+                if (!entry.getKey().startsWith("cube_") || part.cubes.isEmpty()
+                        || part.xRot == 0 && part.yRot == 0 && part.zRot == 0) continue;
+                ModelPart.Cube cube = part.cubes.get(0);
+                float volume = (cube.maxX - cube.minX) * (cube.maxY - cube.minY) * (cube.maxZ - cube.minZ);
+                if (volume > largest) { block = part; largest = volume; }
+            }
+            if (block == null) return;
+            ModelPart.Cube cube = block.cubes.get(0);
+            float[] bounds = BlockbenchModel.bounds(sleeve);
+            ModelPart top = clip(sleeve, bounds[1], bounds[1] + (bounds[4] - bounds[1]) * 0.35F);
+            pieces.add(new Piece(EquipmentSlot.CHEST, bone, block, top, BlockbenchModel.bounds(top),
+                    new float[] {cube.minX, cube.minY, cube.minZ, cube.maxX, cube.maxY, cube.maxZ}));
+        }
 
     /** Split a vanilla sleeve/leg at the joint, retaining its original UVs and armor trim mapping. */
         static ModelPart clip(ModelPart source, float minimum, float maximum) {
@@ -159,7 +196,7 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
         private void add(EquipmentSlot slot, String bone, ModelPart part) {
             part.setInitialPose(PartPose.ZERO);
             part.resetPose();
-            pieces.add(new Piece(slot, bone, part, BlockbenchModel.bounds(part), attachmentBounds(rig.rig.bone(bone))));
+            pieces.add(new Piece(slot, bone, null, part, BlockbenchModel.bounds(part), attachmentBounds(rig.rig.bone(bone))));
         }
 
         @Override public void renderToBuffer(PoseStack pose, VertexConsumer buffer, int light, int overlay, int color) {
@@ -167,18 +204,21 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
                 if (piece.slot() != slot) continue;
                 pose.pushPose();
                 rig.rig.transform(piece.bone(), pose);
+                if (piece.block() != null) piece.block().translateAndRotate(pose);
                 float[] size = new float[3];
-                for (int axis = 0; axis < 3; axis++) size[axis] = (piece.target()[axis + 3] - piece.target()[axis] + 0.45F)
+                for (int axis = 0; axis < 3; axis++) size[axis] = (piece.target()[axis + 3] - piece.target()[axis] + margin)
                         / Math.max(0.01F, piece.source()[axis + 3] - piece.source()[axis]);
-                pose.translate((piece.target()[0] - 0.225F - piece.source()[0] * size[0]) / 16,
-                        (piece.target()[1] - 0.225F - piece.source()[1] * size[1]) / 16,
-                        (piece.target()[2] - 0.225F - piece.source()[2] * size[2]) / 16);
+                pose.translate((piece.target()[0] - margin / 2 - piece.source()[0] * size[0]) / 16,
+                        (piece.target()[1] - margin / 2 - piece.source()[1] * size[1]) / 16,
+                        (piece.target()[2] - margin / 2 - piece.source()[2] * size[2]) / 16);
                 pose.scale(size[0], size[1], size[2]);
                 piece.part().render(pose, buffer, light, overlay, color);
                 pose.popPose();
             }
         }
 
-        private record Piece(EquipmentSlot slot, String bone, ModelPart part, float[] source, float[] target) {}
+        /** {@code block} is set when the piece follows one tilted block of the bone rather than the bone itself. */
+        private record Piece(EquipmentSlot slot, String bone, @org.jetbrains.annotations.Nullable ModelPart block,
+                             ModelPart part, float[] source, float[] target) {}
     }
 }

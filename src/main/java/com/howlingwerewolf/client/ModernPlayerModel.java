@@ -29,7 +29,7 @@ final class ModernPlayerModel<T extends LivingEntity> extends EntityModel<T> imp
     private static final List<String> RELAXED_JOINTS = List.of("rightArm", "leftArm", "rightArmRotation", "leftArmRotation", "right_forearn", "left_forearn",
             "rightLeg", "leftLeg", "right_leg_lower", "left_leg_lower");
     private static final List<String> FOREARMS = List.of("right_forearn", "left_forearn");
-    private static final float ELBOW_FUR_LAY = 0.5F;
+    private static final float ELBOW_FUR_LAY = 0.5F, FOUR_LEGGED_FUR_FOLD = 0.6F;
     private static final float SHOULDER_IN = 0.40F, HIP_RANGE = 1.05F, HIP_SOCKET = 11, REACH_MARGIN = 0.96F;
     // Carriage of the gallop and prowl: root drop in pixels, then torso lean and chest and neck pitch in radians.
     private static final float GALLOP_HEIGHT = -0.6F, GALLOP_LEAN = 1.52F, GALLOP_CHEST = -0.22F, GALLOP_GAZE = 0.10F;
@@ -179,6 +179,8 @@ final class ModernPlayerModel<T extends LivingEntity> extends EntityModel<T> imp
     /**
      * The elbow tuft is modelled on the forearm. Undoing half of the bend lets it sweep out of the
      * joint between the two arm bones, instead of jutting out in line with the folded forearm.
+     * On all fours the Beast folds its forearms far past any upright swing, and laying the tuft by
+     * half of that turned it out sideways; there the lay stops at a small fold.
      */
     private void layElbowFur() {
         for (String bone : FOREARMS) {
@@ -186,6 +188,8 @@ final class ModernPlayerModel<T extends LivingEntity> extends EntityModel<T> imp
             List<ModelPart> tufts = rig.flats().get(bone);
             if (forearm == null || tufts == null) continue;
             float bend = forearm.xRot - forearm.getInitialPose().xRot;
+            float carriage = Math.max(state.beastRunAmount, state.beastProwlAmount);
+            bend = Mth.lerp(carriage, bend, Mth.clamp(bend, -FOUR_LEGGED_FUR_FOLD, FOUR_LEGGED_FUR_FOLD));
             if (Math.abs(bend) < 0.001F) continue;
             for (ModelPart tuft : tufts) {
                 var rest = tuft.getInitialPose();

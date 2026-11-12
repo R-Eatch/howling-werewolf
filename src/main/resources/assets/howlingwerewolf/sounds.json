@@ -1,0 +1,11 @@
+{
+  "moonblood_howl": {
+    "subtitle": "subtitles.howlingwerewolf.moonblood_howl",
+    "sounds": [
+      {
+        "name": "howlingwerewolf:moonblood_howl",
+        "attenuation_distance": 48
+      }
+    ]
+  }
+}
