@@ -217,8 +217,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
     /** The tutorial: the chapter rail, the open chapter's text and its own controls. */
     private void buildGuide(@Nullable WerewolfData data) {
         List<WerewolfGuideBook.Chapter> chapters = WerewolfGuideBook.CHAPTERS;
-        int here = WerewolfGuideBook.stage(data);
-        for (int i = 0; i < chapters.size(); i++) addRenderableWidget(new ChapterButton(i, railX, TOP_BAND + 36 + i * 22, railWidth, 20, i == here));
+        for (int i = 0; i < chapters.size(); i++) addRenderableWidget(new ChapterButton(i, railX, TOP_BAND + 36 + i * 22, railWidth, 20));
         WerewolfGuideBook.Chapter shown = chapters.get(chapter);
         int footer = cardY + cardHeight - 22, right = cardX + cardWidth - 14;
         if (chapter > 0) {
@@ -879,18 +878,16 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }
 
-    /** A chapter in the rail: number, icon and name; a small dot marks where the reader stands. */
+    /** A chapter in the rail: number, icon and name. */
     private final class ChapterButton extends MoonInput.Button {
         private final int index;
-        private final boolean here;
         private final ItemStack icon;
         private float glow;
         private long lastFrame = Util.getMillis();
 
-        ChapterButton(int index, int x, int y, int width, int height, boolean here) {
+        ChapterButton(int index, int x, int y, int width, int height) {
             super(x, y, width, height, Component.translatable(KEY + WerewolfGuideBook.CHAPTERS.get(index).title()));
             this.index = index;
-            this.here = here;
             this.icon = new ItemStack(WerewolfGuideBook.CHAPTERS.get(index).icon().get());
         }
         @Override void press() { openChapter(index); }
@@ -905,10 +902,8 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
             if (open) graphics.fill(x, y + 4, x + 2, y + height - 4, theme.accent());
             graphics.text(font, String.format("%02d", index + 1), x + 7, y + 6, open ? theme.accent() : theme.faint(), false);
             graphics.item(icon, x + 22, y + 2);
-            int room = width - 42 - (here ? 10 : 4);
-            graphics.text(font, CompanionUi.fit(font, getMessage().getString(), room), x + 42, y + 6,
+            graphics.text(font, CompanionUi.fit(font, getMessage().getString(), width - 46), x + 42, y + 6,
                     open ? theme.ink() : MoonUi.mix(theme.sub(), theme.ink(), glow), false);
-            if (here) MoonUi.disc(graphics, x + width - 7, y + height / 2F, 2.4F, theme.accent());
             if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(x, y, width, height, theme.accent());
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }

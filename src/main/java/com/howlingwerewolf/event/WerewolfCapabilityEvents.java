@@ -100,6 +100,7 @@ public final class WerewolfCapabilityEvents {
         restoreAndSync(event.getEntity());
         if (event.getEntity() instanceof ServerPlayer player) {
             com.howlingwerewolf.trial.AlphaTrialManager.deliverPendingFailureMessage(player);
+            WerewolfGuide.companions(player);
         }
     }
 

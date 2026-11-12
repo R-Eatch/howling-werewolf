@@ -1,6 +1,5 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.client.Minecraft;
@@ -15,7 +14,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,18 +63,6 @@ final class WerewolfGuideBook {
             new Entry("alpha_werewolf_badge", ModItems.ALPHA_WEREWOLF_BADGE::get),
             new Entry("ritual_altar", ModBlocks.RITUAL_ALTAR::get),
             new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get));
-
-    static int index(String id) {
-        for (int i = 0; i < CHAPTERS.size(); i++) if (CHAPTERS.get(i).id().equals(id)) return i;
-        return 0;
-    }
-
-    /** The chapter for where the player stands in the bloodline, marked on the chapter list. */
-    static int stage(@Nullable WerewolfData data) {
-        if (data == null || !data.isWerewolf()) return index("awakening");
-        if (data.hasDefeatedAlpha()) return index("beast");
-        return index(data.getLevel() >= 10 ? "trial" : "growth");
-    }
 
     /** Read crafting and cooking recipes from the world. The mod's two brews are registered separately. */
     static List<Shown> recipes(ItemLike target) {

@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/obtain_alpha_badge",
+  "display": {
+    "icon": { "item": "minecraft:lead" },
+    "title": { "translate": "advancement.howlingwerewolf.first_companion.title" },
+    "description": { "translate": "advancement.howlingwerewolf.first_companion.desc" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}

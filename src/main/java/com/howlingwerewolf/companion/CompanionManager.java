@@ -11,6 +11,7 @@ import com.howlingwerewolf.content.ModEntities;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
+import com.howlingwerewolf.event.WerewolfGuide;
 import com.howlingwerewolf.network.CompanionActionPacket;
 import com.howlingwerewolf.network.CompanionViewPacket;
 import net.minecraft.core.BlockPos;
@@ -137,6 +138,7 @@ public final class CompanionManager {
         npc.clearHostileTargets();
         consume(player, ModItems.ALPHA_WEREWOLF_BADGE.get(), 1);
         data.setDirty();
+        WerewolfGuide.firstCompanion(player);
         npc.sayTo(player, "recruited");
         sendView(player, true);
     }
@@ -224,6 +226,7 @@ public final class CompanionManager {
         if (entity != null) entity.refreshStats();
         data.setDirty();
         message(player, "upgraded", record.name(), record.tier);
+        if (record.tier >= CompanionRules.MAX_TIER) WerewolfGuide.companionMaxTier(player);
         say(player, record, "upgrade");
     }
 
