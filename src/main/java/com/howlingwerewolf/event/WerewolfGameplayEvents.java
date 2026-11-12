@@ -9,6 +9,7 @@ import com.howlingwerewolf.WerewolfTreeSkill;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModItems;
+import com.howlingwerewolf.content.ModSounds;
 import com.howlingwerewolf.content.ModTags;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
@@ -74,6 +75,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -464,6 +466,22 @@ public final class WerewolfGameplayEvents {
                 event.getEntity().setSecondsOnFire(8);
             }
         });
+    }
+
+    /**
+     * Optional full-moon rule. Beds work from tick 12542 but the moon forces the change only at 13000,
+     * so the whole bloodline is held from dusk; otherwise sleeping just before the change skips the night.
+     */
+    @SubscribeEvent
+    public static void fullMoonSleep(PlayerSleepInBedEvent event) {
+        if (!HWConfig.PREVENT_FULL_MOON_SLEEP.get() || !(event.getEntity() instanceof ServerPlayer player)
+                || player.level().dimension() != Level.OVERWORLD) return;
+        ServerLevel level = player.serverLevel();
+        if (level.getMoonPhase() != 0 || Math.floorMod(level.getDayTime(), 24000L) < 12000L) return;
+        if (!WerewolfApi.get(player).map(WerewolfData::isWerewolf).orElse(false)) return;
+        event.setResult(net.minecraft.world.entity.player.Player.BedSleepingProblem.OTHER_PROBLEM);
+        player.displayClientMessage(Component.translatable("message.howlingwerewolf.full_moon_no_sleep")
+                .withStyle(ChatFormatting.DARK_PURPLE), true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -857,6 +875,9 @@ public final class WerewolfGameplayEvents {
                     player.getZ(), 18, 0.4D, 0.65D, 0.4D, 0.05D);
             level.playSound(null, player.blockPosition(), SoundEvents.WARDEN_HEARTBEAT,
                     SoundSource.PLAYERS, 1.1F, 0.72F);
+            // One long howl over the heartbeat; a slight pitch spread keeps repeats from sounding identical.
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MOONBLOOD_HOWL.get(),
+                    SoundSource.PLAYERS, 1.0F, 0.94F + player.getRandom().nextFloat() * 0.12F);
             player.sendSystemMessage(Component.translatable("message.howlingwerewolf.moonblood_on")
                     .withStyle(ChatFormatting.DARK_RED));
             ModNetwork.sync(player, data);

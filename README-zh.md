@@ -6,14 +6,14 @@
 
 | | |
 |---|---|
-| Mod 版本 | **1.3.6** |
+| Mod 版本 | **1.3.7** |
 | Minecraft Java 版 | 1.20.1 |
 | Forge | 47.4.16 或更新版本 |
 | Java | 17 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.6-forge.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.7-forge.jar`。服务端和每个客户端需安装同一版本。
 
-1.3.6 中，受到月血沸腾的随从召回后保留增益和虚脱的剩余时间。教程可切换查看四种银锭配方，Modern 野兽吻部补齐对侧胡须，两座祭坛和两种药水换用新纹理。月血沸腾的规则见[随从指南](docs/COMPANIONS-zh.md)。
+1.3.7 中，月血沸腾会响起一声长长的狼嚎；猎人和银誓守夜人换上新的长风衣造型，银剑换用新纹理；祭坛侧面改为素面石砖。新增配置 `preventWerewolfFullMoonSleep`（默认关闭），开启后狼人无法靠睡觉跳过满月。装有 MCA 时，变身玩家的第一人称手臂恢复为狼人手臂。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 

@@ -20,6 +20,7 @@ public final class HWConfig {
     public static final ForgeConfigSpec.BooleanValue PRESERVE_ALPHA_BADGE_ON_REVIVAL;
     public static final ForgeConfigSpec.BooleanValue SHOW_WEREWOLF_EQUIPMENT;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WEREWOLF_AUTO_STEP;
+    public static final ForgeConfigSpec.BooleanValue PREVENT_FULL_MOON_SLEEP;
     public static final ForgeConfigSpec.BooleanValue ENABLE_COMPANIONS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_COMPANION_SORTING;
     public static final ForgeConfigSpec.IntValue COMPANION_SORTING_REACH;
@@ -73,6 +74,9 @@ public final class HWConfig {
         ENABLE_WEREWOLF_AUTO_STEP = builder.comment(
                         "Enable fixed Auto Step heights: Quadruped Wolf 1.0 block, Werewolf 1.5 blocks, Beast 2.0 blocks. Default is true; false restores normal stepping. Manual jumping is unchanged.")
                 .define("enableWerewolfAutoStep", true);
+        PREVENT_FULL_MOON_SLEEP = builder.comment(
+                        "Werewolves cannot sleep through a full moon in the Overworld, from dusk until dawn, so the night cannot be skipped. Default is false: the choice stays with the player.")
+                .define("preventWerewolfFullMoonSleep", false);
         builder.pop();
         builder.push("worldGeneration");
         GENERATE_SILVER = builder.comment(
