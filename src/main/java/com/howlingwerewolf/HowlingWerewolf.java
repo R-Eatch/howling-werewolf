@@ -8,6 +8,7 @@ import com.howlingwerewolf.content.ModBlockEntities;
 import com.howlingwerewolf.content.ModBiomeModifiers;
 import com.howlingwerewolf.content.ModPlacementModifiers;
 import com.howlingwerewolf.content.ModRecipes;
+import com.howlingwerewolf.content.ModSounds;
 import com.howlingwerewolf.content.WerewolfPotionBrewingRecipe;
 import com.howlingwerewolf.content.WolfsbaneBrewingRecipe;
 import com.howlingwerewolf.capability.ModAttachments;
@@ -63,6 +64,7 @@ public final class HowlingWerewolf {
         ModEntities.ENTITIES.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModRecipes.SERIALIZERS.register(modBus);
+        ModSounds.SOUNDS.register(modBus);
         ModPlacementModifiers.PLACEMENT_MODIFIERS.register(modBus);
         ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);

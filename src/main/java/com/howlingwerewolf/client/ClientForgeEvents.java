@@ -25,6 +25,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -158,6 +159,39 @@ public final class ClientForgeEvents {
         if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
         else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
         else WerewolfFirstPersonClawRenderer.render(event, data);
+    }
+
+    /**
+     * The empty main hand of a transformed player is drawn here, a step before PlayerRenderer.renderRightHand.
+     * Player-model mods such as MCA cancel that method at its head to draw their own arm, which also skips Forge's
+     * RenderArmEvent; this keeps vanilla's empty-hand placement and hands the arm to {@link #renderWerewolfArm}.
+     */
+    @SubscribeEvent
+    public static void renderWerewolfHand(RenderHandEvent event) {
+        AbstractClientPlayer player = Minecraft.getInstance().player;
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()
+                || player == null || player.isInvisible() || player.isScoping()) return;
+        if (!WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;
+        event.setCanceled(true);
+        net.minecraft.world.entity.HumanoidArm arm = player.getMainArm();
+        float side = arm == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1.0F : -1.0F;
+        float swing = event.getSwingProgress(), root = net.minecraft.util.Mth.sqrt(swing);
+        PoseStack pose = event.getPoseStack();
+        pose.pushPose();
+        // ItemInHandRenderer.renderPlayerArm, unchanged.
+        pose.translate(side * (-0.3F * net.minecraft.util.Mth.sin(root * (float) Math.PI) + 0.64000005F),
+                0.4F * net.minecraft.util.Mth.sin(root * (float) (Math.PI * 2)) - 0.6F - event.getEquipProgress() * 0.6F,
+                -0.4F * net.minecraft.util.Mth.sin(swing * (float) Math.PI) - 0.71999997F);
+        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(side * 45.0F));
+        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(side * net.minecraft.util.Mth.sin(root * (float) Math.PI) * 70.0F));
+        pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(side * net.minecraft.util.Mth.sin(swing * swing * (float) Math.PI) * -20.0F));
+        pose.translate(side * -1.0F, 3.6F, 3.5F);
+        pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(side * 120.0F));
+        pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(200.0F));
+        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(side * -135.0F));
+        pose.translate(side * 5.6F, 0.0F, 0.0F);
+        renderWerewolfArm(new RenderArmEvent(pose, event.getSubmitNodeCollector(), event.getPackedLight(), player, arm));
+        pose.popPose();
     }
 
     private ClientForgeEvents() {}

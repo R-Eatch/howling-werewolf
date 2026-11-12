@@ -37,13 +37,23 @@ import org.jetbrains.annotations.Nullable;
 
 public final class HunterEntity extends PathfinderMob {
     private static final int TRIAL_EFFECT_DURATION = 20 * 60 * 30;
-    private boolean trialHunter;
+    private static final String TRIAL_NAME_KEY = "entity.howlingwerewolf.trial_hunter";
+    /** Tracked so clients can dress the trial's Silver-Oath Watcher; saved as TrialHunter as before. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Boolean> TRIAL_HUNTER =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(HunterEntity.class,
+                    net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
     private boolean villagePatrol;
     private long villageKey;
 
     public HunterEntity(EntityType<? extends HunterEntity> type, Level level) {
         super(type, level);
         xpReward = 8;
+    }
+
+    @Override
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(TRIAL_HUNTER, false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -107,14 +117,13 @@ public final class HunterEntity extends PathfinderMob {
     }
 
     public boolean isTrialHunter() {
-        return trialHunter;
+        return entityData.get(TRIAL_HUNTER);
     }
 
     public void configureForTrial() {
-        trialHunter = true;
+        entityData.set(TRIAL_HUNTER, true);
         setPersistenceRequired();
-        setCustomName(Component.translatable("entity.howlingwerewolf.trial_hunter"));
-        setCustomNameVisible(true);
+        setCustomName(Component.translatable(TRIAL_NAME_KEY));
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         setHealth(getMaxHealth());
@@ -142,7 +151,7 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     protected void dropFromLootTable(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,
                                      boolean recentlyHit) {
-        if (!trialHunter) super.dropFromLootTable(level, source, recentlyHit);
+        if (!isTrialHunter()) super.dropFromLootTable(level, source, recentlyHit);
     }
 
     @Override
@@ -155,7 +164,7 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     protected void addAdditionalSaveData(ValueOutput tag) {
         super.addAdditionalSaveData(tag);
-        tag.putBoolean("TrialHunter", trialHunter);
+        tag.putBoolean("TrialHunter", isTrialHunter());
         tag.putBoolean("VillagePatrol", villagePatrol);
         if (villagePatrol) tag.putLong("VillageKey", villageKey);
     }
@@ -163,9 +172,13 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     protected void readAdditionalSaveData(ValueInput tag) {
         super.readAdditionalSaveData(tag);
-        trialHunter = tag.getBooleanOr("TrialHunter", false);
+        entityData.set(TRIAL_HUNTER, tag.getBooleanOr("TrialHunter", false));
         villagePatrol = tag.getBooleanOr("VillagePatrol", false);
         villageKey = tag.getLongOr("VillageKey", 0L);
         if (villagePatrol) setHomeTo(BlockPos.of(villageKey), 48);
+        // Saves before 1.3.5 pinned the trial name tag; a name-tag rename is left alone.
+        if (isTrialHunter() && getCustomName() != null && getCustomName().getContents()
+                instanceof net.minecraft.network.chat.contents.TranslatableContents name
+                && TRIAL_NAME_KEY.equals(name.getKey())) setCustomNameVisible(false);
     }
 }

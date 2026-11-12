@@ -1,0 +1,16 @@
+{
+  "parent": "howlingwerewolf:guide/first_companion",
+  "display": {
+    "icon": { "id": "howlingwerewolf:moonbane_pearl" },
+    "title": { "translate": "advancement.howlingwerewolf.companion_max_tier.title" },
+    "description": { "translate": "advancement.howlingwerewolf.companion_max_tier.desc" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete": { "trigger": "minecraft:impossible" }
+  },
+  "requirements": [["complete"]]
+}

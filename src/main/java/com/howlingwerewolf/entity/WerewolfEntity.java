@@ -117,9 +117,9 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     }
 
     /** Configure an Alpha ally without changing the wild variant's behavior. / 配置月冠援军，不改变野生变体行为。 */
-    public void configureForAlpha(UUID owner, @Nullable LivingEntity target) {
+    public void configureForAlpha(UUID owner, com.howlingwerewolf.ModernSkin coat, @Nullable LivingEntity target) {
         summonedByAlpha = true;
-        NpcAppearanceData.setCoat(entityData, APPEARANCE, com.howlingwerewolf.ModernSkin.ASHEN);
+        NpcAppearanceData.setCoat(entityData, APPEARANCE, coat);
         alphaOwner = owner;
         xpReward = 0;
         setPersistenceRequired();
@@ -199,6 +199,7 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         super.addAdditionalSaveData(tag);
         tag.putBoolean("SummonedByAlpha", summonedByAlpha);
         NpcAppearanceData.save(this, APPEARANCE, tag);
+        if (summonedByAlpha) tag.putBoolean("AlphaCoat", true);
         if (alphaOwner != null) tag.store("AlphaOwner", UUIDUtil.CODEC, alphaOwner);
     }
 
@@ -208,7 +209,8 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         summonedByAlpha = tag.getBooleanOr("SummonedByAlpha", false);
         alphaOwner = tag.read("AlphaOwner", UUIDUtil.CODEC).orElse(null);
         xpReward = summonedByAlpha ? 0 : 10;
-        NpcAppearanceData.load(this, APPEARANCE, tag, summonedByAlpha);
+        // Alpha summons saved before 1.3.5 lack AlphaCoat and stay Ashen; newer ones keep their Alpha's coat.
+        NpcAppearanceData.load(this, APPEARANCE, tag, summonedByAlpha && !tag.getBooleanOr("AlphaCoat", false));
     }
 
     /** Hunters recognize transformed players as werewolves too. / 猎人也会把已变身玩家识别为狼人。 */
