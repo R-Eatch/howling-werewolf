@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.7. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.20.1, Forge 47.4.16 and Java 17, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
