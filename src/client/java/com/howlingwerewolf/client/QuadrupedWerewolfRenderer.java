@@ -3,27 +3,38 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
 
-public final class QuadrupedWerewolfRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, QuadrupedWerewolfModel<AvatarRenderState>> {
+public final class QuadrupedWerewolfRenderer
+        extends LivingEntityRenderer<AbstractClientPlayer, QuadrupedWerewolfModel<AbstractClientPlayer>> {
     public QuadrupedWerewolfRenderer(EntityRendererProvider.Context context) {
-        super(context, new QuadrupedWerewolfModel<>(context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F, AvatarRenderState::new);
-        addLayer(new QuadrupedHeldItemLayer(this));
+        super(context, new QuadrupedWerewolfModel<>(
+                context.bakeLayer(ClientModEvents.QUADRUPED_WEREWOLF_LAYER)), 0.5F);
+        addLayer(new QuadrupedHeldItemLayer(this, context.getItemInHandRenderer()));
     }
 
-    @Override protected void setupRotations(AvatarRenderState state, PoseStack pose, float bodyRot, float scale) {
-        super.setupRotations(state, pose, bodyRot, scale);
-        WerewolfRenderTransforms.applyQuadrupedTravelPose(state, pose);
+    @Override
+    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks,
+                                  float rotationYaw, float partialTick, float scale) {
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick, scale);
+        WerewolfRenderTransforms.applyQuadrupedTravelPose(player, poseStack, partialTick);
     }
 
-    @Override public Identifier getTextureLocation(AvatarRenderState state) {
-        return WerewolfSkinTextures.get(WerewolfRenderData.get(state).skinId(), WerewolfForm.QUADRUPED);
+    @Override
+    public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
+        return WerewolfSkinTextures.get(WerewolfSkinRenderContext.getSkinId(player), WerewolfForm.QUADRUPED);
     }
 
-    @Override protected boolean shouldShowName(AbstractClientPlayer player, double distance) {
-        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player, distance);
+    @Override
+    protected RenderType getRenderType(AbstractClientPlayer player, boolean visible, boolean translucent, boolean glowing) {
+        return WerewolfBodyRenderType.of(model, getTextureLocation(player), visible, translucent, glowing);
+    }
+
+    @Override
+    protected boolean shouldShowName(AbstractClientPlayer player) {
+        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player);
     }
 }

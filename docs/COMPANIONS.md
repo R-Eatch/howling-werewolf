@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.21.11, Fabric Loader 0.20.1, Fabric API 0.141.6 and Java 21, Howling Werewolf 1.3.7. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.21.1, Fabric Loader 0.16.14, Fabric API 0.116.4+1.21.1 and Java 21, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -76,7 +76,7 @@ When there is no safe ground nearby, recall, revival and returning hunters wait 
 
 Bring your companion to the middle of your storage, open the Sorting tab and choose **Start sorting**.
 
-The work area is a sphere with a radius of 16 blocks around where the companion stood when it started, and it stays put as the companion moves. That reaches 16 blocks straight up or down and less toward the corners. **Chests, copper chests and barrels** inside it join the job, up to the nearest 64, with a double chest counting once.
+The work area is a sphere with a radius of 16 blocks around where the companion stood when it started, and it stays put as the companion moves. That reaches 16 blocks straight up or down and less toward the corners. **Chests and barrels** inside it join the job, up to the nearest 64, with a double chest counting once.
 
 Your companion works the way you would: it walks over, opens the lid with the real animation and sound, takes the items, closes up, then walks to the destination, opens it and sets them down. After a full round it lets you know and stays on site, tidying anything added later. Any other order ends the job.
 

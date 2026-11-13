@@ -7,16 +7,15 @@ import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.companion.CompanionSortSettings;
 import com.howlingwerewolf.companion.CompanionSorting;
 import com.howlingwerewolf.network.CompanionActionPacket;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +56,7 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
     }
     private void setMethod(boolean wanted) {
         CompoundTag record = selectedRecord();
-        if (record != null && record.getBooleanOr("SortConsolidate", true) != wanted) request(CompanionActionPacket.Action.SORT, "toggle");
+        if (record != null && CompanionUi.flag(record, "SortConsolidate", true) != wanted) request(CompanionActionPacket.Action.SORT, "toggle");
     }
     private void request(CompanionActionPacket.Action action, String value) {
         if (selected == null) return;
@@ -67,7 +66,7 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
     private @Nullable Component startHint() {
         CompoundTag record = selectedRecord();
         if (record == null) return null;
-        if (!record.getBooleanOr("SortNearby", false)) return Component.translatable("screen.howlingwerewolf.companion.reason.sort_far");
+        if (!record.getBoolean("SortNearby")) return Component.translatable("screen.howlingwerewolf.companion.reason.sort_far");
         return Component.translatable(KEY + "start_hint", CompanionSortSettings.RADIUS);
     }
     @Override public void tick() {
@@ -78,17 +77,17 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
     @Override protected void refreshControls() {
         if (start == null) return;
         CompoundTag record = selectedRecord();
-        boolean ready = record != null && systemEnabled() && snapshot.getBooleanOr("SortingEnabled", false) && record.getBooleanOr("Enabled", false) && mode(record).hasEntity() && delay == 0;
+        boolean ready = record != null && systemEnabled() && snapshot.getBoolean("SortingEnabled") && record.getBoolean("Enabled") && mode(record).hasEntity() && delay == 0;
         boolean sorting = record != null && mode(record) == CompanionMode.SORT;
         start.visible = !sorting; stop.visible = sorting;
-        start.active = ready && record.getBooleanOr("SortNearby", false);
+        start.active = ready && record.getBoolean("SortNearby");
         stop.active = ready;
-        boolean together = record != null && record.getBooleanOr("SortConsolidate", true);
+        boolean together = record != null && CompanionUi.flag(record, "SortConsolidate", true);
         consolidate.selected(together); merge.selected(!together);
         consolidate.active = merge.active = ready;
     }
     private static int[] center(CompoundTag record) {
-        int[] center = record.getIntArray("SortCenter").orElse(new int[3]);
+        int[] center = record.getIntArray("SortCenter"); if (center.length < 3) center = new int[3];
         return center.length == 3 ? center : new int[3];
     }
     private static int mapX(int left, int offset) { return left + RADAR_X + Math.round(offset * (RADAR_RADIUS - 8F) / CompanionSortSettings.RADIUS); }
@@ -99,25 +98,25 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
         return new Focus(null, record == null ? null : Component.translatable(KEY + "note"));
     }
 
-    @Override protected void body(GuiGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
+    @Override protected void body(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
         CompoundTag record = selectedRecord();
         if (record == null) return;
         drawRadar(graphics, theme, left, top, record);
         int x = left + SIDE_X, y = top + TOP_BAND + 8;
-        CompanionUi.label(graphics, font, Component.literal(record.getStringOr("Name", "")), x, y + 2, SIDE_W - 90, theme.ink());
-        String phase = record.getStringOr("SortPhase", "stopped");
+        CompanionUi.label(graphics, font, Component.literal(record.getString("Name")), x, y + 2, SIDE_W - 90, theme.ink());
+        String phase = CompanionUi.str(record, "SortPhase", "stopped");
         Component phaseText = Component.translatable(KEY + "phase." + phase);
         CompanionUi.tag(graphics, font, phaseText, x + SIDE_W - font.width(phaseText) - 10, y, phaseColor(phase, theme));
         y += 18;
-        int moved = record.getIntOr("SortMoved", 0), remaining = record.getIntOr("SortRemaining", 0);
+        int moved = record.getInt("SortMoved"), remaining = record.getInt("SortRemaining");
         int usable = 0, skipped = 0;
-        ListTag containers = record.getListOrEmpty("SortContainers");
-        for (int i = 0; i < containers.size(); i++) { if (containers.getCompoundOrEmpty(i).getBooleanOr("Usable", false)) usable++; else skipped++; }
+        ListTag containers = record.getList("SortContainers", 10);
+        for (int i = 0; i < containers.size(); i++) { if (containers.getCompound(i).getBoolean("Usable")) usable++; else skipped++; }
         CompanionUi.label(graphics, font, Component.translatable(KEY + "found", usable, skipped), x, y, SIDE_W, theme.ink());
         CompanionUi.label(graphics, font, Component.translatable(KEY + "moved", moved, remaining), x, y + 11, SIDE_W, theme.sub());
         CompanionUi.label(graphics, font, Component.translatable(KEY + "limit", CompanionSorting.SCAN_LIMIT), x, y + 22, SIDE_W, theme.faint());
         CompanionUi.section(graphics, font, Component.translatable("screen.howlingwerewolf.companion.section.method"), x, top + 100, SIDE_W, theme);
-        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + (record.getBooleanOr("SortConsolidate", true) ? "consolidate_desc" : "merge_desc")), x, top + 140, SIDE_W, theme.sub(), 2);
+        CompanionUi.wrapped(graphics, font, Component.translatable(KEY + (CompanionUi.flag(record, "SortConsolidate", true) ? "consolidate_desc" : "merge_desc")), x, top + 140, SIDE_W, theme.sub(), 2);
     }
     private static int phaseColor(String phase, MoonUi.Theme theme) {
         return switch (phase) {
@@ -127,7 +126,7 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
             default -> theme.sub();
         };
     }
-    private void drawRadar(GuiGraphics graphics, MoonUi.Theme theme, int left, int top, CompoundTag record) {
+    private void drawRadar(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, CompoundTag record) {
         int cx = left + RADAR_X, cy = radarY(top), radius = RADAR_RADIUS;
         MoonUi.glow(graphics, cx, cy, radius * 1.7F, theme.bloom());
         MoonUi.moon(graphics, cx, cy, radius, 0, theme);
@@ -135,8 +134,8 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
         MoonUi.circle(graphics, cx, cy, radius / 2F, 0.7F, 0x40000000);
         MoonUi.line(graphics, cx - radius + 6, cy, cx + radius - 6, cy, 0.7F, 0x2C000000);
         MoonUi.line(graphics, cx, cy - radius + 6, cx, cy + radius - 6, 0.7F, 0x2C000000);
-        int moved = record.getIntOr("SortMoved", 0), remaining = record.getIntOr("SortRemaining", 0);
-        String phase = record.getStringOr("SortPhase", "stopped");
+        int moved = record.getInt("SortMoved"), remaining = record.getInt("SortRemaining");
+        String phase = CompanionUi.str(record, "SortPhase", "stopped");
         float progress = moved + remaining == 0 ? phase.equals("done") ? 1 : 0 : moved / (float) (moved + remaining);
         int lit = Math.round(progress * RING_TICKS);
         float ring = radius + 5;
@@ -151,18 +150,18 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
             float pulse = (Util.getMillis() % 2200) / 2200F;
             MoonUi.circle(graphics, cx, cy, Math.max(1, radius * pulse), 0.9F, MoonUi.alpha(MoonUi.BLOOD, (1 - pulse) * 0.6F));
         }
-        graphics.drawString(font, "N", cx - 2, cy - radius + 5, 0x80000000, false);
+        graphics.text(font, "N", cx - 2, cy - radius + 5, 0x80000000, false);
         int[] center = center(record);
-        int[] at = record.getIntArray("SortAt").orElse(new int[0]);
-        ListTag containers = record.getListOrEmpty("SortContainers");
+        int[] at = record.getIntArray("SortAt");
+        ListTag containers = record.getList("SortContainers", 10);
         int framed = 0;
         for (int i = 0; i < containers.size(); i++) {
-            CompoundTag entry = containers.getCompoundOrEmpty(i);
-            int px = mapX(left, entry.getIntOr("X", 0) - center[0]), py = mapY(top, entry.getIntOr("Z", 0) - center[2]);
-            boolean usable = entry.getBooleanOr("Usable", false);
-            boolean holdsOneKind = !entry.getListOrEmpty("Frames").isEmpty();
+            CompoundTag entry = containers.getCompound(i);
+            int px = mapX(left, entry.getInt("X") - center[0]), py = mapY(top, entry.getInt("Z") - center[2]);
+            boolean usable = entry.getBoolean("Usable");
+            boolean holdsOneKind = !entry.getList("Frames", 8).isEmpty();
             if (holdsOneKind) framed++;
-            boolean current = at.length == 3 && entry.getIntOr("X", 0) == at[0] && entry.getIntOr("Y", 0) == at[1] && entry.getIntOr("Z", 0) == at[2];
+            boolean current = at.length == 3 && entry.getInt("X") == at[0] && entry.getInt("Y") == at[1] && entry.getInt("Z") == at[2];
             int color = current ? MoonUi.BLOOD : !usable ? DOT_SKIPPED : holdsOneKind ? DOT_FRAMED : DOT;
             MoonUi.disc(graphics, px, py, current ? 3.4F : 2.6F, color);
             if (current) MoonUi.ring(graphics, px, py, 6, MoonUi.alpha(MoonUi.BLOOD, 1 - (Util.getMillis() % 800) / 800F));
@@ -171,31 +170,31 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
         MoonUi.line(graphics, cx, cy - 4, cx, cy + 4, 1.4F, MoonUi.BLOOD);
         if (containers.isEmpty()) {
             Component empty = Component.translatable(KEY + "radar_empty");
-            graphics.drawString(font, empty, cx - font.width(empty) / 2, cy + 12, 0xB0000000, false);
+            graphics.text(font, empty, cx - font.width(empty) / 2, cy + 12, 0xB0000000, false);
         }
         int legendY = top + HEIGHT - LOWER_BAND - 13;
         String range = CompanionSortSettings.RADIUS + "m";
-        graphics.drawString(font, range, left + RADAR_X + radius - font.width(range) + 10, legendY, theme.faint(), false);
+        graphics.text(font, range, left + RADAR_X + radius - font.width(range) + 10, legendY, theme.faint(), false);
         if (framed > 0) {
             MoonUi.disc(graphics, left + 14, legendY + 4, 2.6F, DOT_FRAMED);
-            graphics.drawString(font, Component.translatable(KEY + "framed", framed), left + 21, legendY, theme.faint(), false);
+            graphics.text(font, Component.translatable(KEY + "framed", framed), left + 21, legendY, theme.faint(), false);
         }
     }
     @Override protected @Nullable Component areaHint(int left, int top, float mouseX, float mouseY) {
         CompoundTag record = selectedRecord();
         if (record == null) return null;
         int[] center = center(record);
-        ListTag containers = record.getListOrEmpty("SortContainers");
+        ListTag containers = record.getList("SortContainers", 10);
         for (int i = 0; i < containers.size(); i++) {
-            CompoundTag entry = containers.getCompoundOrEmpty(i);
-            int px = mapX(left, entry.getIntOr("X", 0) - center[0]), py = mapY(top, entry.getIntOr("Z", 0) - center[2]);
+            CompoundTag entry = containers.getCompound(i);
+            int px = mapX(left, entry.getInt("X") - center[0]), py = mapY(top, entry.getInt("Z") - center[2]);
             if (Mth.abs(mouseX - px) <= 3 && Mth.abs(mouseY - py) <= 3) {
-                ListTag frames = entry.getListOrEmpty("Frames");
-                if (!frames.isEmpty() && entry.getBooleanOr("Usable", false)) {
-                    return Component.translatable(KEY + "dot_framed", framedItems(frames), entry.getIntOr("X", 0), entry.getIntOr("Y", 0), entry.getIntOr("Z", 0));
+                ListTag frames = entry.getList("Frames", 8);
+                if (!frames.isEmpty() && entry.getBoolean("Usable")) {
+                    return Component.translatable(KEY + "dot_framed", framedItems(frames), entry.getInt("X"), entry.getInt("Y"), entry.getInt("Z"));
                 }
-                return Component.translatable(KEY + (entry.getBooleanOr("Usable", false) ? "dot_ready" : "dot_skipped"),
-                        entry.getIntOr("X", 0), entry.getIntOr("Y", 0), entry.getIntOr("Z", 0));
+                return Component.translatable(KEY + (entry.getBoolean("Usable") ? "dot_ready" : "dot_skipped"),
+                        entry.getInt("X"), entry.getInt("Y"), entry.getInt("Z"));
             }
         }
         return null;
@@ -203,8 +202,8 @@ public final class CompanionSortingScreen extends CompanionFrameScreen {
     private static Component framedItems(ListTag frames) {
         List<Component> names = new ArrayList<>();
         for (int i = 0; i < frames.size(); i++) {
-            Identifier id = Identifier.tryParse(frames.getStringOr(i, ""));
-            if (id != null) names.add(new ItemStack(BuiltInRegistries.ITEM.getValue(id)).getHoverName());
+            ResourceLocation id = ResourceLocation.tryParse(frames.getString(i));
+            if (id != null) names.add(new ItemStack(BuiltInRegistries.ITEM.get(id)).getHoverName());
         }
         return ComponentUtils.formatList(names, Component.literal(" / "));
     }

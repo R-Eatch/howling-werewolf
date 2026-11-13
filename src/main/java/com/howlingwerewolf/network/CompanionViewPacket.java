@@ -5,11 +5,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /** Private owner-only summaries. Inventory stacks travel through the native container protocol. */
 public record CompanionViewPacket(CompoundTag data, boolean open) implements CustomPacketPayload {
-    public static final Type<CompanionViewPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath("howlingwerewolf", "companion_view"));
+    public static final Type<CompanionViewPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("howlingwerewolf", "companion_view"));
     public static final StreamCodec<RegistryFriendlyByteBuf, CompanionViewPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> { buf.writeNbt(packet.data); buf.writeBoolean(packet.open); },
             buf -> { CompoundTag tag = buf.readNbt(); return new CompanionViewPacket(tag == null ? new CompoundTag() : tag, buf.readBoolean()); });

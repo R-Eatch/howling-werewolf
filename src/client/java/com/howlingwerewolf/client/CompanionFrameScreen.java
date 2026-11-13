@@ -5,17 +5,16 @@ import com.howlingwerewolf.client.CompanionUi.Look;
 import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.network.CompanionActionPacket;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
+import com.howlingwerewolf.client.MoonInput.KeyEvent;
+import com.howlingwerewolf.client.MoonInput.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +28,7 @@ import java.util.UUID;
  * language in a lighter form: a sheet over the world that keeps the game in view and opens at once.
  * The tabs sit in its upper band, and the lower band reads out whatever the pointer rests on.
  */
-abstract class CompanionFrameScreen extends Screen {
+abstract class CompanionFrameScreen extends MoonInput.Page {
     protected static final int WIDTH = 520, HEIGHT = 306, TOP_BAND = 26, LOWER_BAND = 46;
     private static final int TITLE_ROOM = 136, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     enum Tab { PACK, SORT, LOOK, GUIDE }
@@ -62,9 +61,9 @@ abstract class CompanionFrameScreen extends Screen {
 
     protected abstract Tab tab();
     protected abstract void build(int left, int top);
-    protected abstract void body(GuiGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY);
+    protected abstract void body(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY);
     /** Drawn above the controls, for text that sits beside a row. */
-    protected void overlay(GuiGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {}
+    protected void overlay(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {}
     protected void refreshControls() {}
     protected void onSnapshot(CompoundTag previous) {}
     /** A hint for something drawn directly rather than a button. */
@@ -78,7 +77,7 @@ abstract class CompanionFrameScreen extends Screen {
         CompoundTag previous = snapshot;
         snapshot = next.copy();
         if (open) {
-            String target = next.getStringOr("OpenTarget", "");
+            String target = next.getString("OpenTarget");
             if (!target.isEmpty()) try { selected = UUID.fromString(target); } catch (IllegalArgumentException ignored) {}
             reselect();
             if (tab() != Tab.PACK) { openTab(Tab.PACK); return; }
@@ -90,33 +89,33 @@ abstract class CompanionFrameScreen extends Screen {
         refreshControls();
     }
     private void reselect() {
-        ListTag entries = snapshot.getListOrEmpty("Companions");
+        ListTag entries = snapshot.getList("Companions", 10);
         if (recordFor(selected) != null) return;
         selected = null;
         if (!entries.isEmpty()) {
-            try { selected = UUID.fromString(entries.getCompoundOrEmpty(0).getStringOr("Id", "")); } catch (IllegalArgumentException ignored) {}
+            try { selected = UUID.fromString(entries.getCompound(0).getString("Id")); } catch (IllegalArgumentException ignored) {}
         }
     }
     private static String rosterIds(CompoundTag data) {
         StringBuilder ids = new StringBuilder();
-        ListTag entries = data.getListOrEmpty("Companions");
-        for (int i = 0; i < entries.size(); i++) ids.append(entries.getCompoundOrEmpty(i).getStringOr("Id", "")).append(';');
+        ListTag entries = data.getList("Companions", 10);
+        for (int i = 0; i < entries.size(); i++) ids.append(entries.getCompound(i).getString("Id")).append(';');
         return ids.toString();
     }
     protected final @Nullable CompoundTag selectedRecord() { return recordFor(selected); }
     private @Nullable CompoundTag recordFor(@Nullable UUID id) {
         if (id == null) return null;
-        ListTag entries = snapshot.getListOrEmpty("Companions");
+        ListTag entries = snapshot.getList("Companions", 10);
         for (int i = 0; i < entries.size(); i++) {
-            CompoundTag entry = entries.getCompoundOrEmpty(i);
-            if (id.toString().equals(entry.getStringOr("Id", ""))) return entry;
+            CompoundTag entry = entries.getCompound(i);
+            if (id.toString().equals(entry.getString("Id"))) return entry;
         }
         return null;
     }
     protected static CompanionMode mode(CompoundTag entry) {
-        return CompanionMode.values()[Math.clamp(entry.getIntOr("Mode", CompanionMode.DEAD.ordinal()), 0, CompanionMode.values().length - 1)];
+        return CompanionMode.values()[Mth.clamp(CompanionUi.integer(entry, "Mode", CompanionMode.DEAD.ordinal()), 0, CompanionMode.values().length - 1)];
     }
-    protected final boolean systemEnabled() { return snapshot.getBooleanOr("SystemEnabled", true); }
+    protected final boolean systemEnabled() { return CompanionUi.flag(snapshot, "SystemEnabled", true); }
     protected final void send(CompanionActionPacket.Action action, UUID target, String value) {
         if (minecraft.getConnection() == null) return;
         ClientPlayNetworking.send(new CompanionActionPacket(action, target, value));
@@ -142,7 +141,7 @@ abstract class CompanionFrameScreen extends Screen {
         int x = left + TITLE_ROOM;
         for (Tab each : Tab.values()) {
             Component label = Component.translatable("screen.howlingwerewolf.companion.tab." + each.name().toLowerCase(java.util.Locale.ROOT));
-            int tabWidth = Math.clamp(font.width(label) + 16, 40, 76);
+            int tabWidth = Mth.clamp(font.width(label) + 16, 40, 76);
             UiButton button = new UiButton(x, top + 3, tabWidth, 20, label, Look.TAB, () -> openTab(each));
             button.selected(each == tab());
             tabs.put(each, addRenderableWidget(button));
@@ -162,7 +161,7 @@ abstract class CompanionFrameScreen extends Screen {
             UiButton button = entry.getValue();
             button.active = switch (entry.getKey()) {
                 case PACK, GUIDE -> true;
-                case SORT -> present && snapshot.getBooleanOr("SortingEnabled", false);
+                case SORT -> present && snapshot.getBoolean("SortingEnabled");
                 case LOOK -> present;
             };
         }
@@ -176,7 +175,7 @@ abstract class CompanionFrameScreen extends Screen {
         refreshControls();
     }
 
-    @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    @Override public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         long now = Util.getMillis();
         lastDrawn = now;
         float rise = MoonUi.smooth((now - opened) / 120F);
@@ -198,11 +197,11 @@ abstract class CompanionFrameScreen extends Screen {
             else CompanionUi.label(graphics, font, heading, left + 12, top + 9, TITLE_ROOM - 18, MoonUi.BAND_TEXT);
             drawUnderline(graphics, top);
             drawFocus(graphics, left, top, logicalX, logicalY);
-            super.render(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
+            super.extractRenderState(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
             overlay(graphics, theme, left, top, logicalX, logicalY);
         } finally { graphics.pose().popMatrix(); }
     }
-    private void drawUnderline(GuiGraphics graphics, int top) {
+    private void drawUnderline(MoonGraphics graphics, int top) {
         UiButton active = tabs.get(tab());
         if (active == null) return;
         long now = Util.getMillis();
@@ -214,7 +213,7 @@ abstract class CompanionFrameScreen extends Screen {
         graphics.fill(Math.round(underlineX), top + 21, Math.round(underlineX + underlineWidth), top + 23, MoonUi.BLOOD);
     }
     /** The pointer's subject first, then the page's own resting text. */
-    private void drawFocus(GuiGraphics graphics, int left, int top, float mouseX, float mouseY) {
+    private void drawFocus(MoonGraphics graphics, int left, int top, float mouseX, float mouseY) {
         Component heading = null, body = null;
         for (var child : children()) {
             if (child instanceof UiButton button && button.visible && button.isMouseOver(mouseX, mouseY)) {
@@ -242,7 +241,7 @@ abstract class CompanionFrameScreen extends Screen {
         if (body != null) CompanionUi.wrapped(graphics, font, body, left + 12, y, room, MoonUi.BAND_SUB, heading != null ? 2 : 3);
     }
     /** Draws lines that dissolve at whichever edge has more text beyond it. */
-    protected final void reading(GuiGraphics graphics, List<FormattedCharSequence> lines, int x, int width, int top, int bottom, float offset, int maximum, int color) {
+    protected final void reading(MoonGraphics graphics, List<FormattedCharSequence> lines, int x, int width, int top, int bottom, float offset, int maximum, int color) {
         graphics.enableScissor(x, top, x + width, bottom);
         try {
             for (int i = 0; i < lines.size(); i++) {
@@ -251,11 +250,11 @@ abstract class CompanionFrameScreen extends Screen {
                 float fade = 1;
                 if (offset > 1) fade = Math.min(fade, (y - top + 2) / 12F);
                 if (offset < maximum - 1) fade = Math.min(fade, (bottom - y - 8) / 12F);
-                graphics.drawString(font, lines.get(i), x, y, MoonUi.alpha(color, Mth.clamp(fade, 0, 1)), false);
+                graphics.text(font, lines.get(i), x, y, MoonUi.alpha(color, Mth.clamp(fade, 0, 1)), false);
             }
         } finally { graphics.disableScissor(); }
     }
-    @Override public void renderBackground(GuiGraphics graphics, int x, int y, float partialTick) {}
+    @Override public void extractBackground(MoonGraphics graphics, int x, int y, float partialTick) {}
 
     protected final int left() { return (Math.round(width / scale) - WIDTH) / 2; }
     protected final int top() { return (Math.round(height / scale) - HEIGHT) / 2; }
@@ -276,7 +275,7 @@ abstract class CompanionFrameScreen extends Screen {
     }
     /** The key that opens this window also closes it, unless a name is being typed. */
     @Override public boolean keyPressed(KeyEvent event) {
-        if (!(getFocused() instanceof EditBox) && ClientModEvents.OPEN_COMPANIONS.matches(event)) { onClose(); return true; }
+        if (!(getFocused() instanceof EditBox) && event.matches(ClientModEvents.OPEN_COMPANIONS)) { onClose(); return true; }
         return super.keyPressed(event);
     }
     @Override public void onClose() { minecraft.setScreen(parent); }

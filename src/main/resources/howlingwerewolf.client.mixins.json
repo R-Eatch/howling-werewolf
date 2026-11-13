@@ -3,8 +3,8 @@
   "package": "com.howlingwerewolf.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "LivingEntityRendererMixin",
-    "AvatarRendererMixin"
+    "PlayerRendererMixin",
+    "ItemInHandRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

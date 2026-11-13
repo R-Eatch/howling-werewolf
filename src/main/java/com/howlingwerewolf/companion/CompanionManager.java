@@ -20,14 +20,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.monster.Creeper;
@@ -45,7 +44,7 @@ import java.util.UUID;
 
 public final class CompanionManager {
     public static final ResourceKey<LootTable> HUNT_LOOT = ResourceKey.create(Registries.LOOT_TABLE,
-            Identifier.fromNamespaceAndPath("howlingwerewolf", "gameplay/companion_hunt"));
+            ResourceLocation.fromNamespaceAndPath("howlingwerewolf", "gameplay/companion_hunt"));
 
     public static int skillRank(ServerPlayer player) {
         return WerewolfApi.get(player).map(data -> data.isWerewolf() ? data.getTreeSkillRank(WerewolfTreeSkill.PACK_OATH) : 0).orElse(0);
@@ -122,14 +121,14 @@ public final class CompanionManager {
     }
 
     private static void recruit(ServerPlayer player, UUID npcId) {
-        Entity target = player.level().getEntity(npcId);
+        Entity target = player.serverLevel().getEntity(npcId);
         if (!(target instanceof WerewolfCompanionEntity npc) || !npc.acceptsOffer(player)) return;
         CompanionSavedData data = CompanionSavedData.get(player.level().getServer());
         if (skillRank(player) == 0) { message(player, "skill_required"); return; }
         if (data.ownedBy(player.getUUID()).size() >= capacity(player)) { message(player, "full"); return; }
         if (!hasItems(player, ModItems.ALPHA_WEREWOLF_BADGE.get(), 1)) { message(player, "badge_required"); return; }
         CompanionRecord record = new CompanionRecord(player.getUUID(), npc.getNpcSkinId(),
-                player.level().dimension().identifier(), npc.blockPosition());
+                player.level().dimension().location(), npc.blockPosition());
         record.health = Math.min(npc.getHealth(), (float) CompanionRules.maxHealth(0));
         closeInventory(player, record);
         data.add(record);
@@ -201,13 +200,13 @@ public final class CompanionManager {
         record.huntCooldownEnd = cooldownEnd;
         CompanionSavedData.get(player.level().getServer()).setDirty();
         LootTable table = player.level().getServer().reloadableRegistries().getLootTable(HUNT_LOOT);
-        LootParams params = new LootParams.Builder(player.level())
+        LootParams params = new LootParams.Builder(player.serverLevel())
                 .withParameter(LootContextParams.ORIGIN, entity.position())
                 .withOptionalParameter(LootContextParams.THIS_ENTITY, entity).create(LootContextParamSets.CHEST);
         for (int roll = 0; roll < rolls; roll++) {
             table.getRandomItems(params, stack -> {
                 ItemStack overflow = record.inventory.addItem(stack.copy());
-                if (!overflow.isEmpty()) entity.spawnAtLocation(player.level(), overflow);
+                if (!overflow.isEmpty()) entity.spawnAtLocation(overflow);
             });
         }
         say(player, record, "returned");
@@ -269,7 +268,7 @@ public final class CompanionManager {
         CompanionRecord record = entity.record();
         if (record == null || !record.belongsTo(player.getUUID()) || !record.mode.hasEntity()
                 || !entity.isAlive() || entity.level() != player.level()
-                || !player.isWithinEntityInteractionRange(entity, 1)
+                || !player.canInteractWithEntity(entity, 1)
                 || !CompanionSavedData.get(player.level().getServer()).isCurrent(record, entity)) return;
         handle(player, new CompanionActionPacket(CompanionActionPacket.Action.OPEN, record.id));
     }
@@ -320,8 +319,8 @@ public final class CompanionManager {
     }
 
     @Nullable private static WerewolfCompanionEntity spawnNear(ServerPlayer player, CompanionRecord record, float health) {
-        ServerLevel level = player.level();
-        WerewolfCompanionEntity next = ModEntities.WEREWOLF_COMPANION.get().create(level, EntitySpawnReason.EVENT);
+        ServerLevel level = player.serverLevel();
+        WerewolfCompanionEntity next = ModEntities.WEREWOLF_COMPANION.get().create(level);
         if (next == null) return null;
         BlockPos spot = findSafeSpot(level, next, player.blockPosition(), 4);
         if (spot == null) return null;
@@ -332,7 +331,7 @@ public final class CompanionManager {
         CompanionMode previousMode = record.mode;
         next.bind(record, previousGeneration + 1);
         next.setHealth(Math.clamp(health, 1, next.getMaxHealth()));
-        next.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getYRot(), 0);
+        next.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getYRot(), 0);
         // A protection mod may cancel EntityJoinLevelEvent. Keep the previous projection and
         // lease until the replacement has actually joined; no player commands interleave here.
         if (!level.addFreshEntity(next)) { next.discard(); return null; }
@@ -359,7 +358,7 @@ public final class CompanionManager {
                         || floor.is(Blocks.CAMPFIRE) || floor.is(Blocks.SOUL_CAMPFIRE) || floor.is(Blocks.CACTUS)) continue;
                 if (!level.getFluidState(pos).isEmpty() || !level.getFluidState(pos.above()).isEmpty()
                         || level.getBlockState(pos).is(Blocks.POWDER_SNOW)) continue;
-                entity.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0, 0);
+                entity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0, 0);
                 if (level.noCollision(entity) && !level.containsAnyLiquid(entity.getBoundingBox())) return pos;
             }
         }
@@ -382,7 +381,7 @@ public final class CompanionManager {
             }
         }
         float health = record.mode == CompanionMode.DEAD ? 0 : entity.getHealth();
-        Identifier dimension = level.dimension().identifier();
+        ResourceLocation dimension = level.dimension().location();
         if (record.health != health || !record.position.equals(entity.blockPosition()) || !record.dimension.equals(dimension)) {
             record.health = health;
             record.position = entity.blockPosition().immutable();
@@ -445,9 +444,9 @@ public final class CompanionManager {
     private static void restoreResting(MinecraftServer server, CompanionRecord record) {
         ServerLevel level = server.getLevel(ResourceKey.create(Registries.DIMENSION, record.dimension));
         if (level == null || !level.hasChunkAt(record.position) || !level.isPositionEntityTicking(record.position)) return;
-        WerewolfCompanionEntity entity = ModEntities.WEREWOLF_COMPANION.get().create(level, EntitySpawnReason.EVENT);
+        WerewolfCompanionEntity entity = ModEntities.WEREWOLF_COMPANION.get().create(level);
         if (entity == null) return;
-        entity.snapTo(record.position.getX() + 0.5, record.position.getY(), record.position.getZ() + 0.5, 0, 0);
+        entity.moveTo(record.position.getX() + 0.5, record.position.getY(), record.position.getZ() + 0.5, 0, 0);
         if (!level.noCollision(entity)) return;
         record.generation++;
         entity.bind(record);
@@ -462,7 +461,7 @@ public final class CompanionManager {
     public static boolean mayAttack(ServerPlayer owner, LivingEntity target) {
         if (!HWConfig.ENABLE_COMPANIONS.get()) return false;
         if (target == owner || !target.isAlive() || target instanceof Creeper || target.isAlliedTo(owner)
-                || target instanceof TamableAnimal pet && owner.getUUID().equals(pet.getOwnerReference() == null ? null : pet.getOwnerReference().getUUID())) return false;
+                || target instanceof TamableAnimal pet && owner.getUUID().equals(pet.getOwnerUUID())) return false;
         if (target instanceof WerewolfCompanionEntity companion && companion.record() != null
                 && companion.record().belongsTo(owner.getUUID())) return false;
         if (target instanceof WerewolfCompanionEntity companion && companion.owner() != null

@@ -1,6 +1,6 @@
 # 随从狩猎与交易表
 
-适用 Minecraft 1.21.11 / Fabric。狩猎表来自模组内置的 JSON，数据包覆盖后以服务器加载的内容为准；商人交易写在代码中。[随从指南](COMPANIONS-zh.md) · [English](COMPANION-TABLES.md)
+适用 Minecraft 1.21.1 / Fabric。狩猎表来自模组内置的 JSON，数据包覆盖后以服务器加载的内容为准；商人交易写在代码中。[随从指南](COMPANIONS-zh.md) · [English](COMPANION-TABLES.md)
 
 ## 狩猎权重与数量
 

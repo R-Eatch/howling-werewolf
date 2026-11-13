@@ -4,91 +4,88 @@ import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.trial.RitualAltarBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
-/** Renders offerings and the original badge/pearl convergence using extracted item states. */
-public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAltarBlockEntity, RitualAltarRenderer.State> {
-    private final ItemModelResolver itemModelResolver;
-    public RitualAltarRenderer(BlockEntityRendererProvider.Context context) { itemModelResolver = context.itemModelResolver(); }
-    public static final class State extends BlockEntityRenderState {
-        boolean activation;
-        boolean companion;
-        float companionTicks;
-        float ritualTicks;
-        float time;
-        final ItemStackRenderState offering = new ItemStackRenderState();
-        final ItemStackRenderState badge = new ItemStackRenderState();
-        final ItemStackRenderState pearl = new ItemStackRenderState();
-        final ItemStackRenderState flower = new ItemStackRenderState();
+/** Renders offerings and the twelve-second badge/pearl convergence sequence. */
+public final class RitualAltarRenderer implements BlockEntityRenderer<RitualAltarBlockEntity> {
+    private final ItemRenderer itemRenderer;
+
+    public RitualAltarRenderer(BlockEntityRendererProvider.Context context) {
+        itemRenderer = context.getItemRenderer();
     }
-    @Override public State createRenderState() { return new State(); }
-    @Override public void extractRenderState(RitualAltarBlockEntity altar, State state, float partialTick,
-                                              Vec3 cameraPosition, ModelFeatureRenderer.CrumblingOverlay breaking) {
-        BlockEntityRenderer.super.extractRenderState(altar, state, partialTick, cameraPosition, breaking);
-        state.activation = altar.isCentral() && altar.getTrialPhase() == RitualAltarBlockEntity.PHASE_ACTIVATION;
-        state.companion = altar.isCentral() && altar.isCompanionRitualActive();
-        state.companionTicks = altar.getCompanionRitualTicks() + partialTick;
-        state.ritualTicks = altar.getRitualTicks() + partialTick;
-        state.time = altar.getLevel() == null ? 0.0F : altar.getLevel().getGameTime() + partialTick;
-        itemModelResolver.updateForTopItem(state.offering, altar.getOffering(), ItemDisplayContext.GROUND,
-                altar.getLevel(), null, 0);
-        itemModelResolver.updateForTopItem(state.badge, new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get()),
-                ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
-        itemModelResolver.updateForTopItem(state.pearl, new ItemStack(ModItems.MOONBANE_PEARL.get()),
-                ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
-        itemModelResolver.updateForTopItem(state.flower, new ItemStack(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get().asItem()),
-                ItemDisplayContext.GROUND, altar.getLevel(), null, 0);
+
+    @Override
+    public boolean shouldRenderOffScreen(RitualAltarBlockEntity altar) {
+        // The chunk caches this decision before an altar starts a ritual.
+        return altar.isCentral();
     }
-    // The activation pearls orbit three blocks away from the altar's own block bounds.
-    @Override public boolean shouldRenderOffScreen() { return true; }
-    @Override public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-        if (state.companion) {
-            float progress = Math.min(1, state.companionTicks / com.howlingwerewolf.companion.CompanionRitual.DURATION);
-            renderStack(state.pearl, pose, collector, state.lightCoords, 0.5, 1 + progress * 2, 0.5, state.companionTicks * 4, 0.8F);
+
+    @Override
+    public void render(RitualAltarBlockEntity altar, float partialTick, PoseStack poseStack,
+                       MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (altar.isCentral() && altar.isCompanionRitualActive()) {
+            float ticks = altar.getCompanionRitualTicks() + partialTick;
+            float progress = Math.min(1, ticks / com.howlingwerewolf.companion.CompanionRitual.DURATION);
+            renderStack(new ItemStack(ModItems.MOONBANE_PEARL.get()), poseStack, buffer, packedLight, 0.5, 1 + progress * 2, 0.5, ticks * 4, 0.8F);
+            ItemStack flower = new ItemStack(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get());
             for (int i = 0; i < 4; i++) {
-                double angle = i * Math.PI / 2 + state.companionTicks * 0.04;
+                double angle = i * Math.PI / 2 + ticks * 0.04;
                 double radius = 3 * (1 - progress);
-                renderStack(state.flower, pose, collector, state.lightCoords, 0.5 + Math.cos(angle) * radius,
-                        1 + progress * 1.8, 0.5 + Math.sin(angle) * radius, state.companionTicks * 3, 0.6F);
+                renderStack(flower, poseStack, buffer, packedLight, 0.5 + Math.cos(angle) * radius,
+                        1 + progress * 1.8, 0.5 + Math.sin(angle) * radius, ticks * 3, 0.6F);
             }
-        } else if (state.activation) {
-            float ticks = state.ritualTicks;
-            float badgeRise = Math.min(1.0F, ticks / 100.0F);
-            renderStack(state.badge, pose, collector, state.lightCoords,
-                    0.5D, 1.0D + badgeRise * 1.35D, 0.5D, ticks * 2.4F, 0.9F);
-            if (ticks < 100.0F) return;
-            float progress = Math.min(1.0F, (ticks - 100.0F) / 140.0F);
-            double radius = 3.0D * (1.0D - progress) + 0.35D;
-            float angularSpeed = 0.05F + progress * 0.25F;
-            for (int i = 0; i < 4; i++) {
-                double angle = ticks * angularSpeed + i * Math.PI * 0.5D;
-                renderStack(state.pearl, pose, collector, state.lightCoords,
-                        0.5D + Math.cos(angle) * radius, 1.4D + progress * 1.25D,
-                        0.5D + Math.sin(angle) * radius, (float) Math.toDegrees(-angle), 0.65F);
-            }
-        } else if (!state.offering.isEmpty()) {
-            renderStack(state.offering, pose, collector, state.lightCoords,
-                    0.5D, 1.0D + Math.sin(state.time * 0.08D) * 0.08D, 0.5D, state.time * 2.5F, 0.8F);
+            return;
+        }
+        if (altar.isCentral() && altar.getTrialPhase() == RitualAltarBlockEntity.PHASE_ACTIVATION) {
+            renderActivation(altar, partialTick, poseStack, buffer, packedLight);
+            return;
+        }
+        if (!altar.getOffering().isEmpty()) {
+            float time = altar.getLevel() == null ? 0.0F
+                    : altar.getLevel().getGameTime() + partialTick;
+            renderStack(altar.getOffering(), poseStack, buffer, packedLight,
+                    0.5D, 1.0D + Math.sin(time * 0.08D) * 0.08D, 0.5D,
+                    time * 2.5F, 0.8F);
         }
     }
-    private void renderStack(ItemStackRenderState item, PoseStack pose, SubmitNodeCollector collector,
-                             int light, double x, double y, double z, float rotation, float scale) {
-        pose.pushPose();
-        pose.translate(x, y, z);
-        pose.mulPose(Axis.YP.rotationDegrees(rotation));
-        pose.scale(scale, scale, scale);
-        item.submit(pose, collector, light, OverlayTexture.NO_OVERLAY, 0);
-        pose.popPose();
+
+    private void renderActivation(RitualAltarBlockEntity altar, float partialTick, PoseStack poseStack,
+                                  MultiBufferSource buffer, int packedLight) {
+        float ticks = altar.getRitualTicks() + partialTick;
+        float badgeRise = Math.min(1.0F, ticks / 100.0F);
+        double badgeY = 1.0D + badgeRise * 1.35D;
+        renderStack(new ItemStack(ModItems.ALPHA_WEREWOLF_BADGE.get()), poseStack, buffer,
+                packedLight, 0.5D, badgeY, 0.5D, ticks * 2.4F, 0.9F);
+
+        if (ticks < 100.0F) return;
+        float progress = Math.min(1.0F, (ticks - 100.0F) / 140.0F);
+        double radius = 3.0D * (1.0D - progress) + 0.35D;
+        float angularSpeed = 0.05F + progress * 0.25F;
+        for (int i = 0; i < 4; i++) {
+            double angle = ticks * angularSpeed + i * Math.PI * 0.5D;
+            renderStack(new ItemStack(ModItems.MOONBANE_PEARL.get()), poseStack, buffer,
+                    packedLight, 0.5D + Math.cos(angle) * radius,
+                    1.4D + progress * 1.25D,
+                    0.5D + Math.sin(angle) * radius,
+                    (float)Math.toDegrees(-angle), 0.65F);
+        }
+    }
+
+    private void renderStack(ItemStack stack, PoseStack poseStack, MultiBufferSource buffer,
+                             int packedLight, double x, double y, double z, float rotation,
+                             float scale) {
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
+        poseStack.scale(scale, scale, scale);
+        itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight,
+                OverlayTexture.NO_OVERLAY, poseStack, buffer, null, 0);
+        poseStack.popPose();
     }
 }

@@ -7,14 +7,14 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 /** Switches a learned claw ability on or off. The server checks the ability and its ownership. */
 public record ToggleAbilityPacket(WerewolfAbility ability) implements CustomPacketPayload {
     public static final Type<ToggleAbilityPacket> TYPE = new Type<>(
-            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "toggle_ability"));
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "toggle_ability"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ToggleAbilityPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> buf.writeEnum(packet.ability()),
             buf -> new ToggleAbilityPacket(buf.readEnum(WerewolfAbility.class)));

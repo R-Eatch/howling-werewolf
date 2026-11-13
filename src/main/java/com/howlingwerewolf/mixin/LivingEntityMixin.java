@@ -3,7 +3,6 @@ import com.howlingwerewolf.event.*;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,13 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin {
-    @WrapMethod(method="hurtServer")
-    private boolean howling$damage(ServerLevel world, DamageSource source,float amount,Operation<Boolean> original) {
-        return DamageHooks.incoming((LivingEntity)(Object)this,world,source,amount,value -> original.call(world,source,value));
+    @WrapMethod(method="hurt")
+    private boolean howling$damage(DamageSource source,float amount,Operation<Boolean> original) {
+        return DamageHooks.incoming((LivingEntity)(Object)this,source,amount,value -> original.call(source,value));
     }
     @WrapMethod(method="actuallyHurt")
-    private void howling$healthDamage(ServerLevel world,DamageSource source,float amount,Operation<Void> original) {
-        DamageHooks.healthDamage((LivingEntity)(Object)this,source,amount,() -> original.call(world,source,amount));
+    private void howling$healthDamage(DamageSource source,float amount,Operation<Void> original) {
+        DamageHooks.healthDamage((LivingEntity)(Object)this,source,amount,() -> original.call(source,amount));
     }
     @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method="actuallyHurt",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V"))
     private void howling$beforeHealth(LivingEntity entity,float value,Operation<Void> original,
@@ -37,8 +36,8 @@ abstract class LivingEntityMixin {
     @Inject(method="jumpFromGround",at=@At("TAIL"))
     private void howling$jump(CallbackInfo ci) { WerewolfGameplayEvents.jumpBoost(new GameplayContext.Jump((LivingEntity)(Object)this)); }
     @Inject(method="causeFallDamage",at=@At("HEAD"),cancellable=true)
-    private void howling$fall(double distance,float multiplier,DamageSource source,CallbackInfoReturnable<Boolean> cir) {
-        var context=new GameplayContext.Fall((LivingEntity)(Object)this,distance,multiplier);
+    private void howling$fall(float distance,float multiplier,DamageSource source,CallbackInfoReturnable<Boolean> cir) {
+        var context=new GameplayContext.Fall((LivingEntity)(Object)this);
         WerewolfGameplayEvents.preventMaxRankFallImpact(context);
         if (context.isCanceled()) cir.setReturnValue(false);
     }

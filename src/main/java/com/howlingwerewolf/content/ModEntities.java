@@ -1,6 +1,5 @@
 package com.howlingwerewolf.content;
 
-import com.howlingwerewolf.HowlingWerewolf;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.howlingwerewolf.entity.HunterEntity;
@@ -8,9 +7,6 @@ import com.howlingwerewolf.entity.AlphaWerewolfEntity;
 import com.howlingwerewolf.entity.AlphaMinionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
@@ -22,34 +18,29 @@ public final class ModEntities {
             () -> EntityType.Builder.of(HunterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
-                    .build(ResourceKey.create(Registries.ENTITY_TYPE,
-                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter"))));
+                    .build(ModRegistry.id("hunter").toString()));
     public static final Supplier<EntityType<WerewolfEntity>> WEREWOLF = ENTITIES.register("werewolf",
             () -> EntityType.Builder.of(WerewolfEntity::new, MobCategory.MONSTER)
                     .sized(0.9F, 2.0F)
                     .clientTrackingRange(10)
-                    .build(ResourceKey.create(Registries.ENTITY_TYPE,
-                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf"))));
+                    .build(ModRegistry.id("werewolf").toString()));
     public static final Supplier<EntityType<AlphaWerewolfEntity>> ALPHA_WEREWOLF =
             ENTITIES.register("alpha_werewolf",
                     () -> EntityType.Builder.of(AlphaWerewolfEntity::new, MobCategory.MONSTER)
                             .sized(1.0F, 3.0F)
                             .fireImmune()
                             .clientTrackingRange(12)
-                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
-                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "alpha_werewolf"))));
+                            .build(ModRegistry.id("alpha_werewolf").toString()));
     public static final Supplier<EntityType<AlphaMinionEntity>> ALPHA_MINION =
             ENTITIES.register("alpha_minion",
                     () -> EntityType.Builder.of(AlphaMinionEntity::new, MobCategory.MONSTER)
                             .sized(0.6F, 0.85F)
                             .clientTrackingRange(10)
-                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
-                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "alpha_minion"))));
+                            .build(ModRegistry.id("alpha_minion").toString()));
 
     public static final Supplier<EntityType<WerewolfCompanionEntity>> WEREWOLF_COMPANION =
             ENTITIES.register("werewolf_companion", () -> EntityType.Builder.of(WerewolfCompanionEntity::new, MobCategory.CREATURE)
                     .sized(0.9F, 2.0F).clientTrackingRange(10)
-                    .build(ResourceKey.create(Registries.ENTITY_TYPE,
-                            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf_companion"))));
+                    .build(ModRegistry.id("werewolf_companion").toString()));
     private ModEntities() {}
 }

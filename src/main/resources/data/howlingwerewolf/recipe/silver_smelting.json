@@ -1,10 +1,8 @@
 {
   "type": "minecraft:smelting",
   "category": "misc",
-  "ingredient": "howlingwerewolf:silver_ore",
-  "result": {
-    "id": "howlingwerewolf:silver_ingot"
-  },
+  "ingredient": { "item": "howlingwerewolf:silver_ore" },
+  "result": { "id": "howlingwerewolf:silver_ingot" },
   "experience": 0.7,
   "cookingtime": 200
 }

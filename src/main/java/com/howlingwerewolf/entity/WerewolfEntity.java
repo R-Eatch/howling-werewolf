@@ -1,10 +1,7 @@
 package com.howlingwerewolf.entity;
 
 import com.howlingwerewolf.capability.WerewolfApi;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -13,7 +10,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -30,6 +27,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +85,7 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(WerewolfEntity.class));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, HunterEntity.class, true));
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10,
-                true, false, (entity, level) -> isAttackablePlayer(entity)));
+                true, false, this::isAttackablePlayer));
     }
 
     private boolean isAttackablePlayer(@Nullable LivingEntity entity) {
@@ -103,7 +101,7 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     @Override
     @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        EntitySpawnReason reason, @Nullable SpawnGroupData groupData) {
+                                        MobSpawnType reason, @Nullable SpawnGroupData groupData) {
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData);
         applyDifficultyDamage(level.getDifficulty());
         setHealth(getMaxHealth());
@@ -125,7 +123,7 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         applyDifficultyDamage(level().getDifficulty());
         setHealth(getMaxHealth());
         refreshSummonedEffects();
-        addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
                 SUMMONED_RESISTANCE_DURATION, 0, true, true, true));
         if (target != null) setTarget(target);
     }
@@ -134,9 +132,9 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
         if (!summonedByAlpha) return;
         addEffect(new MobEffectInstance(MobEffects.GLOWING, SUMMONED_EFFECT_DURATION, 0,
                 true, false, true));
-        addEffect(new MobEffectInstance(MobEffects.SPEED, SUMMONED_EFFECT_DURATION, 0,
+        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, SUMMONED_EFFECT_DURATION, 0,
                 true, true, true));
-        addEffect(new MobEffectInstance(MobEffects.STRENGTH, SUMMONED_EFFECT_DURATION, 0,
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, SUMMONED_EFFECT_DURATION, 0,
                 true, true, true));
     }
 
@@ -144,14 +142,14 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     public void aiStep() {
         super.aiStep();
         NpcAppearanceData.refresh(this, APPEARANCE);
-        if (!level().isClientSide() && summonedByAlpha && tickCount % (20 * 60 * 5) == 0) {
+        if (!level().isClientSide && summonedByAlpha && tickCount % (20 * 60 * 5) == 0) {
             refreshSummonedEffects();
         }
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel level, Entity target) {
-        boolean hurt = super.doHurtTarget(level, target);
+    public boolean doHurtTarget(Entity target) {
+        boolean hurt = super.doHurtTarget(target);
         if (hurt && summonedByAlpha && target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 15, 1), this);
             living.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 5, 1), this);
@@ -160,19 +158,17 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     }
 
     @Override
-    protected void actuallyHurt(ServerLevel serverLevel, DamageSource source, float amount) {
+    protected void actuallyHurt(DamageSource source, float amount) {
         if (summonedByAlpha
                 && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             amount *= 0.90F;
         }
-        super.actuallyHurt(serverLevel, source, amount);
+        super.actuallyHurt(source, amount);
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WOLF_SOUNDS.get(
-                net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC)
-                .hurtSound().value();
+        return SoundEvents.WOLF_HURT;
     }
 
     public boolean isSummonedByAlpha() {
@@ -185,28 +181,28 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
     }
 
     @Override
-    protected void dropFromLootTable(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,
-                                     boolean recentlyHit) {
-        if (!summonedByAlpha) super.dropFromLootTable(level, source, recentlyHit);
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
+        return summonedByAlpha ? BuiltInLootTables.EMPTY : super.getDefaultLootTable();
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("SummonedByAlpha", summonedByAlpha);
         NpcAppearanceData.save(this, APPEARANCE, tag);
         if (summonedByAlpha) tag.putBoolean("AlphaCoat", true);
-        if (alphaOwner != null) tag.store("AlphaOwner", UUIDUtil.CODEC, alphaOwner);
+        if (alphaOwner != null) tag.putUUID("AlphaOwner", alphaOwner);
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        summonedByAlpha = tag.getBooleanOr("SummonedByAlpha", false);
-        alphaOwner = tag.read("AlphaOwner", UUIDUtil.CODEC).orElse(null);
+        summonedByAlpha = tag.getBoolean("SummonedByAlpha");
+        alphaOwner = tag.hasUUID("AlphaOwner") ? tag.getUUID("AlphaOwner") : null;
         xpReward = summonedByAlpha ? 0 : 10;
         // Alpha summons saved before 1.3.5 lack AlphaCoat and stay Ashen; newer ones keep their Alpha's coat.
-        NpcAppearanceData.load(this, APPEARANCE, tag, summonedByAlpha && !tag.getBooleanOr("AlphaCoat", false));
+        NpcAppearanceData.load(this, APPEARANCE, tag, summonedByAlpha && !tag.getBoolean("AlphaCoat"));
     }
 
     /** Hunters recognize transformed players as werewolves too. / 猎人也会把已变身玩家识别为狼人。 */

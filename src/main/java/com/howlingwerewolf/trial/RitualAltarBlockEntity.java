@@ -5,10 +5,9 @@ import com.howlingwerewolf.content.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.network.Connection;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
@@ -79,7 +78,7 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     public void dropOffering() {
-        if (offering.isEmpty() || level == null || level.isClientSide()) return;
+        if (offering.isEmpty() || level == null || level.isClientSide) return;
         Containers.dropItemStack(level, worldPosition.getX() + 0.5D,
                 worldPosition.getY() + 0.8D, worldPosition.getZ() + 0.5D, offering);
         offering = ItemStack.EMPTY;
@@ -155,43 +154,38 @@ public final class RitualAltarBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
-        if (level != null && !level.isClientSide()) {
-            if (isTrialActive()) {
-                AlphaTrialManager.fail(this, AlphaTrialManager.FailureReason.ALTAR_BROKEN);
-            }
-            dropOffering();
-            com.howlingwerewolf.companion.CompanionRitual.cancel(this);
-        }
-        super.preRemoveSideEffects(pos, state);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
+        if (!offering.isEmpty()) tag.put("Offering", offering.save(provider));
+        if (trialOwner != null) tag.putUUID("TrialOwner", trialOwner);
+        tag.putInt("TrialPhase", trialPhase);
+        tag.putInt("RitualTicks", ritualTicks);
+        ListTag hunters = new ListTag();
+        for (UUID id : hunterIds) hunters.add(StringTag.valueOf(id.toString()));
+        tag.put("HunterIds", hunters);
+        if (alphaId != null) tag.putUUID("AlphaId", alphaId);
+        if (companionSummoner != null) tag.putUUID("CompanionSummoner", companionSummoner);
+        tag.putInt("CompanionRitualTicks", companionRitualTicks);
     }
 
     @Override
-    protected void saveAdditional(ValueOutput output) {
-        super.saveAdditional(output);
-        if (!offering.isEmpty()) output.store("Offering", ItemStack.CODEC, offering);
-        output.storeNullable("TrialOwner", UUIDUtil.CODEC, trialOwner);
-        output.putInt("TrialPhase", trialPhase);
-        output.putInt("RitualTicks", ritualTicks);
-        var hunters = output.list("HunterIds", UUIDUtil.STRING_CODEC);
-        hunterIds.forEach(hunters::add);
-        output.storeNullable("AlphaId", UUIDUtil.CODEC, alphaId);
-        output.storeNullable("CompanionSummoner", UUIDUtil.CODEC, companionSummoner);
-        output.putInt("CompanionRitualTicks", companionRitualTicks);
-    }
-
-    @Override
-    protected void loadAdditional(ValueInput input) {
-        super.loadAdditional(input);
-        offering = input.read("Offering", ItemStack.CODEC).orElse(ItemStack.EMPTY);
-        trialOwner = input.read("TrialOwner", UUIDUtil.CODEC).orElse(null);
-        trialPhase = input.getIntOr("TrialPhase", PHASE_IDLE);
-        ritualTicks = Math.max(0, input.getIntOr("RitualTicks", 0));
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
+        offering = tag.contains("Offering", Tag.TAG_COMPOUND)
+                ? ItemStack.parse(provider, tag.getCompound("Offering")).orElse(ItemStack.EMPTY)
+                : ItemStack.EMPTY;
+        trialOwner = tag.hasUUID("TrialOwner") ? tag.getUUID("TrialOwner") : null;
+        trialPhase = tag.getInt("TrialPhase");
+        ritualTicks = Math.max(0, tag.getInt("RitualTicks"));
         hunterIds.clear();
-        input.listOrEmpty("HunterIds", UUIDUtil.STRING_CODEC).forEach(hunterIds::add);
-        alphaId = input.read("AlphaId", UUIDUtil.CODEC).orElse(null);
-        companionSummoner = input.read("CompanionSummoner", UUIDUtil.CODEC).orElse(null);
-        companionRitualTicks = Math.clamp(input.getIntOr("CompanionRitualTicks", 0), 0, com.howlingwerewolf.companion.CompanionRitual.DURATION);
+        ListTag hunters = tag.getList("HunterIds", Tag.TAG_STRING);
+        for (int i = 0; i < hunters.size(); i++) {
+            try { hunterIds.add(UUID.fromString(hunters.getString(i))); }
+            catch (IllegalArgumentException ignored) {}
+        }
+        alphaId = tag.hasUUID("AlphaId") ? tag.getUUID("AlphaId") : null;
+        companionSummoner = tag.hasUUID("CompanionSummoner") ? tag.getUUID("CompanionSummoner") : null;
+        companionRitualTicks = Math.clamp(tag.getInt("CompanionRitualTicks"), 0, com.howlingwerewolf.companion.CompanionRitual.DURATION);
     }
 
     @Override

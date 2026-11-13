@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ public final class HowlingWerewolf implements ModInitializer {
         ModRecipes.SERIALIZERS.getClass();
         ModPlacementModifiers.PLACEMENT_MODIFIERS.getClass();
         ModSounds.initialize();
-        TrapezoidIntProvider.initialize();
         ModAttachments.initialize();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricItemGroup.builder()
             .title(Component.translatable("itemGroup.howlingwerewolf"))

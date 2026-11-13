@@ -35,10 +35,10 @@
   ],
   "accessWidener": "howlingwerewolf.accesswidener",
   "depends": {
-    "fabricloader": ">=0.20.1",
-    "minecraft": "~1.21.11",
+    "fabricloader": ">=${loader}",
+    "minecraft": "${minecraft}",
     "java": ">=21",
-    "fabric-api": ">=0.141.6+1.21.11"
+    "fabric-api": ">=${fabric_api}"
   },
   "icon": "logo.png"
 }

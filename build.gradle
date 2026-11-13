@@ -33,8 +33,14 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['-Xmaxerrs', '500']
 }
 processResources {
-    inputs.property 'version', project.version
-    filesMatching('fabric.mod.json') { expand version: project.version }
+    def metadata = [
+        version: project.version,
+        minecraft: project.minecraft_version,
+        loader: project.loader_version,
+        fabric_api: project.fabric_version,
+    ]
+    inputs.properties metadata
+    filesMatching('fabric.mod.json') { expand metadata }
     from('examples/custom-skin-pack') { into 'howlingwerewolf_skin_template' }
 }
 tasks.named('jar', Jar) {

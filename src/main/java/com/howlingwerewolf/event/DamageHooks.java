@@ -2,7 +2,6 @@ package com.howlingwerewolf.event;
 
 import java.util.ArrayDeque;
 import java.util.function.Function;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -10,8 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 public final class DamageHooks {
     private static final ThreadLocal<ArrayDeque<Float>> ORIGINAL = ThreadLocal.withInitial(ArrayDeque::new);
 
-    public static boolean incoming(LivingEntity entity,ServerLevel world,DamageSource source,float amount,Function<Float,Boolean> original) {
-        if (entity.isInvulnerableTo(world,source)) return original.apply(amount);
+    public static boolean incoming(LivingEntity entity,DamageSource source,float amount,Function<Float,Boolean> original) {
+        if (entity.level().isClientSide() || entity.isInvulnerableTo(source)) return original.apply(amount);
         var stack=ORIGINAL.get();
         stack.push(amount);
         try {

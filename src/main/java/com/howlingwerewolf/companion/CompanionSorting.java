@@ -9,18 +9,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -34,6 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
@@ -41,7 +40,7 @@ import java.util.*;
 
 /**
  * Server-owned work orders. The companion walks to storage around its anchor, opens it with the
- * vanilla container counter, and only commits each transfer once it stands at the destination.
+ * vanilla lid animation, and only commits each transfer once it stands at the destination.
  * Items never leave a container until that transaction, so stopping at any moment loses nothing.
  */
 public final class CompanionSorting {
@@ -57,7 +56,7 @@ public final class CompanionSorting {
     public enum Phase { IDLE, WALKING, OPENING, MOVING, CLOSING }
     public record ScanEntry(BlockPos position, boolean usable, Set<Item> filter) {}
     private record Preview(BlockPos center, List<ScanEntry> entries) {}
-    private record Lease(Identifier dimension, BlockPos position) {}
+    private record Lease(ResourceLocation dimension, BlockPos position) {}
     private record Endpoint(CompanionSortPlanner.Storage storage, List<BlockEntity> members, List<BlockState> layout) {
         boolean matches(@Nullable Endpoint current) {
             return current != null && members.equals(current.members) && layout.equals(current.layout)
@@ -119,7 +118,7 @@ public final class CompanionSorting {
         if (operation.equals("preview")) {
             if (enabled() && nearby && record.mode != CompanionMode.SORT && CompanionManager.enabled(player, record)) {
                 state(server).previews.put(record.id, new Preview(entity.blockPosition(), survey(player, entity, new CompanionSortSettings(
-                        player.level().dimension().identifier(), entity.blockPosition(), List.of(), record.sorting.consolidate()), new ArrayList<>())));
+                        player.level().dimension().location(), entity.blockPosition(), List.of(), record.sorting.consolidate()), new ArrayList<>())));
             }
             return;
         }
@@ -135,7 +134,7 @@ public final class CompanionSorting {
                 if (record.mode == CompanionMode.SORT) return;
                 if (!nearby) { CompanionManager.message(player, "sort_nearby"); return; }
                 cancel(server, record.id);
-                record.sorting = record.sorting.anchoredAt(player.level().dimension().identifier(), entity.blockPosition());
+                record.sorting = record.sorting.anchoredAt(player.level().dimension().location(), entity.blockPosition());
                 record.mode = CompanionMode.SORT;
                 CompanionDialogue.say(player, record, "sort");
                 entity.setTarget(null); entity.setAggressive(false); entity.getNavigation().stop(); entity.resetIdleDialogue();
@@ -151,15 +150,13 @@ public final class CompanionSorting {
         if (player.isSpectator() || !player.mayBuild() || !level.mayInteract(player, pos)
                 || level.getServer().isUnderSpawnProtection(level, pos, player)
                 || !player.mayUseItemAt(pos, Direction.UP, ItemStack.EMPTY)) return false;
-        // Claim mods veto block use through this callback; a refusal there means hands off here too.
-        var result = UseBlockCallback.EVENT.invoker().interact(player, level, InteractionHand.MAIN_HAND,
-                new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
-        return result != net.minecraft.world.InteractionResult.FAIL;
+        var hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+        return UseBlockCallback.EVENT.invoker().interact(player, level, InteractionHand.MAIN_HAND, hit) != InteractionResult.FAIL;
     }
 
     /** Trapped chests and shulker boxes stay out on purpose: they are the player's untouched storage. */
     private static boolean supported(BlockState block) {
-        return block.is(Blocks.CHEST) || block.is(BlockTags.COPPER_CHESTS) || block.is(Blocks.BARREL);
+        return block.is(Blocks.CHEST) || block.is(Blocks.BARREL);
     }
     /** Every item framed on any face of these blocks; an empty frame asks for nothing. */
     private static Set<Item> framedItems(ServerLevel level, List<BlockPos> blocks) {
@@ -171,9 +168,16 @@ public final class CompanionSorting {
         }
         return Set.copyOf(items);
     }
-    private static boolean idle(List<net.minecraft.world.entity.ContainerUser> users, @Nullable WerewolfCompanionEntity self) {
-        for (var user : users) if (user != self) return false;
-        return true;
+    /** A player has this storage open: the companion waits rather than move items under them. */
+    public static boolean inUse(ServerLevel level, BlockEntity be) {
+        if (be instanceof ChestBlockEntity && ChestBlockEntity.getOpenCount(level, be.getBlockPos()) > 0) return true;
+        for (ServerPlayer player : level.players()) {
+            if (player.containerMenu instanceof net.minecraft.world.inventory.ChestMenu menu) {
+                net.minecraft.world.Container open = menu.getContainer();
+                if (open == be || open instanceof net.minecraft.world.CompoundContainer compound && compound.contains((net.minecraft.world.Container) be)) return true;
+            }
+        }
+        return false;
     }
     /** Barrels change their OPEN state as this worker opens them; that is not a layout change. */
     private static BlockState layoutOf(BlockState state) {
@@ -181,17 +185,17 @@ public final class CompanionSorting {
     }
 
     @Nullable private static Endpoint resolve(ServerPlayer player, @Nullable WerewolfCompanionEntity self, CompanionSortSettings settings, BlockPos pos) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (!settings.contains(pos) || !level.hasChunkAt(pos)) return null;
         BlockState block = level.getBlockState(pos);
         if (!supported(block)) return null;
         List<BlockPos> positions = new ArrayList<>(); positions.add(pos);
         if (block.getBlock() instanceof ChestBlock && block.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
-            BlockPos other = ChestBlock.getConnectedBlockPos(pos, block);
+            BlockPos other = pos.relative(ChestBlock.getConnectedDirection(block));
             if (!settings.contains(other) || !level.hasChunkAt(other)) return null;
             BlockState otherState = level.getBlockState(other);
             if (!(otherState.getBlock() instanceof ChestBlock) || !supported(otherState) || otherState.getValue(ChestBlock.TYPE) == ChestType.SINGLE
-                    || !ChestBlock.getConnectedBlockPos(other, otherState).equals(pos)) return null;
+                    || !other.relative(ChestBlock.getConnectedDirection(otherState)).equals(pos)) return null;
             positions.add(other);
         }
         positions.sort(BlockPos::compareTo);
@@ -202,9 +206,9 @@ public final class CompanionSorting {
             if (!(be instanceof RandomizableContainerBlockEntity container) || container.getLootTable() != null
                     || !container.canOpen(player) || !mayAccess(player, level, part)) return null;
             if (be instanceof ChestBlockEntity chest) {
-                if (!idle(chest.getEntitiesWithContainerOpen(), self) || ChestBlock.isChestBlockedAt(level, part)) return null;
+                if (inUse(level, chest) || ChestBlock.isChestBlockedAt(level, part)) return null;
             } else if (be instanceof BarrelBlockEntity barrel) {
-                if (!idle(barrel.getEntitiesWithContainerOpen(), self)) return null;
+                if (inUse(level, barrel)) return null;
             } else return null;
             members.add(be);
             layout.add(layoutOf(level.getBlockState(part)));
@@ -220,7 +224,7 @@ public final class CompanionSorting {
 
     /** Nearest storage first; a double chest counts once. Unloaded chunks stay unloaded. */
     private static List<ScanEntry> survey(ServerPlayer player, @Nullable WerewolfCompanionEntity self, CompanionSortSettings settings, List<Endpoint> usable) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         BlockPos center = settings.center();
         int radius = CompanionSortSettings.RADIUS;
         List<BlockPos> candidates = new ArrayList<>();
@@ -241,7 +245,7 @@ public final class CompanionSorting {
             if (seen.contains(pos)) continue;
             BlockState block = level.getBlockState(pos);
             if (block.getBlock() instanceof ChestBlock && block.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
-                seen.add(ChestBlock.getConnectedBlockPos(pos, block));
+                seen.add(pos.relative(ChestBlock.getConnectedDirection(block)));
             }
             seen.add(pos);
             Endpoint endpoint = resolve(player, self, settings, pos);
@@ -281,7 +285,7 @@ public final class CompanionSorting {
             if (record == null || !entity.isAlive() || !data.isCurrent(record, entity)
                     || record.mode != CompanionMode.SORT || player == null || !player.isAlive() || player.isSpectator()
                     || !CompanionManager.enabled(player, record) || entity.level() != player.level()
-                    || !record.sorting.dimension().equals(player.level().dimension().identifier())
+                    || !record.sorting.dimension().equals(player.level().dimension().location())
                     || entity.blockPosition().distSqr(record.sorting.center()) > LEASH * LEASH) continue;
             active.add(record.id);
             Task task = state.tasks.computeIfAbsent(record.id, ignored -> new Task());
@@ -346,7 +350,7 @@ public final class CompanionSorting {
         task.scan = survey(player, entity, record.sorting, usable);
         // Physical halves are leased too: splitting or joining a double chest cannot hand
         // the same slots to a second worker under a different logical identity.
-        Identifier dimension = record.sorting.dimension();
+        ResourceLocation dimension = record.sorting.dimension();
         List<Endpoint> endpoints = new ArrayList<>();
         for (Endpoint endpoint : usable) {
             boolean taken = task.unreachable.contains(endpoint.id()) || endpoint.members.stream()

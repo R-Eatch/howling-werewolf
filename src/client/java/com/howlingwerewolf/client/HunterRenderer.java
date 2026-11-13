@@ -3,28 +3,22 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.entity.HunterEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.resources.ResourceLocation;
 
-public final class HunterRenderer extends WerewolfLivingRenderer<HunterEntity, HunterRenderState, HunterModel> {
-    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
+public final class HunterRenderer extends HumanoidMobRenderer<HunterEntity, HunterModel> {
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/hunter.png");
-    private static final Identifier WATCHER_TEXTURE = Identifier.fromNamespaceAndPath(
+    /** The Silver-Oath Watcher of the Alpha Trial wears the same cut in silver-trimmed colors. */
+    private static final ResourceLocation WATCHER_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             HowlingWerewolf.MOD_ID, "textures/entity/hunter_watcher.png");
 
     public HunterRenderer(EntityRendererProvider.Context context) {
-        super(context, new HunterModel(context.bakeLayer(ClientModEvents.HUNTER_LAYER)), 0.5F, HunterRenderState::new);
-        addLayer(new ItemInHandLayer<>(this));
+        super(context, new HunterModel(context.bakeLayer(ClientModEvents.HUNTER_LAYER)), 0.5F);
     }
 
     @Override
-    public void extractRenderState(HunterEntity entity, HunterRenderState state, float partialTick) {
-        super.extractRenderState(entity, state, partialTick);
-        state.trialHunter = entity.isTrialHunter();
-    }
-
-    @Override
-    public Identifier getTextureLocation(HunterRenderState state) {
-        return state.trialHunter ? WATCHER_TEXTURE : TEXTURE;
+    public ResourceLocation getTextureLocation(HunterEntity entity) {
+        return entity.isTrialHunter() ? WATCHER_TEXTURE : TEXTURE;
     }
 }

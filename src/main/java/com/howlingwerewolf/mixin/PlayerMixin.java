@@ -1,13 +1,10 @@
 package com.howlingwerewolf.mixin;
 import com.howlingwerewolf.event.*;
 import com.howlingwerewolf.capability.*;
-import com.howlingwerewolf.WerewolfModelPose;
-import com.howlingwerewolf.WerewolfModelSet;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -38,9 +35,9 @@ abstract class PlayerMixin {
         return context.canHarvest();
     }
     @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method="actuallyHurt")
-    private void howling$healthDamage(net.minecraft.server.level.ServerLevel world,net.minecraft.world.damagesource.DamageSource source,float amount,
+    private void howling$healthDamage(net.minecraft.world.damagesource.DamageSource source,float amount,
             com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
-        DamageHooks.healthDamage((Player)(Object)this,source,amount,() -> original.call(world,source,amount));
+        DamageHooks.healthDamage((Player)(Object)this,source,amount,() -> original.call(source,amount));
     }
     @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method="actuallyHurt",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/player/Player;setHealth(F)V"))
     private void howling$beforeHealth(Player player,float value,com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original,
@@ -49,15 +46,16 @@ abstract class PlayerMixin {
         original.call(player,value);
     }
     @Inject(method="readAdditionalSaveData",at=@At("TAIL"))
-    private void howling$legacy(ValueInput input,CallbackInfo ci) {
+    private void howling$legacy(CompoundTag input,CallbackInfo ci) {
         // Older Forge/NeoForge saves used this mirror. Fabric attachments remain authoritative.
-        input.read("ForgeData",CompoundTag.CODEC).ifPresent(root -> howling$restoreRoot(root));
-        input.read("NeoForgeData",CompoundTag.CODEC).ifPresent(root -> howling$restoreRoot(root));
+        if (input.contains("ForgeData", Tag.TAG_COMPOUND)) howling$restoreRoot(input.getCompound("ForgeData"));
+        if (input.contains("NeoForgeData", Tag.TAG_COMPOUND)) howling$restoreRoot(input.getCompound("NeoForgeData"));
     }
+    @org.spongepowered.asm.mixin.Unique
     private void howling$restoreRoot(CompoundTag root) {
         var player=(Player)(Object)this;
         var data=WerewolfApi.get(player).orElseThrow();
-        if (data.isDefaultState() && root.contains("PlayerPersisted")) {
+        if (data.isDefaultState() && root.contains("PlayerPersisted", Tag.TAG_COMPOUND)) {
             player.setAttached(ModAttachments.LEGACY,root.copy());
             WerewolfPersistence.recoverIfFresh(player,data);
         }

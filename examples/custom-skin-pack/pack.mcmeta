@@ -1,13 +1,6 @@
 {
   "pack": {
-    "description": "My Wolf - Howling Werewolf custom skin",
-    "min_format": [
-      75,
-      0
-    ],
-    "max_format": [
-      75,
-      0
-    ]
+    "pack_format": 34,
+    "description": "My Wolf - Howling Werewolf custom skin"
   }
 }

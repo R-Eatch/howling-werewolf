@@ -1,10 +1,7 @@
 package com.howlingwerewolf.entity;
 
 import com.howlingwerewolf.capability.WerewolfApi;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -17,7 +14,7 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -65,7 +62,7 @@ public final class AlphaMinionEntity extends Wolf implements WerewolfNpcAppearan
         goalSelector.addGoal(7, new RandomStrollGoal(this, 0.9D));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10,
-                true, false, (entity, level) -> entity instanceof Player player && !player.isCreative()
+                true, false, entity -> entity instanceof Player player && !player.isCreative()
                 && !player.isSpectator()
                 && WerewolfApi.get(player).map(data -> data.isWerewolf()).orElse(false)));
     }
@@ -75,7 +72,7 @@ public final class AlphaMinionEntity extends Wolf implements WerewolfNpcAppearan
         setPersistenceRequired();
         if (target != null) setTarget(target);
         setHealth(getMaxHealth());
-        addEffect(new MobEffectInstance(MobEffects.SPEED, 20 * 10, 0));
+        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 10, 0));
     }
 
     public UUID getAlphaOwner() {
@@ -83,8 +80,8 @@ public final class AlphaMinionEntity extends Wolf implements WerewolfNpcAppearan
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
-        boolean hurt = super.doHurtTarget(level, target);
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        boolean hurt = super.doHurtTarget(target);
         if (hurt && target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 10, 0), this);
             living.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 10, 0), this);
@@ -93,20 +90,20 @@ public final class AlphaMinionEntity extends Wolf implements WerewolfNpcAppearan
     }
 
     @Override
-    protected void dropFromLootTable(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,
-                                     boolean recentlyHit) {
-        // Trial entities do not drop a loot table.
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
+        return net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY;
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        if (alphaOwner != null) tag.store("AlphaOwner", UUIDUtil.CODEC, alphaOwner);
+        if (alphaOwner != null) tag.putUUID("AlphaOwner", alphaOwner);
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        alphaOwner = tag.read("AlphaOwner", UUIDUtil.CODEC).orElse(null);
+        alphaOwner = tag.hasUUID("AlphaOwner") ? tag.getUUID("AlphaOwner") : null;
     }
 }

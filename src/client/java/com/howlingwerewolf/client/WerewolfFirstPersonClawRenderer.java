@@ -2,12 +2,13 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.HumanoidArm;
 
@@ -15,17 +16,17 @@ public final class WerewolfFirstPersonClawRenderer {
     private static final ModelPart ROOT = createLayer().bakeRoot();
     private static final ModelPart BEAST_ROOT = createBeastLayer().bakeRoot();
 
-    public static void render(ArmRenderContext event, WerewolfRenderData data) {
-        boolean beastMode = data.form() == WerewolfForm.BEAST;
+    public static void render(ArmRenderContext event, boolean beastMode) {
         ModelPart modelRoot = beastMode ? BEAST_ROOT : ROOT;
         ModelPart arm = modelRoot.getChild(event.getArm() == HumanoidArm.RIGHT ? "right_arm" : "left_arm");
         arm.resetPose();
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
-        event.getSubmitNodeCollector().submitModelPart(arm, pose,
-                RenderTypes.entityCutoutNoCull(WerewolfSkinTextures.get(data.skinId(),
-                        beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)),
-                event.getPackedLight(), OverlayTexture.NO_OVERLAY, null);
+        VertexConsumer consumer = event.getMultiBufferSource().getBuffer(
+                RenderType.entityCutoutNoCull(WerewolfSkinTextures.get(
+                        WerewolfSkinRenderContext.getSkinId(event.getPlayer()),
+                        beastMode ? WerewolfForm.BEAST : WerewolfForm.WEREWOLF)));
+        arm.render(pose, consumer, event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
         event.setCanceled(true);
     }

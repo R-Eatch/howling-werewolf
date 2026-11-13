@@ -7,7 +7,8 @@ import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
@@ -26,19 +27,24 @@ import java.util.List;
 import java.util.Map;
 
 /** Geometry and all 27 original PNGs are read directly from the three bundled bbmodel files. */
-public final class ModernModelResources extends SimplePreparableReloadListener<ModernModelResources.Prepared> {
+public final class ModernModelResources extends SimplePreparableReloadListener<ModernModelResources.Prepared> implements IdentifiableResourceReloadListener {
+    @Override
+    public ResourceLocation getFabricId() {
+        return ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "modern_models");
+    }
+
     static final List<WerewolfForm> FORMS = List.of(WerewolfForm.WEREWOLF, WerewolfForm.QUADRUPED, WerewolfForm.BEAST);
     private static Map<WerewolfForm, BlockbenchModel> models = Map.of();
     private static int revision;
 
-    protected record Prepared(Map<WerewolfForm, BlockbenchModel> models, Map<Identifier, byte[]> textures) {}
+    protected record Prepared(Map<WerewolfForm, BlockbenchModel> models, Map<ResourceLocation, byte[]> textures) {}
 
-    static Identifier modelId(WerewolfForm form) {
-        return Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "models/entity/modern/" + form.id() + ".bbmodel");
+    static ResourceLocation modelId(WerewolfForm form) {
+        return ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "models/entity/modern/" + form.id() + ".bbmodel");
     }
 
-    static Identifier textureId(ModernSkin skin, WerewolfForm form) {
-        return Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/modern/" + skin.id() + "/" + form.id() + ".png");
+    static ResourceLocation textureId(ModernSkin skin, WerewolfForm form) {
+        return ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "textures/entity/modern/" + skin.id() + "/" + form.id() + ".png");
     }
 
     static BlockbenchModel model(WerewolfForm form) {
@@ -52,7 +58,7 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
     @Override
     protected Prepared prepare(ResourceManager manager, ProfilerFiller profiler) {
         Map<WerewolfForm, BlockbenchModel> definitions = new EnumMap<>(WerewolfForm.class);
-        Map<Identifier, byte[]> textures = new LinkedHashMap<>();
+        Map<ResourceLocation, byte[]> textures = new LinkedHashMap<>();
         for (WerewolfForm form : FORMS) {
             try (InputStream input = manager.open(modelId(form))) {
                 byte[] bytes = input.readNBytes(8 * 1024 * 1024 + 1);
@@ -95,7 +101,7 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
     protected void apply(Prepared prepared, ResourceManager manager, ProfilerFiller profiler) {
         var textureManager = Minecraft.getInstance().getTextureManager();
         for (var entry : prepared.textures().entrySet()) {
-            Identifier id = entry.getKey();
+            ResourceLocation id = entry.getKey();
             // A normal resource-pack PNG can override an embedded palette without editing the model.
             if (manager.getResource(id).isPresent()) {
                 textureManager.release(id);
@@ -103,7 +109,7 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
             }
             try {
                 NativeImage image = NativeImage.read(new ByteArrayInputStream(entry.getValue()));
-                textureManager.register(id, new DynamicTexture(id::toString, image));
+                textureManager.register(id, new DynamicTexture(image));
             } catch (IOException error) {
                 throw new UncheckedIOException("Unable to decode embedded Modern texture " + id, error);
             }

@@ -11,7 +11,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
@@ -60,7 +60,7 @@ public final class CompanionRecord {
             Codec.LONG.optionalFieldOf("hunt_end", 0L).forGetter(record -> record.huntEnd),
             Codec.LONG.optionalFieldOf("hunt_cooldown_end", 0L).forGetter(record -> record.huntCooldownEnd),
             Codec.INT.optionalFieldOf("generation", 0).forGetter(record -> record.generation),
-            Identifier.CODEC.fieldOf("dimension").forGetter(record -> record.dimension),
+            ResourceLocation.CODEC.fieldOf("dimension").forGetter(record -> record.dimension),
             BlockPos.CODEC.fieldOf("position").forGetter(record -> record.position),
             INVENTORY_CODEC.fieldOf("inventory").forGetter(CompanionRecord::items),
             Extra.CODEC.forGetter(record -> new Extra(record.sorting, record.ignoreOwnerDamage, record.moonblood))
@@ -78,7 +78,7 @@ public final class CompanionRecord {
     public long huntEnd;
     public long huntCooldownEnd;
     public int generation;
-    public Identifier dimension;
+    public ResourceLocation dimension;
     public BlockPos position;
     public CompanionSortSettings sorting;
     /** When set, nothing the owner causes can hurt this companion. Off by default and in older saves. */
@@ -91,7 +91,7 @@ public final class CompanionRecord {
     public void onInventoryChanged(Runnable callback) { inventoryChanged = callback; }
 
     private CompanionRecord(UUID id, UUID owner, String classicSkin, String modernSkin, String customName, int tier, CompanionMode mode, float health,
-                            long huntStart, long huntEnd, long huntCooldownEnd, int generation, Identifier dimension,
+                            long huntStart, long huntEnd, long huntCooldownEnd, int generation, ResourceLocation dimension,
                             BlockPos position, List<ItemStack> items, Extra extra) {
         this.id = id;
         this.owner = owner;
@@ -113,7 +113,7 @@ public final class CompanionRecord {
         for (int slot = 0; slot < items.size(); slot++) inventory.setItem(slot, items.get(slot).copy());
     }
 
-    public CompanionRecord(UUID owner, String skin, Identifier dimension, BlockPos position) {
+    public CompanionRecord(UUID owner, String skin, ResourceLocation dimension, BlockPos position) {
         this(UUID.randomUUID(), owner, "howlingwerewolf:" + WerewolfSkin.byId(skin).getId(),
                 ModernSkin.bySkinId(skin) == null ? ModernSkin.ASHEN.skinId() : skin, "", 0, CompanionMode.FOLLOW,
                 (float) CompanionRules.maxHealth(0), 0, 0, 0, 0, dimension, position,

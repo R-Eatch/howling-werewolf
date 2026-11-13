@@ -9,7 +9,7 @@
     "description": {
       "translate": "advancement.howlingwerewolf.infection.desc"
     },
-    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

@@ -1,6 +1,5 @@
 package com.howlingwerewolf.command;
 
-import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfTreeSkill;
 import com.howlingwerewolf.capability.WerewolfApi;
@@ -21,7 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public final class WerewolfCommands {
     public static void register(com.mojang.brigadier.CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("werewolf").requires(source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
+        dispatcher.register(Commands.literal("werewolf").requires(source -> source.hasPermission(2))
                 .then(Commands.literal("infect").then(target(ctx -> infect(ctx, player(ctx)))))
                 .then(Commands.literal("awaken").then(target(ctx -> awaken(ctx, player(ctx)))))
                 .then(Commands.literal("cure").then(target(ctx -> cure(ctx, player(ctx)))))
@@ -195,7 +194,7 @@ public final class WerewolfCommands {
                             + ", alphaDefeated=" + data.hasDefeatedAlpha() + ", level=" + data.getLevel()
                             + ", xp=" + data.getExperience() + "/" + WerewolfData.experienceForNextLevel(data.getLevel())
                             + ", skillPoints=" + data.getAvailableSkillPoints() + ", treePoints=" + data.getAvailableTreePoints()
-                            + ", dimension=" + player.level().dimension().identifier()
+                            + ", dimension=" + player.level().dimension().location()
                             + ", persistedMirror=" + (mirror == null ? "missing" : mirrorMatches ? "match" : "DIFF")), false);
         });
         return 1;

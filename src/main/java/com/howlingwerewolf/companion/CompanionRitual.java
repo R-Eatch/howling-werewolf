@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
-import net.minecraft.world.entity.EntitySpawnReason;
+import org.joml.Vector3f;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -24,12 +24,12 @@ import java.util.List;
 /** Four wolfsbane offerings converge into a rising silver moon ring, then a visitor answers. */
 public final class CompanionRitual {
     public static final int DURATION = 80;
-    private static final DustParticleOptions MOON = new DustParticleOptions(0xBCDFFF, 1.0F);
-    private static final DustParticleOptions FLOWER = new DustParticleOptions(0x8267CE, 0.9F);
+    private static final DustParticleOptions MOON = new DustParticleOptions(new Vector3f(0xBC / 255F, 0xDF / 255F, 1F), 1.0F);
+    private static final DustParticleOptions FLOWER = new DustParticleOptions(new Vector3f(0x82 / 255F, 0x67 / 255F, 0xCE / 255F), 0.9F);
 
     public static void tryStart(ServerPlayer player, BlockPos center) {
         if (!com.howlingwerewolf.HWConfig.ENABLE_COMPANIONS.get()) { CompanionManager.message(player, "disabled"); return; }
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (!(level.getBlockEntity(center) instanceof RitualAltarBlockEntity altar) || !altar.isCentral()) return;
         if (altar.isTrialActive() || altar.isCompanionRitualActive()) { CompanionManager.message(player, "ritual_busy"); return; }
         List<RitualAltarBlockEntity> outer = new ArrayList<>();
@@ -80,7 +80,7 @@ public final class CompanionRitual {
         if (tick < DURATION) return;
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(altar.getCompanionSummoner());
         if (player == null || player.level() != level || !player.isAlive()) { cancel(altar); return; }
-        WerewolfCompanionEntity npc = ModEntities.WEREWOLF_COMPANION.get().create(level, EntitySpawnReason.EVENT);
+        WerewolfCompanionEntity npc = ModEntities.WEREWOLF_COMPANION.get().create(level);
         if (npc == null) { cancel(altar); return; }
         npc.setSummoner(player);
         boolean walking = false;
@@ -90,7 +90,7 @@ public final class CompanionRitual {
             BlockPos candidate = center.offset((int) Math.round(Math.cos(angle) * radius), 1, (int) Math.round(Math.sin(angle) * radius));
             BlockPos spot = CompanionManager.findSafeSpot(level, npc, candidate, 1);
             if (spot == null || Math.hypot(spot.getX() - center.getX(), spot.getZ() - center.getZ()) < 16) continue;
-            npc.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 0, 0);
+            npc.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 0, 0);
             npc.setOnGround(true);
             if (npc.beginArrival(player, center)) { walking = true; break; }
         }
@@ -99,7 +99,7 @@ public final class CompanionRitual {
             if (!level.noCollision(npc)) {
                 BlockPos nearby = CompanionManager.findSafeSpot(level, npc, center.above(), 2);
                 if (nearby == null) { cancel(altar); CompanionManager.message(player, "no_space"); return; }
-                npc.snapTo(nearby.getX() + 0.5, nearby.getY(), nearby.getZ() + 0.5, 0, 0);
+                npc.moveTo(nearby.getX() + 0.5, nearby.getY(), nearby.getZ() + 0.5, 0, 0);
             }
         }
         if (!level.addFreshEntity(npc)) { cancel(altar); return; }
@@ -107,8 +107,7 @@ public final class CompanionRitual {
         npc.sayTo(player, "greeting");
         npc.sayTo(player, "stay_notice");
         level.sendParticles(ParticleTypes.END_ROD, center.getX() + 0.5, center.getY() + 2, center.getZ() + 0.5, 32, 0.7, 0.7, 0.7, 0.03);
-        level.playSound(null, center, SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC)
-                .ambientSound().value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
+        level.playSound(null, center, SoundEvents.WOLF_AMBIENT, SoundSource.NEUTRAL, 0.8F, 0.9F);
     }
 
     public static void cancel(RitualAltarBlockEntity altar) {

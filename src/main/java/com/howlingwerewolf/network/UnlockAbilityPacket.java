@@ -7,13 +7,13 @@ import com.howlingwerewolf.event.WerewolfGuide;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record UnlockAbilityPacket(WerewolfAbility ability) implements CustomPacketPayload {
     public static final Type<UnlockAbilityPacket> TYPE = new Type<>(
-            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "unlock_ability"));
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "unlock_ability"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UnlockAbilityPacket> STREAM_CODEC = StreamCodec.of(
             (buf, packet) -> buf.writeEnum(packet.ability()),
             buf -> new UnlockAbilityPacket(buf.readEnum(WerewolfAbility.class)));

@@ -72,9 +72,9 @@ public final class ClientPacketHandlers {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) return;
         CompoundTag data = packet.data();
-        if (data.getStringOr("View", "").equals("recruit") && packet.open()) {
+        if (data.getString("View").equals("recruit") && packet.open()) {
             java.util.UUID npc;
-            try { npc = java.util.UUID.fromString(data.getStringOr("Npc", "")); }
+            try { npc = java.util.UUID.fromString(data.getString("Npc")); }
             catch (IllegalArgumentException invalid) { return; }
             minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(confirmed -> {
                 minecraft.setScreen(null);
@@ -82,8 +82,8 @@ public final class ClientPacketHandlers {
                         new com.howlingwerewolf.network.CompanionActionPacket(
                                 com.howlingwerewolf.network.CompanionActionPacket.Action.RECRUIT, npc));
             }, Component.translatable("screen.howlingwerewolf.companion.recruit_title"),
-                    Component.translatable("screen.howlingwerewolf.companion.recruit_body", data.getStringOr("Name", ""))));
-        } else if (data.getStringOr("View", "").equals("manage")) {
+                    Component.translatable("screen.howlingwerewolf.companion.recruit_body", data.getString("Name"))));
+        } else if (data.getString("View").equals("manage")) {
             if (minecraft.screen instanceof CompanionFrameScreen screen) screen.receive(data, packet.open());
             else if (packet.open()) minecraft.setScreen(new CompanionScreen(minecraft.screen, data));
         }

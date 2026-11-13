@@ -11,15 +11,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.util.random.WeightedList;
+import net.minecraft.util.random.WeightedRandomList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 @Mixin(NaturalSpawner.class)
 abstract class NaturalSpawnerMixin {
     @ModifyReturnValue(method="mobsAt",at=@At("RETURN"))
-    private static WeightedList<MobSpawnSettings.SpawnerData> howling$fullMoon(WeightedList<MobSpawnSettings.SpawnerData> result,
+    private static WeightedRandomList<MobSpawnSettings.SpawnerData> howling$fullMoon(WeightedRandomList<MobSpawnSettings.SpawnerData> result,
             ServerLevel level,StructureManager structures,ChunkGenerator generator,MobCategory category,BlockPos pos,Holder<Biome> biome) {
         if (category!=MobCategory.MONSTER || ModEntityEvents.isFeralWerewolfSpawnWindow(level)) return result;
-        return WeightedList.of(result.unwrap().stream().filter(entry -> entry.value().type()!=ModEntities.WEREWOLF.get()).toList());
+        return WeightedRandomList.create(result.unwrap().stream().filter(entry -> entry.type != ModEntities.WEREWOLF.get()).toList());
     }
 }

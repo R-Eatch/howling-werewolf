@@ -1,57 +1,48 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.HWConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.object.equipment.ElytraModel;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.resources.model.EquipmentClientInfo;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.Items;
 
-/** Elytra follows the imported back once, including crouching and flight. */
-final class ModernWingsLayer extends RenderLayer<AvatarRenderState, ModernPlayerModel<AvatarRenderState>> {
-    private final EquipmentLayerRenderer equipment;
-    private final BackElytraModel wings;
-    private final BackElytraModel babyWings;
+final class ModernWingsLayer extends RenderLayer<AbstractClientPlayer, ModernPlayerModel<AbstractClientPlayer>> {
+    private final ElytraModel<AbstractClientPlayer> wings;
+    private final ModelPart root;
     private final float[] back;
 
     ModernWingsLayer(ModernPlayerRenderer parent, EntityRendererProvider.Context context) {
         super(parent);
-        equipment = context.getEquipmentRenderer();
-        wings = new BackElytraModel(context.bakeLayer(ModelLayers.ELYTRA));
-        babyWings = new BackElytraModel(context.bakeLayer(ModelLayers.ELYTRA_BABY));
-        back = ModernEquipmentLayer.attachmentBounds(getParentModel().rig.bone("ribs"));
+        root = context.bakeLayer(ModelLayers.ELYTRA);
+        wings = new ElytraModel<>(root);
+        back = ModernEquipmentLayer.attachmentBounds(parent.getModel().rig.bone("ribs"));
     }
 
-    @Override
-    public void submit(PoseStack pose, SubmitNodeCollector collector, int light, AvatarRenderState state, float yRot, float xRot) {
-        if (!WerewolfRenderData.get(state).armoredInstinct() || !HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) return;
-        var stack = state.chestEquipment;
-        var equippable = stack.get(DataComponents.EQUIPPABLE);
-        if (equippable == null || equippable.assetId().isEmpty()) return;
-        Identifier texture = state.skin.elytra() != null ? state.skin.elytra().texturePath()
-                : state.skin.cape() != null && state.showCape ? state.skin.cape().texturePath() : null;
+    @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
+                                 float limb, float speed, float partial, float age, float yaw, float pitch) {
+        var stack = player.getItemBySlot(EquipmentSlot.CHEST);
+        if (!ModernEquipmentLayer.enabled(player) || !stack.is(Items.ELYTRA)) return;
+        var skin = player.getSkin();
+        ResourceLocation texture = skin.elytraTexture() != null ? skin.elytraTexture()
+                : skin.capeTexture() != null && player.isModelPartShown(PlayerModelPart.CAPE) ? skin.capeTexture()
+                : ResourceLocation.withDefaultNamespace("textures/entity/elytra.png");
+        wings.setupAnim(player, limb, speed, age, yaw, pitch);
+        root.getChild("left_wing").y = root.getChild("right_wing").y = 0;
         pose.pushPose();
         getParentModel().rig.transform("ribs", pose);
         pose.translate(0, back[1] / 16, back[5] / 16 + 0.03F);
-        equipment.renderLayers(EquipmentClientInfo.LayerType.WINGS, equippable.assetId().get(),
-                state.isBaby ? babyWings : wings, state, stack, pose, collector, light, texture, state.outlineColor, 0);
+        wings.renderToBuffer(pose, ItemRenderer.getArmorFoilBuffer(buffers, RenderType.armorCutoutNoCull(texture), stack.hasFoil()),
+                light, OverlayTexture.NO_OVERLAY);
         pose.popPose();
-    }
-
-    static final class BackElytraModel extends ElytraModel {
-        BackElytraModel(ModelPart root) { super(root); }
-        @Override public void setupAnim(HumanoidRenderState state) {
-            super.setupAnim(state);
-            // The attachment already follows crouching hips and shoulders.
-            root().getChild("left_wing").y = root().getChild("right_wing").y = 0;
-        }
     }
 }

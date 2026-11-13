@@ -3,7 +3,6 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.network.CompanionActionPacket;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -12,7 +11,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import java.util.UUID;
 
 /** Dismissal cannot be undone, so it asks once more on a page of its own, as the progression reset does. */
-final class CompanionDismissScreen extends Screen {
+final class CompanionDismissScreen extends MoonInput.Page {
     private static final String KEY = "screen.howlingwerewolf.companion.dismiss.";
     private static final int TOP_BAND = 28, BOTTOM_BAND = 40, TEXT_WIDTH = 320;
     private final Screen parent;
@@ -48,7 +47,7 @@ final class CompanionDismissScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         MoonUi.Theme theme = MoonUi.theme();
         int center = width / 2, middle = (TOP_BAND + height - BOTTOM_BAND) / 2;
         backdrop.draw(graphics, theme, width, height, center, middle, mouseX, mouseY);
@@ -63,20 +62,20 @@ final class CompanionDismissScreen extends Screen {
         y = paragraph(graphics, Component.translatable(KEY + "items"), center, y + 2, theme.sub());
         if (mode == CompanionMode.HUNT) paragraph(graphics, Component.translatable(KEY + "hunt"), center, y + 8, theme.accent());
         else if (mode == CompanionMode.DEAD) paragraph(graphics, Component.translatable(KEY + "dead"), center, y + 8, theme.accent());
-        super.render(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     /** Centered lines that wrap on narrow windows; returns where the next line starts. */
-    private int paragraph(GuiGraphics graphics, Component text, int center, int y, int color) {
+    private int paragraph(MoonGraphics graphics, Component text, int center, int y, int color) {
         for (FormattedCharSequence line : font.split(text, Math.min(TEXT_WIDTH, width - 32))) {
-            graphics.drawString(font, line, center - font.width(line) / 2, y, color, false);
+            graphics.text(font, line, center - font.width(line) / 2, y, color, false);
             y += 11;
         }
         return y;
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas is drawn with the dialog itself.
     }
 

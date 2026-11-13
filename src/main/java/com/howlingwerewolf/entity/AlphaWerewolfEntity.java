@@ -4,14 +4,12 @@ import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.content.ModEntities;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,7 +22,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -105,7 +103,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10,
-                true, false, (entity, level) -> entity instanceof Player player && !player.isCreative()
+                true, false, entity -> entity instanceof Player player && !player.isCreative()
                 && !player.isSpectator()
                 && WerewolfApi.get(player).map(data -> data.isWerewolf()).orElse(false)));
     }
@@ -113,7 +111,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     @Override
     @SuppressWarnings("deprecation") // NeoForge marks Mob#finalizeSpawn as override-only.
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
-                                        EntitySpawnReason reason, @Nullable SpawnGroupData groupData) {
+                                        MobSpawnType reason, @Nullable SpawnGroupData groupData) {
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, groupData);
         applyDifficultyScaling(level.getDifficulty());
         return result;
@@ -139,9 +137,9 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         // Strength I before revival, permanently refreshed Strength II afterward.
         // 复活前常驻力量 I，复活后改为持续刷新的常驻力量 II。
         int strengthAmplifier = revived ? 1 : 0;
-        addEffect(new MobEffectInstance(MobEffects.STRENGTH,
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,
                 20 * 60 * 30, strengthAmplifier, true, true));
-        addEffect(new MobEffectInstance(MobEffects.SPEED, 20 * 60 * 30, 0, true, true));
+        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 60 * 30, 0, true, true));
     }
 
     public void configureForTrial(UUID owner, BlockPos center) {
@@ -180,8 +178,8 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide()) return;
         NpcAppearanceData.refresh(this, APPEARANCE);
+        if (level().isClientSide) return;
         if (tickCount % NATURAL_HEAL_INTERVAL == 0 && getHealth() < getMaxHealth()) {
             heal(NATURAL_HEAL_AMOUNT);
         }
@@ -254,9 +252,8 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         getLookControl().setLookAt(target, 60.0F, 60.0F);
         swing(net.minecraft.world.InteractionHand.MAIN_HAND);
         float damage = (float)getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.25F;
-        if (level() instanceof ServerLevel serverLevel
-                && target.hurtServer(serverLevel, damageSources().mobAttack(this), damage)) {
-            target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20 * 10, 0), this);
+        if (target.hurt(damageSources().mobAttack(this), damage)) {
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 0), this);
         }
         if (level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.REVERSE_PORTAL,
@@ -269,10 +266,10 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     private void finishSummoning(@Nullable LivingEntity target) {
         if (!(level() instanceof ServerLevel serverLevel)) return;
         for (int i = 0; i < 4; i++) {
-            WerewolfEntity minion = ModEntities.WEREWOLF.get().create(serverLevel, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+            WerewolfEntity minion = ModEntities.WEREWOLF.get().create(serverLevel);
             if (minion == null) continue;
             double angle = Math.PI * 2.0D * i / 4.0D;
-            minion.snapTo(getX() + Math.cos(angle) * 2.5D, getY(),
+            minion.moveTo(getX() + Math.cos(angle) * 2.5D, getY(),
                     getZ() + Math.sin(angle) * 2.5D, getYRot(), 0.0F);
             minion.configureForAlpha(getUUID(), getNpcCoat(), target);
             serverLevel.addFreshEntity(minion);
@@ -285,14 +282,14 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     /** Cancels the first fatal blow on Normal or Hard and enters the Alpha's final combat state. */
     public boolean tryRevive() {
         Difficulty difficulty = level().getDifficulty();
-        if (level().isClientSide() || revived
+        if (level().isClientSide || revived
                 || (difficulty != Difficulty.NORMAL && difficulty != Difficulty.HARD)) return false;
         revived = true;
         float healthRatio = difficulty == Difficulty.HARD ? 0.42F : 0.20F;
         setHealth(getMaxHealth() * healthRatio);
         addPermanentCombatEffects();
         addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 60, 1, true, true));
-        addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 20 * 60, 0, true, true));
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 60, 0, true, true));
         teleportWarningTicks = 0;
         nextTeleportTick = tickCount + REVIVED_TELEPORT_COOLDOWN - TELEPORT_WARNING;
         pendingForcedSummons++;
@@ -307,16 +304,16 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     }
 
     @Override
-    public boolean hurtServer(ServerLevel serverLevel, DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         int damageFrequencyLimitTicks = HWConfig.ALPHA_TRIAL_DAMAGE_FREQUENCY_LIMIT_TICKS.get();
         // Normal-form claw attacks and their additive skill damage retain PLAYER_ATTACK and must
         // pass this server-side gate. Only the documented forced-cleanup and Beast void sources bypass it.
-        boolean limitedTrialDamage = !level().isClientSide()
+        boolean limitedTrialDamage = !level().isClientSide
                 && trialOwner != null
                 && damageFrequencyLimitTicks > 0
                 && !bypassesDamageFrequencyLimit(source);
         if (limitedTrialDamage && tickCount < nextAllowedDamageTick) return false;
-        boolean hurt = super.hurtServer(serverLevel, source, amount);
+        boolean hurt = super.hurt(source, amount);
         if (limitedTrialDamage && hurt) nextAllowedDamageTick = tickCount + damageFrequencyLimitTicks;
         return hurt;
     }
@@ -333,22 +330,22 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     }
 
     @Override
-    protected void actuallyHurt(ServerLevel serverLevel, DamageSource source, float amount) {
+    protected void actuallyHurt(DamageSource source, float amount) {
         // Ordinary damage is reduced by 70%; invulnerability-bypassing damage keeps its full value.
         // 普通伤害固定减免 70%；绕过无敌的伤害保持完整数值。
         if (!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             amount *= 0.30F;
         }
-        super.actuallyHurt(serverLevel, source, amount);
+        super.actuallyHurt(source, amount);
     }
 
     @Override
-    public boolean isInvulnerableTo(ServerLevel serverLevel, DamageSource source) {
-        return source.is(DamageTypes.FALL) || super.isInvulnerableTo(serverLevel, source);
+    public boolean isInvulnerableTo(DamageSource source) {
+        return source.is(DamageTypes.FALL) || super.isInvulnerableTo(source);
     }
 
     @Override
-    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
         fallDistance = 0.0F;
         return false;
     }
@@ -389,21 +386,21 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     }
 
     @Override
-    protected void customServerAiStep(ServerLevel serverLevel) {
-        super.customServerAiStep(serverLevel);
+    protected void customServerAiStep() {
+        super.customServerAiStep();
         bossBar.setProgress(getHealth() / getMaxHealth());
     }
 
     @Override
-    protected void dropFromLootTable(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,
-                                     boolean recentlyHit) {
-        // Trial entities do not drop a loot table.
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable>
+            getDefaultLootTable() {
+        return net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY;
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        if (trialOwner != null) tag.store("TrialOwner", UUIDUtil.CODEC, trialOwner);
+        if (trialOwner != null) tag.putUUID("TrialOwner", trialOwner);
         if (trialCenter != null) tag.putLong("TrialCenter", trialCenter.asLong());
         tag.putInt("NextTeleportDelay", Math.max(0, nextTeleportTick - tickCount));
         tag.putInt("NextSummonDelay", Math.max(0, nextSummonTick - tickCount));
@@ -417,22 +414,22 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        trialOwner = tag.read("TrialOwner", UUIDUtil.CODEC).orElse(null);
-        trialCenter = tag.getLong("TrialCenter").map(BlockPos::of).orElse(null);
-        nextTeleportTick = tickCount + Math.max(0, tag.getIntOr("NextTeleportDelay", 0));
-        nextSummonTick = tickCount + Math.max(0, tag.getIntOr("NextSummonDelay", 0));
-        summonTicks = Math.max(0, tag.getIntOr("SummonTicks", 0));
-        teleportWarningTicks = Math.max(0, tag.getIntOr("TeleportWarningTicks", 0));
-        halfHealthSummonTriggered = tag.getBooleanOr("HalfHealthSummonTriggered", false);
-        pendingForcedSummons = tag.getInt("PendingForcedSummons").isPresent()
-                ? Math.max(0, tag.getIntOr("PendingForcedSummons", 0))
-                : tag.getBooleanOr("PendingForcedSummon", false) ? 1 : 0;
-        nextAllowedDamageTick = tickCount + Math.max(0, tag.getIntOr("NextAllowedDamageDelay", 0));
-        revived = tag.getBooleanOr("Revived", false);
+        trialOwner = tag.hasUUID("TrialOwner") ? tag.getUUID("TrialOwner") : null;
+        trialCenter = tag.contains("TrialCenter") ? BlockPos.of(tag.getLong("TrialCenter")) : null;
+        nextTeleportTick = tickCount + Math.max(0, tag.getInt("NextTeleportDelay"));
+        nextSummonTick = tickCount + Math.max(0, tag.getInt("NextSummonDelay"));
+        summonTicks = Math.max(0, tag.getInt("SummonTicks"));
+        teleportWarningTicks = Math.max(0, tag.getInt("TeleportWarningTicks"));
+        halfHealthSummonTriggered = tag.getBoolean("HalfHealthSummonTriggered");
+        pendingForcedSummons = tag.contains("PendingForcedSummons")
+                ? Math.max(0, tag.getInt("PendingForcedSummons"))
+                : tag.getBoolean("PendingForcedSummon") ? 1 : 0;
+        nextAllowedDamageTick = tickCount + Math.max(0, tag.getInt("NextAllowedDamageDelay"));
+        revived = tag.getBoolean("Revived");
         // Alphas saved before 1.3.5 have no coat and keep the Ashen they were fought in.
-        NpcAppearanceData.load(this, APPEARANCE, tag, tag.getStringOr("ModernCoat", "").isEmpty());
+        NpcAppearanceData.load(this, APPEARANCE, tag, !tag.contains("ModernCoat"));
     }
 
     /**
@@ -461,7 +458,7 @@ public final class AlphaWerewolfEntity extends Monster implements WerewolfNpcApp
         getJumpControl().jump();
         setDeltaMovement(getDeltaMovement().add(horizontal.x * 0.42D, 0.0D,
                 horizontal.z * 0.42D));
-        needsSync = true;
+        hasImpulse = true;
         return true;
     }
 }

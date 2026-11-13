@@ -1,6 +1,5 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
@@ -15,7 +14,9 @@ import com.howlingwerewolf.network.UseAbilityPacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -23,7 +24,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 public final class ClientEvents {
-    private static net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;
+    private static EntityRendererProvider.Context rendererContext;
+    private static int modernRevision = -1;
     private static WerewolfPlayerRenderer renderer;
     private static BeastPlayerRenderer beastRenderer;
     private static QuadrupedWerewolfRenderer quadrupedRenderer;
@@ -96,50 +98,61 @@ public final class ClientEvents {
         ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.BLOODY_BITE, targetId));
     }
 
-    static void initializeRenderers(EntityRendererProvider.Context context) {
-        renderer = new WerewolfPlayerRenderer(context);
-        beastRenderer = new BeastPlayerRenderer(context);
-        quadrupedRenderer = new QuadrupedWerewolfRenderer(context);
-        equipmentRenderer = new WerewolfEquipmentRenderer(context);
-        for (WerewolfForm form : ModernModelResources.FORMS) modernRenderers.put(form, new ModernPlayerRenderer(context, form));
-        itemModelResolver = context.getItemModelResolver();
+    private static void initializeRenderers() {
+        Minecraft minecraft = Minecraft.getInstance();
+        var dispatcher = minecraft.getEntityRenderDispatcher();
+        rendererContext = new EntityRendererProvider.Context(dispatcher, minecraft.getItemRenderer(),
+                minecraft.getBlockRenderer(), dispatcher.getItemInHandRenderer(),
+                minecraft.getResourceManager(), minecraft.getEntityModels(), minecraft.font);
+        renderer = new WerewolfPlayerRenderer(rendererContext);
+        beastRenderer = new BeastPlayerRenderer(rendererContext);
+        quadrupedRenderer = new QuadrupedWerewolfRenderer(rendererContext);
+        equipmentRenderer = new WerewolfEquipmentRenderer(rendererContext);
     }
 
-    static void extractMouthItem(AbstractClientPlayer player,
-                                 net.minecraft.client.renderer.item.ItemStackRenderState item) {
-        if (itemModelResolver != null) itemModelResolver.updateForLiving(item, player.getMainHandItem(),
-                net.minecraft.world.item.ItemDisplayContext.GROUND, player);
-    }
+    public static boolean renderWerewolfPlayer(PlayerRenderer vanilla, AbstractClientPlayer player, float yaw,
+                                                float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+        WerewolfForm form = WerewolfSkinRenderContext.getForm(player);
+        if (form == WerewolfForm.HUMAN) return false;
+        // The transformed body would fill the camera during another mod's first-person pass.
+        if (FirstPersonBodyCompat.active(null)) return true;
+        if (rendererContext == null) initializeRenderers();
 
-    public static boolean renderWerewolfPlayer(net.minecraft.client.renderer.entity.state.AvatarRenderState state,
-            PoseStack pose, net.minecraft.client.renderer.SubmitNodeCollector collector,
-            net.minecraft.client.renderer.state.CameraRenderState camera) {
-        var data=WerewolfRenderData.get(state);
-        WerewolfForm form=data.form();
-        if (form==WerewolfForm.HUMAN || renderer==null) return false;
-        // Another mod is drawing our body in first person: a werewolf body would fill the camera.
-        if (FirstPersonBodyCompat.active(state)) return true;
         pose.pushPose();
         try {
-            if (data.modelSet()==WerewolfModelSet.MODERN) modernRenderers.get(form).submit(state,pose,collector,camera);
-            else switch(form) {
-                case BEAST -> beastRenderer.submit(state,pose,collector,camera);
-                case QUADRUPED -> quadrupedRenderer.submit(state,pose,collector,camera);
-                default -> {
-                    renderer.submit(state,pose,collector,camera);
-                    if (data.armoredInstinct() && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) equipmentRenderer.submit(state,pose,collector,camera);
+            if (WerewolfSkinRenderContext.getModelSet(player) == WerewolfModelSet.MODERN) {
+                if (modernRevision != ModernModelResources.revision()) {
+                    modernRenderers.clear();
+                    modernRevision = ModernModelResources.revision();
+                }
+                modernRenderers.computeIfAbsent(form, selected -> new ModernPlayerRenderer(rendererContext, selected))
+                        .render(player, yaw, partial, pose, buffers, light);
+            } else if (form == WerewolfForm.BEAST) {
+                beastRenderer.render(player, yaw, partial, pose, buffers, light);
+            } else if (form == WerewolfForm.QUADRUPED) {
+                quadrupedRenderer.render(player, yaw, partial, pose, buffers, light);
+            } else {
+                renderer.render(player, yaw, partial, pose, buffers, light);
+                boolean armoredInstinct = WerewolfSkinRenderContext.isPreview(player) || WerewolfApi.get(player)
+                        .map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT) && data.showsEquipment()).orElse(false);
+                if (armoredInstinct && HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) {
+                    equipmentRenderer.prepare(player, vanilla, partial);
+                    equipmentRenderer.render(player, yaw, partial, pose, buffers, light);
                 }
             }
-        } finally { pose.popPose(); }
+        } finally {
+            pose.popPose();
+        }
         return true;
     }
 
     public static void renderWerewolfArm(ArmRenderContext event) {
-        var data = WerewolfRenderData.forEntity(event.getPlayer());
-        if (data.form() == WerewolfForm.HUMAN) return;
-        if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
-        else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
-        else WerewolfFirstPersonClawRenderer.render(event, data);
+        WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
+            if (!data.isTransformed()) return;
+            if (data.isQuadrupedMode()) event.setCanceled(true);
+            else if (data.getModelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
+            else WerewolfFirstPersonClawRenderer.render(event, data.isBeastMode());
+        });
     }
 
     private ClientEvents() {}

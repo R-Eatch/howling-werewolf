@@ -9,7 +9,8 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.entity.LivingEntity;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Matrix4f;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Retargets the established actions onto the imported skeleton, preserving its authored rest pose. */
-final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel<S> implements ArmedModel<S>, HeadedModel {
+final class ModernPlayerModel<T extends LivingEntity> extends EntityModel<T> implements ArmedModel, HeadedModel {
     private static final String[] FORE_RIGHT = {"rightArmRotation", "right_forearn"}, FORE_LEFT = {"leftArmRotation", "left_forearn"};
     private static final String[] HIND_RIGHT = {"rightLeg", "right_leg_lower", "right_foot_upper"}, HIND_LEFT = {"leftLeg", "left_leg_lower", "left_foot_upper"};
     private static final List<String> RELAXED_JOINTS = List.of("rightArm", "leftArm", "rightArmRotation", "leftArmRotation", "right_forearn", "left_forearn",
@@ -36,9 +37,12 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     private static final float PROWL_HEIGHT = 1.5F, PROWL_LEAN = 1.52F, PROWL_CHEST = -0.22F, PROWL_GAZE = 0.05F;
     private static final float PROWL_FORE_BIAS = -0.04F, PROWL_HIND_BIAS = -0.02F;
     private final WerewolfForm form;
+    private final ModelPart root;
+    private final ModelPart driverRoot;
+    private ModernRenderState state;
     final BlockbenchModel.Baked rig;
-    private final EntityModel<S> driver;
-    private final HumanoidModel<S> nativeHands = new HumanoidModel<>(
+    private final EntityModel<T> driver;
+    private final HumanoidModel<T> nativeHands = new HumanoidModel<>(
             LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0), 64, 64).bakeRoot());
     private final List<Binding> bindings = new ArrayList<>();
     private final Vector3f rightPawContact;
@@ -54,11 +58,13 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     }
 
     ModernPlayerModel(WerewolfForm form, BlockbenchModel.Baked rig) {
-        super(rig.root());
+        super();
+        this.root = rig.root();
         this.form = form;
         this.rig = rig;
         if (form == WerewolfForm.BEAST) {
-            driver = new BeastPlayerModel<>(BeastPlayerModel.createBodyLayer().bakeRoot());
+            driverRoot = BeastPlayerModel.createBodyLayer().bakeRoot();
+            driver = new BeastPlayerModel<>(driverRoot);
             bind("torso", "body"); bind("torso/head", "head"); bind("torso/head/jaw", "jaw");
             bind("torso/right_upper_arm", "rightArm"); bind("torso/left_upper_arm", "leftArm");
             bind("torso/right_upper_arm/right_forearm", "right_forearn");
@@ -68,13 +74,15 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
             bind("tail_base", "tail"); bind("tail_base/tail_mid", "tail_main12");
             bind("tail_base/tail_mid/tail_tip", "tail_12");
         } else if (form == WerewolfForm.QUADRUPED) {
-            driver = new QuadrupedWerewolfModel<>(QuadrupedWerewolfModel.createBodyLayer().bakeRoot());
+            driverRoot = QuadrupedWerewolfModel.createBodyLayer().bakeRoot();
+            driver = new QuadrupedWerewolfModel<>(driverRoot);
             bind("head", "head"); bind("head/real_head", "muzzle");
             bind("right_hind_leg", "rightLeg"); bind("left_hind_leg", "leftLeg");
             bind("right_front_leg", "front_RightLeg"); bind("left_front_leg", "front_LeftLeg");
             bind("tail", "tail"); bind("tail/real_tail", "tail_main12");
         } else {
-            driver = new WerewolfPlayerModel<>(WerewolfPlayerModel.createBodyLayer().bakeRoot());
+            driverRoot = WerewolfPlayerModel.createBodyLayer().bakeRoot();
+            driver = new WerewolfPlayerModel<>(driverRoot);
             bind("torso", "body"); bind("torso/chest", "body_upper"); bind("torso/chest/head", "head");
             bind("torso/chest/head/muzzle", "jaw");
             bind("torso/chest/right_arm", "rightArm"); bind("torso/chest/left_arm", "leftArm");
@@ -102,29 +110,41 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     }
 
     private void bind(String source, String target) {
-        ModelPart part = driver.root();
+        ModelPart part = driverRoot;
         for (String segment : source.split("/")) part = part.getChild(segment);
         bindings.add(new Binding(part, rig.bone(target)));
     }
 
     @Override
-    public void setupAnim(S state) {
+    public void setupAnim(T entity, float limbSwing, float limbSpeed, float age, float yaw, float pitch) {
+        state = ModernRenderState.sample(entity, limbSwing, limbSpeed, age, pitch, attackTime);
         resetPose();
-        driver.setupAnim(state);
+        driver.attackTime = attackTime;
+        driver.riding = riding;
+        driver.young = young;
+        driver.prepareMobModel(entity, limbSwing, limbSpeed, state.partialTick);
+        driver.setupAnim(entity, limbSwing, limbSpeed, age, yaw, pitch);
+        nativeHands.attackTime = attackTime;
+        nativeHands.riding = riding;
+        nativeHands.young = young;
+        nativeHands.crouching = entity.isCrouching();
+        ModernArmPoses.apply(nativeHands, entity);
+        nativeHands.prepareMobModel(entity, limbSwing, limbSpeed, state.partialTick);
+        nativeHands.setupAnim(entity, limbSwing, limbSpeed, age, yaw, pitch);
         for (Binding binding : bindings) {
             ModelPart source = binding.source();
             ModelPart target = binding.target();
             var rest = source.getInitialPose();
-            target.xRot += source.xRot - rest.xRot();
-            target.yRot += source.yRot - rest.yRot();
-            target.zRot += source.zRot - rest.zRot();
-            target.x += (source.x - rest.x()) / rig.scale();
-            target.y += (source.y - rest.y()) / rig.scale();
-            target.z += (source.z - rest.z()) / rig.scale();
+            target.xRot += source.xRot - rest.xRot;
+            target.yRot += source.yRot - rest.yRot;
+            target.zRot += source.zRot - rest.zRot;
+            target.x += (source.x - rest.x) / rig.scale();
+            target.y += (source.y - rest.y) / rig.scale();
+            target.z += (source.z - rest.z) / rig.scale();
         }
         applyNativeHands(state);
         if (form == WerewolfForm.BEAST) {
-            var motion = WerewolfRenderData.get(state);
+            var motion = state;
             if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying && state.isUsingItem) {
                 // Aiming keeps the upright crouch, so native arm poses still point at the target.
                 root.y += 2.4F;
@@ -132,30 +152,28 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
                 rig.bone("head").xRot -= 0.72F;
                 placeLimb("right_foot_lower", rightFootContact, HIND_RIGHT, "rightLeg", 0, 0, 0, 0, 1);
                 placeLimb("left_foot_lower", leftFootContact, HIND_LEFT, "leftLeg", 0, 0, 0, 0, 1);
-            } else if (motion.beastProwlAmount() > 0 && !blockedQuadruped(state)) {
-                applyBeastProwl(state, motion.beastProwlAmount());
+            } else if (motion.beastProwlAmount > 0 && !blockedQuadruped(state)) {
+                applyBeastProwl(state, motion.beastProwlAmount);
             }
-            applyBeastRun(state, motion.beastRunAmount(), motion.beastLeapAmount());
+            applyBeastRun(state, motion.beastRunAmount, motion.beastLeapAmount);
         }
-        var carriageData = WerewolfRenderData.get(state);
-        layElbowFur(Math.max(carriageData.beastRunAmount(), carriageData.beastProwlAmount()));
+        layElbowFur();
         animateTail(state);
     }
 
-    private void applyNativeHands(S state) {
+    private void applyNativeHands(ModernRenderState state) {
         if (form == WerewolfForm.QUADRUPED || state.leftHandItemStack.isEmpty() && state.rightHandItemStack.isEmpty()) return;
         // AvatarRenderer already extracts Steve's ITEM/BOW/CROSSBOW/SPYGLASS/TRIDENT/SPEAR poses.
         // Keep both arms from the same native pose so aiming and two-handed use stay coordinated.
-        nativeHands.setupAnim(state);
         for (HumanoidArm arm : HumanoidArm.values()) {
-            ModelPart source = nativeHands.getArm(arm);
+            ModelPart source = (arm == HumanoidArm.RIGHT ? nativeHands.rightArm : nativeHands.leftArm);
             ModelPart target = rig.bone(arm == HumanoidArm.RIGHT ? "rightArm" : "leftArm");
-            target.xRot = target.getInitialPose().xRot() + source.xRot;
-            target.yRot = target.getInitialPose().yRot() + source.yRot;
-            target.zRot = target.getInitialPose().zRot() + source.zRot;
+            target.xRot = target.getInitialPose().xRot + source.xRot;
+            target.yRot = target.getInitialPose().yRot + source.yRot;
+            target.zRot = target.getInitialPose().zRot + source.zRot;
         }
         rig.bone("body").yRot = nativeHands.body.yRot;
-        rig.bone("body_upper").yRot = rig.bone("body_upper").getInitialPose().yRot();
+        rig.bone("body_upper").yRot = rig.bone("body_upper").getInitialPose().yRot;
     }
 
     /**
@@ -164,18 +182,19 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
      * On all fours the Beast folds its forearms far past any upright swing, and laying the tuft by
      * half of that turned it out sideways; there the lay stops at a small fold.
      */
-    private void layElbowFur(float carriage) {
+    private void layElbowFur() {
         for (String bone : FOREARMS) {
             ModelPart forearm = rig.bones().get(bone);
             List<ModelPart> tufts = rig.flats().get(bone);
             if (forearm == null || tufts == null) continue;
-            float bend = forearm.xRot - forearm.getInitialPose().xRot();
+            float bend = forearm.xRot - forearm.getInitialPose().xRot;
+            float carriage = Math.max(state.beastRunAmount, state.beastProwlAmount);
             bend = Mth.lerp(carriage, bend, Mth.clamp(bend, -FOUR_LEGGED_FUR_FOLD, FOUR_LEGGED_FUR_FOLD));
             if (Math.abs(bend) < 0.001F) continue;
             for (ModelPart tuft : tufts) {
                 var rest = tuft.getInitialPose();
                 Vector3f euler = new Quaternionf().rotationX(-bend * ELBOW_FUR_LAY)
-                        .mul(new Quaternionf().rotationZYX(rest.zRot(), rest.yRot(), rest.xRot()))
+                        .mul(new Quaternionf().rotationZYX(rest.zRot, rest.yRot, rest.xRot))
                         .getEulerAnglesZYX(new Vector3f());
                 tuft.xRot = euler.x;
                 tuft.yRot = euler.y;
@@ -184,17 +203,17 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
     }
 
-    private void animateTail(S state) {
+    private void animateTail(ModernRenderState state) {
         float phase = state.ageInTicks * 0.085F;
         float movement = Mth.clamp(state.walkAnimationSpeed, 0, 1);
         float strength = state.isCrouching ? 0.55F : form == WerewolfForm.BEAST
-                && WerewolfRenderData.get(state).beastRunAmount() > 0 ? 0.45F : 1;
+                && state.beastRunAmount > 0 ? 0.45F : 1;
         String[] names = {"tail", "tail_main12", "tail_12"};
         float[] amplitudes = {0.09F, 0.13F, 0.18F};
         for (int index = 0; index < names.length; index++) {
             ModelPart tail = rig.bone(names[index]);
             float lag = index * 0.45F;
-            tail.yRot = tail.getInitialPose().yRot() + strength * (
+            tail.yRot = tail.getInitialPose().yRot + strength * (
                     Mth.sin(phase - lag) * amplitudes[index]
                     + Mth.sin(state.ageInTicks * 0.031F - lag) * 0.025F
                     + Mth.sin(state.walkAnimationPos * 0.6F - lag) * movement * 0.045F);
@@ -202,28 +221,28 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         }
     }
 
-    private static boolean blockedQuadruped(HumanoidRenderState state) {
+    private static boolean blockedQuadruped(ModernRenderState state) {
         return state.isPassenger || state.isInWater || state.isVisuallySwimming || state.isFallFlying
                 || state.isAutoSpinAttack || state.isUsingItem;
     }
 
     /** Levels the spine over all four limbs: the Beast's upright rig folded into a quadruped carriage. */
-    private void carryOnFours(S state, float amount, float height, float lean, float chest, float gaze) {
+    private void carryOnFours(ModernRenderState state, float amount, float height, float lean, float chest, float gaze) {
         ModelPart head = rig.bone("head");
         root.y += height * amount;
         rig.bone("waist").xRot += lean * amount;
         ModelPart body = rig.bone("body");
         ModelPart upper = rig.bone("body_upper");
         body.xRot = Mth.lerp(amount, body.xRot, 0);
-        upper.xRot = Mth.lerp(amount, upper.xRot, upper.getInitialPose().xRot() + chest);
+        upper.xRot = Mth.lerp(amount, upper.xRot, upper.getInitialPose().xRot + chest);
         // The neck cancels every pitch of the spine, so the eyes stay level through the stride.
-        float level = -(lean + chest + upper.getInitialPose().xRot());
+        float level = -(lean + chest + upper.getInitialPose().xRot);
         head.xRot = Mth.lerp(amount, head.xRot, level + gaze + Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.5F, 0.5F));
         for (String name : RELAXED_JOINTS) {
             ModelPart joint = rig.bone(name);
-            joint.xRot = Mth.lerp(amount, joint.xRot, joint.getInitialPose().xRot());
-            joint.yRot = Mth.lerp(amount, joint.yRot, joint.getInitialPose().yRot());
-            joint.zRot = Mth.lerp(amount, joint.zRot, joint.getInitialPose().zRot());
+            joint.xRot = Mth.lerp(amount, joint.xRot, joint.getInitialPose().xRot);
+            joint.yRot = Mth.lerp(amount, joint.yRot, joint.getInitialPose().yRot);
+            joint.zRot = Mth.lerp(amount, joint.zRot, joint.getInitialPose().zRot);
         }
         // Bring the paws in under the chest rather than out at the shoulders.
         rig.bone("rightArm").zRot += SHOULDER_IN * amount;
@@ -232,7 +251,7 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         rig.bone("tail").xRot -= lean * 0.92F * amount;
     }
 
-    private void applyBeastRun(S state, float amount, float leap) {
+    private void applyBeastRun(ModernRenderState state, float amount, float leap) {
         if (amount <= 0 || state.isCrouching || blockedQuadruped(state)) return;
         float speed = Math.min(state.walkAnimationSpeed, 1);
         float cycle = BeastGait.stride(state.walkAnimationPos, BeastGait.GALLOP_RATE);
@@ -273,7 +292,7 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         placeLimb(paw, contact, joints, anchor, bias + travel * span, lift, tilt, 1, amount);
     }
 
-    private void applyBeastProwl(S state, float amount) {
+    private void applyBeastProwl(ModernRenderState state, float amount) {
         float speed = Math.min(state.walkAnimationSpeed * 1.4F, 1);
         float cycle = BeastGait.stride(state.walkAnimationPos, BeastGait.PROWL_RATE);
         carryOnFours(state, amount, PROWL_HEIGHT, PROWL_LEAN + Mth.sin(cycle * Mth.TWO_PI * 2) * 0.012F * speed,
@@ -308,7 +327,7 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         Vector3f target = new Vector3f(current.x, current.y + desiredBottom - bottom, Mth.lerp(amount, current.z, goalZ));
         boolean hind = jointCount == 3;
         ModelPart hip = rig.bone(joints[0]);
-        float hipRest = hip.getInitialPose().xRot(), hipY = hip.y, hipZ = hip.z;
+        float hipRest = hip.getInitialPose().xRot, hipY = hip.y, hipZ = hip.z;
         // Planar inverse kinematics keeps grounded paws on the floor through the stance.
         for (int pass = 0; pass < 3; pass++) {
             levelPaw(effector, pawPitch);
@@ -466,8 +485,8 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         for (int index = 0; index < path.size() - 1; index++) path.get(index).translateAndRotate(pose);
         float[] bottom = {Float.NEGATIVE_INFINITY};
         rig.bone(bone).visit(pose, (transform, name, index, cube) -> {
-            for (var polygon : cube.polygons) for (var vertex : polygon.vertices()) {
-                float y = transform.pose().transformPosition(vertex.worldX(), vertex.worldY(), vertex.worldZ(), new Vector3f()).y;
+            for (var polygon : cube.polygons) for (var vertex : polygon.vertices) {
+                float y = transform.pose().transformPosition(vertex.pos.x / 16, vertex.pos.y / 16, vertex.pos.z / 16, new Vector3f()).y;
                 bottom[0] = Math.max(bottom[0], y);
             }
         });
@@ -488,8 +507,8 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         float[] bounds = {Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
                 Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
         part.visit(new PoseStack(), (transform, path, index, cube) -> {
-            for (var polygon : cube.polygons) for (var vertex : polygon.vertices()) {
-                Vector3f point = transform.pose().transformPosition(vertex.worldX(), vertex.worldY(), vertex.worldZ(), new Vector3f());
+            for (var polygon : cube.polygons) for (var vertex : polygon.vertices) {
+                Vector3f point = transform.pose().transformPosition(vertex.pos.x / 16, vertex.pos.y / 16, vertex.pos.z / 16, new Vector3f());
                 inverse.transformPosition(point);
                 bounds[0] = Math.min(bounds[0], point.x); bounds[3] = Math.max(bounds[3], point.x);
                 bounds[1] = Math.min(bounds[1], point.y); bounds[4] = Math.max(bounds[4], point.y);
@@ -502,19 +521,18 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     @Override public ModelPart getHead() { return rig.bone("head"); }
 
     @Override
-    public void translateToHand(S state, HumanoidArm arm, PoseStack pose) {
+    public void translateToHand(HumanoidArm arm, PoseStack pose) {
         String paw = arm == HumanoidArm.RIGHT ? "right_paw" : "left_paw";
         Matrix4f actual = matrix(paw);
         // One model-space pixel below the palm center, without changing native item scale or aim.
         Vector3f grip = actual.transformPosition(arm == HumanoidArm.RIGHT ? rightGrip : leftGrip, new Vector3f()).add(0, 1.0F / 16, 0);
-        var motion = WerewolfRenderData.get(state);
-        boolean nativeOrientation = form != WerewolfForm.BEAST || motion.beastRunAmount() <= 0 && motion.beastProwlAmount() <= 0
+        var motion = state;
+        boolean nativeOrientation = form != WerewolfForm.BEAST || motion.beastRunAmount <= 0 && motion.beastProwlAmount <= 0
                 || state.isUsingItem || state.isFallFlying || state.isInWater;
         org.joml.Quaternionf rotation;
         if (nativeOrientation) {
-            nativeHands.setupAnim(state);
             PoseStack nativePose = new PoseStack();
-            nativeHands.translateToHand(state, arm, nativePose);
+            nativeHands.translateToHand(arm, nativePose);
             rotation = nativePose.last().pose().getUnnormalizedRotation(new org.joml.Quaternionf()).normalize();
         } else rotation = actual.getUnnormalizedRotation(new org.joml.Quaternionf()).normalize();
         // Import normalization scales the body only. Weapons retain their native size.
@@ -533,6 +551,15 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         // Lift the item into the bite line by one normalized model pixel.
         pose.translate(0, 0.03F - 1.0F / (16 * rig.scale()), -0.3F);
         pose.scale(1 / rig.scale(), 1 / rig.scale(), 1 / rig.scale());
+    }
+
+    void resetPose() {
+        root.getAllParts().forEach(ModelPart::resetPose);
+        root.xScale = root.yScale = root.zScale = rig.scale();
+    }
+
+    @Override public void renderToBuffer(PoseStack pose, VertexConsumer buffer, int light, int overlay, int color) {
+        root.render(pose, buffer, light, overlay, color);
     }
 
     private record Binding(ModelPart source, ModelPart target) {}

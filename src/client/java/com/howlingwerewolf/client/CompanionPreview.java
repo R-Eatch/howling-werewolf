@@ -4,11 +4,9 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfModelSet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 /** A detached fitting-room model standing before the moon; previewing changes no live companion. */
 final class CompanionPreview {
@@ -47,7 +45,7 @@ final class CompanionPreview {
         zoom = Mth.clamp(zoom + (float) amount * 0.08F, 0.65F, 1.3F);
         return true;
     }
-    void render(GuiGraphics graphics, String model, String skin, float uiScale, double mouseX, double mouseY, MoonUi.Theme theme) {
+    void render(MoonGraphics graphics, String model, String skin, float uiScale, double mouseX, double mouseY, MoonUi.Theme theme) {
         MoonUi.moon(graphics, moonX, moonY, radius, MoonUi.moonPhase(), theme);
         float feet = moonY + radius * 0.88F;
         MoonUi.pool(graphics, moonX, feet, radius * 0.62F, radius * 0.11F, theme.shadow());
@@ -70,12 +68,7 @@ final class CompanionPreview {
         graphics.enableScissor(viewLeft, viewTop, viewRight, viewBottom);
         try {
             WerewolfSkinRenderContext.withPreview(player, WerewolfForm.WEREWOLF, WerewolfModelSet.byId(model), skin, () -> {
-                var state = minecraft.getEntityRenderDispatcher().getRenderer(player).createRenderState(player, 1);
-                state.shadowPieces.clear(); state.outlineColor = 0; state.nameTag = null; if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar) avatar.scoreText = null;
-                graphics.submitEntityRenderState(state, size * uiScale,
-                        new Vector3f(0, (feet - (viewTop + viewBottom) / 2F) / size, 0), pose, camera,
-                        Math.round(viewLeft * uiScale), Math.round(viewTop * uiScale),
-                        Math.round(viewRight * uiScale), Math.round(viewBottom * uiScale));
+                graphics.entity(player, size, (viewLeft + viewRight) / 2F, feet, pose, camera);
             });
         } finally { graphics.disableScissor(); }
     }

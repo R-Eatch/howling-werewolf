@@ -13,8 +13,7 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.network.SetWerewolfSkinPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import com.howlingwerewolf.client.MoonInput.MouseButtonEvent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.RemotePlayer;
@@ -24,7 +23,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -32,7 +30,7 @@ import java.util.List;
 import java.io.IOException;
 
 /** A cosmetic fitting room. Only Apply sends a request; preview entities never enter the level. */
-public final class WerewolfSkinScreen extends Screen {
+public final class WerewolfSkinScreen extends MoonInput.Page {
     private static final int MIN_WIDTH = 560, MIN_HEIGHT = 320, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     private static final int TOP_BAND = 28, BOTTOM_BAND = 50, MARGIN = 12, LIST_WIDTH = 150, CARD_HEIGHT = 50, CARD_GAP = 4;
     private static final WerewolfForm[] PREVIEW_FORMS = {
@@ -230,7 +228,7 @@ public final class WerewolfSkinScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int logicalMouseX = toLogical(mouseX);
         int logicalMouseY = toLogical(mouseY);
         MoonUi.Theme theme = MoonUi.theme();
@@ -282,9 +280,9 @@ public final class WerewolfSkinScreen extends Screen {
             }
             int statusRoom = wide / 2 - MARGIN - 8, statusY = bandTop + 7;
             for (var line : font.split(status, statusRoom).stream().limit(1).toList()) {
-                graphics.drawString(font, line, wide - MARGIN - font.width(line), statusY, statusColor, false);
+                graphics.text(font, line, wide - MARGIN - font.width(line), statusY, statusColor, false);
             }
-            super.render(graphics, logicalMouseX, logicalMouseY, partialTick);
+            super.extractRenderState(graphics, logicalMouseX, logicalMouseY, partialTick);
             if (modelButton != null && modelButton.isHovered()) {
                 Component detail = Component.translatable("screen.howlingwerewolf.skins.model." + modelSet.id() + ".tooltip");
                 graphics.setTooltipForNextFrame(font, font.split(detail, Math.round(260 * uiScale)), mouseX, mouseY);
@@ -304,11 +302,11 @@ public final class WerewolfSkinScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas is drawn with the screen itself.
     }
 
-    private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderPreview(MoonGraphics graphics, int mouseX, int mouseY) {
         if (previewPlayer == null) return;
         float blocks = switch (previewForm) {
             case BEAST -> 3.05F;
@@ -333,16 +331,7 @@ public final class WerewolfSkinScreen extends Screen {
         graphics.enableScissor(x0, y0, x1, y1);
         try {
             WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, modelSet, selectedSkin, () -> {
-                var dispatcher = minecraft.getEntityRenderDispatcher();
-                var state = dispatcher.getRenderer(previewPlayer).createRenderState(previewPlayer, 1.0F);
-                state.shadowPieces.clear();
-                state.outlineColor = 0;
-                state.nameTag = null;
-                if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar) avatar.scoreText = null;
-                graphics.submitEntityRenderState(state, scale * uiScale,
-                        new Vector3f(0.0F, (baseline - (y0 + y1) / 2.0F) / scale, 0.0F), pose, camera,
-                        Math.round(x0 * uiScale), Math.round(y0 * uiScale),
-                        Math.round(x1 * uiScale), Math.round(y1 * uiScale));
+                graphics.entity(previewPlayer, scale, (x0 + x1) / 2.0F, baseline, pose, camera);
             });
         } finally {
             graphics.disableScissor();
@@ -472,7 +461,7 @@ public final class WerewolfSkinScreen extends Screen {
     private void createTemplate() {
         try {
             var directory = WerewolfSkinTemplate.export(minecraft.getResourcePackDirectory(), modelSet, selectedSkin);
-            net.minecraft.util.Util.getPlatform().openPath(directory);
+            net.minecraft.Util.getPlatform().openFile(directory.toFile());
             notice = Component.translatable("screen.howlingwerewolf.skins.template_created");
         } catch (IOException | RuntimeException error) {
             LogUtils.getLogger().warn("Unable to create werewolf skin template", error);
@@ -503,16 +492,17 @@ public final class WerewolfSkinScreen extends Screen {
         }
 
         @Override
-        protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderWidget(net.minecraft.client.gui.GuiGraphics raw, int mouseX, int mouseY, float partialTick) {
+            MoonGraphics graphics = new MoonGraphics(raw);
             boolean selected = selectedSkin.equals(skin.id());
             MoonUi.Theme theme = MoonUi.theme();
             int edge = selected ? theme.accent() : isHoveredOrFocused() ? theme.ink() : theme.line();
             MoonUi.round(graphics, getX(), getY(), width, height, 5, edge);
             MoonUi.round(graphics, getX() + 1, getY() + 1, width - 2, height - 2, 4, theme.node());
-            graphics.drawString(font, font.plainSubstrByWidth(getMessage().getString(), width - 20), getX() + 10, getY() + 6, selected ? theme.accent() : theme.ink(), false);
+            graphics.text(font, font.plainSubstrByWidth(getMessage().getString(), width - 20), getX() + 10, getY() + 6, selected ? theme.accent() : theme.ink(), false);
             int y = getY() + 18;
             for (var line : font.split(skinDescription(skin), width - 20).stream().limit(2).toList()) {
-                graphics.drawString(font, line, getX() + 10, y, theme.sub(), false);
+                graphics.text(font, line, getX() + 10, y, theme.sub(), false);
                 y += 10;
             }
             int color = !skin.builtin() ? 0xFF917EB3 : skin.modelSet() == WerewolfModelSet.MODERN ? 0xFF728998 : switch (WerewolfSkin.byId(skin.id())) {

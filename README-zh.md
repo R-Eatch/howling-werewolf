@@ -1,18 +1,18 @@
-# 月厄狼人 · Fabric 1.21.11
+# 月厄狼人 · Fabric 1.21.1
 
 [English](README.md)
 
-这里是《月厄狼人》**Minecraft 1.21.11** 版的源码，分支 `1.21.11-fabric`。
+这里是《月厄狼人》**Minecraft 1.21.1** 版的源码，分支 `1.21.1-fabric`。
 
 | | |
 |---|---|
-| Mod 版本 | **1.3.7** |
-| Minecraft Java 版 | 1.21.11 |
-| Fabric Loader | 0.20.1 或更新版本 |
-| Fabric API | 0.141.6+1.21.11 或更新版本 |
+| Mod 版本 | **1.3.8** |
+| Minecraft Java 版 | 1.21.1 |
+| Fabric Loader | 0.16.14 或更新版本 |
+| Fabric API | 0.116.4+1.21.1 或更新版本 |
 | Java | 21 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.7-fabric-1.21.11.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.3.8-fabric-1.21.1.jar`。服务端和每个客户端需安装同一版本。
 
 1.3.5–1.3.7 新增分章节的“教程”页（含物品介绍与配方）、每位随从单独的“不受主人伤害”开关、月血沸腾同时作用于附近随从、Modern 模型下 Alpha 试炼的随机毛色，并优化原版盔甲贴合。月血沸腾会响起一声长长的狼嚎；猎人和银誓守夜人换上新的长风衣造型；银剑和 Alpha 狼人徽章换用新纹理；祭坛侧面和中央祭坛底面改为素面石砖；新增两个随从进度：首次招募随从，以及随从升至最高阶。新增配置 `preventWerewolfFullMoonSleep`（默认关闭），开启后狼人无法靠睡觉跳过满月。
 

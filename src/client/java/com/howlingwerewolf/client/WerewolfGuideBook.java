@@ -3,29 +3,21 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.util.context.ContextMap;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
-import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
-import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplayContext;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -73,14 +65,7 @@ final class WerewolfGuideBook {
             new Entry("ritual_altar", ModBlocks.RITUAL_ALTAR::get),
             new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get));
 
-    /** The mod's own crafting and cooking recipes: crafting by id, then smelting, then blasting. */
-    private static final List<String> RECIPE_FILES = List.of("alpha_werewolf_badge", "central_ritual_altar", "moonbane_pearl",
-            "ritual_altar", "silver_sword", "deepslate_silver_smelting", "silver_smelting", "deepslate_silver_blasting", "silver_blasting");
-
-    /**
-     * Recipes for one item. Since 1.21.2 a client no longer receives the server's recipe table, so the guide decodes the
-     * recipes bundled with the mod and shows their vanilla recipe displays. The two brews are registered separately.
-     */
+    /** Read crafting and cooking recipes from the world. The mod's two brews are registered separately. */
     static List<Shown> recipes(ItemLike target) {
         var level = Minecraft.getInstance().level;
         if (level == null) return List.of();
@@ -92,45 +77,37 @@ final class WerewolfGuideBook {
             return List.of(brew(new ItemStack(ModItems.WOLFSBANE_POTION.get()),
                     new ItemStack(Items.FERMENTED_SPIDER_EYE), target));
         }
-        RegistryOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
-        ContextMap context = SlotDisplayContext.fromLevel(level);
+        var manager = level.getRecipeManager();
+        RegistryAccess registries = level.registryAccess();
         List<Shown> shown = new ArrayList<>();
-        for (String name : RECIPE_FILES) {
-            Recipe<?> recipe = bundled(name, ops);
-            if (recipe == null) continue;
-            for (RecipeDisplay display : recipe.display()) {
-                ItemStack result = display.result().resolveForFirstStack(context);
-                if (!result.is(target.asItem())) continue;
-                if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                    int width = shaped.width();
-                    if (width < 1 || width > 3 || shaped.height() > 3) continue;
-                    List<List<ItemStack>> slots = new ArrayList<>();
-                    for (int i = 0; i < 9; i++) slots.add(List.of());
-                    for (int i = 0; i < shaped.ingredients().size(); i++) {
-                        slots.set(i / width * 3 + i % width, shaped.ingredients().get(i).resolveForStacks(context));
-                    }
-                    shown.add(new Shown(Method.CRAFT, slots, result));
-                } else if (display instanceof ShapelessCraftingRecipeDisplay shapeless && shapeless.ingredients().size() <= 9) {
-                    List<List<ItemStack>> slots = new ArrayList<>();
-                    for (int i = 0; i < 9; i++) slots.add(List.of());
-                    for (int i = 0; i < shapeless.ingredients().size(); i++) slots.set(i, shapeless.ingredients().get(i).resolveForStacks(context));
-                    shown.add(new Shown(Method.CRAFT, slots, result));
-                } else if (display instanceof FurnaceRecipeDisplay furnace) {
-                    shown.add(new Shown(recipe.getType() == RecipeType.BLASTING ? Method.BLAST : Method.SMELT,
-                            List.of(furnace.ingredient().resolveForStacks(context)), result));
-                }
+        for (RecipeHolder<CraftingRecipe> holder : manager.getAllRecipesFor(RecipeType.CRAFTING).stream()
+                .sorted(Comparator.comparing((RecipeHolder<CraftingRecipe> h) -> h.id())).toList()) {
+            CraftingRecipe recipe = holder.value();
+            ItemStack result = recipe.getResultItem(registries);
+            if (!result.is(target.asItem())) continue;
+            List<Ingredient> ingredients = recipe.getIngredients();
+            int width = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
+            if (width < 1 || width > 3 || ingredients.isEmpty() || ingredients.size() > width * 3) continue;
+            List<List<ItemStack>> slots = new ArrayList<>();
+            for (int i = 0; i < 9; i++) slots.add(List.of());
+            for (int i = 0; i < ingredients.size(); i++) {
+                slots.set(i / width * 3 + i % width, List.of(ingredients.get(i).getItems()));
             }
+            shown.add(new Shown(Method.CRAFT, slots, result));
         }
+        addCooking(manager.getAllRecipesFor(RecipeType.SMELTING), shown, Method.SMELT, target, registries);
+        addCooking(manager.getAllRecipesFor(RecipeType.BLASTING), shown, Method.BLAST, target, registries);
         return List.copyOf(shown);
     }
 
-    private static @org.jetbrains.annotations.Nullable Recipe<?> bundled(String name, RegistryOps<JsonElement> ops) {
-        try (var in = WerewolfGuideBook.class.getResourceAsStream("/data/howlingwerewolf/recipe/" + name + ".json")) {
-            if (in == null) return null;
-            JsonElement json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            return Recipe.CODEC.parse(ops, json).result().orElse(null);
-        } catch (IOException | RuntimeException e) {
-            return null;
+    private static void addCooking(List<? extends RecipeHolder<? extends AbstractCookingRecipe>> recipes, List<Shown> shown,
+                                   Method method, ItemLike target, RegistryAccess registries) {
+        for (RecipeHolder<? extends AbstractCookingRecipe> holder : recipes.stream()
+                .sorted(Comparator.comparing((RecipeHolder<? extends AbstractCookingRecipe> h) -> h.id())).toList()) {
+            AbstractCookingRecipe recipe = holder.value();
+            ItemStack result = recipe.getResultItem(registries);
+            if (!result.is(target.asItem()) || recipe.getIngredients().isEmpty()) continue;
+            shown.add(new Shown(method, List.of(List.of(recipe.getIngredients().get(0).getItems())), result));
         }
     }
 
@@ -140,7 +117,7 @@ final class WerewolfGuideBook {
 
     /** One alternative per second, so tags and multi-item ingredients show every choice. */
     static ItemStack cycle(List<ItemStack> choices) {
-        return choices.isEmpty() ? ItemStack.EMPTY : choices.get((int) (net.minecraft.util.Util.getMillis() / 1000 % choices.size()));
+        return choices.isEmpty() ? ItemStack.EMPTY : choices.get((int) (net.minecraft.Util.getMillis() / 1000 % choices.size()));
     }
 
     private WerewolfGuideBook() {}

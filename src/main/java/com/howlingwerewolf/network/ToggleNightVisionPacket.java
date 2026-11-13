@@ -5,13 +5,13 @@ import com.howlingwerewolf.event.WerewolfGameplayEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public record ToggleNightVisionPacket() implements CustomPacketPayload {
     public static final Type<ToggleNightVisionPacket> TYPE = new Type<>(
-            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "toggle_night_vision"));
+            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "toggle_night_vision"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ToggleNightVisionPacket> STREAM_CODEC =
             StreamCodec.unit(new ToggleNightVisionPacket());
 

@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
@@ -76,9 +75,10 @@ final class BlockbenchModel {
         float[] bounds = bounds(root);
         float scale = height * 16.0F / (bounds[4] - bounds[1]);
         if (!Float.isFinite(scale) || scale <= 0.0F) throw new IllegalArgumentException("Empty model bounds");
-        PartPose rootPose = PartPose.offset(0.0F, 24.0F - bounds[4] * scale, 0.0F).withScale(scale);
+        PartPose rootPose = PartPose.offset(0.0F, 24.0F - bounds[4] * scale, 0.0F);
         root.setInitialPose(rootPose);
         root.loadPose(rootPose);
+        root.xScale = root.yScale = root.zScale = scale;
         for (String name : paths.keySet()) {
             List<ModelPart> path = new ArrayList<>();
             path.add(root);
@@ -149,56 +149,29 @@ final class BlockbenchModel {
         boolean mirror = GsonHelper.getAsBoolean(json, "mirror_uv", false);
         float inflate = number(json, "inflate", 0);
         var directions = EnumSet.allOf(Direction.class);
-        ModelPart.Cube cube = new AuthoredUvCube(origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
+        ModelPart.Cube cube = new ModelPart.Cube(0, 0, origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
                 size[0], size[1], size[2], inflate, inflate, inflate, mirror, textureWidth, textureHeight, directions);
         // Blockbench rounds box-UV sizes separately from the actual fractional geometry.
         ModelPart.Cube uv = new ModelPart.Cube(0, 0, 0, 0, 0,
                 Math.abs(north[2] - north[0]), Math.abs(north[3] - north[1]), Math.abs(east[2] - east[0]),
                 0, 0, 0, mirror, textureWidth, textureHeight, directions);
         for (int index = 0; index < cube.polygons.length; index++) {
-            ModelPart.Vertex[] points = cube.polygons[index].vertices().clone();
-            ModelPart.Vertex[] tex = uv.polygons[index].vertices();
+            ModelPart.Vertex[] points = cube.polygons[index].vertices.clone();
+            ModelPart.Vertex[] tex = uv.polygons[index].vertices;
             for (int vertex = 0; vertex < points.length; vertex++) {
-                points[vertex] = points[vertex].remap(tex[vertex].u() + u / textureWidth, tex[vertex].v() + v / textureHeight);
+                points[vertex] = points[vertex].remap(tex[vertex].u + u / textureWidth, tex[vertex].v + v / textureHeight);
             }
-            cube.polygons[index] = new ModelPart.Polygon(points, cube.polygons[index].normal());
+            System.arraycopy(points, 0, cube.polygons[index].vertices, 0, points.length);
         }
         return cube;
-    }
-
-    /**
-     * These fractional boxes have UV dimensions independent of their geometry.
-     * Entity optimizers may cache vanilla constructor arguments, before our authored
-     * UVs are installed. Emit the final polygons directly so every consumer receives
-     * the same vertices, without depending on a renderer mod's private cache or API.
-     */
-    static final class AuthoredUvCube extends ModelPart.Cube {
-        AuthoredUvCube(float x, float y, float z, float width, float height, float depth,
-                       float growX, float growY, float growZ, boolean mirror,
-                       float textureWidth, float textureHeight, Set<Direction> faces) {
-            super(0, 0, x, y, z, width, height, depth, growX, growY, growZ,
-                    mirror, textureWidth, textureHeight, faces);
-        }
-
-        @Override public void compile(PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, int color) {
-            Vector3f normal = new Vector3f();
-            for (ModelPart.Polygon polygon : polygons) {
-                pose.transformNormal(polygon.normal(), normal);
-                for (ModelPart.Vertex vertex : polygon.vertices()) {
-                    consumer.addVertex(pose, vertex.worldX(), vertex.worldY(), vertex.worldZ())
-                            .setColor(color).setUv(vertex.u(), vertex.v()).setOverlay(overlay).setLight(light)
-                            .setNormal(normal.x, normal.y, normal.z);
-                }
-            }
-        }
     }
 
     static float[] bounds(ModelPart root) {
         float[] result = {Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
                 Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
         root.visit(new PoseStack(), (pose, path, index, cube) -> {
-            for (var polygon : cube.polygons) for (var vertex : polygon.vertices()) {
-                Vector3f point = pose.pose().transformPosition(vertex.worldX(), vertex.worldY(), vertex.worldZ(), new Vector3f()).mul(16);
+            for (var polygon : cube.polygons) for (var vertex : polygon.vertices) {
+                Vector3f point = pose.pose().transformPosition(vertex.pos.x / 16, vertex.pos.y / 16, vertex.pos.z / 16, new Vector3f()).mul(16);
                 result[0] = Math.min(result[0], point.x); result[3] = Math.max(result[3], point.x);
                 result[1] = Math.min(result[1], point.y); result[4] = Math.max(result[4], point.y);
                 result[2] = Math.min(result[2], point.z); result[5] = Math.max(result[5], point.z);

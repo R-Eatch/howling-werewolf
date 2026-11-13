@@ -18,7 +18,7 @@ final class ModernBeastRunState {
         boolean prowling = WerewolfApi.get(player).map(data -> WerewolfModelPose.isBeastProwl(player, data)).orElse(false);
         Motion motion = MOTIONS.computeIfAbsent(player, ignored -> new Motion(player.tickCount));
         if (motion.tick != player.tickCount) {
-            float elapsed = Math.clamp(player.tickCount - motion.tick, 1, 20);
+            float elapsed = Mth.clamp(player.tickCount - motion.tick, 1, 20);
             motion.run.advance(running, 0.2F * elapsed);
             motion.prowl.advance(prowling, 0.2F * elapsed);
             motion.leap.advance(running && !player.onGround(), 0.25F * elapsed);

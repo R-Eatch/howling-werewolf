@@ -1,6 +1,6 @@
 package com.howlingwerewolf;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /** Shared validation for persisted skin selections and server-bound cosmetic requests. */
 public final class WerewolfSkinIds {
@@ -17,7 +17,7 @@ public final class WerewolfSkinIds {
             }
             return null;
         }
-        Identifier id = Identifier.tryParse(value);
+        ResourceLocation id = ResourceLocation.tryParse(value);
         if (id == null || id.getNamespace().isEmpty() || !validPath(id.getPath())
                 || !id.toString().equals(value)) return null;
         if (HowlingWerewolf.MOD_ID.equals(id.getNamespace())) {

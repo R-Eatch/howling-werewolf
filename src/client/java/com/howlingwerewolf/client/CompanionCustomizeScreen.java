@@ -5,7 +5,6 @@ import com.howlingwerewolf.client.CompanionUi.Look;
 import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.network.CompanionActionPacket;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -33,19 +32,19 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
     CompanionCustomizeScreen(@Nullable Screen parent, CompoundTag snapshot, @Nullable UUID selected) {
         super(Component.translatable(KEY + "customize"), parent, snapshot, selected);
         CompoundTag record = selectedRecord();
-        pendingName = record == null ? "" : record.getStringOr("CustomName", "");
-        pendingSkin = record == null ? "" : record.getStringOr("Skin", "");
-        model = snapshot.getStringOr("Model", "modern");
+        pendingName = record == null ? "" : record.getString("CustomName");
+        pendingSkin = record == null ? "" : record.getString("Skin");
+        model = CompanionUi.str(snapshot, "Model", "modern");
     }
     @Override protected Tab tab() { return Tab.LOOK; }
     @Override protected int actionsWidth() { return ACTION_W + 10; }
     @Override protected void onSnapshot(CompoundTag previous) {
-        String nextModel = snapshot.getStringOr("Model", model);
+        String nextModel = CompanionUi.str(snapshot, "Model", model);
         if (!nextModel.equals(model)) {
             // The world switched model family: coats differ, so rebuild from the companion's own coat.
             model = nextModel;
             CompoundTag record = selectedRecord();
-            pendingSkin = record == null ? "" : record.getStringOr("Skin", "");
+            pendingSkin = record == null ? "" : record.getString("Skin");
             rebuildWidgets();
         }
     }
@@ -57,20 +56,19 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
         int x = left + SIDE_X;
         name = addRenderableWidget(new EditBox(font, x + 2, top + 49, SIDE_W - 84, 12, Component.translatable(KEY + "name")));
         name.setBordered(false);
-        name.setTextShadow(false);
         name.setMaxLength(64);
         name.setValue(pendingName);
         name.setResponder(value -> pendingName = value);
         saveName = addRenderableWidget(new UiButton(x + SIDE_W - 72, top + 44, 72, 18, Component.translatable(KEY + "save_name"), Look.SOFT,
                 () -> request(CompanionActionPacket.Action.RENAME, name.getValue())));
-        ListTag skins = snapshot.getListOrEmpty("Skins");
+        ListTag skins = snapshot.getList("Skins", 10);
         int columns = 3, gap = 4, chipW = (SIDE_W - gap * (columns - 1)) / columns;
         for (int i = 0; i < skins.size(); i++) {
-            CompoundTag skin = skins.getCompoundOrEmpty(i);
-            String id = skin.getStringOr("Id", "");
+            CompoundTag skin = skins.getCompound(i);
+            String id = skin.getString("Id");
             coatIds.add(id);
             UiButton chip = new UiButton(x + i % columns * (chipW + gap), top + 112 + i / columns * 26, chipW, 22,
-                    Component.literal(skin.getStringOr("Name", "")), Look.CHIP, () -> { pendingSkin = id; refreshControls(); });
+                    Component.literal(skin.getString("Name")), Look.CHIP, () -> { pendingSkin = id; refreshControls(); });
             coats.add(addRenderableWidget(chip));
         }
         applySkin = addRenderableWidget(new UiButton(left + WIDTH - 12 - ACTION_W, top + HEIGHT - LOWER_BAND + 10, ACTION_W, 26, Component.translatable(KEY + "apply_skin"), Look.PRIMARY,
@@ -89,8 +87,8 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
         if (name == null) return;
         CompoundTag record = selectedRecord();
         boolean editable = record != null && systemEnabled() && mode(record) != CompanionMode.HUNT && mode(record) != CompanionMode.DEAD;
-        saveName.active = editable && actionDelay == 0 && !name.getValue().equals(record.getStringOr("CustomName", ""));
-        applySkin.active = editable && actionDelay == 0 && !pendingSkin.equals(record.getStringOr("Skin", ""));
+        saveName.active = editable && actionDelay == 0 && !name.getValue().equals(record.getString("CustomName"));
+        applySkin.active = editable && actionDelay == 0 && !pendingSkin.equals(record.getString("Skin"));
         name.setEditable(editable);
         name.setTextColor(MoonUi.theme().ink());
         for (int i = 0; i < coats.size(); i++) {
@@ -101,7 +99,7 @@ public final class CompanionCustomizeScreen extends CompanionFrameScreen {
     @Override protected Focus focus() {
         return new Focus(null, Component.translatable(KEY + "skin_hint"));
     }
-    @Override protected void body(GuiGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
+    @Override protected void body(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
         if (selectedRecord() == null) return;
         int moonY = top + (TOP_BAND + HEIGHT - LOWER_BAND) / 2;
         MoonUi.glow(graphics, left + MOON_X, moonY, MOON_RADIUS * 1.6F, theme.bloom());

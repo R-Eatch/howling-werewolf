@@ -5,7 +5,7 @@ import com.howlingwerewolf.companion.CompanionRecord;
 import com.howlingwerewolf.companion.CompanionRules;
 import com.howlingwerewolf.companion.CompanionSavedData;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -55,7 +55,7 @@ public final class WerewolfGuide {
 
     private static void award(ServerPlayer player, String path) {
         AdvancementHolder advancement = player.level().getServer().getAdvancements()
-                .get(Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path));
+                .get(ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, path));
         if (advancement == null) {
             HowlingWerewolf.LOGGER.warn("Missing werewolf guide advancement {}", path);
             return;

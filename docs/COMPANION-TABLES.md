@@ -1,6 +1,6 @@
 # Companion hunt and trade tables
 
-For Minecraft 1.21.11 / Fabric. The hunt table comes from the JSON built into the mod, and once a data pack overrides it, what the server loaded is what counts; the merchant's trades are defined in code. [Companion guide](COMPANIONS.md) · [简体中文](COMPANION-TABLES-zh.md)
+For Minecraft 1.21.1 / Fabric. The hunt table comes from the JSON built into the mod, and once a data pack overrides it, what the server loaded is what counts; the merchant's trades are defined in code. [Companion guide](COMPANIONS.md) · [简体中文](COMPANION-TABLES-zh.md)
 
 ## Hunt weights and counts
 

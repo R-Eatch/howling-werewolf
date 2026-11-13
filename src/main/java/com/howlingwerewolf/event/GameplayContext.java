@@ -6,9 +6,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.util.TriState;
 
 /** Mutable decisions shared by Fabric callbacks and the narrow vanilla hooks. */
 public final class GameplayContext {
@@ -44,15 +41,8 @@ public final class GameplayContext {
         private final BlockPos pos;
         public Interaction(Player player,BlockPos pos) { super(player);this.pos=pos; }
         public BlockPos getPos() { return pos; }
-        public void setUseBlock(TriState value) { setCanceled(value==TriState.FALSE); }
     }
-    public static final class Fall extends EntityContext<LivingEntity> {
-        private double distance;
-        private float multiplier;
-        public Fall(LivingEntity entity,double distance,float multiplier) { super(entity);this.distance=distance;this.multiplier=multiplier; }
-        public void setDistance(float distance) { this.distance=distance; }
-        public void setDamageMultiplier(float multiplier) { this.multiplier=multiplier; }
-    }
+    public static final class Fall extends EntityContext<LivingEntity> { public Fall(LivingEntity entity) { super(entity); } }
     public static final class Jump extends EntityContext<LivingEntity> { public Jump(LivingEntity entity) { super(entity); } }
     public static final class BreakSpeed extends EntityContext<Player> {
         private final BlockState state;
@@ -72,16 +62,6 @@ public final class GameplayContext {
         public boolean canHarvest() { return harvest; }
         public void setCanHarvest(boolean value) { harvest=value; }
     }
-    public static final class Looting {
-        private final Holder<Enchantment> enchantment;
-        private final DamageSource source;
-        private int level;
-        public Looting(Holder<Enchantment> enchantment,DamageSource source,int level) { this.enchantment=enchantment;this.source=source;this.level=level; }
-        public Holder<Enchantment> getEnchantment() { return enchantment; }
-        public DamageSource getDamageSource() { return source; }
-        public int getEnchantmentLevel() { return level; }
-        public void setEnchantmentLevel(int level) { this.level=level; }
-    }
     public static final class Size extends EntityContext<Entity> {
         private final Pose pose;
         private EntityDimensions size;
@@ -97,7 +77,7 @@ public final class GameplayContext {
         public Pickup(Player player,ItemEntity item) { this.player=player;this.item=item; }
         public Player getPlayer() { return player; }
         public ItemEntity getItemEntity() { return item; }
-        public void setCanPickup(TriState value) { allowed=value!=TriState.FALSE; }
+        public void denyPickup() { allowed=false; }
         public boolean allowed() { return allowed; }
     }
 }

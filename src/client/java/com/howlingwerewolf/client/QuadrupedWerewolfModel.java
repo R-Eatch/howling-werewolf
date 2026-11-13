@@ -1,6 +1,7 @@
 package com.howlingwerewolf.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -8,7 +9,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.Mth;
 
 /**
@@ -16,7 +17,7 @@ import net.minecraft.util.Mth;
  * definition here makes the four-legged model part of this mod's compiled JAR while retaining the
  * standard 64x32 wolf UV layout.
  */
-public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends EntityModel<S> {
+public final class QuadrupedWerewolfModel<T extends LivingEntity> extends EntityModel<T> {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart realHead;
@@ -30,7 +31,6 @@ public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends
     private final ModelPart realTail;
 
     public QuadrupedWerewolfModel(ModelPart root) {
-        super(root);
         this.root = root;
         this.head = root.getChild("head");
         this.realHead = head.getChild("real_head");
@@ -80,12 +80,8 @@ public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends
     }
 
     @Override
-    public void setupAnim(S player) {
-        float limbSwing = player.walkAnimationPos;
-        float limbAmount = player.walkAnimationSpeed;
-        float ageInTicks = player.ageInTicks;
-        float netHeadYaw = player.yRot;
-        float headPitch = player.xRot;
+    public void setupAnim(T player, float limbSwing, float limbAmount,
+                          float ageInTicks, float netHeadYaw, float headPitch) {
         root.getAllParts().forEach(ModelPart::resetPose);
 
         head.setPos(-1.0F, 13.5F, -7.0F);
@@ -103,7 +99,7 @@ public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends
         rightFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F + Mth.PI) * 1.4F * speed;
         leftFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * speed;
 
-        if (player.isCrouching) {
+        if (player.isCrouching()) {
             head.y += 1.0F;
             upperBody.y += 1.0F;
             body.y += 1.0F;
@@ -122,4 +118,9 @@ public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends
         realHead.translateAndRotate(poseStack);
     }
 
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int packedLight,
+                               int packedOverlay, int color) {
+        root.render(poseStack, consumer, packedLight, packedOverlay, color);
+    }
 }

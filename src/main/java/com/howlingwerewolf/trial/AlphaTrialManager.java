@@ -50,7 +50,7 @@ public final class AlphaTrialManager {
     public enum FailureReason { OWNER_MISSING, OWNER_LEFT, ALTAR_BROKEN, PEACEFUL }
 
     public static void tryStart(ServerPlayer player, BlockPos center) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (level.dimension() != Level.OVERWORLD) {
             reject(player, "message.howlingwerewolf.trial.overworld_only");
             return;
@@ -206,12 +206,12 @@ public final class AlphaTrialManager {
         BlockPos center = altar.getBlockPos();
         List<UUID> ids = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
-            HunterEntity hunter = ModEntities.HUNTER.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+            HunterEntity hunter = ModEntities.HUNTER.get().create(level);
             if (hunter == null) continue;
             double angle = Math.PI * 2.0D * i / 7.0D;
             double x = center.getX() + 0.5D + Math.cos(angle) * 8.0D;
             double z = center.getZ() + 0.5D + Math.sin(angle) * 8.0D;
-            hunter.snapTo(x, center.getY() + 1.0D, z,
+            hunter.moveTo(x, center.getY() + 1.0D, z,
                     (float)Math.toDegrees(angle + Math.PI), 0.0F);
             hunter.configureForTrial();
             hunter.setTarget(owner);
@@ -230,12 +230,12 @@ public final class AlphaTrialManager {
     private static void spawnAlpha(RitualAltarBlockEntity altar, ServerPlayer owner) {
         ServerLevel level = (ServerLevel)altar.getLevel();
         BlockPos center = altar.getBlockPos();
-        AlphaWerewolfEntity alpha = ModEntities.ALPHA_WEREWOLF.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        AlphaWerewolfEntity alpha = ModEntities.ALPHA_WEREWOLF.get().create(level);
         if (alpha == null) {
             fail(altar, FailureReason.ALTAR_BROKEN);
             return;
         }
-        alpha.snapTo(center.getX() + 0.5D, center.getY() + 1.0D, center.getZ() + 0.5D,
+        alpha.moveTo(center.getX() + 0.5D, center.getY() + 1.0D, center.getZ() + 0.5D,
                 owner.getYRot() + 180.0F, 0.0F);
         alpha.configureForTrial(owner.getUUID(), center);
         alpha.setTarget(owner);
@@ -254,7 +254,7 @@ public final class AlphaTrialManager {
                                         RitualAltarBlockEntity altar) {
         Vec3 middle = Vec3.atCenterOf(center);
         if (level.getGameTime() % 2L == 0L) {
-            DustParticleOptions dust = new DustParticleOptions(0x850A1A, 1.2F);
+            DustParticleOptions dust = new DustParticleOptions(new org.joml.Vector3f(0.52F, 0.04F, 0.10F), 1.2F);
             for (int i = 0; i < 48; i++) {
                 double angle = Math.PI * 2.0D * i / 48.0D;
                 double x = middle.x + Math.cos(angle) * BARRIER_RADIUS;
@@ -409,7 +409,7 @@ public final class AlphaTrialManager {
 
     /** A closed connection cannot display chat, so repeat the unified failure line on login. */
     public static void deliverPendingFailureMessage(ServerPlayer player) {
-        if (!player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).getBooleanOr(PENDING_FAILURE_TAG, false)) return;
+        if (!player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).getBoolean(PENDING_FAILURE_TAG)) return;
         player.getAttachedOrCreate(com.howlingwerewolf.capability.ModAttachments.LEGACY).remove(PENDING_FAILURE_TAG);
         player.sendSystemMessage(Component.translatable("message.howlingwerewolf.trial.failed")
                 .withStyle(ChatFormatting.DARK_RED));

@@ -4,11 +4,14 @@ package com.howlingwerewolf.companion;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.Identifier;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.saveddata.SavedDataType;
+import com.howlingwerewolf.HowlingWerewolf;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.datafix.DataFixTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -21,14 +24,28 @@ import java.util.UUID;
 
 /** Server-wide and keyed by owner UUID, so neither player death nor a dimension unload loses followers. */
 public final class CompanionSavedData extends SavedData {
+    private static final String NAME = "howlingwerewolf_companions";
     public static final Codec<CompanionSavedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CompanionRecord.CODEC.listOf().fieldOf("companions").forGetter(data -> List.copyOf(data.records.values())),
             Codec.LONG.optionalFieldOf("paused_at", -1L).forGetter(data -> data.pausedAt),
             Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).optionalFieldOf("owner_addresses", Map.of())
                     .forGetter(data -> Map.copyOf(data.ownerAddresses))
     ).apply(instance, CompanionSavedData::new));
-    private static final SavedDataType<CompanionSavedData> TYPE = new SavedDataType<>(
-            "howlingwerewolf_companions", CompanionSavedData::new, CODEC, null);
+    // Vanilla 1.21.1 requires a fix type. Command storage preserves this mod's own keys.
+    private static final SavedData.Factory<CompanionSavedData> FACTORY = new SavedData.Factory<>(
+            CompanionSavedData::new, CompanionSavedData::load, DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
+
+    /** Item stacks carry data components, so both directions go through the world's registries. */
+    private static CompanionSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+        return CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), tag).resultOrPartial(error ->
+                HowlingWerewolf.LOGGER.error("Could not read companion records: {}", error)).orElseGet(CompanionSavedData::new);
+    }
+    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), this)
+                .resultOrPartial(error -> HowlingWerewolf.LOGGER.error("Could not save companion records: {}", error))
+                .ifPresent(encoded -> { if (encoded instanceof CompoundTag compound) tag.merge(compound); });
+        return tag;
+    }
     private final Map<UUID, CompanionRecord> records = new LinkedHashMap<>();
     // Loaded projections are transient references scoped to this server's saved data, never global statics.
     private final Map<UUID, WerewolfCompanionEntity> loaded = new HashMap<>();
@@ -90,7 +107,7 @@ public final class CompanionSavedData extends SavedData {
         lastIdleSpeech.put(owner, now);
         return true;
     }
-    public static CompanionSavedData get(MinecraftServer server) { return server.overworld().getDataStorage().computeIfAbsent(TYPE); }
+    public static CompanionSavedData get(MinecraftServer server) { return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME); }
     public List<CompanionRecord> ownedBy(UUID owner) {
         return records.values().stream().filter(record -> record.belongsTo(owner)).toList();
     }

@@ -1,4 +1,9 @@
 accessWidener v2 named
 accessible field net/minecraft/world/food/FoodData exhaustionLevel F
+accessible method net/minecraft/world/entity/SpawnPlacements register (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/SpawnPlacementType;Lnet/minecraft/world/level/levelgen/Heightmap$Types;Lnet/minecraft/world/entity/SpawnPlacements$SpawnPredicate;)V
+accessible class net/minecraft/client/model/geom/ModelPart$Polygon
+accessible class net/minecraft/client/model/geom/ModelPart$Vertex
+accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/minecraft/client/model/geom/ModelPart$Polygon;
 accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
 accessible field net/minecraft/client/model/geom/ModelPart children Ljava/util/Map;
+accessible method net/minecraft/world/entity/animal/Wolf setCollarColor (Lnet/minecraft/world/item/DyeColor;)V

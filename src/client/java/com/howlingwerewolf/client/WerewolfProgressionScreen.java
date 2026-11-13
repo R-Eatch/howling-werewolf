@@ -19,26 +19,21 @@ import com.howlingwerewolf.network.UpgradeTreeSkillPacket;
 import com.howlingwerewolf.network.UseAbilityPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
+import com.howlingwerewolf.client.MoonInput.KeyEvent;
+import com.howlingwerewolf.client.MoonInput.MouseButtonEvent;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +43,7 @@ import java.util.List;
  * the navigation above and whatever is in focus below; between the bands stands tonight's moon,
  * ringed by experience, with the player's own form in front of it.
  */
-public final class WerewolfProgressionScreen extends Screen {
+public final class WerewolfProgressionScreen extends MoonInput.Page {
     private static final String KEY = "screen.howlingwerewolf.";
     private static final int MIN_WIDTH = 560, MIN_HEIGHT = 320, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     private static final int TOP_BAND = 28, THIN_BAND = 16, MARGIN = 12, NODE_RADIUS = 12, HEADER = 30;
@@ -396,7 +391,7 @@ public final class WerewolfProgressionScreen extends Screen {
     // ------------------------------------------------------------------ frame
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         float logicalX = mouseX / uiScale, logicalY = mouseY / uiScale;
         long now = Util.getMillis();
         frameBlend = 1 - (float) Math.exp(-Math.min(now - lastFrame, 100) / 90F);
@@ -415,7 +410,7 @@ public final class WerewolfProgressionScreen extends Screen {
             if (stage) drawStage(graphics, theme, data);
             else drawArticle(graphics, theme);
             drawBands(graphics, data, logicalX, logicalY);
-            super.render(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
+            super.extractRenderState(graphics, Math.round(logicalX), Math.round(logicalY), partialTick);
             if (!hoveredStack.isEmpty()) graphics.setTooltipForNextFrame(font, List.of(hoveredStack.getHoverName().getVisualOrderText()),
                     Math.round(logicalX), Math.round(logicalY));
             for (var child : children()) {
@@ -429,11 +424,11 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas below is the background; the world only shows while it washes in.
     }
 
-    private void drawMoonAndFigure(GuiGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data, boolean stage, float mouseX, float mouseY) {
+    private void drawMoonAndFigure(MoonGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data, boolean stage, float mouseX, float mouseY) {
         float shiftX = (mouseX - moonX) * -0.006F, shiftY = (mouseY - moonY) * -0.006F;
         MoonUi.moon(graphics, moonX + shiftX, moonY + shiftY, moonRadius, MoonUi.moonPhase(), theme);
         float ringRadius = moonRadius + 8;
@@ -455,7 +450,7 @@ public final class WerewolfProgressionScreen extends Screen {
         drawFigure(graphics, data, moonX, feet, moonRadius, mouseX, mouseY, stage);
     }
 
-    private void drawFigure(GuiGraphics graphics, @Nullable WerewolfData data, float x, float feet, float radius, float mouseX, float mouseY, boolean stage) {
+    private void drawFigure(MoonGraphics graphics, @Nullable WerewolfData data, float x, float feet, float radius, float mouseX, float mouseY, boolean stage) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) { figure = null; return; }
         if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player.getGameProfile());
@@ -479,10 +474,7 @@ public final class WerewolfProgressionScreen extends Screen {
         graphics.enableScissor(x0, y0, x1, y1);
         try {
             WerewolfSkinRenderContext.withPreview(player, form, modelSet, skin, () -> {
-                var state = mc.getEntityRenderDispatcher().getRenderer(player).createRenderState(player, 1);
-                state.shadowPieces.clear(); state.outlineColor = 0; state.nameTag = null; if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar) avatar.scoreText = null;
-                graphics.submitEntityRenderState(state, size * uiScale, new Vector3f(0, (feet - (y0 + y1) / 2F) / size, 0), pose, camera,
-                        Math.round(x0 * uiScale), Math.round(y0 * uiScale), Math.round(x1 * uiScale), Math.round(y1 * uiScale));
+                graphics.entity(player, size, (x0 + x1) / 2F, feet, pose, camera);
             });
         } finally {
             graphics.disableScissor();
@@ -490,7 +482,7 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     /** Dashed arcs through the rows of nodes, and a hairline from each node to the moon. */
-    private void drawStage(GuiGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data) {
+    private void drawStage(MoonGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data) {
         if (data == null || !data.isWerewolf()) return;
         int center = wide / 2;
         MoonUi.centered(graphics, font, Component.translatable(KEY + "level", data.getLevel(), data.getEffectiveMaxLevel()), center, TOP_BAND + 6, theme.ink());
@@ -524,24 +516,24 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     /** The card around the open chapter, its heading, and the figure that belongs to it. */
-    private void drawGuide(GuiGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data, float mouseX, float mouseY) {
+    private void drawGuide(MoonGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data, float mouseX, float mouseY) {
         hoveredStack = ItemStack.EMPTY;
         Component status = Component.translatable(KEY + "info.status", Component.translatable(KEY + "info.status." + statusKey(data)));
         int chipWidth = Math.min(railWidth, font.width(status) + 20);
         MoonUi.round(graphics, railX, TOP_BAND + 12, chipWidth, 16, 8, MoonUi.alpha(theme.accent(), 0.13F));
         MoonUi.disc(graphics, railX + 8.5F, TOP_BAND + 20, 2.2F, theme.accent());
-        graphics.drawString(font, CompanionUi.fit(font, status.getString(), chipWidth - 20), railX + 15, TOP_BAND + 16, theme.accent(), false);
+        graphics.text(font, CompanionUi.fit(font, status.getString(), chipWidth - 20), railX + 15, TOP_BAND + 16, theme.accent(), false);
         MoonUi.pool(graphics, cardX + cardWidth / 2F, cardY + cardHeight / 2F + 6, cardWidth * 0.56F, cardHeight * 0.56F, MoonUi.alpha(theme.shadow(), 0.45F));
         MoonUi.round(graphics, cardX, cardY, cardWidth, cardHeight, 8, MoonUi.alpha(theme.node(), 0.94F));
         WerewolfGuideBook.Chapter shown = WerewolfGuideBook.CHAPTERS.get(chapter);
         float reveal = MoonUi.smooth((Util.getMillis() - pageOpened) / 220F);
-        graphics.drawString(font, Component.translatable(KEY + "guide.chapter", chapter + 1, WerewolfGuideBook.CHAPTERS.size()),
+        graphics.text(font, Component.translatable(KEY + "guide.chapter", chapter + 1, WerewolfGuideBook.CHAPTERS.size()),
                 cardX + 40, cardY + 9, MoonUi.alpha(theme.faint(), reveal), false);
-        graphics.renderItem(new ItemStack(shown.icon().get()), cardX + 16, cardY + 21);
+        graphics.item(new ItemStack(shown.icon().get()), cardX + 16, cardY + 21);
         Component title = Component.translatable(KEY + shown.title());
         int titleRoom = cardWidth - 56 - (shown.id().equals("beast") || shown.id().equals("companions") ? 130 : 0);
         if (font.width(title) * 2 <= titleRoom) MoonUi.large(graphics, font, title, cardX + 40, cardY + 21, 2, MoonUi.alpha(theme.ink(), reveal));
-        else graphics.drawString(font, CompanionUi.fit(font, title.getString(), titleRoom), cardX + 40, cardY + 25, MoonUi.alpha(theme.ink(), reveal), false);
+        else graphics.text(font, CompanionUi.fit(font, title.getString(), titleRoom), cardX + 40, cardY + 25, MoonUi.alpha(theme.ink(), reveal), false);
         graphics.fill(cardX + 16, cardY + GUIDE_HEADER - 7, cardX + cardWidth - 16, cardY + GUIDE_HEADER - 6, MoonUi.alpha(theme.line(), 0.7F));
         graphics.fill(cardX + 16, cardY + cardHeight - GUIDE_FOOTER + 2, cardX + cardWidth - 16, cardY + cardHeight - GUIDE_FOOTER + 3, MoonUi.alpha(theme.line(), 0.5F));
         if (shown.id().equals("trial")) drawAltar(graphics, theme, data);
@@ -549,7 +541,7 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     /** The selected recipe and its required crafting station. */
-    private void drawRecipe(GuiGraphics graphics, MoonUi.Theme theme, int x, int y, float mouseX, float mouseY) {
+    private void drawRecipe(MoonGraphics graphics, MoonUi.Theme theme, int x, int y, float mouseX, float mouseY) {
         WerewolfGuideBook.Shown recipe = recipes.isEmpty() ? null : recipes.get(recipeIndex);
         String method = recipe == null ? "none" : recipe.method().name().toLowerCase(java.util.Locale.ROOT);
         ItemLike station = recipe == null ? Items.COMPASS : switch (recipe.method()) {
@@ -558,8 +550,8 @@ public final class WerewolfProgressionScreen extends Screen {
             case BLAST -> Items.BLAST_FURNACE;
             case BREW -> Items.BREWING_STAND;
         };
-        graphics.renderItem(new ItemStack(station), x, y - 4);
-        graphics.drawString(font, CompanionUi.fit(font, Component.translatable(KEY + "guide.method." + method).getString(), RECIPE_WIDTH - 20), x + 20, y, theme.sub(), false);
+        graphics.item(new ItemStack(station), x, y - 4);
+        graphics.text(font, CompanionUi.fit(font, Component.translatable(KEY + "guide.method." + method).getString(), RECIPE_WIDTH - 20), x + 20, y, theme.sub(), false);
         if (recipe == null) return;
         int top = y + 18;
         List<List<ItemStack>> slots = recipe.slots();
@@ -576,22 +568,22 @@ public final class WerewolfProgressionScreen extends Screen {
         MoonUi.line(graphics, x + 69, arrowY - 3.5F, x + 73, arrowY, 1.2F, theme.sub());
         MoonUi.line(graphics, x + 69, arrowY + 3.5F, x + 73, arrowY, 1.2F, theme.sub());
         slot(graphics, theme, x + 78, top + 19, List.of(recipe.result()), mouseX, mouseY);
-        if (recipe.result().getCount() > 1) graphics.drawString(font, "\u00D7" + recipe.result().getCount(), x + 80, top + 39, theme.faint(), false);
+        if (recipe.result().getCount() > 1) graphics.text(font, "\u00D7" + recipe.result().getCount(), x + 80, top + 39, theme.faint(), false);
         if (recipes.size() > 1) {
             String page = (recipeIndex + 1) + " / " + recipes.size();
-            graphics.drawString(font, page, x + (RECIPE_WIDTH - font.width(page)) / 2, y + 84, theme.sub(), false);
+            graphics.text(font, page, x + (RECIPE_WIDTH - font.width(page)) / 2, y + 84, theme.sub(), false);
         }
     }
 
-    private void slot(GuiGraphics graphics, MoonUi.Theme theme, int x, int y, List<ItemStack> choices, float mouseX, float mouseY) {
+    private void slot(MoonGraphics graphics, MoonUi.Theme theme, int x, int y, List<ItemStack> choices, float mouseX, float mouseY) {
         MoonUi.round(graphics, x, y, 18, 18, 4, MoonUi.alpha(theme.line(), 0.38F));
         ItemStack stack = WerewolfGuideBook.cycle(choices);
         if (stack.isEmpty()) return;
-        graphics.renderItem(stack, x + 1, y + 1);
+        graphics.item(stack, x + 1, y + 1);
         if (mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) hoveredStack = stack;
     }
 
-    private void drawArticle(GuiGraphics graphics, MoonUi.Theme theme) {
+    private void drawArticle(MoonGraphics graphics, MoonUi.Theme theme) {
         float reveal = MoonUi.smooth((Util.getMillis() - pageOpened) / 220F);
         graphics.enableScissor(articleX, articleY, articleX + articleWidth + 8, articleY + articleHeight);
         int y = articleY - Math.round(scroll);
@@ -605,7 +597,7 @@ public final class WerewolfProgressionScreen extends Screen {
                 }
                 int ink = MoonUi.alpha(line.color(), reveal * Mth.clamp(fade, 0, 1));
                 if (line.marked()) MoonUi.disc(graphics, articleX + 2.5F, y + 3.5F, 1.6F, ink);
-                graphics.drawString(font, line.text(), articleX + line.indent(), y, ink, false);
+                graphics.text(font, line.text(), articleX + line.indent(), y, ink, false);
             }
             y += 10 + line.gap();
         }
@@ -621,7 +613,7 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     /** The rite seen from above, laid out on the moon it is sworn under. */
-    private void drawAltar(GuiGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data) {
+    private void drawAltar(MoonGraphics graphics, MoonUi.Theme theme, @Nullable WerewolfData data) {
         MoonUi.moon(graphics, moonX, moonY, moonRadius, MoonUi.moonPhase(), theme);
         float ring = moonRadius + 6;
         for (int i = 0; i < XP_TICKS; i += 2) {
@@ -642,17 +634,17 @@ public final class WerewolfProgressionScreen extends Screen {
         altarNode(graphics, moonX, moonY, Math.max(9, moonRadius * 0.17F), "1", MoonUi.BLOOD, 0xFFFFFFFF);
     }
 
-    private void altarNode(GuiGraphics graphics, float x, float y, float radius, String number, int fill, int text) {
+    private void altarNode(MoonGraphics graphics, float x, float y, float radius, String number, int fill, int text) {
         MoonUi.disc(graphics, x, y, radius, fill);
         MoonUi.centered(graphics, font, Component.literal(number), Math.round(x), Math.round(y) - 4, text);
     }
 
-    private void drawBands(GuiGraphics graphics, @Nullable WerewolfData data, float mouseX, float mouseY) {
+    private void drawBands(MoonGraphics graphics, @Nullable WerewolfData data, float mouseX, float mouseY) {
         graphics.fill(0, 0, wide, TOP_BAND, MoonUi.BAND);
         graphics.fill(0, stageBottom, wide, tall, MoonUi.BAND);
-        int titleRoom = tabs.isEmpty() ? wide : tabs.getFirst().getX() - MARGIN - 8;
+        int titleRoom = tabs.isEmpty() ? wide : tabs.get(0).getX() - MARGIN - 8;
         if (font.width(title) * 2 <= titleRoom) MoonUi.large(graphics, font, title, MARGIN, 6, 2, MoonUi.BAND_TEXT);
-        else graphics.drawString(font, CompanionUi.fit(font, title.getString(), titleRoom), MARGIN, 10, MoonUi.BAND_TEXT, false);
+        else graphics.text(font, CompanionUi.fit(font, title.getString(), titleRoom), MARGIN, 10, MoonUi.BAND_TEXT, false);
         TabButton current = null;
         for (TabButton tab : tabs) if (tab.page == page) current = tab;
         if (current != null) {
@@ -667,7 +659,7 @@ public final class WerewolfProgressionScreen extends Screen {
             MoonUi.centered(graphics, font, Component.translatable(KEY + "not_werewolf"), wide / 2, y, MoonUi.BAND_TEXT);
             for (FormattedCharSequence line : notWerewolfLines(data)) {
                 y += 11;
-                graphics.drawString(font, line, wide / 2 - font.width(line) / 2, y, MoonUi.BAND_SUB, false);
+                graphics.text(font, line, wide / 2 - font.width(line) / 2, y, MoonUi.BAND_SUB, false);
             }
             return;
         }
@@ -684,7 +676,7 @@ public final class WerewolfProgressionScreen extends Screen {
     }
 
     /** The lower band reads out whatever the pointer rests on, falling back to the selected node. */
-    private void drawFocus(GuiGraphics graphics, WerewolfData data, float mouseX, float mouseY) {
+    private void drawFocus(MoonGraphics graphics, WerewolfData data, float mouseX, float mouseY) {
         int top = stageBottom + 8, room = wide - MARGIN * 2 - (page == Page.TREE ? TREE_ACTIONS : ABILITY_ACTIONS);
         Node hovered = null;
         for (Node node : nodes) if (node.isMouseOver(mouseX, mouseY)) hovered = node;
@@ -703,7 +695,7 @@ public final class WerewolfProgressionScreen extends Screen {
             body = shown.description();
         }
         if (heading == null) return;
-        graphics.drawString(font, heading, MARGIN, top, MoonUi.BAND_TEXT, false);
+        graphics.text(font, heading, MARGIN, top, MoonUi.BAND_TEXT, false);
         int x = MARGIN + font.width(heading) + 8;
         if (shown != null && heading == shown.name) {
             if (shown.skill != null) {
@@ -713,10 +705,10 @@ public final class WerewolfProgressionScreen extends Screen {
                     x += 11;
                 }
                 String count = rank + " / " + shown.skill.maxRank();
-                graphics.drawString(font, count, x + 2, top, MoonUi.BAND_SUB, false);
+                graphics.text(font, count, x + 2, top, MoonUi.BAND_SUB, false);
             } else {
                 Component cost = Component.translatable(KEY + "cost", shown.ability.cost());
-                graphics.drawString(font, cost, x, top, 0xFFE3B667, false);
+                graphics.text(font, cost, x, top, 0xFFE3B667, false);
                 x += font.width(cost) + 8;
                 Component state = null;
                 if (data.hasAbility(shown.ability)) {
@@ -724,12 +716,12 @@ public final class WerewolfProgressionScreen extends Screen {
                     else if (shown.ability == WerewolfAbility.EMPTY_CLAW_SLOT) state = Component.translatable(KEY + "claw_slot", data.getClawHotbarSlot() + 1);
                     else if (shown.ability.switchable()) state = Component.translatable(data.isAbilityDisabled(shown.ability) ? KEY + "inactive" : KEY + "active");
                 }
-                if (state != null) graphics.drawString(font, state, x, top, 0xFFEE7A8C, false);
+                if (state != null) graphics.text(font, state, x, top, 0xFFEE7A8C, false);
             }
         }
         int y = top + 13;
         for (FormattedCharSequence line : font.split(body, room)) {
-            graphics.drawString(font, line, MARGIN, y, MoonUi.BAND_SUB, false);
+            graphics.text(font, line, MARGIN, y, MoonUi.BAND_SUB, false);
             y += 10;
         }
     }
@@ -844,7 +836,7 @@ public final class WerewolfProgressionScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (ClientModEvents.OPEN_PROGRESSION.matches(event)) { onClose(); return true; }
+        if (event.matches(ClientModEvents.OPEN_PROGRESSION)) { onClose(); return true; }
         return super.keyPressed(event);
     }
 
@@ -860,7 +852,7 @@ public final class WerewolfProgressionScreen extends Screen {
     private enum Page { TREE, ABILITIES, GUIDE }
 
     /** One word in the upper band; the screen draws the sliding underline. */
-    private static final class TabButton extends AbstractButton {
+    private static final class TabButton extends MoonInput.Button {
         final @Nullable Page page;
         private final Runnable action;
         private float glow;
@@ -871,21 +863,21 @@ public final class WerewolfProgressionScreen extends Screen {
             this.page = page;
             this.action = action;
         }
-        @Override public void onPress(InputWithModifiers input) { action.run(); }
-        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        @Override void press() { action.run(); }
+        @Override protected void extractContents(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
             long now = Util.getMillis();
             glow = Mth.clamp(glow + (isHovered() ? 1 : -1) * Math.min(now - lastFrame, 80) / 90F, 0, 1);
             lastFrame = now;
             Font font = Minecraft.getInstance().font;
             int ink = MoonUi.mix(MoonUi.BAND_SUB, MoonUi.BAND_TEXT, glow);
-            graphics.drawString(font, CompanionUi.fit(font, getMessage().getString(), Math.max(8, getWidth() - 10)), getX() + (getWidth() < 20 ? 4 : 7), getY() + 6, ink, false);
-            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), MoonUi.BAND_TEXT);
+            graphics.text(font, CompanionUi.fit(font, getMessage().getString(), Math.max(8, getWidth() - 10)), getX() + (getWidth() < 20 ? 4 : 7), getY() + 6, ink, false);
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(getX(), getY(), getWidth(), getHeight(), MoonUi.BAND_TEXT);
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }
 
     /** A chapter in the rail: number, icon and name. */
-    private final class ChapterButton extends AbstractButton {
+    private final class ChapterButton extends MoonInput.Button {
         private final int index;
         private final ItemStack icon;
         private float glow;
@@ -896,8 +888,8 @@ public final class WerewolfProgressionScreen extends Screen {
             this.index = index;
             this.icon = new ItemStack(WerewolfGuideBook.CHAPTERS.get(index).icon().get());
         }
-        @Override public void onPress(InputWithModifiers input) { openChapter(index); }
-        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        @Override void press() { openChapter(index); }
+        @Override protected void extractContents(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
             long now = Util.getMillis();
             glow = Mth.clamp(glow + (isHovered() ? 1 : -1) * Math.min(now - lastFrame, 80) / 90F, 0, 1);
             lastFrame = now;
@@ -906,17 +898,17 @@ public final class WerewolfProgressionScreen extends Screen {
             int x = getX(), y = getY(), width = getWidth(), height = getHeight();
             if (open || glow > 0.01F) MoonUi.round(graphics, x, y, width, height, 6, MoonUi.alpha(theme.node(), open ? 0.94F : 0.55F * glow));
             if (open) graphics.fill(x, y + 4, x + 2, y + height - 4, theme.accent());
-            graphics.drawString(font, String.format("%02d", index + 1), x + 7, y + 6, open ? theme.accent() : theme.faint(), false);
-            graphics.renderItem(icon, x + 22, y + 2);
-            graphics.drawString(font, CompanionUi.fit(font, getMessage().getString(), width - 46), x + 42, y + 6,
+            graphics.text(font, String.format("%02d", index + 1), x + 7, y + 6, open ? theme.accent() : theme.faint(), false);
+            graphics.item(icon, x + 22, y + 2);
+            graphics.text(font, CompanionUi.fit(font, getMessage().getString(), width - 46), x + 42, y + 6,
                     open ? theme.ink() : MoonUi.mix(theme.sub(), theme.ink(), glow), false);
-            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(x, y, width, height, theme.accent());
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(x, y, width, height, theme.accent());
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }
 
     /** One item of the item chapter; the selected one is ringed in the accent. */
-    private final class ItemChip extends AbstractButton {
+    private final class ItemChip extends MoonInput.Button {
         private final int index;
         private final ItemStack stack;
         private float glow;
@@ -927,8 +919,8 @@ public final class WerewolfProgressionScreen extends Screen {
             this.index = index;
             this.stack = new ItemStack(WerewolfGuideBook.ITEMS.get(index).item().get());
         }
-        @Override public void onPress(InputWithModifiers input) { openItem(index); }
-        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        @Override void press() { openItem(index); }
+        @Override protected void extractContents(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
             long now = Util.getMillis();
             glow = Mth.clamp(glow + (isHovered() ? 1 : -1) * Math.min(now - lastFrame, 80) / 90F, 0, 1);
             lastFrame = now;
@@ -937,15 +929,15 @@ public final class WerewolfProgressionScreen extends Screen {
             int x = getX(), y = getY();
             MoonUi.round(graphics, x, y, 22, 22, 5, open ? theme.accent() : MoonUi.mix(theme.line(), theme.sub(), glow));
             MoonUi.round(graphics, x + 1, y + 1, 20, 20, 4, theme.node());
-            graphics.renderItem(stack, x + 3, y + 3);
+            graphics.item(stack, x + 3, y + 3);
             if (isHovered()) hoveredStack = stack;
-            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(x - 1, y - 1, 24, 24, theme.accent());
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(x - 1, y - 1, 24, 24, theme.accent());
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }
 
     /** A skill or ability floating at its place on the orbit, with its name running outward. */
-    private final class Node extends AbstractButton {
+    private final class Node extends MoonInput.Button {
         final @Nullable WerewolfTreeSkill skill;
         final @Nullable WerewolfAbility ability;
         final Component name;
@@ -987,9 +979,9 @@ public final class WerewolfProgressionScreen extends Screen {
         float x(float amount) { return Mth.lerp(MoonUi.settle(amount), wide / 2F, targetX); }
         float y(float amount) { return Mth.lerp(MoonUi.settle(amount), (float) moonY, targetY); }
 
-        @Override public void onPress(InputWithModifiers input) { select(this); }
+        @Override void press() { select(this); }
 
-        @Override protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        @Override protected void extractContents(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
             float amount = reveal();
             if (amount <= 0) return;
             long now = Util.getMillis();
@@ -1019,7 +1011,7 @@ public final class WerewolfProgressionScreen extends Screen {
             pose.translate(x, y);
             float iconScale = radius / NODE_RADIUS;
             pose.scale(iconScale, iconScale);
-            graphics.renderItem(icon, -8, -8);
+            graphics.item(icon, -8, -8);
             pose.popMatrix();
             if (!owned && !ready) MoonUi.disc(graphics, x, y, radius - 1, MoonUi.alpha(theme.node(), 0.62F));
             float textAlpha = MoonUi.smooth(settled * 1.3F - 0.3F);
@@ -1029,7 +1021,7 @@ public final class WerewolfProgressionScreen extends Screen {
             int textWidth = font.width(label);
             int textX = left ? Math.round(targetX) - NODE_RADIUS - 6 - textWidth : Math.round(targetX) + NODE_RADIUS + 7;
             int textY = Math.round(targetY) - 8;
-            graphics.drawString(font, label, textX, textY, MoonUi.alpha(nameColor, textAlpha), false);
+            graphics.text(font, label, textX, textY, MoonUi.alpha(nameColor, textAlpha), false);
             int pipWidth = top > 4 ? 5 : 7, gap = 2;
             int pipsWidth = skill != null ? top * pipWidth + (top - 1) * gap : 0;
             int pipX = left ? Math.round(targetX) - NODE_RADIUS - 6 - pipsWidth : textX;
@@ -1044,7 +1036,7 @@ public final class WerewolfProgressionScreen extends Screen {
                 int barX = left ? Math.round(targetX) - NODE_RADIUS - 6 - 12 : textX;
                 graphics.fill(barX, textY + 11, barX + 12, textY + 14, MoonUi.alpha(color, textAlpha));
             }
-            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), theme.accent());
+            if (isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()) graphics.outline(getX(), getY(), getWidth(), getHeight(), theme.accent());
         }
         @Override protected void updateWidgetNarration(NarrationElementOutput output) { defaultButtonNarrationText(output); }
     }
