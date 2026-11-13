@@ -149,8 +149,8 @@ final class BlockbenchModel {
         boolean mirror = GsonHelper.getAsBoolean(json, "mirror_uv", false);
         float inflate = number(json, "inflate", 0);
         var directions = EnumSet.allOf(Direction.class);
-        ModelPart.Cube cube = new ModelPart.Cube(0, 0, origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
-                size[0], size[1], size[2], inflate, inflate, inflate, mirror, textureWidth, textureHeight, directions);
+        ModelPart.Cube cube = new EditedModelCube(origin[0] - to[0], origin[1] - to[1], from[2] - origin[2],
+                size[0], size[1], size[2], inflate, mirror, textureWidth, textureHeight, directions);
         // Blockbench rounds box-UV sizes separately from the actual fractional geometry.
         ModelPart.Cube uv = new ModelPart.Cube(0, 0, 0, 0, 0,
                 Math.abs(north[2] - north[0]), Math.abs(north[3] - north[1]), Math.abs(east[2] - east[0]),

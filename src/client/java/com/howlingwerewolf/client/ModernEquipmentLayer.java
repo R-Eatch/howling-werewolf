@@ -162,9 +162,9 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
             if (original.maxY < minimum || original.minY > maximum) return;
             var faces = java.util.EnumSet.noneOf(Direction.class);
             for (int face = 0; face < original.polygons.length; face++) faces.add(Direction.values()[face]);
-            ModelPart.Cube copy = new ModelPart.Cube(0, 0, original.minX, minimum, original.minZ,
+            ModelPart.Cube copy = new EditedModelCube(original.minX, minimum, original.minZ,
                     original.maxX - original.minX, maximum - minimum, original.maxZ - original.minZ,
-                    0, 0, 0, false, 64, 64, faces);
+                    0, false, 64, 64, faces);
             for (int face = 0; face < original.polygons.length; face++) {
                 var polygon = original.polygons[face];
                 ModelPart.Vertex[] vertices = new ModelPart.Vertex[4];
