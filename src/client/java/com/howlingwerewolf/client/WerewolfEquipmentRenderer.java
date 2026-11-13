@@ -1,7 +1,7 @@
 package com.howlingwerewolf.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
@@ -13,9 +13,11 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 
 /** Vanilla equipment layers, aligned to the original werewolf body without a second player body. */
-public final class WerewolfEquipmentRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
+public final class WerewolfEquipmentRenderer
+        extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, HumanoidModel<AvatarRenderState>> {
     public WerewolfEquipmentRenderer(EntityRendererProvider.Context context) {
-        super(context, new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false), 0.0F, AvatarRenderState::new);
+        // Keep PlayerModel animation hooks out of the equipment renderer.
+        super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER)), 0.0F, AvatarRenderState::new);
         addLayer(new HumanoidArmorLayer<>(this,
                 ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(), WerewolfArmorModel::new),
                 context.getEquipmentRenderer()));
