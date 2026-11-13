@@ -12,6 +12,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -48,6 +49,11 @@ public final class ClientModEvents {
     public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
             "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
             "key.categories.howlingwerewolf");
+
+    @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(PunchyCompat::register);
+    }
 
     @SubscribeEvent
     public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {
