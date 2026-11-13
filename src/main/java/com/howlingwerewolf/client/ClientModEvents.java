@@ -12,6 +12,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 
 @EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT)
@@ -49,6 +50,11 @@ public final class ClientModEvents {
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, InputConstants.KEY_R,
             KEY_CATEGORY);
+
+    @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(PunchyCompat::register);
+    }
 
     @SubscribeEvent
     public static void registerSkinReloadListener(AddClientReloadListenersEvent event) {

@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.7. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
