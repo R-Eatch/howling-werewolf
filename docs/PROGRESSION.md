@@ -2,7 +2,7 @@
 
 [简体中文](PROGRESSION-zh.md) · [Back to README](../README.md)
 
-These values apply to all four editions of 1.3.7. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
+These values apply to all five editions of 1.3.8. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
 
 ## Experience sources
 

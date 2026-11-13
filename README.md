@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.7-blue?style=flat-square" alt="Latest source: 1.3.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.8-blue?style=flat-square" alt="Latest source: 1.3.8"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge downloads"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth downloads"></a>
@@ -17,20 +17,20 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all four supported editions.
+> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all five editions of 1.3.8.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
 ## The 1.3 update: werewolf companions
 
-Everything after 1.2.2 lives in **1.3.x** (currently **1.3.7**):
+Everything after 1.2.2 lives in **1.3.x** (currently **1.3.8**):
 
 - **Werewolf merchants and companions.** Call a werewolf brother at the Moon-Oath altars, trade with him, and recruit him with an Alpha Werewolf Badge to keep him as a lasting companion. See [Werewolf brothers: merchants and companions](#werewolf-brothers-merchants-and-companions).
 - **Storage sorting.** Your companion walks to chests and barrels, opens them, carries items by hand and gathers like with like.
 - **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases.
 - **Long, Tool and Fire Claws can be switched off**, and **equipment display** can be switched on the Skins page and applied with your coat.
 - **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
-- A new **Minecraft 1.21.11 Fabric** edition.
+- A new **Minecraft 1.21.1 Fabric** edition.
 - **Works with Iron's Spells and Better Combat.** When they draw the player's body in first person, the werewolf body no longer blocks the camera.
 - **A Guide tab.** The progression screen's Traits and Alpha Trial pages are now one Guide in nine chapters, from infection to companions, with an item chapter that shows each item's crafting, smelting or brewing recipe.
 - **More for companions.** Each companion has its own switch to ignore your damage, Moonblood Surge also strengthens your recruited companions within 16 blocks, and two advancements mark your first companion and a companion raised to the highest tier.
@@ -319,7 +319,7 @@ When reporting an issue, provide:
 
 ## Source and building
 
-The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.11**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.7**.
+The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.8**. Updates for **Fabric on Minecraft 1.21.11** are paused at **1.3.8**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

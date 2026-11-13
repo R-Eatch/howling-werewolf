@@ -2,7 +2,7 @@
 
 [简体中文](CONFIG-zh.md) · [Back to README](../README.md)
 
-This page covers all four editions of 1.3.7: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.11 and NeoForge 26.1.2. They share the same keys and defaults.
+This page covers all five editions of 1.3.8: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.1, Fabric 1.21.11 and NeoForge 26.1.2. They share the same keys and defaults.
 
 ## Where the files are
 

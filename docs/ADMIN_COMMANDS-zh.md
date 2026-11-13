@@ -2,7 +2,7 @@
 
 [English](ADMIN_COMMANDS.md)
 
-本文适用于 Howling Werewolf `1.3.7`（Minecraft 26.1.2 / NeoForge 26.1.2.122）。这些命令用于开发、验收、服务器管理和存档诊断。
+本文适用于 Howling Werewolf `1.3.8`（Minecraft 26.1.2 / NeoForge 26.1.2.122）。这些命令用于开发、验收、服务器管理和存档诊断。
 
 ## 使用条件
 

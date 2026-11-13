@@ -2,7 +2,7 @@
 
 [English](CONFIG.md) · [返回 README](../README-zh.md)
 
-本页适用于 1.3.7 的全部四个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.11 Fabric 和 26.1.2 NeoForge，各版本的配置项和默认值相同。
+本页适用于 1.3.8 的全部五个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.1 Fabric、1.21.11 Fabric 和 26.1.2 NeoForge，各版本的配置项和默认值相同。
 
 ## 文件位置
 
