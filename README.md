@@ -2,7 +2,7 @@
 
 [简体中文](README-zh.md)
 
-This is the source of Howling Werewolf for **Minecraft 1.21.11**, branch `1.21.11-fabric`.
+This is the source of Howling Werewolf for **Minecraft 1.21.11**, branch `1.21.11-fabric`. Updates are paused at **1.3.7**.
 
 | | |
 |---|---|
