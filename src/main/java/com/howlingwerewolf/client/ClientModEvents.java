@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = HowlingWerewolf.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -48,6 +49,11 @@ public final class ClientModEvents {
     public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
             "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
             "key.categories.howlingwerewolf");
+
+    @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(PunchyCompat::register);
+    }
 
     @SubscribeEvent
     public static void registerSkinReloadListener(RegisterClientReloadListenersEvent event) {

@@ -3,9 +3,11 @@ package com.howlingwerewolf.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidArmorModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
@@ -20,10 +22,10 @@ import net.minecraft.resources.ResourceLocation;
  * crouch and fall-flying poses.
  */
 public final class WerewolfEquipmentRenderer
-        extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+        extends LivingEntityRenderer<AbstractClientPlayer, HumanoidModel<AbstractClientPlayer>> {
 
     public WerewolfEquipmentRenderer(EntityRendererProvider.Context context) {
-        super(context, new HiddenPlayerModel(context), 0.0F);
+        super(context, new HiddenEquipmentModel(context), 0.0F);
         addLayer(new HumanoidArmorLayer<>(this,
                 new HumanoidArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
                 new HumanoidArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
@@ -105,9 +107,10 @@ public final class WerewolfEquipmentRenderer
         return false;
     }
 
-    private static final class HiddenPlayerModel extends PlayerModel<AbstractClientPlayer> {
-        private HiddenPlayerModel(EntityRendererProvider.Context context) {
-            super(context.bakeLayer(ModelLayers.PLAYER), false);
+    // Skip PlayerModel animation hooks, which would pose the armor separately from the werewolf body.
+    private static final class HiddenEquipmentModel extends HumanoidModel<AbstractClientPlayer> {
+        private HiddenEquipmentModel(EntityRendererProvider.Context context) {
+            super(context.bakeLayer(ModelLayers.PLAYER), RenderType::entityTranslucent);
         }
 
         @Override
