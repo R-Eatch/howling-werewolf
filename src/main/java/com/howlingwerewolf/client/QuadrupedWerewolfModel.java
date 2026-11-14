@@ -115,6 +115,7 @@ public final class QuadrupedWerewolfModel<S extends HumanoidRenderState> extends
         tail.xRot = 0.75F + speed * 0.18F;
         realHead.zRot = Mth.sin(ageInTicks * 0.09F) * 0.025F;
         realTail.zRot = Mth.sin(ageInTicks * 0.16F) * 0.08F;
+        ClientPouncePose.apply(player, com.howlingwerewolf.WerewolfForm.QUADRUPED, body, head, rightFrontLeg, leftFrontLeg, rightHindLeg, leftHindLeg);
     }
 
     public void translateToMouth(PoseStack poseStack) {

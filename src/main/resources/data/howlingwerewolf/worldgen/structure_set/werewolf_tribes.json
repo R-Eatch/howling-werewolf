@@ -1,0 +1,26 @@
+{
+  "structures": [
+    {
+      "structure": "howlingwerewolf:werewolf_tribe",
+      "weight": 1
+    },
+    {
+      "structure": "howlingwerewolf:werewolf_tribe_birch",
+      "weight": 1
+    },
+    {
+      "structure": "howlingwerewolf:werewolf_tribe_taiga",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 178523381,
+    "spacing": 46,
+    "separation": 12,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 8
+    }
+  }
+}

@@ -18,13 +18,10 @@ import com.howlingwerewolf.companion.CompanionDialogue;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -55,7 +52,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.item.trading.TradeSet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -76,8 +72,6 @@ import java.util.UUID;
 public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance, ContainerUser {
     private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> RECRUITED = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final ResourceKey<TradeSet> TRADES = ResourceKey.create(Registries.TRADE_SET,
-            Identifier.fromNamespaceAndPath("howlingwerewolf", "werewolf_brother"));
     private CompanionRecord record;
     private boolean moonbloodCrashPending;
     private int generation;
@@ -415,7 +409,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         return canOfferRecruitment(player) && player.getUUID().equals(offeredTo) && level().getGameTime() <= offerExpires;
     }
     @Override protected void updateTrades(ServerLevel level) {
-        if (HWConfig.ENABLE_COMPANIONS.get() && !isRecruited()) addOffersFromTradeSet(level, getOffers(), TRADES);
+        if (HWConfig.ENABLE_COMPANIONS.get() && !isRecruited()) WerewolfTrades.draw(this, level, getOffers(), WerewolfTrades.MerchantRole.BROTHER);
     }
     @Override protected void rewardTradeXp(MerchantOffer offer) {}
     // A werewolf merchant barks, pants and whines instead of haggling like a villager.
@@ -522,9 +516,11 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     @Override protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putString("CompanionSkin", getNpcSkinId());
+        output.putBoolean("SharedTradeTable", true);
     }
     @Override protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
+        if (!input.getBooleanOr("SharedTradeTable", false)) offers = null;
         setSkin(input.getStringOr("CompanionSkin", getNpcSkinId()));
     }
 

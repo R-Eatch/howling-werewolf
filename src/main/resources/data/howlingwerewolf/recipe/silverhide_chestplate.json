@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "H H",
+    "HHH",
+    "HHH"
+  ],
+  "key": {
+    "H": "howlingwerewolf:silverhide"
+  },
+  "result": {
+    "id": "howlingwerewolf:silverhide_chestplate",
+    "count": 1
+  }
+}

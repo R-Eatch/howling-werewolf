@@ -2,6 +2,7 @@ package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.trial.RitualAltarBlock;
+import com.howlingwerewolf.world.SettlementMarkerBlock;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -12,6 +13,10 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 
 public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(HowlingWerewolf.MOD_ID);
+
+    public static final DeferredBlock<SettlementMarkerBlock> SETTLEMENT_MARKER = BLOCKS.registerBlock(
+            "settlement_marker", SettlementMarkerBlock::new,
+            props -> props.mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE));
 
     public static final DeferredBlock<Block> SILVER_ORE = BLOCKS.registerSimpleBlock("silver_ore",
             props -> props.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE));

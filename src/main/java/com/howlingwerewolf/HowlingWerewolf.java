@@ -9,6 +9,7 @@ import com.howlingwerewolf.content.ModBiomeModifiers;
 import com.howlingwerewolf.content.ModPlacementModifiers;
 import com.howlingwerewolf.content.ModRecipes;
 import com.howlingwerewolf.content.ModSounds;
+import com.howlingwerewolf.content.ModStructures;
 import com.howlingwerewolf.content.WerewolfPotionBrewingRecipe;
 import com.howlingwerewolf.content.WolfsbaneBrewingRecipe;
 import com.howlingwerewolf.capability.ModAttachments;
@@ -45,6 +46,12 @@ public final class HowlingWerewolf {
                         output.accept(ModItems.SILVER_INGOT.get());
                         output.accept(ModItems.MOONBANE_PEARL.get());
                         output.accept(ModItems.SILVER_SWORD.get());
+                        output.accept(ModItems.WEREWOLF_PELT.get());
+                        output.accept(ModItems.SILVERHIDE.get());
+                        output.accept(ModItems.SILVERHIDE_HELMET.get());
+                        output.accept(ModItems.SILVERHIDE_CHESTPLATE.get());
+                        output.accept(ModItems.SILVERHIDE_LEGGINGS.get());
+                        output.accept(ModItems.SILVERHIDE_BOOTS.get());
                         output.accept(ModItems.WOLFSBANE_POTION.get());
                         output.accept(ModItems.WEREWOLF_POTION.get());
                         output.accept(ModItems.ALPHA_WEREWOLF_BADGE.get());
@@ -66,6 +73,7 @@ public final class HowlingWerewolf {
         ModRecipes.SERIALIZERS.register(modBus);
         ModSounds.SOUNDS.register(modBus);
         ModPlacementModifiers.PLACEMENT_MODIFIERS.register(modBus);
+        ModStructures.TYPES.register(modBus);
         ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);
         TABS.register(modBus);
