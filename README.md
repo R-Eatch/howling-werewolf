@@ -21,25 +21,6 @@
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
-## The 1.3 update: werewolf companions
-
-Everything after 1.2.2 lives in **1.3.x** (currently **1.3.8**):
-
-- **Werewolf merchants and companions.** Call a werewolf brother at the Moon-Oath altars, trade with him, and recruit him with an Alpha Werewolf Badge to keep him as a lasting companion. See [Werewolf brothers: merchants and companions](#werewolf-brothers-merchants-and-companions).
-- **Storage sorting.** Your companion walks to chests and barrels, opens them, carries items by hand and gathers like with like.
-- **A new progression screen and companion window.** Press **K** and the world falls away to moonlight, with your skills floating around tonight's moon. A crescent at the top right switches between the white **Moonlight** and dark **Nightfall** canvases.
-- **Long, Tool and Fire Claws can be switched off**, and **equipment display** can be switched on the Skins page and applied with your coat.
-- **Beast movement.** The Modern Beast gallops on all fours when sprinting and prowls on all fours when crouching, with a lower crouching view.
-- A new **Minecraft 1.21.1 Fabric** edition.
-- **Works with Iron's Spells and Better Combat.** When they draw the player's body in first person, the werewolf body no longer blocks the camera.
-- **A Guide tab.** The progression screen's Traits and Alpha Trial pages are now one Guide in nine chapters, from infection to companions, with an item chapter that shows each item's crafting, smelting or brewing recipe.
-- **More for companions.** Each companion has its own switch to ignore your damage, Moonblood Surge also strengthens your recruited companions within 16 blocks, and two advancements mark your first companion and a companion raised to the highest tier.
-- **New looks and sounds.** Moonblood Surge sounds a long wolf howl; Hunters wear a long coat and broad hat, and the Silver-Oath Watcher a grander one; the Silver Sword, the Alpha Werewolf Badge, the altars and both potions are redrawn; in the Modern model the trial's Alpha and its werewolves wear one of the nine coats at random.
-- **An optional full-moon rule.** `preventWerewolfFullMoonSleep`, off by default, keeps werewolves from sleeping through a full moon.
-- **Better armour fit and MCA support.** Vanilla armour sits closer on the Modern models. On the Forge and NeoForge editions, players who use MCA Reborn's villager model keep their werewolf body and first-person claws when transformed.
-
-1.2.2 brought the **Modern** models for all three forms (Werewolf, Quadruped Wolf and Beast, nine coats each) by **thewolfulti**; the Classic set remains.
-
 ## Before the first howl
 
 A claw wound left in the forest may seem no different from any other injury at first. Then another night falls, the dormant bloodline begins to awaken, and the moon makes its first choice for you.
