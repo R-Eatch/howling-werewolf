@@ -142,8 +142,8 @@ final class ModernPlayerModel<T extends LivingEntity> extends EntityModel<T> imp
             target.y += (source.y - rest.y) / rig.scale();
             target.z += (source.z - rest.z) / rig.scale();
         }
-        applyNativeHands(state);
-        if (form == WerewolfForm.BEAST) {
+        if (!ClientPouncePose.active(entity)) applyNativeHands(state);
+        if (form == WerewolfForm.BEAST && !ClientPouncePose.active(entity)) {
             var motion = state;
             if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying && state.isUsingItem) {
                 // Aiming keeps the upright crouch, so native arm poses still point at the target.

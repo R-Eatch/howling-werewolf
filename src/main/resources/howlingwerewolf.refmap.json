@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
+      "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
+        "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+      }
+    }
+  }
+}

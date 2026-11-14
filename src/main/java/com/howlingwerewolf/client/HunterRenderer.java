@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 
-public final class HunterRenderer extends HumanoidMobRenderer<HunterEntity, HunterModel> {
+public final class HunterRenderer extends HumanoidMobRenderer<HunterEntity, HunterModel<HunterEntity>> {
     private static final ResourceLocation TEXTURE = new ResourceLocation(
             HowlingWerewolf.MOD_ID, "textures/entity/hunter.png");
     /** The Silver-Oath Watcher of the Alpha Trial wears the same cut in silver-trimmed colors. */
@@ -15,7 +15,7 @@ public final class HunterRenderer extends HumanoidMobRenderer<HunterEntity, Hunt
             HowlingWerewolf.MOD_ID, "textures/entity/hunter_watcher.png");
 
     public HunterRenderer(EntityRendererProvider.Context context) {
-        super(context, new HunterModel(context.bakeLayer(ClientModEvents.HUNTER_LAYER)), 0.5F);
+        super(context, new HunterModel<>(context.bakeLayer(ClientModEvents.HUNTER_LAYER)), 0.5F);
         addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
     }
 

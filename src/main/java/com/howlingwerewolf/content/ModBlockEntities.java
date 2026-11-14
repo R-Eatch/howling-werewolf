@@ -2,6 +2,7 @@ package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.trial.RitualAltarBlockEntity;
+import com.howlingwerewolf.world.SettlementMarkerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,6 +16,10 @@ public final class ModBlockEntities {
             BLOCK_ENTITIES.register("ritual_altar", () -> BlockEntityType.Builder.of(
                     RitualAltarBlockEntity::new,
                     ModBlocks.RITUAL_ALTAR.get(), ModBlocks.CENTRAL_RITUAL_ALTAR.get()).build(null));
+
+    public static final RegistryObject<BlockEntityType<SettlementMarkerBlockEntity>> SETTLEMENT_MARKER =
+            BLOCK_ENTITIES.register("settlement_marker", () -> BlockEntityType.Builder.of(
+                    SettlementMarkerBlockEntity::new, ModBlocks.SETTLEMENT_MARKER.get()).build(null));
 
     private ModBlockEntities() {}
 }

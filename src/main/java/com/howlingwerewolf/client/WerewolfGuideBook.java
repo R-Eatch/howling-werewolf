@@ -62,7 +62,13 @@ final class WerewolfGuideBook {
             new Entry("moonbane_pearl", ModItems.MOONBANE_PEARL::get),
             new Entry("alpha_werewolf_badge", ModItems.ALPHA_WEREWOLF_BADGE::get),
             new Entry("ritual_altar", ModBlocks.RITUAL_ALTAR::get),
-            new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get));
+            new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get),
+            new Entry("werewolf_pelt", ModItems.WEREWOLF_PELT::get),
+            new Entry("silverhide", ModItems.SILVERHIDE::get),
+            new Entry("silverhide_helmet", ModItems.SILVERHIDE_HELMET::get),
+            new Entry("silverhide_chestplate", ModItems.SILVERHIDE_CHESTPLATE::get),
+            new Entry("silverhide_leggings", ModItems.SILVERHIDE_LEGGINGS::get),
+            new Entry("silverhide_boots", ModItems.SILVERHIDE_BOOTS::get));
 
     /** Read crafting and cooking recipes from the world. The mod's two brews are registered separately. */
     static List<Shown> recipes(ItemLike target) {

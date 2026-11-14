@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.howlingwerewolf.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "howlingwerewolf.refmap.json",
+  "mixins": ["LocateWatchtowerMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

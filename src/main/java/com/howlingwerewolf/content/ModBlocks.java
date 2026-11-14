@@ -12,11 +12,16 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import com.howlingwerewolf.trial.RitualAltarBlock;
+import com.howlingwerewolf.world.SettlementMarkerBlock;
 
 import java.util.function.Supplier;
 
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, HowlingWerewolf.MOD_ID);
+
+    public static final RegistryObject<Block> SETTLEMENT_MARKER = BLOCKS.register("settlement_marker",
+            () -> new SettlementMarkerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+                    .strength(2.0F, 6.0F).sound(SoundType.STONE)));
 
     public static final RegistryObject<Block> SILVER_ORE = register("silver_ore", () -> new Block(BlockBehaviour.Properties.of()
             .mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE)));

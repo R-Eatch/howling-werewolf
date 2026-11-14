@@ -1,6 +1,7 @@
 package com.howlingwerewolf.network;
 
 import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.ability.PounceAbility;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.capability.WerewolfPersistence;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
@@ -13,7 +14,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "22";
+    private static final String PROTOCOL = "23";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(HowlingWerewolf.MOD_ID, "main"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -71,6 +72,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(CompanionViewPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(CompanionViewPacket::encode).decoder(CompanionViewPacket::decode)
                 .consumerMainThread(CompanionViewPacket::handle).add();
+        CHANNEL.messageBuilder(PounceMotionPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PounceMotionPacket::encode).decoder(PounceMotionPacket::decode)
+                .consumerMainThread(PounceMotionPacket::handle).add();
         CHANNEL.messageBuilder(ToggleAbilityPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ToggleAbilityPacket::encode).decoder(ToggleAbilityPacket::decode)
                 .consumerMainThread(ToggleAbilityPacket::handle).add();
@@ -91,6 +95,11 @@ public final class ModNetwork {
 
     public static void showBadgeActivation(ServerPlayer player) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new BadgeActivationPacket());
+    }
+
+    public static void showPounce(ServerPlayer player, PounceAbility.Motion motion) {
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+                new PounceMotionPacket(player.getId(), motion));
     }
 
     private ModNetwork() {}

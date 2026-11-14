@@ -67,6 +67,8 @@ minecraft {
         // applies to all the run configs below
         configureEach {
             workingDirectory project.file('run')
+            args '-mixin.config=howlingwerewolf.mixins.json'
+            property 'mixin.env.disableRefMap', 'true'
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -203,6 +205,7 @@ tasks.named('jar', Jar).configure {
 
     manifest {
         attributes([
+                'MixinConfigs'            : 'howlingwerewolf.mixins.json',
                 'Specification-Title'     : mod_name,
                 'Specification-Vendor'    : mod_authors,
                 'Specification-Version'   : '1', // We are version 1 of ourselves

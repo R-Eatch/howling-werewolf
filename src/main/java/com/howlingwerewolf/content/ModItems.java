@@ -1,6 +1,8 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
@@ -11,6 +13,18 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, HowlingWerewolf.MOD_ID);
+
+    public static final RegistryObject<Item> WEREWOLF_PELT = ITEMS.register("werewolf_pelt", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SILVERHIDE = ITEMS.register("silverhide", () -> new Item(new Item.Properties()));
+    private static final ArmorMaterial SILVERHIDE_MATERIAL = PeltArmor.material();
+    public static final RegistryObject<ArmorItem> SILVERHIDE_HELMET = ITEMS.register("silverhide_helmet",
+            () -> PeltArmor.piece(SILVERHIDE_MATERIAL, ArmorItem.Type.HELMET));
+    public static final RegistryObject<ArmorItem> SILVERHIDE_CHESTPLATE = ITEMS.register("silverhide_chestplate",
+            () -> PeltArmor.piece(SILVERHIDE_MATERIAL, ArmorItem.Type.CHESTPLATE));
+    public static final RegistryObject<ArmorItem> SILVERHIDE_LEGGINGS = ITEMS.register("silverhide_leggings",
+            () -> PeltArmor.piece(SILVERHIDE_MATERIAL, ArmorItem.Type.LEGGINGS));
+    public static final RegistryObject<ArmorItem> SILVERHIDE_BOOTS = ITEMS.register("silverhide_boots",
+            () -> PeltArmor.piece(SILVERHIDE_MATERIAL, ArmorItem.Type.BOOTS));
 
     public static final RegistryObject<Item> SILVER_INGOT = ITEMS.register("silver_ingot", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> MOONBANE_PEARL = ITEMS.register("moonbane_pearl", () -> new Item(new Item.Properties()));

@@ -5,7 +5,7 @@ import java.util.Locale;
 public enum WerewolfAbility {
     NIGHT_VISION(1), SUMMON_WOLF_SPIRIT(3), QUADRUPED_FORM(4), MOONBLOOD_SURGE(3),
     ARMORED_INSTINCT(2), HARD_LIFE(2), EMPTY_CLAW_SLOT(1), LONG_CLAWS(2),
-    TOOL_CLAWS(2), FIRE_CLAWS(2), BLOODY_BITE(3);
+    TOOL_CLAWS(2), FIRE_CLAWS(2), BLOODY_BITE(3), POUNCE(3);
 
     private final int cost;
 

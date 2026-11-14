@@ -1,0 +1,18 @@
+package com.howlingwerewolf.client;
+
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.resources.ResourceLocation;
+
+public final class HunterCaptainRenderer extends HumanoidMobRenderer<SettlementLeaderEntity, HunterModel<SettlementLeaderEntity>> {
+    private static final ResourceLocation TEXTURE = new ResourceLocation("howlingwerewolf", "textures/entity/hunter_captain.png");
+
+    public HunterCaptainRenderer(EntityRendererProvider.Context context) {
+        super(context, new HunterModel<>(context.bakeLayer(ClientModEvents.HUNTER_LAYER)), 0.5F);
+        addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
+    }
+
+    @Override public ResourceLocation getTextureLocation(SettlementLeaderEntity entity) { return TEXTURE; }
+}
