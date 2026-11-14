@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.8-blue?style=flat-square" alt="Latest source: 1.3.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.4.0-blue?style=flat-square" alt="Latest source: 1.4.0"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge downloads"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth downloads"></a>
@@ -17,7 +17,7 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers all five editions of 1.3.8.
+> `main` currently contains the **Minecraft 26.1.2 / NeoForge** source. This introduction covers the four editions of 1.4.0.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -252,7 +252,7 @@ The Moon-Oath altars are not only for the Alpha. With a different set of offerin
 
 Summoning works at any time of day and any moon phase. A werewolf brother runs to you from afar and stays for 10min.
 
-**Trading**: right-click him to trade. Each merchant brings six of nine trades, covering Silver Ingots, Wolfsbane, Moonbane Pearls, Werewolf Potions and Wolfsbane Potions, each with limited uses; they do not restock.
+**Trading**: right-click him to trade. Each merchant brings eight of thirteen trades, covering Silver Ingots, Wolfsbane, Werewolf Pelts, Moonbane Pearls, Werewolf Potions and Wolfsbane Potions, each with limited uses; they do not restock.
 
 **Recruiting**: right-click him holding an Alpha Werewolf Badge and confirm; one badge is used and he becomes your lasting companion. Before you pass the Alpha Trial you can keep one companion; afterwards each Pack Oath rank adds a slot, up to three. A companion's highest tier equals your Pack Oath rank.
 
@@ -300,7 +300,7 @@ When reporting an issue, provide:
 
 ## Source and building
 
-The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.3.8**. Updates for **Fabric on Minecraft 1.21.11** are paused at **1.3.8**.
+The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.1**, and **NeoForge for Minecraft 26.1.2**. The latest Mod source version is **1.4.0**. Updates for **Fabric on Minecraft 1.21.11** are paused at **1.3.8**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

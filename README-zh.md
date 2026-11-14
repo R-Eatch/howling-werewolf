@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.3.8-blue?style=flat-square" alt="最新源码： 1.3.8"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.4.0-blue?style=flat-square" alt="最新源码： 1.4.0"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge 下载量"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth 下载量"></a>
@@ -17,7 +17,7 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖 1.3.8 的五个版本。
+> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖 1.4.0 的四个版本。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
@@ -252,7 +252,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 召唤不限昼夜和月相。狼人兄弟会从远处跑来，停留10min。
 
-**交易**：普通右键打开交易。每位商人从九种交易里抽六种，涉及银锭、狼毒花、月厄珍珠、狼人药水和狼毒花药水，次数有限、不会补货。
+**交易**：普通右键打开交易。每位商人从十三种交易里抽八种，涉及银锭、狼毒花、狼人毛皮、月厄珍珠、狼人药水和狼毒花药水，次数有限、不会补货。
 
 **招募**：手持狼人徽章右键商人并确认，消耗一枚徽章，他就成为你的长期同伴。通过 Alpha 试炼前最多一名随从；通过后，狼群誓约每升一级多一个名额，最多三名。随从的最高阶数等于狼群誓约的等级。
 
@@ -300,7 +300,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码与构建
 
-项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.1 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.3.8**。**Minecraft 1.21.11 Fabric** 在 **1.3.8** 暂停更新。
+项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.1 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.4.0**。**Minecraft 1.21.11 Fabric** 在 **1.3.8** 暂停更新。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 

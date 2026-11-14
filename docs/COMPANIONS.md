@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.1.2, NeoForge 26.1.2.122 and Java 25, Howling Werewolf 1.4.0. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -30,7 +30,7 @@ The rite works at any hour and moon phase. The merchant stays 12000 game ticks (
 
 ## Trading and recruiting
 
-Each merchant draws six of nine trades, each with limited uses. See the [trade table](COMPANION-TABLES.md#merchant-trades).
+Each merchant draws eight of thirteen trades with limited stock and no restocks. See the [trade table](COMPANION-TABLES.md#merchant-trades).
 
 Hold an Alpha Werewolf Badge and right-click the merchant, then confirm to spend one badge and recruit him. The prompt lasts ten seconds. On confirming, the server checks distance, health, skill, party size and the badge again, and takes the badge once everything passes. He then stays with you for good, named after his coat by default.
 

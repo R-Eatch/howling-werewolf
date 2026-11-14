@@ -2,7 +2,7 @@
 
 [简体中文](PROGRESSION-zh.md) · [Back to README](../README.md)
 
-These values apply to all five editions of 1.3.8. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
+These values apply to all four editions of 1.4.0. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
 
 ## Experience sources
 
@@ -73,7 +73,7 @@ The skill tree has 14 entries and takes 50 points to max out; level 20 gives 43 
 
 ## Skills
 
-Skills are unlocked with Skill Points, once each; unlocking all of them takes 25 points. Beast Form costs no points and is unlocked by the first Alpha Trial victory.
+Skills are unlocked with Skill Points, once each; unlocking all of them takes 28 points. Beast Form costs no points and is unlocked by the first Alpha Trial victory.
 
 | Skill | Cost | Key | Numbers |
 |---|---:|---|---|
@@ -88,6 +88,7 @@ Skills are unlocked with Skill Points, once each; unlocking all of them takes 25
 | Tool Claws | 2 | — | While transformed and empty-handed, your claws work like iron pickaxes, axes and shovels and can harvest iron-tier blocks. Can be switched on the Abilities page. |
 | Fire Claws | 2 | — | Transformed empty-hand attacks work like Fire Aspect II (8 seconds of fire). Can be switched on the Abilities page. |
 | Bloody Bite | 3 | B | Bites the aimed target for 1.8× your current claw damage and applies Weakness II, Slowness III, Hunger I and Poison I for 15 seconds each; 60-second cooldown. |
+| Pounce | 3 | Z | On landing, Werewolf strikes ahead, Quadruped slows nearby targets, and Beast damages and knocks back nearby targets. Enhanced Jump strengthens the pounce. Shared 5-second cooldown. |
 
 ## Reset
 

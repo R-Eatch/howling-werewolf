@@ -1,6 +1,6 @@
 # 随从指南
 
-适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.3.8。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
+适用于 Minecraft 26.1.2 / NeoForge 26.1.2.122 / Java 25，Howling Werewolf 1.4.0。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
 配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
@@ -30,7 +30,7 @@
 
 ## 交易与招募
 
-每位商人从九种交易中抽六种，每种次数有限。完整列表见[交易表](COMPANION-TABLES-zh.md#商人交易)。
+每位商人从十三种交易中抽八种，每种次数有限，且不会补货。完整列表见[交易表](COMPANION-TABLES-zh.md#商人交易)。
 
 手持狼人徽章右键商人，确认后消耗一枚徽章完成招募。确认框有效十秒，确认时服务端会重新检查距离、存活、技能、人数和徽章，全部满足才扣除徽章。招募后他成为你的长期同伴，默认名字是当前毛色的名字。
 
