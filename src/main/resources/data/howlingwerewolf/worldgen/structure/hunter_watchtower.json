@@ -1,0 +1,7 @@
+{
+  "type": "howlingwerewolf:hunter_watchtower",
+  "biomes": "#howlingwerewolf:has_structure/hunter_watchtower",
+  "step": "top_layer_modification",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

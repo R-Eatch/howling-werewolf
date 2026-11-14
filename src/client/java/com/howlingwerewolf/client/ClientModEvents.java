@@ -43,13 +43,15 @@ public final class ClientModEvents {
     public static final KeyMapping BLOODY_BITE = new KeyMapping(
             "key.howlingwerewolf.bloody_bite", InputConstants.Type.KEYSYM, InputConstants.KEY_B,
             KEY_CATEGORY);
+    public static final KeyMapping POUNCE = new KeyMapping(
+            "key.howlingwerewolf.pounce", InputConstants.Type.KEYSYM, InputConstants.KEY_Z, KEY_CATEGORY);
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, InputConstants.KEY_R,
             KEY_CATEGORY);
 
     public static void initialize() {
         BlockRenderLayerMap.INSTANCE.putBlock(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get(), RenderType.cutout());
-        for (KeyMapping key : new KeyMapping[]{OPEN_PROGRESSION,OPEN_COMPANIONS,TRANSFORM,BEAST_MODE,QUADRUPED_MODE,NIGHT_VISION,SUMMON_WOLF_SPIRIT,BLOODY_BITE,MOONBLOOD_SURGE})
+        for (KeyMapping key : new KeyMapping[]{OPEN_PROGRESSION,OPEN_COMPANIONS,TRANSFORM,BEAST_MODE,QUADRUPED_MODE,NIGHT_VISION,SUMMON_WOLF_SPIRIT,BLOODY_BITE,POUNCE,MOONBLOOD_SURGE})
             net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(key);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(HUNTER_LAYER,HunterModel::createBodyLayer);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(QUADRUPED_WEREWOLF_LAYER,QuadrupedWerewolfModel::createBodyLayer);
@@ -59,6 +61,15 @@ public final class ClientModEvents {
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.ALPHA_MINION.get(), context ->
                 new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F));
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.WEREWOLF_COMPANION.get(),CompanionRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), context ->
+                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_CHIEF.get(), context ->
+                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.SQUAD_HEALING_POTION.get(),
+                net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
+                com.howlingwerewolf.network.PounceMotionPacket.TYPE, (packet, context) -> context.client().execute(() -> ClientPouncePose.receive(packet)));
         BlockEntityRendererRegistry.register(ModBlockEntities.RITUAL_ALTAR.get(), RitualAltarRenderer::new);
         var resources = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
         resources.registerReloadListener(new ModernModelResources());

@@ -237,6 +237,7 @@ public final class BeastPlayerModel<T extends LivingEntity> extends EntityModel<
         tailBase.yRot = wag;
         tailMid.yRot = wag * 1.35F;
         tailTip.yRot = wag * 1.7F;
+        ClientPouncePose.apply(player, ageInTicks, com.howlingwerewolf.WerewolfForm.BEAST, torso, head, rightUpperArm, leftUpperArm, rightThigh, leftThigh);
     }
 
     private void applySpecialMovementPose(T player, float ageInTicks, float swimAmount,

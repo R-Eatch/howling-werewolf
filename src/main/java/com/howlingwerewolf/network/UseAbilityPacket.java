@@ -32,6 +32,7 @@ public record UseAbilityPacket(WerewolfAbility ability, int targetId) implements
         if (packet.targetId() < -1) return;
         if (packet.ability() != WerewolfAbility.SUMMON_WOLF_SPIRIT
                 && packet.ability() != WerewolfAbility.BLOODY_BITE
+                && packet.ability() != WerewolfAbility.POUNCE
                 && packet.ability() != WerewolfAbility.MOONBLOOD_SURGE) return;
         if (packet.ability() != WerewolfAbility.BLOODY_BITE && packet.targetId() != -1) return;
         WerewolfGameplayEvents.useAbility(sender, packet.ability(), packet.targetId());

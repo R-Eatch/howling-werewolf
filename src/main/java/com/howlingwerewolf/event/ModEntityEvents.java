@@ -19,6 +19,9 @@ public final class ModEntityEvents {
 
     public static void register() {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER.get(), HunterEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), com.howlingwerewolf.entity.TribeWerewolfEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_CHIEF.get(), com.howlingwerewolf.entity.SettlementLeaderEntity.chiefAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_WEREWOLF.get(), com.howlingwerewolf.entity.AlphaWerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.ALPHA_MINION.get(), com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes());

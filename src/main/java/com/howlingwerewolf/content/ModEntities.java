@@ -3,6 +3,9 @@ package com.howlingwerewolf.content;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.howlingwerewolf.entity.HunterEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import com.howlingwerewolf.entity.TribeWerewolfEntity;
+import com.howlingwerewolf.entity.SquadHealingPotion;
 import com.howlingwerewolf.entity.AlphaWerewolfEntity;
 import com.howlingwerewolf.entity.AlphaMinionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
@@ -42,5 +45,17 @@ public final class ModEntities {
             ENTITIES.register("werewolf_companion", () -> EntityType.Builder.of(WerewolfCompanionEntity::new, MobCategory.CREATURE)
                     .sized(0.9F, 2.0F).clientTrackingRange(10)
                     .build(ModRegistry.id("werewolf_companion").toString()));
+    public static final Supplier<EntityType<SettlementLeaderEntity>> HUNTER_CAPTAIN =
+            ENTITIES.register("hunter_captain", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 1.95F).clientTrackingRange(10).build("hunter_captain"));
+    public static final Supplier<EntityType<TribeWerewolfEntity>> TRIBE_WEREWOLF =
+            ENTITIES.register("tribe_werewolf", () -> EntityType.Builder.of(TribeWerewolfEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_werewolf"));
+    public static final Supplier<EntityType<SettlementLeaderEntity>> TRIBE_CHIEF =
+            ENTITIES.register("tribe_chief", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_chief"));
+    public static final Supplier<EntityType<SquadHealingPotion>> SQUAD_HEALING_POTION =
+            ENTITIES.register("squad_healing_potion", () -> EntityType.Builder.<SquadHealingPotion>of(SquadHealingPotion::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build("squad_healing_potion"));
     private ModEntities() {}
 }

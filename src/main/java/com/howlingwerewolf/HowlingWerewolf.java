@@ -27,6 +27,7 @@ public final class HowlingWerewolf implements ModInitializer {
         ModBlockEntities.BLOCK_ENTITIES.getClass();
         ModRecipes.SERIALIZERS.getClass();
         ModPlacementModifiers.PLACEMENT_MODIFIERS.getClass();
+        ModStructures.TYPES.getClass();
         ModSounds.initialize();
         ModAttachments.initialize();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricItemGroup.builder()
@@ -52,8 +53,16 @@ public final class HowlingWerewolf implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.accept(ModItems.SILVER_INGOT.get()); entries.accept(ModItems.MOONBANE_PEARL.get());
             entries.accept(ModItems.ALPHA_WEREWOLF_BADGE.get());
+            entries.accept(ModItems.WEREWOLF_PELT.get());
+            entries.accept(ModItems.SILVERHIDE.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> entries.accept(ModItems.SILVER_SWORD.get()));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
+            entries.accept(ModItems.SILVER_SWORD.get());
+            entries.accept(ModItems.SILVERHIDE_HELMET.get());
+            entries.accept(ModItems.SILVERHIDE_CHESTPLATE.get());
+            entries.accept(ModItems.SILVERHIDE_LEGGINGS.get());
+            entries.accept(ModItems.SILVERHIDE_BOOTS.get());
+        });
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
             entries.accept(ModItems.WOLFSBANE_POTION.get()); entries.accept(ModItems.WEREWOLF_POTION.get());
         });

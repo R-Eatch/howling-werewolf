@@ -1,7 +1,7 @@
 package com.howlingwerewolf.client;
 
-import com.howlingwerewolf.entity.HunterEntity;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,7 +14,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
  * A long-coated monster hunter on the vanilla humanoid skeleton, so poses, held items and armor work
  * as usual. The upper 64x32 holds the body; the lower half holds the hat, the high collar and the coat tails.
  */
-public final class HunterModel extends HumanoidModel<HunterEntity> {
+public final class HunterModel<T extends LivingEntity> extends HumanoidModel<T> {
     private final ModelPart frontTail;
     private final ModelPart backTail;
 
@@ -45,7 +45,7 @@ public final class HunterModel extends HumanoidModel<HunterEntity> {
     }
 
     @Override
-    public void setupAnim(HunterEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         hat.visible = false;
         // The tails follow whichever leg pushes into them: forward swings lift the front, backward the back.

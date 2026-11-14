@@ -45,6 +45,15 @@ abstract class PlayerMixin {
         DamageHooks.beforeHealthChange(player,source,value);
         original.call(player,value);
     }
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "actuallyHurt", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterMagicAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float howling$silverhide(float damage,
+            @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) net.minecraft.world.damagesource.DamageSource source) {
+        if ((Player) (Object) this instanceof net.minecraft.server.level.ServerPlayer player) {
+            return com.howlingwerewolf.content.PeltArmor.reduce(player, source, damage);
+        }
+        return damage;
+    }
     @Inject(method="readAdditionalSaveData",at=@At("TAIL"))
     private void howling$legacy(CompoundTag input,CallbackInfo ci) {
         // Older Forge/NeoForge saves used this mirror. Fabric attachments remain authoritative.

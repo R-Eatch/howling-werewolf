@@ -786,6 +786,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
             case TOOL_CLAWS -> Items.IRON_AXE;
             case FIRE_CLAWS -> Items.BLAZE_POWDER;
             case BLOODY_BITE -> Items.BEEF;
+            case POUNCE -> com.howlingwerewolf.content.ModItems.WEREWOLF_PELT.get();
         };
     }
 

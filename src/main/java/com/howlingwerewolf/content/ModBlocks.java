@@ -10,6 +10,9 @@ import net.minecraft.world.level.material.MapColor;
 
 public final class ModBlocks {
     public static final ModRegistry.Blocks BLOCKS = new ModRegistry.Blocks();
+    public static final Supplier<com.howlingwerewolf.world.SettlementMarkerBlock> SETTLEMENT_MARKER = BLOCKS.register("settlement_marker", () ->
+            new com.howlingwerewolf.world.SettlementMarkerBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE)));
 
     public static final Supplier<Block> SILVER_ORE = BLOCKS.registerSimpleBlock("silver_ore",
             props -> props.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE));

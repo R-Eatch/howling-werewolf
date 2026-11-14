@@ -2,6 +2,8 @@ package com.howlingwerewolf.event;
 
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.ability.PounceAbility;
+import com.howlingwerewolf.content.PeltArmor;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfCombatRules;
 import com.howlingwerewolf.WerewolfForm;
@@ -144,6 +146,8 @@ public final class WerewolfGameplayEvents {
             processMoonbloodCrash(player, data);
             refreshWerewolfModifiers(player, data);
             processFormRules(player, data);
+            PeltArmor.refreshSpeed(player);
+            PounceAbility.tick(player, data);
             processTotemExperience(player, data);
             processSpiritWolves(player, data);
             if (data.getLevel() >= WerewolfData.getMaxLevel() && player.tickCount % 20 == 0) {
@@ -674,6 +678,7 @@ public final class WerewolfGameplayEvents {
     public static void useAbility(ServerPlayer player, WerewolfAbility ability, int targetId) {
         if (ability == WerewolfAbility.SUMMON_WOLF_SPIRIT) summonWolfSpirits(player);
         else if (ability == WerewolfAbility.BLOODY_BITE) bloodyBite(player, targetId);
+        else if (ability == WerewolfAbility.POUNCE) PounceAbility.start(player);
         else if (ability == WerewolfAbility.MOONBLOOD_SURGE) useMoonbloodSurge(player);
     }
 
@@ -1206,7 +1211,7 @@ public final class WerewolfGameplayEvents {
         }
     }
 
-    private static int countArmorBearingPieces(net.minecraft.world.entity.player.Player player) {
+    public static int countArmorBearingPieces(net.minecraft.world.entity.player.Player player) {
         int count = 0;
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                 EquipmentSlot.LEGS, EquipmentSlot.FEET}) {

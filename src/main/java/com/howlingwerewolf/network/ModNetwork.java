@@ -1,5 +1,6 @@
 package com.howlingwerewolf.network;
 
+import com.howlingwerewolf.ability.PounceAbility;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.capability.WerewolfPersistence;
 import net.minecraft.nbt.CompoundTag;
@@ -9,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 public final class ModNetwork {
     public static void register() {
         PayloadTypeRegistry.playS2C().register(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(PounceMotionPacket.TYPE, PounceMotionPacket.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(RequestWerewolfSyncPacket.TYPE, RequestWerewolfSyncPacket.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(RequestWerewolfSyncPacket.TYPE, (packet, context) -> context.server().execute(() -> RequestWerewolfSyncPacket.handle(packet, context)));
         PayloadTypeRegistry.playC2S().register(ResetProgressionPacket.TYPE, ResetProgressionPacket.STREAM_CODEC);
@@ -58,6 +60,12 @@ public final class ModNetwork {
 
     public static void showBadgeActivation(ServerPlayer player) {
         sendToPlayer(player, new BadgeActivationPacket());
+    }
+
+    public static void showPounce(ServerPlayer player, PounceAbility.Motion motion) {
+        var packet = new PounceMotionPacket(player.getId(), motion);
+        sendToPlayer(player, packet);
+        for (ServerPlayer observer : PlayerLookup.tracking(player)) sendToPlayer(observer, packet);
     }
 
     private ModNetwork() {}

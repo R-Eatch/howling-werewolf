@@ -86,6 +86,9 @@ public final class ClientEvents {
             ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
+        while (ClientModEvents.POUNCE.consumeClick()) {
+            ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.POUNCE));
+        }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }

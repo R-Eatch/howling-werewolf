@@ -11,7 +11,8 @@
     "BrewingPotionSlotMixin",
     "NaturalSpawnerMixin",
     "EnchantmentHelperMixin",
-    "MobMixin"
+    "MobMixin",
+    "LocateWatchtowerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -15,5 +15,9 @@ public final class ModBlockEntities {
             BLOCK_ENTITIES.register("ritual_altar", () -> net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(
                     RitualAltarBlockEntity::new, ModBlocks.RITUAL_ALTAR.get(), ModBlocks.CENTRAL_RITUAL_ALTAR.get()).build());
 
+    public static final Supplier<BlockEntityType<com.howlingwerewolf.world.SettlementMarkerBlockEntity>> SETTLEMENT_MARKER =
+            BLOCK_ENTITIES.register("settlement_marker", () -> net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(
+                    com.howlingwerewolf.world.SettlementMarkerBlockEntity::new, ModBlocks.SETTLEMENT_MARKER.get()).build());
+
     private ModBlockEntities() {}
 }
