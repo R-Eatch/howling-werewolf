@@ -4,7 +4,8 @@
   "package": "com.howlingwerewolf.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "EnchantmentHelperMixin"
+    "EnchantmentHelperMixin",
+    "LocateWatchtowerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

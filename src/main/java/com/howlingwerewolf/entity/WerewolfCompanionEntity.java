@@ -55,10 +55,8 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -72,7 +70,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -81,25 +78,6 @@ import java.util.function.Supplier;
 public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance {
     private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> RECRUITED = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.BOOLEAN);
-    /** Nine offers; each merchant brings six of them, without duplicates and without restocking. */
-    private record Trade(Supplier<ItemLike> wants, int wantsCount, @Nullable Supplier<ItemLike> also, int alsoCount,
-                         Supplier<ItemLike> gives, int givesCount, int maxUses) {
-        MerchantOffer offer() {
-            return new MerchantOffer(new ItemCost(wants.get(), wantsCount), also == null ? Optional.empty() : Optional.of(new ItemCost(also.get(), alsoCount)),
-                    new ItemStack(gives.get(), givesCount), maxUses, 0, 0.0F);
-        }
-    }
-    private static final List<Trade> TRADES = List.of(
-            new Trade(() -> Items.EMERALD, 6, null, 0, () -> ModItems.SILVER_INGOT.get(), 4, 8),
-            new Trade(() -> Items.IRON_INGOT, 16, null, 0, () -> ModItems.SILVER_INGOT.get(), 2, 8),
-            new Trade(() -> Items.EMERALD, 12, () -> ModBlocks.WOLFSBANE.get(), 4, () -> ModItems.MOONBANE_PEARL.get(), 1, 4),
-            new Trade(() -> ModBlocks.WOLFSBANE.get(), 6, () -> Items.DIAMOND, 1, () -> ModItems.MOONBANE_PEARL.get(), 1, 4),
-            new Trade(() -> ModItems.SILVER_INGOT.get(), 4, null, 0, () -> ModBlocks.WOLFSBANE.get(), 2, 8),
-            new Trade(() -> ModBlocks.WOLFSBANE.get(), 4, () -> Items.EMERALD, 2, () -> ModItems.WEREWOLF_POTION.get(), 1, 2),
-            new Trade(() -> ModItems.SILVER_INGOT.get(), 4, () -> Items.EMERALD, 2, () -> ModItems.WOLFSBANE_POTION.get(), 1, 2),
-            new Trade(() -> Items.EMERALD, 4, null, 0, () -> ModBlocks.WOLFSBANE.get(), 4, 8),
-            new Trade(() -> ModBlocks.WOLFSBANE.get(), 4, null, 0, () -> ModItems.SILVER_INGOT.get(), 2, 8));
-    private static final int OFFERED = 6;
     private CompanionRecord record;
     private boolean moonbloodCrashPending;
     private int generation;
@@ -453,13 +431,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     @Override protected void updateTrades() {
         if (!HWConfig.ENABLE_COMPANIONS.get() || isRecruited()) return;
-        List<Trade> pool = new ArrayList<>(TRADES);
-        for (int i = pool.size() - 1; i > 0; i--) {
-            int j = random.nextInt(i + 1);
-            Trade swap = pool.get(i); pool.set(i, pool.get(j)); pool.set(j, swap);
-        }
-        MerchantOffers offers = getOffers();
-        for (int i = 0; i < OFFERED; i++) offers.add(pool.get(i).offer());
+        WerewolfTrades.draw(getOffers(), WerewolfTrades.MerchantRole.BROTHER, random);
     }
     @Override protected void rewardTradeXp(MerchantOffer offer) {}
     // A werewolf merchant barks, pants and whines instead of haggling like a villager.
@@ -564,10 +536,13 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putBoolean("SharedTradeTable", true);
         tag.putString("CompanionSkin", getNpcSkinId());
     }
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        // Normally temporary merchants are not saved. Tolerate a legacy entity imported with offers.
+        if (tag.contains("Offers") && !tag.contains("SharedTradeTable")) offers = null;
         if (tag.contains("CompanionSkin")) setSkin(tag.getString("CompanionSkin"));
     }
 

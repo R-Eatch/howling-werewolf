@@ -1,6 +1,7 @@
 package com.howlingwerewolf.network;
 
 import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.ability.PounceAbility;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.capability.WerewolfPersistence;
 import net.minecraft.nbt.CompoundTag;
@@ -10,7 +11,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "22";
+    private static final String PROTOCOL = "23";
 
     /** Registers all gameplay payloads; handlers run on the main game thread by default. */
     public static void register(RegisterPayloadHandlersEvent event) {
@@ -21,6 +22,7 @@ public final class ModNetwork {
                 SyncWerewolfDataPacket::handle);
         registrar.playToClient(BadgeActivationPacket.TYPE, BadgeActivationPacket.STREAM_CODEC,
                 BadgeActivationPacket::handle);
+        registrar.playToClient(PounceMotionPacket.TYPE, PounceMotionPacket.STREAM_CODEC, PounceMotionPacket::handle);
         registrar.playToServer(TransformRequestPacket.TYPE, TransformRequestPacket.STREAM_CODEC,
                 TransformRequestPacket::handle);
         registrar.playToServer(UpgradeTreeSkillPacket.TYPE, UpgradeTreeSkillPacket.STREAM_CODEC,
@@ -61,6 +63,10 @@ public final class ModNetwork {
 
     public static void showBadgeActivation(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, new BadgeActivationPacket());
+    }
+
+    public static void showPounce(ServerPlayer player, PounceAbility.Motion motion) {
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new PounceMotionPacket(player.getId(), motion));
     }
 
     private ModNetwork() {}

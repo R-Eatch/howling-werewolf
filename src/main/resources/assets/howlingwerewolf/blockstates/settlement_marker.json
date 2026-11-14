@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "tribe=false": {
+      "model": "minecraft:block/polished_andesite"
+    },
+    "tribe=true": {
+      "model": "minecraft:block/chiseled_stone_bricks"
+    }
+  }
+}

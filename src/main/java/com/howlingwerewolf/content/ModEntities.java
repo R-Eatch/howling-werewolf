@@ -6,6 +6,9 @@ import com.howlingwerewolf.entity.AlphaWerewolfEntity;
 import com.howlingwerewolf.entity.AlphaMinionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
+import com.howlingwerewolf.entity.TribeWerewolfEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import com.howlingwerewolf.entity.SquadHealingPotion;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -44,5 +47,18 @@ public final class ModEntities {
             ENTITIES.register("werewolf_companion", () -> EntityType.Builder.of(WerewolfCompanionEntity::new, MobCategory.CREATURE)
                     .sized(0.9F, 2.0F).clientTrackingRange(10)
                     .build("werewolf_companion"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SettlementLeaderEntity>> HUNTER_CAPTAIN =
+            ENTITIES.register("hunter_captain", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 1.95F).clientTrackingRange(10).build("hunter_captain"));
+    public static final DeferredHolder<EntityType<?>, EntityType<TribeWerewolfEntity>> TRIBE_WEREWOLF =
+            ENTITIES.register("tribe_werewolf", () -> EntityType.Builder.of(TribeWerewolfEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_werewolf"));
+    public static final DeferredHolder<EntityType<?>, EntityType<SettlementLeaderEntity>> TRIBE_CHIEF =
+            ENTITIES.register("tribe_chief", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_chief"));
+    public static final DeferredHolder<EntityType<?>, EntityType<SquadHealingPotion>> SQUAD_HEALING_POTION =
+            ENTITIES.register("squad_healing_potion", () -> EntityType.Builder.<SquadHealingPotion>of(SquadHealingPotion::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build("squad_healing_potion"));
     private ModEntities() {}
 }

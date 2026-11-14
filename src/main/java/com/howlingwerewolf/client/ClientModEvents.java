@@ -43,6 +43,9 @@ public final class ClientModEvents {
     public static final KeyMapping BLOODY_BITE = new KeyMapping(
             "key.howlingwerewolf.bloody_bite", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B,
             "key.categories.howlingwerewolf");
+    public static final KeyMapping POUNCE = new KeyMapping(
+            "key.howlingwerewolf.pounce", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z,
+            "key.categories.howlingwerewolf");
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
             "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R,
             "key.categories.howlingwerewolf");
@@ -70,6 +73,7 @@ public final class ClientModEvents {
         event.register(NIGHT_VISION);
         event.register(SUMMON_WOLF_SPIRIT);
         event.register(BLOODY_BITE);
+        event.register(POUNCE);
         event.register(MOONBLOOD_SURGE);
         event.register(OPEN_COMPANIONS);
     }
@@ -89,6 +93,12 @@ public final class ClientModEvents {
                 context -> new WerewolfNpcRenderer<com.howlingwerewolf.entity.AlphaMinionEntity>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F));
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.WEREWOLF_COMPANION.get(), CompanionRenderer::new);
+        event.registerEntityRenderer(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
+        event.registerEntityRenderer(ModEntities.TRIBE_CHIEF.get(), context -> new WerewolfNpcRenderer<>(context,
+                com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F));
+        event.registerEntityRenderer(ModEntities.TRIBE_WEREWOLF.get(), context -> new WerewolfNpcRenderer<>(context,
+                com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F));
+        event.registerEntityRenderer(ModEntities.SQUAD_HEALING_POTION.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.RITUAL_ALTAR.get(),
                 RitualAltarRenderer::new);
     }

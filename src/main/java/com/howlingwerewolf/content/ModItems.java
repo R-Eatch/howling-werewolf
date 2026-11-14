@@ -1,15 +1,27 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(HowlingWerewolf.MOD_ID);
+    public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, HowlingWerewolf.MOD_ID);
+    private static final DeferredHolder<ArmorMaterial, ArmorMaterial> SILVERHIDE_ARMOR = ARMOR_MATERIALS.register("silverhide", PeltArmor::material);
+    public static final DeferredItem<Item> WEREWOLF_PELT = ITEMS.register("werewolf_pelt", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> SILVERHIDE = ITEMS.register("silverhide", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<ArmorItem> SILVERHIDE_HELMET = ITEMS.register("silverhide_helmet", () -> PeltArmor.piece(SILVERHIDE_ARMOR, ArmorItem.Type.HELMET));
+    public static final DeferredItem<ArmorItem> SILVERHIDE_CHESTPLATE = ITEMS.register("silverhide_chestplate", () -> PeltArmor.piece(SILVERHIDE_ARMOR, ArmorItem.Type.CHESTPLATE));
+    public static final DeferredItem<ArmorItem> SILVERHIDE_LEGGINGS = ITEMS.register("silverhide_leggings", () -> PeltArmor.piece(SILVERHIDE_ARMOR, ArmorItem.Type.LEGGINGS));
+    public static final DeferredItem<ArmorItem> SILVERHIDE_BOOTS = ITEMS.register("silverhide_boots", () -> PeltArmor.piece(SILVERHIDE_ARMOR, ArmorItem.Type.BOOTS));
 
     public static final DeferredItem<Item> SILVER_INGOT = ITEMS.register("silver_ingot", () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> MOONBANE_PEARL = ITEMS.register("moonbane_pearl", () -> new Item(new Item.Properties()));

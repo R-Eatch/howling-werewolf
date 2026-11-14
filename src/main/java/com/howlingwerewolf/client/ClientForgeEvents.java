@@ -87,6 +87,9 @@ public final class ClientForgeEvents {
             PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.SUMMON_WOLF_SPIRIT));
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
+        while (ClientModEvents.POUNCE.consumeClick()) {
+            PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.POUNCE));
+        }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             PacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }

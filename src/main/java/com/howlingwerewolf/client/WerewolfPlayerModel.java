@@ -222,6 +222,7 @@ public final class WerewolfPlayerModel<T extends LivingEntity> extends EntityMod
         tailBase.yRot = tailWave;
         tailTip.yRot = tailWave * 1.4F;
         muzzle.xRot = Mth.sin(ageInTicks * 0.045F) * 0.01F;
+        ClientPouncePose.apply(player, ageInTicks, com.howlingwerewolf.WerewolfForm.WEREWOLF, torso, head, rightArm, leftArm, rightLeg, leftLeg);
     }
 
     private void applySpecialMovementPose(T player, float ageInTicks, float swimAmount,

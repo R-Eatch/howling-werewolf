@@ -46,6 +46,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     private long wolfSpiritCooldownEnd;
     private long wolfSpiritExpireTime;
     private long bloodyBiteCooldownEnd;
+    private long pounceCooldownEnd;
+    private com.howlingwerewolf.ability.PounceAbility.Flight pounceFlight;
     private long moonbloodSurgeCooldownEnd;
     private long moonbloodCrashTime;
     private int totemExperienceTicks;
@@ -81,6 +83,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     public long getWolfSpiritCooldownEnd() { return wolfSpiritCooldownEnd; }
     public long getWolfSpiritExpireTime() { return wolfSpiritExpireTime; }
     public long getBloodyBiteCooldownEnd() { return bloodyBiteCooldownEnd; }
+    public long getPounceCooldownEnd() { return pounceCooldownEnd; }
+    public com.howlingwerewolf.ability.PounceAbility.Flight getPounceFlight() { return pounceFlight; }
     public long getMoonbloodSurgeCooldownEnd() { return moonbloodSurgeCooldownEnd; }
     public long getMoonbloodCrashTime() { return moonbloodCrashTime; }
     public int getTotemExperienceTicks() { return totemExperienceTicks; }
@@ -131,6 +135,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
     public void setWolfSpiritCooldownEnd(long value) { wolfSpiritCooldownEnd = Math.max(0L, value); }
     public void setWolfSpiritExpireTime(long value) { wolfSpiritExpireTime = Math.max(0L, value); }
     public void setBloodyBiteCooldownEnd(long value) { bloodyBiteCooldownEnd = Math.max(0L, value); }
+    public void setPounceCooldownEnd(long value) { pounceCooldownEnd = Math.max(0L, value); }
+    public void setPounceFlight(com.howlingwerewolf.ability.PounceAbility.Flight flight) { pounceFlight = flight; }
     public void setMoonbloodSurgeCooldownEnd(long value) { moonbloodSurgeCooldownEnd = Math.max(0L, value); }
     public void setMoonbloodCrashTime(long value) { moonbloodCrashTime = Math.max(0L, value); }
     public void setTotemExperienceTicks(int value) { totemExperienceTicks = Math.max(0, Math.min(1200, value)); }
@@ -278,6 +284,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         wolfSpiritCooldownEnd = 0L;
         wolfSpiritExpireTime = 0L;
         bloodyBiteCooldownEnd = 0L;
+        pounceCooldownEnd = 0L;
+        pounceFlight = null;
         moonbloodSurgeCooldownEnd = 0L;
         moonbloodCrashTime = 0L;
         return true;
@@ -293,6 +301,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
                 && awakeningDayTime == -1L && wolfSpiritCooldownEnd == 0L
                 && wolfSpiritExpireTime == 0L && bloodyBiteCooldownEnd == 0L
+                && pounceCooldownEnd == 0L
                 && moonbloodSurgeCooldownEnd == 0L && moonbloodCrashTime == 0L
                 && totemExperienceTicks == 0 && getSpentTreePoints() == 0 && abilities.isEmpty()
                 && disabledAbilities.isEmpty()
@@ -317,6 +326,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         wolfSpiritCooldownEnd = 0L;
         wolfSpiritExpireTime = 0L;
         bloodyBiteCooldownEnd = 0L;
+        pounceCooldownEnd = 0L;
+        pounceFlight = null;
         moonbloodSurgeCooldownEnd = 0L;
         moonbloodCrashTime = 0L;
         totemExperienceTicks = 0;
@@ -347,6 +358,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         wolfSpiritCooldownEnd = other.wolfSpiritCooldownEnd;
         wolfSpiritExpireTime = other.wolfSpiritExpireTime;
         bloodyBiteCooldownEnd = other.bloodyBiteCooldownEnd;
+        pounceCooldownEnd = other.pounceCooldownEnd;
+        pounceFlight = null;
         moonbloodSurgeCooldownEnd = other.moonbloodSurgeCooldownEnd;
         moonbloodCrashTime = other.moonbloodCrashTime;
         totemExperienceTicks = other.totemExperienceTicks;
@@ -379,6 +392,7 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         tag.putLong("WolfSpiritCooldownEnd", wolfSpiritCooldownEnd);
         tag.putLong("WolfSpiritExpireTime", wolfSpiritExpireTime);
         tag.putLong("BloodyBiteCooldownEnd", bloodyBiteCooldownEnd);
+        tag.putLong("PounceCooldownEnd", pounceCooldownEnd);
         tag.putLong("MoonbloodSurgeCooldownEnd", moonbloodSurgeCooldownEnd);
         tag.putLong("MoonbloodCrashTime", moonbloodCrashTime);
         tag.putInt("TotemExperienceTicks", totemExperienceTicks);
@@ -432,6 +446,8 @@ public final class WerewolfData implements INBTSerializable<CompoundTag> {
         wolfSpiritCooldownEnd = Math.max(0L, tag.getLong("WolfSpiritCooldownEnd"));
         wolfSpiritExpireTime = Math.max(0L, tag.getLong("WolfSpiritExpireTime"));
         bloodyBiteCooldownEnd = Math.max(0L, tag.getLong("BloodyBiteCooldownEnd"));
+        pounceCooldownEnd = Math.max(0L, tag.getLong("PounceCooldownEnd"));
+        pounceFlight = null;
         moonbloodSurgeCooldownEnd = Math.max(0L, tag.getLong("MoonbloodSurgeCooldownEnd"));
         moonbloodCrashTime = Math.max(0L, tag.getLong("MoonbloodCrashTime"));
         totemExperienceTicks = Math.max(0, Math.min(1200, tag.getInt("TotemExperienceTicks")));

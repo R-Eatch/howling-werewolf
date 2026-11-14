@@ -4,6 +4,8 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.content.ModEntities;
 import com.howlingwerewolf.entity.HunterEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import com.howlingwerewolf.entity.TribeWerewolfEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -34,6 +36,9 @@ public final class ModEntityEvents {
                     com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes().build());
             event.put(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes().build());
             event.put(ModEntities.WEREWOLF_COMPANION.get(), com.howlingwerewolf.entity.WerewolfCompanionEntity.createAttributes().build());
+            event.put(ModEntities.HUNTER_CAPTAIN.get(), HunterEntity.createAttributes().build());
+            event.put(ModEntities.TRIBE_WEREWOLF.get(), TribeWerewolfEntity.createAttributes().build());
+            event.put(ModEntities.TRIBE_CHIEF.get(), SettlementLeaderEntity.chiefAttributes().build());
         }
     }
 

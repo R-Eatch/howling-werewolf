@@ -11,11 +11,14 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import com.howlingwerewolf.trial.RitualAltarBlock;
+import com.howlingwerewolf.world.SettlementMarkerBlock;
 
 import java.util.function.Supplier;
 
 public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(HowlingWerewolf.MOD_ID);
+    public static final DeferredBlock<SettlementMarkerBlock> SETTLEMENT_MARKER = BLOCKS.register("settlement_marker", () -> new SettlementMarkerBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE)));
 
     public static final DeferredBlock<Block> SILVER_ORE = register("silver_ore", () -> new Block(BlockBehaviour.Properties.of()
             .mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE)));
