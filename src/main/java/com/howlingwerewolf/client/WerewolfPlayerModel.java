@@ -226,6 +226,7 @@ public final class WerewolfPlayerModel<S extends HumanoidRenderState> extends En
         tailBase.yRot = tailWave;
         tailTip.yRot = tailWave * 1.4F;
         muzzle.xRot = Mth.sin(ageInTicks * 0.045F) * 0.01F;
+        ClientPouncePose.apply(player, com.howlingwerewolf.WerewolfForm.WEREWOLF, torso, head, rightArm, leftArm, rightLeg, leftLeg);
     }
 
     private void applySpecialMovementPose(S player, float ageInTicks, float swimAmount,

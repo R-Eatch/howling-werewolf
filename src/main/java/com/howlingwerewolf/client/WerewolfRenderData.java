@@ -16,11 +16,11 @@ import net.minecraft.world.entity.LivingEntity;
 /** Cosmetic and animation inputs captured on the extraction thread. */
 record WerewolfRenderData(WerewolfForm form, WerewolfModelSet modelSet, String skinId, boolean preview,
                           boolean armoredInstinct, boolean sprinting, float beastRunAmount, float beastProwlAmount,
-                          float beastLeapAmount, ItemStackRenderState mouthItem) {
+                          float beastLeapAmount, ItemStackRenderState mouthItem, ClientPouncePose.Sample pounce) {
     static final ContextKey<WerewolfRenderData> KEY = new ContextKey<>(
             Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf_render"));
     private static final WerewolfRenderData EMPTY = new WerewolfRenderData(WerewolfForm.HUMAN,
-            WerewolfModelSet.CLASSIC, WerewolfSkinIds.DEFAULT_ID, false, false, false, 0, 0, 0, new ItemStackRenderState());
+            WerewolfModelSet.CLASSIC, WerewolfSkinIds.DEFAULT_ID, false, false, false, 0, 0, 0, new ItemStackRenderState(), null);
 
     static WerewolfRenderData get(HumanoidRenderState state) {
         return state.getRenderDataOrDefault(KEY, EMPTY);
@@ -33,7 +33,7 @@ record WerewolfRenderData(WerewolfForm form, WerewolfModelSet modelSet, String s
     static WerewolfRenderData forEntity(LivingEntity entity, float partialTick) {
         if (entity instanceof com.howlingwerewolf.entity.WerewolfNpcAppearance npc) {
             return new WerewolfRenderData(npc.getNpcForm(), npc.getNpcModelSet(), npc.getNpcSkinId(),
-                    false, false, entity.isSprinting(), 0, 0, 0, new ItemStackRenderState());
+                    false, false, entity.isSprinting(), 0, 0, 0, new ItemStackRenderState(), null);
         }
         if (entity instanceof AbstractClientPlayer player) {
             boolean preview = WerewolfSkinRenderContext.isPreview(player);
@@ -41,9 +41,9 @@ record WerewolfRenderData(WerewolfForm form, WerewolfModelSet modelSet, String s
             return new WerewolfRenderData(WerewolfSkinRenderContext.getForm(player),
                     WerewolfSkinRenderContext.getModelSet(player), WerewolfSkinRenderContext.getSkinId(player), preview,
                     preview || WerewolfApi.get(player).map(data -> data.hasAbility(WerewolfAbility.ARMORED_INSTINCT) && data.showsEquipment()).orElse(false),
-                    player.isSprinting(), motion.run(), motion.prowl(), motion.leap(), new ItemStackRenderState());
+                    player.isSprinting(), motion.run(), motion.prowl(), motion.leap(), new ItemStackRenderState(), preview ? null : ClientPouncePose.sample(player, partialTick));
         }
         return new WerewolfRenderData(WerewolfForm.HUMAN, WerewolfModelSet.CLASSIC, WerewolfSkinIds.DEFAULT_ID,
-                false, false, entity.isSprinting(), 0, 0, 0, new ItemStackRenderState());
+                false, false, entity.isSprinting(), 0, 0, 0, new ItemStackRenderState(), null);
     }
 }

@@ -20,6 +20,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -44,6 +45,8 @@ public final class HunterEntity extends PathfinderMob {
                     net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
     private boolean villagePatrol;
     private long villageKey;
+    @Nullable private LivingEntity captainAttacker;
+    private long protectUntil;
 
     public HunterEntity(EntityType<? extends HunterEntity> type, Level level) {
         super(type, level);
@@ -72,13 +75,26 @@ public final class HunterEntity extends PathfinderMob {
         goalSelector.addGoal(6, new RandomStrollGoal(this, 0.85D));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        targetSelector.addGoal(0, new Goal() {
+            { setFlags(java.util.EnumSet.of(Flag.TARGET)); }
+            @Override public boolean canUse() {
+                return captainAttacker != null && captainAttacker.isAlive() && level().getGameTime() < protectUntil
+                        && distanceToSqr(captainAttacker) <= 32 * 32 && canAttack(captainAttacker);
+            }
+            @Override public void start() { setTarget(captainAttacker); }
+            @Override public void tick() { if (getTarget() != captainAttacker) setTarget(captainAttacker); }
+            @Override public void stop() {
+                if (getTarget() == captainAttacker) setTarget(null);
+                captainAttacker = null;
+            }
+        });
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10,
                 true, false, (entity, level) -> isWerewolfTarget(entity)));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
         targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers(HunterEntity.class));
     }
 
-    private static boolean isWerewolfTarget(@Nullable LivingEntity entity) {
+    static boolean isWerewolfTarget(@Nullable LivingEntity entity) {
         return entity instanceof WerewolfEntity
                 || entity instanceof AlphaWerewolfEntity
                 || entity instanceof AlphaMinionEntity
@@ -159,6 +175,12 @@ public final class HunterEntity extends PathfinderMob {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
         if (random.nextFloat() < 0.50F) spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
+    }
+
+    void protectCaptain(LivingEntity attacker) {
+        if (!villagePatrol || isTrialHunter()) return;
+        captainAttacker = attacker;
+        protectUntil = level().getGameTime() + 160;
     }
 
     @Override

@@ -71,11 +71,18 @@ final class WerewolfGuideBook {
             new Entry("moonbane_pearl", ModItems.MOONBANE_PEARL::get),
             new Entry("alpha_werewolf_badge", ModItems.ALPHA_WEREWOLF_BADGE::get),
             new Entry("ritual_altar", ModBlocks.RITUAL_ALTAR::get),
-            new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get));
+            new Entry("central_ritual_altar", ModBlocks.CENTRAL_RITUAL_ALTAR::get),
+            new Entry("werewolf_pelt", ModItems.WEREWOLF_PELT::get),
+            new Entry("silverhide", ModItems.SILVERHIDE::get),
+            new Entry("silverhide_helmet", ModItems.SILVERHIDE_HELMET::get),
+            new Entry("silverhide_chestplate", ModItems.SILVERHIDE_CHESTPLATE::get),
+            new Entry("silverhide_leggings", ModItems.SILVERHIDE_LEGGINGS::get),
+            new Entry("silverhide_boots", ModItems.SILVERHIDE_BOOTS::get));
 
     /** The mod's own crafting and cooking recipes: crafting by id, then smelting, then blasting. */
     private static final List<String> RECIPE_FILES = List.of("alpha_werewolf_badge", "central_ritual_altar", "moonbane_pearl",
-            "ritual_altar", "silver_sword", "deepslate_silver_smelting", "silver_smelting", "deepslate_silver_blasting", "silver_blasting");
+            "ritual_altar", "silver_sword", "silverhide", "silverhide_helmet", "silverhide_chestplate",
+            "silverhide_leggings", "silverhide_boots", "deepslate_silver_smelting", "silver_smelting", "deepslate_silver_blasting", "silver_blasting");
 
     /**
      * Recipes for one item. Since 1.21.2 a client no longer receives the server's recipe table, so the guide decodes the

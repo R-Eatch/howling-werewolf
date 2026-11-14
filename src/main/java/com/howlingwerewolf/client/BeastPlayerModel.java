@@ -244,6 +244,7 @@ public final class BeastPlayerModel<S extends HumanoidRenderState> extends Entit
         tailBase.yRot = wag;
         tailMid.yRot = wag * 1.35F;
         tailTip.yRot = wag * 1.7F;
+        ClientPouncePose.apply(player, com.howlingwerewolf.WerewolfForm.BEAST, torso, head, rightUpperArm, leftUpperArm, rightThigh, leftThigh);
     }
 
     private void applySpecialMovementPose(S player, float ageInTicks, float swimAmount,
