@@ -37,6 +37,7 @@ public final class ClientEvents {
 
     public static void clientTick(Minecraft minecraftUnused) {
         Minecraft minecraft = Minecraft.getInstance();
+        ClientPounceTarget.tick();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
             dimensionResyncTicks = -1;
@@ -87,7 +88,7 @@ public final class ClientEvents {
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.POUNCE.consumeClick()) {
-            ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.POUNCE));
+            ClientPounceTarget.toggle();
         }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             ClientPlayNetworking.send(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));

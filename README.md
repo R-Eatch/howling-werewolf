@@ -6,13 +6,13 @@ This is the source of Howling Werewolf for **Minecraft 1.21.1**, branch `1.21.1-
 
 | | |
 |---|---|
-| Mod version | **1.4.1** |
+| Mod version | **1.4.3** |
 | Minecraft Java Edition | 1.21.1 |
 | Fabric Loader | 0.16.14 or later |
 | Fabric API | 0.116.4+1.21.1 or later |
 | Java | 21 |
 
-Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.4.1-fabric-1.21.1.jar`. Install the same version on the server and on every client.
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.4.3-fabric-1.21.1.jar`. Install the same version on the server and on every client.
 
 The gameplay guide, the other editions and downloads are on the [main branch](https://github.com/R-Eatch/howling-werewolf).
 

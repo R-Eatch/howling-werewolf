@@ -31,6 +31,7 @@ public final class ModItems {
             AlphaWerewolfBadgeItem::new);
     public static final Supplier<Item> SILVER_SWORD = ITEMS.registerItem("silver_sword", props -> new SwordItem(Tiers.IRON,
             props.attributes(SwordItem.createAttributes(Tiers.IRON, 3, -2.4F))));
+    public static final Supplier<Item> HUNTER_CROSSBOW = ITEMS.registerItem("hunter_crossbow", HunterCrossbowItem::new);
     public static final Supplier<Item> WEREWOLF_SPAWN_EGG = ITEMS.registerItem("werewolf_spawn_egg",
             props -> new SpawnEggItem(ModEntities.WEREWOLF.get(), 0xFFFFFF, 0xFFFFFF, props));
     public static final Supplier<Item> HUNTER_SPAWN_EGG = ITEMS.registerItem("hunter_spawn_egg",
@@ -45,8 +46,9 @@ public final class ModItems {
             props -> new SpawnEggItem(ModEntities.TRIBE_WEREWOLF.get(), 0xFFFFFF, 0xFFFFFF, props));
 
     public static final java.util.List<Supplier<Item>> ITEMS_LIST = java.util.List.of(
-            SILVER_INGOT, MOONBANE_PEARL, SILVER_SWORD, WOLFSBANE_POTION, WEREWOLF_POTION,
+            SILVER_INGOT, MOONBANE_PEARL, SILVER_SWORD, HUNTER_CROSSBOW, WOLFSBANE_POTION, WEREWOLF_POTION,
             WEREWOLF_PELT, SILVERHIDE, SILVERHIDE_HELMET, SILVERHIDE_CHESTPLATE, SILVERHIDE_LEGGINGS, SILVERHIDE_BOOTS,
-            ALPHA_WEREWOLF_BADGE, WEREWOLF_SPAWN_EGG, HUNTER_SPAWN_EGG, ALPHA_WEREWOLF_SPAWN_EGG);
+            ALPHA_WEREWOLF_BADGE, WEREWOLF_SPAWN_EGG, HUNTER_SPAWN_EGG, ALPHA_WEREWOLF_SPAWN_EGG,
+            HUNTER_CAPTAIN_SPAWN_EGG, TRIBE_CHIEF_SPAWN_EGG, TRIBE_WEREWOLF_SPAWN_EGG);
     private ModItems() {}
 }

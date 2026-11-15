@@ -12,6 +12,7 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.content.ModSounds;
 import com.howlingwerewolf.content.ModTags;
+import com.howlingwerewolf.content.HunterCrossbowItem;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.network.ModNetwork;
@@ -302,6 +303,7 @@ public final class WerewolfGameplayEvents {
     }
 
     public static void livingHurt(GameplayContext.Damage event) {
+        event.setAmount(HunterCrossbowItem.damage(event.getEntity(), event.getSource(), event.getAmount()));
         if (!(event.getEntity() instanceof ServerPlayer victim)) return;
         WerewolfApi.get(victim).ifPresent(data -> {
             Entity infectionSource = event.getSource().getEntity();
@@ -321,7 +323,7 @@ public final class WerewolfGameplayEvents {
             if (!data.isWerewolf() || !data.isTransformed()) return;
             float amount = event.getAmount();
             if (event.getSource().is(DamageTypeTags.IS_FIRE)) amount *= WEREWOLF_FIRE_MULTIPLIER;
-            if (event.getSource().getEntity() instanceof LivingEntity attacker
+            if (!HunterCrossbowItem.firedArrow(event.getSource()) && event.getSource().getEntity() instanceof LivingEntity attacker
                     && attacker.getMainHandItem().is(ModTags.SILVER_WEAPONS)) {
                 amount *= 1.5F;
                 victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
@@ -676,7 +678,6 @@ public final class WerewolfGameplayEvents {
     public static void useAbility(ServerPlayer player, WerewolfAbility ability, int targetId) {
         if (ability == WerewolfAbility.SUMMON_WOLF_SPIRIT) summonWolfSpirits(player);
         else if (ability == WerewolfAbility.BLOODY_BITE) bloodyBite(player, targetId);
-        else if (ability == WerewolfAbility.POUNCE) PounceAbility.start(player);
         else if (ability == WerewolfAbility.MOONBLOOD_SURGE) useMoonbloodSurge(player);
     }
 

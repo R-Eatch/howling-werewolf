@@ -41,6 +41,8 @@ public final class SettlementData extends SavedData {
         return level.getDataStorage().computeIfAbsent(FACTORY, "howlingwerewolf_settlements");
     }
 
+    Site siteAt(BlockPos position) { return sites.get(position); }
+
     Site getOrCreate(BlockPos position, boolean tribe, RandomSource random) {
         return sites.computeIfAbsent(position.immutable(), ignored -> {
             setDirty();

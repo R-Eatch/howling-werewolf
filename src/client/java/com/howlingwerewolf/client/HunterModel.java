@@ -1,7 +1,9 @@
 package com.howlingwerewolf.client;
 
+import com.howlingwerewolf.entity.HunterEntity;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -46,6 +48,13 @@ public final class HunterModel<T extends LivingEntity> extends HumanoidModel<T> 
 
     @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        rightArmPose = ArmPose.EMPTY;
+        leftArmPose = ArmPose.EMPTY;
+        if (entity instanceof HunterEntity hunter && hunter.holdsHunterCrossbow()) {
+            ArmPose pose = entity.isUsingItem() ? ArmPose.CROSSBOW_CHARGE : ArmPose.CROSSBOW_HOLD;
+            if (entity.getMainArm() == HumanoidArm.RIGHT) rightArmPose = pose;
+            else leftArmPose = pose;
+        }
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         hat.visible = false;
         // The tails follow whichever leg pushes into them: forward swings lift the front, backward the back.

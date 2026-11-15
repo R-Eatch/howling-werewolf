@@ -33,6 +33,9 @@ public final class ModNetwork {
         PayloadTypeRegistry.playC2S().register(UpgradeTreeSkillPacket.TYPE, UpgradeTreeSkillPacket.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(UpgradeTreeSkillPacket.TYPE, (packet, context) -> context.server().execute(() -> UpgradeTreeSkillPacket.handle(packet, context)));
         PayloadTypeRegistry.playC2S().register(UseAbilityPacket.TYPE, UseAbilityPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(PounceTargetPacket.TYPE, PounceTargetPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(PounceTargetPacket.TYPE, (packet, context) ->
+                context.server().execute(() -> packet.handle(context.player())));
         PayloadTypeRegistry.playC2S().register(ToggleAbilityPacket.TYPE, ToggleAbilityPacket.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ToggleAbilityPacket.TYPE, (packet, context) -> context.server().execute(() -> ToggleAbilityPacket.handle(packet, context)));
         PayloadTypeRegistry.playC2S().register(CompanionActionPacket.TYPE, CompanionActionPacket.STREAM_CODEC);

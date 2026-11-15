@@ -76,18 +76,20 @@ final class SettlementDialogue {
 
     void idle() {
         long now = leader.level().getGameTime();
-        if (!leader.hasSettlement() || leader.isTrading() || now < nextAmbient) return;
+        if (leader.isTrading() || now < nextAmbient) return;
+        if (!leader.isWarden() && (!leader.hasSettlement() || !leader.isWithinRestriction())) return;
         if (nextAmbient == 0) {
             nextAmbient = now + 1200 + leader.getRandom().nextInt(1201);
             return;
         }
+        long day = Math.floorDiv(leader.level().getDayTime(), 24000);
+        boolean fullMoon = leader.level().getMoonPhase() == 0;
+        if (fullMoon && (!leader.level().isNight() || fullMoonDay == day)) return;
         ServerPlayer player = nearestPlayer(10);
         if (player == null) return;
         nextAmbient = now + 2400 + leader.getRandom().nextInt(1201);
-        long day = Math.floorDiv(leader.level().getDayTime(), 24000);
-        boolean fullMoon = leader.level().isNight() && leader.level().getMoonPhase() == 0 && fullMoonDay != day;
         if (fullMoon) fullMoonDay = day;
-        say(player, fullMoon ? "ambient.full_moon" : "ambient.idle.0");
+        say(player, fullMoon ? "ambient.full_moon" : "ambient.idle." + leader.getRandom().nextInt(4));
     }
 
     private ServerPlayer nearestPlayer(double distance) {

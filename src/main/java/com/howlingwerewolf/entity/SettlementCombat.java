@@ -10,6 +10,13 @@ public final class SettlementCombat {
         return entity instanceof HunterEntity || entity instanceof SettlementLeaderEntity leader && leader.isWarden();
     }
 
+    public static boolean isWerewolf(Entity entity) {
+        return entity instanceof WerewolfEntity || entity instanceof AlphaWerewolfEntity || entity instanceof AlphaMinionEntity
+                || entity instanceof TribeWerewolfEntity || entity instanceof WerewolfCompanionEntity
+                || entity instanceof SettlementLeaderEntity leader && !leader.isWarden()
+                || entity instanceof ServerPlayer player && WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false);
+    }
+
     public static void defendPlayer(ServerPlayer player, Entity source) {
         if (!(source instanceof LivingEntity hunter) || !hunter.isAlive() || !isHunter(hunter)
                 || !WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;

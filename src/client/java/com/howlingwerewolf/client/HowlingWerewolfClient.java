@@ -7,6 +7,9 @@ import com.howlingwerewolf.network.*;
 public final class HowlingWerewolfClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         ClientModEvents.initialize();
+        HunterCrossbowRender.registerProperties();
+        net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.LAST.register(context ->
+                ClientPounceTarget.draw(context.matrixStack(), context.camera()));
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> PunchyCompat.register());
         ClientTickEvents.END_CLIENT_TICK.register(ClientEvents::clientTick);
         ClientPlayNetworking.registerGlobalReceiver(SyncWerewolfDataPacket.TYPE,(packet,context) -> context.client().execute(() -> ClientPacketHandlers.applySync(packet)));

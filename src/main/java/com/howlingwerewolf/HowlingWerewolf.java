@@ -28,6 +28,7 @@ public final class HowlingWerewolf implements ModInitializer {
         ModRecipes.SERIALIZERS.getClass();
         ModPlacementModifiers.PLACEMENT_MODIFIERS.getClass();
         ModStructures.TYPES.getClass();
+        com.howlingwerewolf.content.DoubleLootCount.register();
         ModSounds.initialize();
         ModAttachments.initialize();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricItemGroup.builder()
@@ -58,6 +59,7 @@ public final class HowlingWerewolf implements ModInitializer {
         });
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
             entries.accept(ModItems.SILVER_SWORD.get());
+            entries.accept(ModItems.HUNTER_CROSSBOW.get());
             entries.accept(ModItems.SILVERHIDE_HELMET.get());
             entries.accept(ModItems.SILVERHIDE_CHESTPLATE.get());
             entries.accept(ModItems.SILVERHIDE_LEGGINGS.get());

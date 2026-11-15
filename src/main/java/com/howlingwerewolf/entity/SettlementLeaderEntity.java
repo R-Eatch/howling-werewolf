@@ -42,7 +42,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -78,12 +77,11 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         setCustomName(Component.translatable(type.getDescriptionId()));
         setCustomNameVisible(true);
         ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
+        equipSilverhideArmor();
         if (isWarden()) {
             equip(EquipmentSlot.MAINHAND, wardenSword());
         } else {
             setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.TRAPDOOR, -1.0F);
-            equip(EquipmentSlot.CHEST, new ItemStack(ModItems.SILVERHIDE_CHESTPLATE.get()));
-            equip(EquipmentSlot.LEGS, new ItemStack(ModItems.SILVERHIDE_LEGGINGS.get()));
             equip(EquipmentSlot.FEET, new ItemStack(ModItems.SILVERHIDE_BOOTS.get()));
         }
     }
@@ -100,6 +98,15 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         setDropChance(slot, 0);
     }
 
+    private void equipSilverhideArmor() {
+        if (getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
+            equip(EquipmentSlot.CHEST, new ItemStack(ModItems.SILVERHIDE_CHESTPLATE.get()));
+        }
+        if (getItemBySlot(EquipmentSlot.LEGS).isEmpty()) {
+            equip(EquipmentSlot.LEGS, new ItemStack(ModItems.SILVERHIDE_LEGGINGS.get()));
+        }
+    }
+
     public static AttributeSupplier.Builder wardenAttributes() {
         return HunterEntity.createAttributes().add(Attributes.MAX_HEALTH, 40);
     }
@@ -113,6 +120,11 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     public boolean isWarden() { return getType() == ModEntities.HUNTER_CAPTAIN.get(); }
 
     public boolean hasSettlement() { return site != null; }
+
+    @Nullable BlockPos trainingYard() {
+        return isWarden() && site != null && level() instanceof ServerLevel server
+                ? SettlementPositions.trainingYard(server, site) : null;
+    }
 
     public void settlementSpawn(BlockPos site, @Nullable Long villageKey, ModernSkin coat, SettlementPositions.Routine routine) {
         this.site = site.immutable();
@@ -147,7 +159,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         if (isWarden()) {
             targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, HunterEntity::isWerewolfTarget));
-            targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
+            targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, HunterEntity::isVillageThreat));
         } else {
             targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10,
                     true, false, SettlementCombat::isHunter));
@@ -234,7 +246,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     private boolean atWorkTime() {
         long hour = Math.floorMod(level().getDayTime(), SettlementData.DAY);
         return site != null && hour >= 2000 && hour < 9000
-                && level().getBlockState(site).is(com.howlingwerewolf.content.ModBlocks.SETTLEMENT_MARKER.get());
+                && level().getBlockState(site).is(ModBlocks.SETTLEMENT_MARKER.get());
     }
 
     @Override public void aiStep() {
@@ -272,13 +284,6 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         }
     }
 
-    @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        if (isWarden()) {
-            spawnAtLocation(new ItemStack(ModBlocks.WOLFSBANE.get(), random.nextBoolean() ? 4 : 2));
-        }
-    }
-
     public CompoundTag saveTradeStock() {
         CompoundTag tag = new CompoundTag();
         tag.putLong("WorkDay", workDay);
@@ -311,6 +316,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        if (isWarden()) equipSilverhideArmor();
         if (tag.contains("Settlement")) {
             BlockPos position = BlockPos.of(tag.getLong("Settlement"));
             settlementSpawn(position, tag.contains("VillageKey") ? tag.getLong("VillageKey") : null,
@@ -328,7 +334,8 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
 
         @Override public boolean canUse() {
             if (isTrading() || isSleeping() || level().getGameTime() < healReadyAt || (tickCount + getId()) % 10 != 0) return false;
-            patient = squad(20).stream().filter(mob -> mob.getHealth() <= mob.getMaxHealth() * 0.8F)
+            patient = getHealth() < getMaxHealth() ? SettlementLeaderEntity.this
+                    : squad(20).stream().filter(mob -> mob.getHealth() < mob.getMaxHealth())
                     .min(Comparator.comparingDouble(mob -> mob.getHealth() / mob.getMaxHealth())).orElse(null);
             return patient != null;
         }
@@ -341,19 +348,29 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         @Override public void stop() { patient = null; }
 
         @Override public void tick() {
-            getLookControl().setLookAt(patient, 30, 30);
-            if (distanceToSqr(patient) > 10 * 10 || !getSensing().hasLineOfSight(patient)) {
-                getNavigation().moveTo(patient, 1.05);
-                return;
+            if (getHealth() < getMaxHealth()) patient = SettlementLeaderEntity.this;
+            boolean healingSelf = patient == SettlementLeaderEntity.this;
+            if (!healingSelf) {
+                getLookControl().setLookAt(patient, 30, 30);
+                if (distanceToSqr(patient) > 10 * 10 || !getSensing().hasLineOfSight(patient)) {
+                    getNavigation().moveTo(patient, 1.05);
+                    return;
+                }
             }
             getNavigation().stop();
             var bottle = new SquadHealingPotion(ModEntities.SQUAD_HEALING_POTION.get(), level());
             bottle.setItem(net.minecraft.world.item.alchemy.PotionContents.createItemStack(
                     net.minecraft.world.item.Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.STRONG_HEALING));
             bottle.setOwner(SettlementLeaderEntity.this);
-            bottle.setPos(getX(), getEyeY() - 0.18, getZ());
-            Vec3 aim = patient.position().add(patient.getDeltaMovement().scale(2)).add(0, patient.getBbHeight() * 0.55, 0).subtract(bottle.position());
-            bottle.shoot(aim.x, aim.y + aim.horizontalDistance() * 0.23, aim.z, 0.76F, 0.7F);
+            if (healingSelf) {
+                bottle.setPos(getX(), getY() + 0.75, getZ());
+                bottle.setDeltaMovement(0, -0.55, 0);
+            } else {
+                bottle.setPos(getX(), getEyeY() - 0.18, getZ());
+                Vec3 aim = patient.position().add(patient.getDeltaMovement().scale(2))
+                        .add(0, patient.getBbHeight() * 0.55, 0).subtract(bottle.position());
+                bottle.shoot(aim.x, aim.y + aim.horizontalDistance() * 0.23, aim.z, 0.76F, 0.7F);
+            }
             if (level().addFreshEntity(bottle)) {
                 playSound(net.minecraft.sounds.SoundEvents.SPLASH_POTION_THROW, 0.9F, 0.9F + random.nextFloat() * 0.2F);
                 healReadyAt = level().getGameTime() + 100;

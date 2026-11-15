@@ -1,5 +1,6 @@
 package com.howlingwerewolf.event;
 
+import com.howlingwerewolf.content.HunterCrossbowItem;
 import java.util.ArrayDeque;
 import java.util.function.Function;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,6 +32,7 @@ public final class DamageHooks {
         original.run();
         float loss=Math.max(0,before-entity.getHealth());
         if (loss>0) {
+            HunterCrossbowItem.onDamage(entity, source);
             if (entity instanceof net.minecraft.server.level.ServerPlayer player)
                 com.howlingwerewolf.entity.SettlementCombat.defendPlayer(player, source.getEntity());
             var stack=ORIGINAL.get();

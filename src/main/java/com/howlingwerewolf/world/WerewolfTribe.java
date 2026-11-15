@@ -18,6 +18,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -76,7 +77,7 @@ public final class WerewolfTribe extends Structure {
                 int clearFrom = Math.min(floor, naturalY);
                 for (int y = clearFrom; y <= floor + CLEAR_HEIGHT; y++) {
                     BlockState state = level.getBlockState(pos.set(x, y, z));
-                    if (isVegetation(state)) {
+                    if (isNaturalVegetation(level, pos, state)) {
                         level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                     }
                 }
@@ -85,30 +86,49 @@ public final class WerewolfTribe extends Structure {
         for (StructurePiece piece : container.pieces()) {
             if (!(piece instanceof PoolElementStructurePiece part)) continue;
             String template = part.getElement().toString();
-            if (template.contains("courtyard") || template.contains("/ritual")) continue;
+            if (template.contains("courtyard")) {
+                for (int z = 15; z <= 17; z++) {
+                    extendApproach(level, chunk, footprints, part, new BlockPos(0, 1, z), Direction.WEST);
+                    extendApproach(level, chunk, footprints, part, new BlockPos(26, 1, z), Direction.EAST);
+                }
+                continue;
+            }
+            if (template.contains("/ritual")) continue;
             int localDoorX = (part.getRotation().rotate(Direction.EAST).getAxis() == Direction.Axis.X
                     ? part.getBoundingBox().getXSpan() : part.getBoundingBox().getZSpan()) / 2;
             int depth = part.getRotation().rotate(Direction.SOUTH).getAxis() == Direction.Axis.Z
                     ? part.getBoundingBox().getZSpan() : part.getBoundingBox().getXSpan();
-            BlockPos back = part.getPosition().offset(new BlockPos(localDoorX, 3, depth - 1).rotate(part.getRotation()));
-            landAroundHouse(level, chunk, footprints, back, part.getRotation().rotate(Direction.SOUTH));
+            extendApproach(level, chunk, footprints, part, new BlockPos(localDoorX, 3, depth - 1), Direction.SOUTH);
         }
     }
 
-    private static void landAroundHouse(WorldGenLevel level, BoundingBox chunk, List<BoundingBox> footprints,
-                                       BlockPos edge, Direction outward) {
-        for (int step = 1; step <= 4; step++) {
+    private static void extendApproach(WorldGenLevel level, BoundingBox chunk, List<BoundingBox> footprints,
+                                       PoolElementStructurePiece part, BlockPos localEdge, Direction localOutward) {
+        BlockPos edge = part.getPosition().offset(localEdge.rotate(part.getRotation()));
+        Direction outward = part.getRotation().rotate(localOutward);
+        for (int step = 1; step <= CLEARANCE; step++) {
             BlockPos at = edge.relative(outward, step).below(step - 1);
             if (footprints.stream().anyMatch(box -> distanceToFootprint(box, at.getX(), at.getZ()) == 0)) break;
             if (!chunk.isInside(at) || level.getBlockState(at).isCollisionShapeFullBlock(level, at)) continue;
             level.setBlock(at, Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, outward.getOpposite()), 2);
+            for (int support = 1; support <= 4 && at.getY() - support >= level.getMinBuildHeight(); support++) {
+                BlockPos below = at.below(support);
+                if (level.getBlockState(below).isCollisionShapeFullBlock(level, below)) break;
+                level.setBlock(below, Blocks.STONE_BRICKS.defaultBlockState(), 2);
+            }
         }
     }
 
-    private static boolean isVegetation(BlockState state) {
-        return !state.isAir() && (state.is(BlockTags.LEAVES)
-                || state.is(BlockTags.LOGS) && !state.getBlock().builtInRegistryHolder().key().location().getPath().startsWith("stripped_")
-                || state.is(BlockTags.REPLACEABLE_BY_TREES) && state.getFluidState().isEmpty());
+    private static boolean isNaturalVegetation(WorldGenLevel level, BlockPos pos, BlockState state) {
+        if (state.isAir()) return false;
+        if (state.is(BlockTags.LEAVES)) return !state.getOptionalValue(BlockStateProperties.PERSISTENT).orElse(false);
+        if (state.is(Blocks.VINE)) {
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                if (level.getBlockState(pos.relative(side)).is(Blocks.STRIPPED_SPRUCE_WOOD)) return false;
+            }
+        }
+        return state.is(BlockTags.LOGS) && !state.getBlock().builtInRegistryHolder().key().location().getPath().startsWith("stripped_")
+                || state.is(BlockTags.REPLACEABLE_BY_TREES) && state.getFluidState().isEmpty();
     }
 
     private static int distanceToFootprint(BoundingBox box, int x, int z) {

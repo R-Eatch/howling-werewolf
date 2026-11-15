@@ -60,6 +60,7 @@ final class WerewolfGuideBook {
             new Entry("deepslate_silver_ore", ModBlocks.DEEPSLATE_SILVER_ORE::get),
             new Entry("silver_ingot", ModItems.SILVER_INGOT::get),
             new Entry("silver_sword", ModItems.SILVER_SWORD::get),
+            new Entry("hunter_crossbow", ModItems.HUNTER_CROSSBOW::get),
             new Entry("wolfsbane_potion", ModItems.WOLFSBANE_POTION::get),
             new Entry("werewolf_potion", ModItems.WEREWOLF_POTION::get),
             new Entry("moonbane_pearl", ModItems.MOONBANE_PEARL::get),

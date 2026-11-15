@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerRendererMixin",
-    "ItemInHandRendererMixin"
+    "ItemInHandRendererMixin",
+    "PounceClickMixin",
+    "PounceMovementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

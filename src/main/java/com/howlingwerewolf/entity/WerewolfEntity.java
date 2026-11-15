@@ -40,6 +40,7 @@ import java.util.UUID;
  * 双足狼人共用实体：野生狼人仅使用基础属性，月冠召唤的狼群成员通过持久化标记获得试炼增益、攻击效果与自然减伤。
  */
 public final class WerewolfEntity extends Monster implements WerewolfNpcAppearance {
+    static final double FERAL_MAX_HEALTH = 40.0;
     private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
             net.minecraft.network.syncher.SynchedEntityData.defineId(WerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN),
             net.minecraft.network.syncher.SynchedEntityData.defineId(WerewolfEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT));
@@ -66,8 +67,8 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 40.0D)
-                .add(Attributes.ATTACK_DAMAGE, 6.0D)
+                .add(Attributes.MAX_HEALTH, FERAL_MAX_HEALTH)
+                .add(Attributes.ATTACK_DAMAGE, feralAttackDamage(Difficulty.NORMAL))
                 .add(Attributes.MOVEMENT_SPEED, 0.30D)
                 .add(Attributes.FOLLOW_RANGE, 36.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.20D);
