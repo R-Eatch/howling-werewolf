@@ -309,6 +309,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         if (villageKey != null) tag.putLong("VillageKey", villageKey);
         if (routine != null) tag.put("Routine", routine.save());
         tag.putLong("HealReadyAt", healReadyAt);
+        tag.putLong("HealShoutReadyAt", dialogue.nextHealShout);
         tag.put("TradeStock", saveTradeStock());
         NpcAppearanceData.save(this, APPEARANCE, tag);
     }
@@ -323,6 +324,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
                     ModernSkin.ASHEN, SettlementPositions.Routine.load(tag.getCompound("Routine"), position));
         }
         healReadyAt = tag.getLong("HealReadyAt");
+        dialogue.nextHealShout = tag.getLong("HealShoutReadyAt");
         restoreTradeStock(tag.getCompound("TradeStock"));
         NpcAppearanceData.load(this, APPEARANCE, tag, false);
     }
