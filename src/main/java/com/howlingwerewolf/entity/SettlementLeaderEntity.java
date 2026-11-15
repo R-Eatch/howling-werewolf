@@ -81,6 +81,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         if (isWarden()) {
             equip(EquipmentSlot.MAINHAND, wardenSword());
         } else {
+            setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.TRAPDOOR, -1.0F);
             equip(EquipmentSlot.CHEST, new ItemStack(ModItems.SILVERHIDE_CHESTPLATE.get()));
             equip(EquipmentSlot.LEGS, new ItemStack(ModItems.SILVERHIDE_LEGGINGS.get()));
             equip(EquipmentSlot.FEET, new ItemStack(ModItems.SILVERHIDE_BOOTS.get()));
