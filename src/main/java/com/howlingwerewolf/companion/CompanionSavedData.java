@@ -11,6 +11,8 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -19,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,12 +36,17 @@ public final class CompanionSavedData extends SavedData {
             CompanionRecord.CODEC.listOf().fieldOf("companions").forGetter(data -> List.copyOf(data.records.values())),
             Codec.LONG.optionalFieldOf("paused_at", -1L).forGetter(data -> data.pausedAt),
             Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).optionalFieldOf("owner_addresses", Map.of())
-                    .forGetter(data -> Map.copyOf(data.ownerAddresses))
+                    .forGetter(data -> Map.copyOf(data.ownerAddresses)),
+            Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.unboundedMap(Codec.STRING, Codec.STRING))
+                    .optionalFieldOf("owner_visits", Map.of()).forGetter(data -> Map.copyOf(data.ownerVisits))
     ).apply(instance, CompanionSavedData::new));
     private static final SavedDataType<CompanionSavedData> TYPE = new SavedDataType<>(
             Identifier.fromNamespaceAndPath("howlingwerewolf", "companions"), CompanionSavedData::new, CODEC,
             DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
     private final Map<UUID, CompanionRecord> records = new LinkedHashMap<>();
+    private final Map<UUID, List<CompanionRecord>> recordsByOwner = new HashMap<>();
+    private final Map<UUID, Map<String, String>> ownerVisits = new HashMap<>();
+    private final Map<UUID, CompanionContextDialogue> contextDialogues = new HashMap<>();
     // Loaded projections are transient references scoped to this server's saved data, never global statics.
     private final Map<UUID, WerewolfCompanionEntity> loaded = new HashMap<>();
     private final Set<WerewolfCompanionEntity> untracked = new HashSet<>();
@@ -51,9 +59,11 @@ public final class CompanionSavedData extends SavedData {
     public final Map<UUID, Long> lastActions = new HashMap<>();
 
     public CompanionSavedData() {}
-    private CompanionSavedData(List<CompanionRecord> entries, long pausedAt, Map<UUID, String> addresses) {
+    private CompanionSavedData(List<CompanionRecord> entries, long pausedAt, Map<UUID, String> addresses,
+                               Map<UUID, Map<String, String>> visits) {
         entries.forEach(this::attach);
         this.pausedAt = pausedAt;
+        ownerVisits.putAll(visits);
         addresses.forEach((owner, address) -> {
             if (validAddress(address) && !address.isBlank()) ownerAddresses.put(owner, address.strip());
         });
@@ -120,8 +130,29 @@ public final class CompanionSavedData extends SavedData {
         }
         return storage.computeIfAbsent(TYPE);
     }
+    void tickDialogue(ServerPlayer player, ServerLevel level, List<CompanionRecord> roster,
+                      long now, boolean readAmbient) {
+        UUID owner = player.getUUID();
+        if (roster.isEmpty() && !ownerVisits.containsKey(owner)) {
+            contextDialogues.remove(owner);
+            return;
+        }
+        contextDialogues.computeIfAbsent(owner, id -> new CompanionContextDialogue())
+                .tick(player, level, this, roster, now, readAmbient);
+    }
+
+    Map<String, String> updateVisits(UUID owner, Map<String, String> current) {
+        Map<String, String> previous = ownerVisits.getOrDefault(owner, Map.of());
+        if (!current.equals(previous)) {
+            if (current.isEmpty()) ownerVisits.remove(owner);
+            else ownerVisits.put(owner, Map.copyOf(current));
+            setDirty();
+        }
+        return previous;
+    }
+
     public List<CompanionRecord> ownedBy(UUID owner) {
-        return records.values().stream().filter(record -> record.belongsTo(owner)).toList();
+        return recordsByOwner.getOrDefault(owner, List.of());
     }
     @Nullable public CompanionRecord find(UUID id) { return records.get(id); }
     public void add(CompanionRecord record) { attach(record); setDirty(); }
@@ -130,11 +161,17 @@ public final class CompanionSavedData extends SavedData {
             record.onInventoryChanged(() -> {});
             loaded.remove(record.id);
             lastSpeech.remove(record.id);
+            var remaining = ownedBy(record.owner).stream().filter(other -> other != record).toList();
+            if (remaining.isEmpty()) recordsByOwner.remove(record.owner);
+            else recordsByOwner.put(record.owner, remaining);
             setDirty();
         }
     }
     private void attach(CompanionRecord record) {
         if (records.putIfAbsent(record.id, record) != null) throw new IllegalStateException("Duplicate companion UUID");
+        var owned = new ArrayList<>(ownedBy(record.owner));
+        owned.add(record);
+        recordsByOwner.put(record.owner, List.copyOf(owned));
         record.onInventoryChanged(this::setDirty);
     }
     @Nullable public WerewolfCompanionEntity loaded(UUID id) {

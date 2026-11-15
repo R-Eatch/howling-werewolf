@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 26.3, Fabric Loader 0.20.1, Fabric API 0.166.2+26.3 and Java 25, Howling Werewolf 1.4.3. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.3, Fabric Loader 0.20.1, Fabric API 0.166.2+26.3 and Java 25, Howling Werewolf 1.4.4. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 

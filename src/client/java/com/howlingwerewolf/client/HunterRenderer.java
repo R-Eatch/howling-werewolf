@@ -18,6 +18,12 @@ public final class HunterRenderer extends WerewolfLivingRenderer<HunterEntity, H
     }
 
     @Override
+    protected boolean shouldShowName(HunterEntity hunter, double distance) {
+        return super.shouldShowName(hunter, distance) && (hunter.shouldShowName()
+                || hunter.hasCustomName() && entityRenderDispatcher.crosshairPickEntity == hunter);
+    }
+
+    @Override
     public void extractRenderState(HunterEntity entity, HunterRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         state.trialHunter = entity.isTrialHunter();

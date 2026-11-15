@@ -7,11 +7,9 @@
         {
           "type": "minecraft:loot_table",
           "value": "howlingwerewolf:entities/hunter",
-          "functions": [
-            {
-              "function": "howlingwerewolf:double_count"
-            }
-          ]
+          "modifier": {
+            "type": "howlingwerewolf:double_count"
+          }
         }
       ]
     },
@@ -21,12 +19,10 @@
         {
           "type": "minecraft:item",
           "name": "howlingwerewolf:silver_ingot",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 2
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 2
+          }
         }
       ]
     },
@@ -36,12 +32,10 @@
         {
           "type": "minecraft:item",
           "name": "howlingwerewolf:wolfsbane",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 2
-            }
-          ]
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 2
+          }
         }
       ]
     }

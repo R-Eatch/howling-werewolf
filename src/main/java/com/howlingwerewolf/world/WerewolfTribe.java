@@ -1,6 +1,7 @@
 package com.howlingwerewolf.world;
 
 import com.howlingwerewolf.HowlingWerewolf;
+import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModStructures;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -121,6 +122,8 @@ public final class WerewolfTribe extends Structure {
 
     private static boolean isNaturalVegetation(WorldGenLevel level, BlockPos pos, BlockState state) {
         if (state.isAir()) return false;
+        // In 26.3 small flowers are replaceable by trees, including the courtyard's planted wolfsbane.
+        if (state.is(ModBlocks.WOLFSBANE.get()) && level.getBlockState(pos.below()).is(Blocks.ROOTED_DIRT)) return false;
         if (state.is(BlockTags.LEAVES)) return !state.getOptionalValue(BlockStateProperties.PERSISTENT).orElse(false);
         if (state.is(Blocks.VINE)) {
             for (Direction side : Direction.Plane.HORIZONTAL) {

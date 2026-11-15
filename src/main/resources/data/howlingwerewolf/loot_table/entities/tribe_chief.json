@@ -7,11 +7,9 @@
         {
           "type": "minecraft:loot_table",
           "value": "howlingwerewolf:entities/tribe_werewolf",
-          "functions": [
-            {
-              "function": "howlingwerewolf:double_count"
-            }
-          ]
+          "modifier": {
+            "type": "howlingwerewolf:double_count"
+          }
         }
       ]
     },

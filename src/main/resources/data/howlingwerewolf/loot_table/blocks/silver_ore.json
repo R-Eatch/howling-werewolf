@@ -1,8 +1,17 @@
 {
   "type": "minecraft:block",
-  "pools": [{
-    "rolls": 1,
-    "entries": [{ "type": "minecraft:item", "name": "howlingwerewolf:silver_ore" }],
-    "conditions": [{ "condition": "minecraft:survives_explosion" }]
-  }]
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "howlingwerewolf:silver_ore"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
 }
