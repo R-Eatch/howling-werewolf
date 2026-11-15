@@ -14,8 +14,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,12 +29,14 @@ public final class SettlementData extends SavedData {
     private static final SavedDataType<SettlementData> TYPE = new SavedDataType<>(
             Identifier.fromNamespaceAndPath("howlingwerewolf", "settlements"), SettlementData::new, CODEC);
     private final Map<BlockPos, Site> sites = new HashMap<>();
+    final Map<Long, List<BoundingBox>> tribeBounds = SettlementPositions.boundsCache();
 
     static final class Site {
         final ModernSkin coat;
         final UUID[] members = new UUID[1 + TRIBE_MEMBERS];
         final long[] replacementAt = new long[members.length];
         CompoundTag tradeStock = new CompoundTag();
+        Map<String, List<BlockPos>> schedule;
 
         Site(ModernSkin coat) { this.coat = coat; }
     }
@@ -40,6 +44,8 @@ public final class SettlementData extends SavedData {
     public static SettlementData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(TYPE);
     }
+
+    Site siteAt(BlockPos position) { return sites.get(position); }
 
     Site getOrCreate(BlockPos position, boolean tribe, RandomSource random) {
         return sites.computeIfAbsent(position.immutable(), ignored -> {

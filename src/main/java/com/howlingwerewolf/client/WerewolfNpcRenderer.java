@@ -53,4 +53,6 @@ abstract class WerewolfNpcRenderer<T extends LivingEntity>
         var data = WerewolfRenderData.get(state);
         return WerewolfSkinCatalog.texture(data.skinId(), data.modelSet(), form);
     }
+
+    ModernPlayerModel<HumanoidRenderState> modernModel() { return modern; }
 }

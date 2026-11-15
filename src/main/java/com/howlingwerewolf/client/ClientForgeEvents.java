@@ -26,6 +26,7 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -44,6 +45,7 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void clientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
+        ClientPounceTarget.tick();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
             dimensionResyncTicks = -1;
@@ -93,11 +95,17 @@ public final class ClientForgeEvents {
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.POUNCE.consumeClick()) {
-            ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.POUNCE));
+            ClientPounceTarget.toggle();
         }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }
+    }
+
+    @SubscribeEvent
+    public static void renderPounceTarget(SubmitCustomGeometryEvent event) {
+        ClientPounceTarget.draw(event.getPoseStack(), Minecraft.getInstance().gameRenderer.getMainCamera(),
+                event.getSubmitNodeCollector());
     }
 
     static void useBloodyBite() {

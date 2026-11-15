@@ -44,6 +44,7 @@ public final class SettlementMarkerBlockEntity extends BlockEntity {
 
         SettlementData data = SettlementData.get(server);
         SettlementData.Site site = data.getOrCreate(pos, tribe, server.getRandom());
+        if (site.schedule == null) site.schedule = SettlementPositions.schedule(server, pos, tribe);
         int slots = tribe ? site.members.length : 1;
         for (int slot = 0; slot < slots; slot++) {
             if (site.members[slot] != null || server.getGameTime() < site.replacementAt[slot]) continue;
@@ -53,10 +54,10 @@ public final class SettlementMarkerBlockEntity extends BlockEntity {
             Mob mob = type.create(server, EntitySpawnReason.STRUCTURE);
             if (mob == null || !findSpawnPosition(server, pos, mob)) continue;
             if (mob instanceof SettlementLeaderEntity leader) {
-                leader.settlementSpawn(pos, marker.villageKey, site.coat);
+                leader.settlementSpawn(pos, marker.villageKey, site.coat, SettlementPositions.Routine.from(site.schedule, pos, tribe, slot));
                 if (!site.tradeStock.isEmpty()) leader.restoreTradeStock(site.tradeStock);
             } else if (mob instanceof TribeWerewolfEntity resident) {
-                resident.settlementSpawn(pos, site.coat);
+                resident.settlementSpawn(pos, site.coat, SettlementPositions.Routine.from(site.schedule, pos, tribe, slot));
             }
             if (server.addFreshEntity(mob)) {
                 site.members[slot] = mob.getUUID();

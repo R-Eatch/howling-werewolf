@@ -4,5 +4,9 @@
   "package": "com.howlingwerewolf.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": ["LocateWatchtowerMixin"],
+  "client": [
+    "client.PounceClickMixin",
+    "client.PounceMovementMixin"
+  ],
   "injectors": { "defaultRequire": 1 }
 }

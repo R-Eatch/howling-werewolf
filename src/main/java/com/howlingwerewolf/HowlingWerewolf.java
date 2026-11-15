@@ -46,6 +46,7 @@ public final class HowlingWerewolf {
                         output.accept(ModItems.SILVER_INGOT.get());
                         output.accept(ModItems.MOONBANE_PEARL.get());
                         output.accept(ModItems.SILVER_SWORD.get());
+                        output.accept(ModItems.HUNTER_CROSSBOW.get());
                         output.accept(ModItems.WEREWOLF_PELT.get());
                         output.accept(ModItems.SILVERHIDE.get());
                         output.accept(ModItems.SILVERHIDE_HELMET.get());
@@ -58,6 +59,9 @@ public final class HowlingWerewolf {
                         output.accept(ModItems.WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModItems.HUNTER_SPAWN_EGG.get());
                         output.accept(ModItems.ALPHA_WEREWOLF_SPAWN_EGG.get());
+                        output.accept(ModItems.HUNTER_CAPTAIN_SPAWN_EGG.get());
+                        output.accept(ModItems.TRIBE_CHIEF_SPAWN_EGG.get());
+                        output.accept(ModItems.TRIBE_WEREWOLF_SPAWN_EGG.get());
                         output.accept(ModBlocks.SILVER_ORE.get());
                         output.accept(ModBlocks.DEEPSLATE_SILVER_ORE.get());
                         output.accept(ModBlocks.WOLFSBANE.get());
@@ -74,6 +78,7 @@ public final class HowlingWerewolf {
         ModSounds.SOUNDS.register(modBus);
         ModPlacementModifiers.PLACEMENT_MODIFIERS.register(modBus);
         ModStructures.TYPES.register(modBus);
+        com.howlingwerewolf.content.DoubleLootCount.TYPES.register(modBus);
         ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);
         TABS.register(modBus);

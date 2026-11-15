@@ -122,8 +122,13 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
             target.y += (source.y - rest.y()) / rig.scale();
             target.z += (source.z - rest.z()) / rig.scale();
         }
-        if (!ClientPouncePose.active(state)) applyNativeHands(state);
-        if (form == WerewolfForm.BEAST && !ClientPouncePose.active(state)) {
+        boolean pouncing = ClientPouncePose.active(state);
+        if (!pouncing) applyNativeHands(state);
+        if (form == WerewolfForm.BEAST && pouncing) {
+            anchorPounceHip("rightLeg");
+            anchorPounceHip("leftLeg");
+        }
+        if (form == WerewolfForm.BEAST && !pouncing) {
             var motion = WerewolfRenderData.get(state);
             if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying && state.isUsingItem) {
                 // Aiming keeps the upright crouch, so native arm poses still point at the target.
@@ -399,6 +404,11 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         float angle = hip.xRot - rest;
         hip.y = baseY + HIP_SOCKET * (Mth.cos(angle) - 1);
         hip.z = baseZ + HIP_SOCKET * Mth.sin(angle);
+    }
+
+    private void anchorPounceHip(String bone) {
+        ModelPart thigh = rig.bone(bone);
+        swingFromSocket(thigh, thigh.getInitialPose().xRot(), thigh.y, thigh.z);
     }
 
     private void restBend(String effector, String[] joints) {

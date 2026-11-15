@@ -13,7 +13,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -26,14 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Armor follows the imported bones instead of drawing a second Classic-shaped body. */
-final class ModernEquipmentLayer extends RenderLayer<AvatarRenderState, ModernPlayerModel<AvatarRenderState>> {
+final class ModernEquipmentLayer<S extends HumanoidRenderState> extends RenderLayer<S, ModernPlayerModel<S>> {
     private final EquipmentLayerRenderer equipment;
-    private final List<Piece> pieces = new ArrayList<>();
+    private final List<Piece<S>> pieces = new ArrayList<>();
 
-    ModernEquipmentLayer(ModernPlayerRenderer parent, EntityRendererProvider.Context context) {
+    ModernEquipmentLayer(RenderLayerParent<S, ModernPlayerModel<S>> parent, EntityRendererProvider.Context context) {
         super(parent);
         equipment = context.getEquipmentRenderer();
-        ArmorModelSet<HumanoidModel<AvatarRenderState>> models = ArmorModelSet.bake(
+        ArmorModelSet<HumanoidModel<S>> models = ArmorModelSet.bake(
                 ModelLayers.PLAYER_ARMOR, context.getModelSet(), HumanoidModel::new);
         // Cuts follow the vanilla layer layout along a limb box: leggings cover its upper three
         // quarters (thigh, then shin), boots its lower half (ankle, then paw), sleeves split at the elbow,
@@ -80,7 +81,7 @@ final class ModernEquipmentLayer extends RenderLayer<AvatarRenderState, ModernPl
         ModelPart.Cube cube = block.cubes.get(0);
         float[] bounds = BlockbenchModel.bounds(sleeve);
         ModelPart top = clip(sleeve, bounds[1], bounds[1] + (bounds[4] - bounds[1]) * 0.35F);
-        pieces.add(new Piece(EquipmentSlot.CHEST, bone, block, new ArmorPieceModel(top), BlockbenchModel.bounds(top),
+        pieces.add(new Piece<>(EquipmentSlot.CHEST, bone, block, new ArmorPieceModel<>(top), BlockbenchModel.bounds(top),
                 new float[] {cube.minX, cube.minY, cube.minZ, cube.maxX, cube.maxY, cube.maxZ}));
     }
 
@@ -125,13 +126,17 @@ final class ModernEquipmentLayer extends RenderLayer<AvatarRenderState, ModernPl
         part.resetPose();
         float[] source = BlockbenchModel.bounds(part);
         float[] target = attachmentBounds(getParentModel().rig.bone(bone));
-        pieces.add(new Piece(slot, bone, null, new ArmorPieceModel(part), source, target));
+        pieces.add(new Piece<>(slot, bone, null, new ArmorPieceModel<>(part), source, target));
     }
 
     @Override
-    public void submit(PoseStack pose, SubmitNodeCollector collector, int light, AvatarRenderState state, float yRot, float xRot) {
+    public void submit(PoseStack pose, SubmitNodeCollector collector, int light, S state, float yRot, float xRot) {
         if (!WerewolfRenderData.get(state).armoredInstinct() || !HWConfig.SHOW_WEREWOLF_EQUIPMENT.get()) return;
-        for (Piece piece : pieces) {
+        submitArmor(pose, collector, light, state);
+    }
+
+    void submitArmor(PoseStack pose, SubmitNodeCollector collector, int light, S state) {
+        for (Piece<S> piece : pieces) {
             ItemStack stack = switch (piece.slot()) {
                 case HEAD -> state.headEquipment;
                 case CHEST -> state.chestEquipment;
@@ -193,12 +198,12 @@ final class ModernEquipmentLayer extends RenderLayer<AvatarRenderState, ModernPl
         return bounds;
     }
 
-    private static final class ArmorPieceModel extends EntityModel<AvatarRenderState> {
+    private static final class ArmorPieceModel<S extends HumanoidRenderState> extends EntityModel<S> {
         ArmorPieceModel(ModelPart root) { super(root); }
-        @Override public void setupAnim(AvatarRenderState state) { resetPose(); }
+        @Override public void setupAnim(S state) { resetPose(); }
     }
 
     /** {@code block} is set when the piece follows one tilted block of the bone rather than the bone itself. */
-    private record Piece(EquipmentSlot slot, String bone, @org.jetbrains.annotations.Nullable ModelPart block,
-                         ArmorPieceModel model, float[] source, float[] target) {}
+    private record Piece<S extends HumanoidRenderState>(EquipmentSlot slot, String bone, @org.jetbrains.annotations.Nullable ModelPart block,
+                         ArmorPieceModel<S> model, float[] source, float[] target) {}
 }

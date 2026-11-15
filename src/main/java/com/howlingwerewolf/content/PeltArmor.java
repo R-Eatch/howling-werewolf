@@ -1,21 +1,16 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
-import com.howlingwerewolf.capability.WerewolfApi;
-import com.howlingwerewolf.entity.AlphaWerewolfEntity;
-import com.howlingwerewolf.entity.SettlementLeaderEntity;
-import com.howlingwerewolf.entity.TribeWerewolfEntity;
-import com.howlingwerewolf.entity.WerewolfCompanionEntity;
-import com.howlingwerewolf.entity.WerewolfEntity;
 import net.minecraft.ChatFormatting;
+import com.howlingwerewolf.entity.SettlementCombat;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,8 +30,7 @@ import java.util.function.Consumer;
 
 public final class PeltArmor {
     private static final Identifier SET = Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "silverhide");
-    private static final Identifier SPEED_ID = SET.withSuffix("_speed");
-    private static final AttributeModifier SPEED = new AttributeModifier(SPEED_ID, 0.20, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.125F;
 
     private static final ArmorMaterial MATERIAL = new ArmorMaterial(
             ArmorMaterials.IRON.durability(), ArmorMaterials.IRON.defense(), ArmorMaterials.GOLD.enchantmentValue(),
@@ -44,7 +38,10 @@ public final class PeltArmor {
             ResourceKey.create(EquipmentAssets.ROOT_ID, SET));
 
     public static Item piece(Item.Properties properties, ArmorType type) {
-        return new Item(properties.humanoidArmor(MATERIAL, type)) {
+        return new Item(properties.humanoidArmor(MATERIAL, type).attributes(MATERIAL.createAttributes(type)
+                .withModifierAdded(Attributes.MOVEMENT_SPEED,
+                        new AttributeModifier(SET.withSuffix("_speed_" + type.getName()), 0.0125, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.bySlot(type.getSlot())))) {
             @Override
             public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                         Consumer<Component> tooltip, TooltipFlag flag) {
@@ -54,30 +51,22 @@ public final class PeltArmor {
         };
     }
 
-    public static void refreshSpeed(ServerPlayer player) {
-        var speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (speed == null) return;
-        boolean active = player.isAlive() && wearingSet(player) && !player.hasEffect(MobEffects.SPEED);
-        if (active && !speed.hasModifier(SPEED_ID)) speed.addTransientModifier(SPEED);
-        if (!active && speed.hasModifier(SPEED_ID)) speed.removeModifier(SPEED_ID);
+    public static float reduce(LivingEntity bearer, DamageSource source, float damage) {
+        if (damage <= 0 || source.is(DamageTypes.GENERIC_KILL)) return damage;
+        int pieces = countPieces(bearer);
+        if (pieces == 4) damage *= source.is(DamageTypes.FELL_OUT_OF_WORLD) ? 0.95F : 0.90F;
+        if (pieces > 0 && (source.is(DamageTypeTags.IS_FREEZING) || SettlementCombat.isWerewolf(source.getEntity())))
+            damage *= 1 - pieces * SPECIAL_REDUCTION_PER_PIECE;
+        return damage;
     }
 
-    public static float reduce(ServerPlayer player, DamageSource source, float damage) {
-        return damage > 0 && wearingSet(player) && (source.is(DamageTypeTags.IS_FREEZING) || fromWerewolf(source.getEntity()))
-                ? damage * 0.5F : damage;
-    }
+    public static boolean wearingSet(LivingEntity bearer) { return countPieces(bearer) == 4; }
 
-    private static boolean wearingSet(ServerPlayer player) {
-        return player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.SILVERHIDE_HELMET.get())
-                && player.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.SILVERHIDE_CHESTPLATE.get())
-                && player.getItemBySlot(EquipmentSlot.LEGS).is(ModItems.SILVERHIDE_LEGGINGS.get())
-                && player.getItemBySlot(EquipmentSlot.FEET).is(ModItems.SILVERHIDE_BOOTS.get());
-    }
-
-    private static boolean fromWerewolf(Entity source) {
-        return source instanceof WerewolfEntity || source instanceof AlphaWerewolfEntity || source instanceof TribeWerewolfEntity
-                || source instanceof WerewolfCompanionEntity || source instanceof SettlementLeaderEntity leader && !leader.isWarden()
-                || source instanceof ServerPlayer player && WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false);
+    private static int countPieces(LivingEntity bearer) {
+        return (bearer.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.SILVERHIDE_HELMET.get()) ? 1 : 0)
+                + (bearer.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.SILVERHIDE_CHESTPLATE.get()) ? 1 : 0)
+                + (bearer.getItemBySlot(EquipmentSlot.LEGS).is(ModItems.SILVERHIDE_LEGGINGS.get()) ? 1 : 0)
+                + (bearer.getItemBySlot(EquipmentSlot.FEET).is(ModItems.SILVERHIDE_BOOTS.get()) ? 1 : 0);
     }
 
     private PeltArmor() {}

@@ -36,6 +36,13 @@ public final class ModItems {
             props -> new SpawnEggItem(props.spawnEgg(ModEntities.HUNTER.get())));
     public static final DeferredItem<Item> ALPHA_WEREWOLF_SPAWN_EGG = ITEMS.registerItem("alpha_werewolf_spawn_egg",
             props -> new SpawnEggItem(props.spawnEgg(ModEntities.ALPHA_WEREWOLF.get())));
+    public static final DeferredItem<Item> HUNTER_CAPTAIN_SPAWN_EGG = ITEMS.registerItem("hunter_captain_spawn_egg",
+            props -> new SpawnEggItem(props.spawnEgg(ModEntities.HUNTER_CAPTAIN.get())));
+    public static final DeferredItem<Item> TRIBE_CHIEF_SPAWN_EGG = ITEMS.registerItem("tribe_chief_spawn_egg",
+            props -> new SpawnEggItem(props.spawnEgg(ModEntities.TRIBE_CHIEF.get())));
+    public static final DeferredItem<Item> TRIBE_WEREWOLF_SPAWN_EGG = ITEMS.registerItem("tribe_werewolf_spawn_egg",
+            props -> new SpawnEggItem(props.spawnEgg(ModEntities.TRIBE_WEREWOLF.get())));
+    public static final DeferredItem<HunterCrossbowItem> HUNTER_CROSSBOW = ITEMS.registerItem("hunter_crossbow", HunterCrossbowItem::new);
 
     private ModItems() {}
 }
