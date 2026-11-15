@@ -16,6 +16,7 @@ final class SettlementDialogue {
     private final Map<UUID, Long> recentTrades = new HashMap<>();
     private long nextAmbient;
     private long nextCombat;
+    long nextHealShout;
     private long fullMoonDay = -1;
 
     SettlementDialogue(SettlementLeaderEntity leader) { this.leader = leader; }
@@ -69,9 +70,12 @@ final class SettlementDialogue {
     }
 
     void healSquad() {
+        long now = leader.level().getGameTime();
+        if (now < nextHealShout || now < nextCombat) return;
         ServerPlayer player = nearestPlayer(14);
-        if (player == null || leader.level().getGameTime() < nextCombat) return;
-        nextCombat = leader.level().getGameTime() + 200;
+        if (player == null) return;
+        nextHealShout = now + 20 * 60;
+        nextCombat = now + 200;
         say(player, "combat.heal_squad");
     }
 

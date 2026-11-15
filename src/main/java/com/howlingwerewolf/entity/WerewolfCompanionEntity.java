@@ -90,8 +90,6 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     private long lastHurt;
     private long lastAmbientLine = -200;
     private long nextIdleLine;
-    private long nextContextLine;
-    private int previousContext;
     private boolean merchantTimeWarning;
     private long nextMerchantTrade;
     private String merchantClassicSkin;
@@ -325,7 +323,6 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
                 heal(CompanionRules.regeneration(CompanionManager.effectiveTier(player, record)));
             }
             CompanionManager.remember(this);
-            tickContextDialogue(level, player);
             tickIdleDialogue(player);
         }
     }
@@ -400,33 +397,8 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         tickArrival(level);
     }
 
-    private void tickContextDialogue(ServerLevel level, ServerPlayer player) {
-        long now = level.getGameTime();
-        var data = com.howlingwerewolf.capability.WerewolfApi.get(player).orElse(null);
-        if (data == null) return;
-        long hour = Math.floorMod(level.getDayTime(), 24000);
-        boolean overworld = level.dimension().equals(Level.OVERWORLD);
-        var biome = level.getBiome(player.blockPosition());
-        boolean taiga = biome.is(net.minecraft.world.level.biome.Biomes.TAIGA) || biome.is(net.minecraft.world.level.biome.Biomes.SNOWY_TAIGA)
-                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_PINE_TAIGA)
-                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_SPRUCE_TAIGA);
-        String[] cues = {"player_low_hp", "player_beast", "full_moon", "sunrise", "rain", "biome.taiga", "biome.nether", "water"};
-        boolean[] active = {
-                player.getHealth() <= player.getMaxHealth() * 0.25F, data.isBeastMode(),
-                overworld && hour >= 13000 && hour < 23000 && level.getMoonPhase() == 0, overworld && hour < 900,
-                overworld && level.isRainingAt(player.blockPosition()), taiga, level.dimension().equals(Level.NETHER),
-                player.isInWater()
-        };
-        int current = 0;
-        for (int i = 0; i < active.length; i++) if (active[i]) current |= 1 << i;
-        int changed = current & ~previousContext;
-        previousContext = current;
-        if (changed == 0 || now < nextContextLine || distanceToSqr(player) > 12 * 12
-                || !player.isAlive() || player.isSpectator() || player.containerMenu != player.inventoryMenu) return;
-        if (getTarget() != null && (changed & 1) == 0) return;
-        nextContextLine = now + 1200;
-        nextIdleLine = Math.max(nextIdleLine, now + 1200);
-        sayTo(player, cues[Integer.numberOfTrailingZeros(changed)]);
+    public void deferIdleDialogue() {
+        nextIdleLine = Math.max(nextIdleLine, level().getGameTime() + 1200);
     }
 
     private void tickIdleDialogue(ServerPlayer player) {

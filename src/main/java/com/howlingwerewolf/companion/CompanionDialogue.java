@@ -19,7 +19,8 @@ public final class CompanionDialogue {
             Map.entry("sort", 3), Map.entry("sort_idle_found", 2),
             Map.entry("full_moon", 2), Map.entry("sunrise", 1), Map.entry("rain", 1),
             Map.entry("player_low_hp", 1), Map.entry("player_beast", 2),
-            Map.entry("biome.taiga", 1), Map.entry("biome.nether", 1), Map.entry("water", 1));
+            Map.entry("biome.taiga", 1), Map.entry("biome.nether", 3), Map.entry("biome.end", 3),
+            Map.entry("location.village", 3), Map.entry("location.tribe", 3), Map.entry("water", 1));
     private static final Set<String> RELIABLE = Set.of("follow", "guard", "rest", "sort", "sort_idle_found", "fallen", "wounded");
 
     public static String key(String occasion, RandomSource random) {
@@ -28,12 +29,17 @@ public final class CompanionDialogue {
     }
     public static void say(ServerPlayer player, CompanionRecord record, String occasion) {
         if (!record.belongsTo(player.getUUID())) return;
+        var server = player.getServer();
+        var data = CompanionSavedData.get(server);
         // Keep the requested greeting/vow/hunt/return/revival lines reliable. Ambient responses
         // share a cooldown across entity replacements, so recall cannot reset their chat limit.
         if (VARIANTS.containsKey(occasion) && !RELIABLE.contains(occasion)
-                && !CompanionSavedData.get(player.getServer()).allowSpeech(record.id,
-                player.getServer().overworld().getGameTime())) return;
-        String custom = CompanionSavedData.get(player.getServer()).address(record.owner);
+                && !data.allowSpeech(record.id, server.overworld().getGameTime())) return;
+        sendLine(player, record, occasion, data);
+    }
+
+    static void sendLine(ServerPlayer player, CompanionRecord record, String occasion, CompanionSavedData data) {
+        String custom = data.address(record.owner);
         Component address = custom.isEmpty() ? Component.translatable("dialogue.howlingwerewolf.companion.address_default") : Component.literal(custom);
         player.sendSystemMessage(Component.literal("<" + record.name() + "> ")
                 .append(Component.translatable(key(occasion, player.getRandom()), address)));

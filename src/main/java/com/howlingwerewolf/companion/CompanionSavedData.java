@@ -9,9 +9,12 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -23,13 +26,19 @@ import java.util.UUID;
 /** Server-wide and keyed by owner UUID, so neither player death nor a dimension unload loses followers. */
 public final class CompanionSavedData extends SavedData {
     private static final String NAME = "howlingwerewolf_companions";
-    private record Stored(List<CompanionRecord> companions, long pausedAt, Map<UUID, String> addresses) {}
+    private record Stored(List<CompanionRecord> companions, long pausedAt, Map<UUID, String> addresses,
+                          Map<UUID, Map<String, String>> visits) {}
     private static final Codec<Stored> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CompanionRecord.CODEC.listOf().fieldOf("companions").forGetter(Stored::companions),
             Codec.LONG.optionalFieldOf("paused_at", -1L).forGetter(Stored::pausedAt),
-            Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).optionalFieldOf("owner_addresses", Map.of()).forGetter(Stored::addresses)
+            Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).optionalFieldOf("owner_addresses", Map.of()).forGetter(Stored::addresses),
+            Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.unboundedMap(Codec.STRING, Codec.STRING))
+                    .optionalFieldOf("owner_visits", Map.of()).forGetter(Stored::visits)
     ).apply(instance, Stored::new));
     private final Map<UUID, CompanionRecord> records = new LinkedHashMap<>();
+    private final Map<UUID, List<CompanionRecord>> recordsByOwner = new HashMap<>();
+    private final Map<UUID, Map<String, String>> ownerVisits = new HashMap<>();
+    private final Map<UUID, CompanionContextDialogue> contextDialogues = new HashMap<>();
     // Loaded projections are transient references scoped to this server's saved data, never global statics.
     private final Map<UUID, WerewolfCompanionEntity> loaded = new HashMap<>();
     private final Set<WerewolfCompanionEntity> untracked = new HashSet<>();
@@ -53,12 +62,14 @@ public final class CompanionSavedData extends SavedData {
         stored.addresses().forEach((owner, address) -> {
             if (validAddress(address) && !address.isBlank()) data.ownerAddresses.put(owner, address.strip());
         });
+        data.ownerVisits.putAll(stored.visits());
         return data;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        var encoded = CODEC.encodeStart(NbtOps.INSTANCE, new Stored(List.copyOf(records.values()), pausedAt, Map.copyOf(ownerAddresses)))
+        var encoded = CODEC.encodeStart(NbtOps.INSTANCE, new Stored(List.copyOf(records.values()), pausedAt, Map.copyOf(ownerAddresses),
+                Map.copyOf(ownerVisits)))
                 .resultOrPartial(error -> HowlingWerewolf.LOGGER.error("Could not save companion records: {}", error));
         if (encoded.isPresent() && encoded.get() instanceof CompoundTag compound) tag.merge(compound);
         return tag;
@@ -108,8 +119,29 @@ public final class CompanionSavedData extends SavedData {
     public static CompanionSavedData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(CompanionSavedData::load, CompanionSavedData::new, NAME);
     }
+    void tickDialogue(ServerPlayer player, ServerLevel level, List<CompanionRecord> roster,
+                      long now, boolean readAmbient) {
+        UUID owner = player.getUUID();
+        if (roster.isEmpty() && !ownerVisits.containsKey(owner)) {
+            contextDialogues.remove(owner);
+            return;
+        }
+        contextDialogues.computeIfAbsent(owner, id -> new CompanionContextDialogue())
+                .tick(player, level, this, roster, now, readAmbient);
+    }
+
+    Map<String, String> updateVisits(UUID owner, Map<String, String> current) {
+        Map<String, String> previous = ownerVisits.getOrDefault(owner, Map.of());
+        if (!current.equals(previous)) {
+            if (current.isEmpty()) ownerVisits.remove(owner);
+            else ownerVisits.put(owner, Map.copyOf(current));
+            setDirty();
+        }
+        return previous;
+    }
+
     public List<CompanionRecord> ownedBy(UUID owner) {
-        return records.values().stream().filter(record -> record.belongsTo(owner)).toList();
+        return recordsByOwner.getOrDefault(owner, List.of());
     }
     @Nullable public CompanionRecord find(UUID id) { return records.get(id); }
     public void add(CompanionRecord record) { attach(record); setDirty(); }
@@ -118,11 +150,17 @@ public final class CompanionSavedData extends SavedData {
             record.onInventoryChanged(() -> {});
             loaded.remove(record.id);
             lastSpeech.remove(record.id);
+            var remaining = ownedBy(record.owner).stream().filter(other -> other != record).toList();
+            if (remaining.isEmpty()) recordsByOwner.remove(record.owner);
+            else recordsByOwner.put(record.owner, remaining);
             setDirty();
         }
     }
     private void attach(CompanionRecord record) {
         if (records.putIfAbsent(record.id, record) != null) throw new IllegalStateException("Duplicate companion UUID");
+        var owned = new ArrayList<>(ownedBy(record.owner));
+        owned.add(record);
+        recordsByOwner.put(record.owner, List.copyOf(owned));
         record.onInventoryChanged(this::setDirty);
     }
     @Nullable public WerewolfCompanionEntity loaded(UUID id) {
