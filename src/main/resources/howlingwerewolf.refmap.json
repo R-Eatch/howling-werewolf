@@ -2,12 +2,34 @@
   "mappings": {
     "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
       "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+    },
+    "com/howlingwerewolf/mixin/client/PounceClickMixin": {
+      "continueAttack": "Lnet/minecraft/client/Minecraft;m_91386_(Z)V",
+      "startAttack": "Lnet/minecraft/client/Minecraft;m_202354_()Z",
+      "startUseItem": "Lnet/minecraft/client/Minecraft;m_91277_()V"
+    },
+    "com/howlingwerewolf/mixin/client/PounceMovementMixin": {
+      "tick": "Lnet/minecraft/client/player/KeyboardInput;m_214106_(ZF)V"
+    },
+    "com/howlingwerewolf/mixin/CrossbowArrowMixin": {
+      "getArrow": "Lnet/minecraft/world/item/CrossbowItem;m_40914_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/projectile/AbstractArrow;"
     }
   },
   "data": {
     "searge": {
       "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
         "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+      },
+      "com/howlingwerewolf/mixin/client/PounceClickMixin": {
+        "continueAttack": "Lnet/minecraft/client/Minecraft;m_91386_(Z)V",
+        "startAttack": "Lnet/minecraft/client/Minecraft;m_202354_()Z",
+        "startUseItem": "Lnet/minecraft/client/Minecraft;m_91277_()V"
+      },
+      "com/howlingwerewolf/mixin/client/PounceMovementMixin": {
+        "tick": "Lnet/minecraft/client/player/KeyboardInput;m_214106_(ZF)V"
+      },
+      "com/howlingwerewolf/mixin/CrossbowArrowMixin": {
+        "getArrow": "Lnet/minecraft/world/item/CrossbowItem;m_40914_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/projectile/AbstractArrow;"
       }
     }
   }

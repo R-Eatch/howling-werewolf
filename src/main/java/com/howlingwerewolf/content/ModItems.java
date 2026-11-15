@@ -34,6 +34,9 @@ public final class ModItems {
             AlphaWerewolfBadgeItem::new);
     public static final RegistryObject<SwordItem> SILVER_SWORD = ITEMS.register("silver_sword",
             () -> new SwordItem(Tiers.IRON, 3, -2.4F, new Item.Properties()));
+    public static final RegistryObject<HunterCrossbowItem> HUNTER_CROSSBOW = ITEMS.register("hunter_crossbow",
+            () -> new HunterCrossbowItem(new Item.Properties()));
+    // Neutral tints preserve the dedicated full-color spawn egg textures.
     public static final RegistryObject<Item> WEREWOLF_SPAWN_EGG = ITEMS.register("werewolf_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
@@ -43,6 +46,12 @@ public final class ModItems {
     public static final RegistryObject<Item> ALPHA_WEREWOLF_SPAWN_EGG = ITEMS.register("alpha_werewolf_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.ALPHA_WEREWOLF, 0xFFFFFF, 0xFFFFFF,
                     new Item.Properties()));
+    public static final RegistryObject<Item> HUNTER_CAPTAIN_SPAWN_EGG = ITEMS.register("hunter_captain_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.HUNTER_CAPTAIN, 0xFFFFFF, 0xFFFFFF, new Item.Properties()));
+    public static final RegistryObject<Item> TRIBE_CHIEF_SPAWN_EGG = ITEMS.register("tribe_chief_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.TRIBE_CHIEF, 0xFFFFFF, 0xFFFFFF, new Item.Properties()));
+    public static final RegistryObject<Item> TRIBE_WEREWOLF_SPAWN_EGG = ITEMS.register("tribe_werewolf_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.TRIBE_WEREWOLF, 0xFFFFFF, 0xFFFFFF, new Item.Properties()));
 
     private ModItems() {}
 }

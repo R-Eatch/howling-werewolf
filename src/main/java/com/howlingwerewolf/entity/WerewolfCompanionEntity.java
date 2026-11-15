@@ -90,6 +90,10 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     private long lastHurt;
     private long lastAmbientLine = -200;
     private long nextIdleLine;
+    private long nextContextLine;
+    private int previousContext;
+    private boolean merchantTimeWarning;
+    private long nextMerchantTrade;
     private String merchantClassicSkin;
     private String merchantModernSkin;
     private final SimpleContainer merchantInventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE);
@@ -301,12 +305,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (!(level() instanceof ServerLevel level)) return;
         if (tickCount % 20 == 0) refreshAppearance();
         if (!isRecruited()) {
-            if (level.getGameTime() >= expiresAt) {
-                ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
-                if (visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16) sayTo(visitor, "farewell");
-                closeTrading(); discard(); return;
-            }
-            tickArrival(level);
+            tickMerchant(level);
             return;
         }
         if (record == null) { discard(); return; }
@@ -326,6 +325,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
                 heal(CompanionRules.regeneration(CompanionManager.effectiveTier(player, record)));
             }
             CompanionManager.remember(this);
+            tickContextDialogue(level, player);
             tickIdleDialogue(player);
         }
     }
@@ -379,6 +379,56 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         sortBusy = false;
     }
     public void resetIdleDialogue() { nextIdleLine = level().getGameTime() + 1200 + random.nextInt(1201); }
+
+    private void tickMerchant(ServerLevel level) {
+        long now = level.getGameTime();
+        ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
+        boolean nearby = visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16;
+        if (now >= expiresAt) {
+            if (nearby) sayTo(visitor, "farewell");
+            closeTrading();
+            discard();
+            return;
+        }
+        if (nearby && !merchantTimeWarning && expiresAt - now <= 2400) {
+            merchantTimeWarning = true;
+            sayTo(visitor, "time_warning");
+        } else if (nearby && altar == null && !isTrading() && now >= nextIdleLine) {
+            resetIdleDialogue();
+            sayTo(visitor, "idle");
+        }
+        tickArrival(level);
+    }
+
+    private void tickContextDialogue(ServerLevel level, ServerPlayer player) {
+        long now = level.getGameTime();
+        var data = com.howlingwerewolf.capability.WerewolfApi.get(player).orElse(null);
+        if (data == null) return;
+        long hour = Math.floorMod(level.getDayTime(), 24000);
+        boolean overworld = level.dimension().equals(Level.OVERWORLD);
+        var biome = level.getBiome(player.blockPosition());
+        boolean taiga = biome.is(net.minecraft.world.level.biome.Biomes.TAIGA) || biome.is(net.minecraft.world.level.biome.Biomes.SNOWY_TAIGA)
+                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_PINE_TAIGA)
+                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_SPRUCE_TAIGA);
+        String[] cues = {"player_low_hp", "player_beast", "full_moon", "sunrise", "rain", "biome.taiga", "biome.nether", "water"};
+        boolean[] active = {
+                player.getHealth() <= player.getMaxHealth() * 0.25F, data.isBeastMode(),
+                overworld && hour >= 13000 && hour < 23000 && level.getMoonPhase() == 0, overworld && hour < 900,
+                overworld && level.isRainingAt(player.blockPosition()), taiga, level.dimension().equals(Level.NETHER),
+                player.isInWater()
+        };
+        int current = 0;
+        for (int i = 0; i < active.length; i++) if (active[i]) current |= 1 << i;
+        int changed = current & ~previousContext;
+        previousContext = current;
+        if (changed == 0 || now < nextContextLine || distanceToSqr(player) > 12 * 12
+                || !player.isAlive() || player.isSpectator() || player.containerMenu != player.inventoryMenu) return;
+        if (getTarget() != null && (changed & 1) == 0) return;
+        nextContextLine = now + 1200;
+        nextIdleLine = Math.max(nextIdleLine, now + 1200);
+        sayTo(player, cues[Integer.numberOfTrailingZeros(changed)]);
+    }
+
     private void tickIdleDialogue(ServerPlayer player) {
         long now = level().getGameTime();
         if (now < nextIdleLine || record == null || !record.mode.hasEntity() || getTarget() != null
@@ -444,7 +494,10 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     @Override public void notifyTrade(MerchantOffer offer) {
         if (isRecruited() || !HWConfig.ENABLE_COMPANIONS.get()) return;
         super.notifyTrade(offer);
-        if (getTradingPlayer() instanceof ServerPlayer player) sayTo(player, "traded");
+        if (getTradingPlayer() instanceof ServerPlayer player && level().getGameTime() >= nextMerchantTrade) {
+            nextMerchantTrade = level().getGameTime() + 100;
+            sayTo(player, "traded");
+        }
     }
     @Override public SimpleContainer getInventory() { return record == null ? merchantInventory : record.inventory; }
     @Override public boolean wantsToPickUp(ItemStack stack) { return false; }
@@ -590,7 +643,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     public void sayTo(ServerPlayer player, String key) {
         if (record != null) CompanionDialogue.say(player, record, key);
-        else CompanionDialogue.send(player, getName().getString(), key, random);
+        else CompanionDialogue.sendMerchant(player, getName(), key, random);
     }
     public void sayOccasionally(ServerPlayer player, String key) {
         long now = level().getGameTime();

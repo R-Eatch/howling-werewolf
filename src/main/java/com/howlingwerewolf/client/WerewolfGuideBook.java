@@ -40,7 +40,7 @@ final class WerewolfGuideBook {
             new Chapter("traits", "guide.traits.title", () -> Items.IRON_CHESTPLATE, List.of("guide.traits.intro",
                     "•info.armor", "•info.fire", "•info.silver", "•guide.traits.hunters")),
             new Chapter("growth", "guide.growth.title", () -> Items.EXPERIENCE_BOTTLE, List.of("info.progression",
-                    "•kill_xp_rule", "•info.level_scaling", "•guide.growth.points", "•guide.growth.badge")),
+                    "•kill_xp_rule", "•info.level_scaling", "•guide.growth.points", "•guide.growth.badge", "•guide.growth.pounce")),
             new Chapter("quadruped", "guide.quadruped.title", () -> Items.LEATHER_BOOTS, List.of("info.quadruped",
                     "•guide.quadruped.key")),
             new Chapter("trial", "tab.trial", ModItems.ALPHA_WEREWOLF_BADGE::get, List.of("trial.intro",
@@ -49,7 +49,9 @@ final class WerewolfGuideBook {
                     "•guide.beast.key", "!info.beast_warning")),
             new Chapter("companions", "guide.companions.title", () -> Items.LEAD, List.of("guide.companions.intro",
                     "•guide.companions.summon", "•guide.companions.recruit", "•guide.companions.manage")),
-            new Chapter("items", "guide.items.title", ModItems.MOONBANE_PEARL::get, List.of("guide.items.intro")));
+            new Chapter("items", "guide.items.title", ModItems.MOONBANE_PEARL::get, List.of("guide.items.intro")),
+            new Chapter("settlements", "guide.settlements.title", () -> Items.CAMPFIRE, List.of("guide.settlements.intro",
+                    "•guide.settlements.watchtower", "•guide.settlements.tribe", "•guide.settlements.trading", "•guide.settlements.locate")));
 
     static final List<Entry> ITEMS = List.of(
             new Entry("wolfsbane", ModBlocks.WOLFSBANE::get),
@@ -57,6 +59,7 @@ final class WerewolfGuideBook {
             new Entry("deepslate_silver_ore", ModBlocks.DEEPSLATE_SILVER_ORE::get),
             new Entry("silver_ingot", ModItems.SILVER_INGOT::get),
             new Entry("silver_sword", ModItems.SILVER_SWORD::get),
+            new Entry("hunter_crossbow", ModItems.HUNTER_CROSSBOW::get),
             new Entry("wolfsbane_potion", ModItems.WOLFSBANE_POTION::get),
             new Entry("werewolf_potion", ModItems.WEREWOLF_POTION::get),
             new Entry("moonbane_pearl", ModItems.MOONBANE_PEARL::get),

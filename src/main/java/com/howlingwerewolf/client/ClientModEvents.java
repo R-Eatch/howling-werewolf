@@ -56,6 +56,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(PunchyCompat::register);
+        event.enqueueWork(HunterCrossbowRender::registerProperties);
     }
 
     @SubscribeEvent
@@ -94,8 +95,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.WEREWOLF_COMPANION.get(), CompanionRenderer::new);
         event.registerEntityRenderer(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
-        event.registerEntityRenderer(ModEntities.TRIBE_CHIEF.get(), context -> new WerewolfNpcRenderer<>(context,
-                com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F));
+        event.registerEntityRenderer(ModEntities.TRIBE_CHIEF.get(), TribeChiefRenderer::new);
         event.registerEntityRenderer(ModEntities.TRIBE_WEREWOLF.get(), context -> new WerewolfNpcRenderer<>(context,
                 com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F));
         event.registerEntityRenderer(ModEntities.SQUAD_HEALING_POTION.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);

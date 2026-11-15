@@ -2,7 +2,6 @@ package com.howlingwerewolf.ability;
 
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfForm;
-import com.howlingwerewolf.WerewolfTreeSkill;
 import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.entity.SettlementLeaderEntity;
@@ -19,7 +18,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -30,17 +28,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public final class PounceAbility {
-    public static final int COOLDOWN = 100;
+    public static final int COOLDOWN = 400;
+    public static final int MAX_FLIGHT_TICKS = 70;
     private static final int WINDUP = 3;
     private static final ResourceKey<DamageType> IMPACT = ResourceKey.create(Registries.DAMAGE_TYPE,
             new ResourceLocation("howlingwerewolf", "pounce"));
 
     public enum Motion { WINDUP, FLIGHT, LAND, CLEAR }
 
-    public record Flight(ServerLevel level, WerewolfForm form, Vec3 forward, int rank, long startedAt,
-                         boolean launched, boolean airborne) {}
+    public record Flight(ServerLevel level, WerewolfForm form, Vec3 forward, Vec3 target, long startedAt,
+                         boolean launched, boolean airborne, double startY) {}
 
-    public static void start(ServerPlayer player) {
+    public static void start(ServerPlayer player, Vec3 target) {
         WerewolfData data = WerewolfApi.get(player).orElse(null);
         if (data == null || !data.hasAbility(WerewolfAbility.POUNCE) || !data.isTransformed() || !player.onGround() || invalid(player)) return;
         long now = player.level().getGameTime();
@@ -49,10 +48,12 @@ public final class PounceAbility {
             player.displayClientMessage(Component.translatable("message.howlingwerewolf.pounce_cooldown", seconds), true);
             return;
         }
-        float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-        Vec3 forward = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw));
-        data.setPounceFlight(new Flight(player.serverLevel(), data.getForm(), forward,
-                data.getTreeSkillRank(WerewolfTreeSkill.JUMP), now, false, false));
+        if (PounceTargeting.launchVelocity(player, data.getForm(), target) == null) {
+            player.displayClientMessage(Component.translatable("message.howlingwerewolf.pounce_invalid"), true);
+            return;
+        }
+        Vec3 forward = target.subtract(player.position()).multiply(1, 0, 1).normalize();
+        data.setPounceFlight(new Flight(player.serverLevel(), data.getForm(), forward, target, now, false, false, player.getY()));
         ModNetwork.showPounce(player, Motion.WINDUP);
     }
 
@@ -61,7 +62,7 @@ public final class PounceAbility {
         if (flight == null) return;
         long now = player.level().getGameTime();
         if (invalid(player) || !data.hasAbility(WerewolfAbility.POUNCE) || data.getForm() != flight.form()
-                || player.serverLevel() != flight.level() || now - flight.startedAt() > 45) {
+                || player.serverLevel() != flight.level() || now - flight.startedAt() > MAX_FLIGHT_TICKS) {
             end(player, data, Motion.CLEAR);
             return;
         }
@@ -71,32 +72,29 @@ public final class PounceAbility {
             return;
         }
         if (!player.onGround()) {
-            if (!flight.airborne()) data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.forward(), flight.rank(), flight.startedAt(), true, true));
+            if (!flight.airborne() && player.getY() > flight.startY() + 0.125) {
+                data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.forward(), flight.target(),
+                        flight.startedAt(), true, true, flight.startY()));
+            }
         } else if (flight.airborne()) {
             end(player, data, Motion.LAND);
             impact(player, flight);
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100));
         } else if (now - flight.startedAt() > WINDUP + 6) end(player, data, Motion.CLEAR);
     }
 
     private static void launch(ServerPlayer player, WerewolfData data, Flight flight, long now) {
-        double armorFactor = flight.form() == WerewolfForm.WEREWOLF
-                ? 1 - 0.175 * com.howlingwerewolf.event.WerewolfGameplayEvents.countArmorBearingPieces(player) : 1;
-        double rank = flight.rank() * armorFactor;
-        double speed = switch (flight.form()) {
-            case QUADRUPED -> 0.99 + 0.09 * rank;
-            case BEAST -> 0.62 + 0.07 * rank;
-            default -> 0.76 + 0.08 * rank;
-        };
-        double lift = switch (flight.form()) {
-            case QUADRUPED -> 0.34 + 0.023 * rank;
-            case BEAST -> 0.59 + 0.038 * rank;
-            default -> 0.45 + 0.030 * rank;
-        };
-        player.setDeltaMovement(flight.forward().scale(speed).add(0, lift, 0));
+        Vec3 velocity = PounceTargeting.launchVelocity(player, flight.form(), flight.target());
+        if (velocity == null) {
+            end(player, data, Motion.CLEAR);
+            player.displayClientMessage(Component.translatable("message.howlingwerewolf.pounce_invalid"), true);
+            return;
+        }
+        player.setDeltaMovement(velocity);
         player.setOnGround(false);
         player.hasImpulse = true;
-        player.hurtMarked = true;
-        data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.forward(), flight.rank(), flight.startedAt(), true, false));
+        Vec3 forward = velocity.multiply(1, 0, 1).normalize();
+        data.setPounceFlight(new Flight(flight.level(), flight.form(), forward, flight.target(), now, true, false, player.getY()));
         data.setPounceCooldownEnd(now + COOLDOWN);
         ModNetwork.sync(player, data);
         ModNetwork.showPounce(player, Motion.FLIGHT);
@@ -108,7 +106,7 @@ public final class PounceAbility {
         ServerLevel level = flight.level();
         boolean beast = flight.form() == WerewolfForm.BEAST;
         boolean wolf = flight.form() == WerewolfForm.QUADRUPED;
-        double radius = beast ? 2.5 + 0.30 * flight.rank() : wolf ? 2.0 + 0.28 * flight.rank() : 2.65;
+        double radius = PounceTargeting.impactRadius(flight.form());
         var damage = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(IMPACT), player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.25, radius),
                 target -> eligible(player, target))) {
@@ -116,9 +114,9 @@ public final class PounceAbility {
             if (horizontal.lengthSqr() > radius * radius || !player.hasLineOfSight(target)) continue;
             if (!beast && !wolf && horizontal.lengthSqr() > 0.04 && horizontal.normalize().dot(flight.forward()) < 0.42) continue;
             if (wolf) {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40 + 8 * flight.rank(), 0), player);
-            } else if (target.hurt(damage, beast ? 6 + flight.rank() * 0.75F : 4 + flight.rank() * 1.4F) && beast) {
-                target.knockback(0.8 + flight.rank() * 0.1, -horizontal.x, -horizontal.z);
+                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 64, 0), player);
+            } else if (target.hurt(damage, beast ? 12.375F : 12.3F) && beast) {
+                target.knockback(1.1, -horizontal.x, -horizontal.z);
             }
         }
         var surface = level.getBlockState(player.getOnPos());
@@ -137,13 +135,14 @@ public final class PounceAbility {
                 && !(target instanceof SettlementLeaderEntity leader && !leader.isWarden() && leader.getTarget() != player);
     }
 
-    private static boolean invalid(ServerPlayer player) {
+    public static boolean invalid(Player player) {
         return !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isInWaterOrBubble()
                 || player.isInLava() || player.isFallFlying() || player.getAbilities().flying || player.isUsingItem();
     }
 
     private static void end(ServerPlayer player, WerewolfData data, Motion motion) {
         data.setPounceFlight(null);
+        if (motion == Motion.LAND) player.setDeltaMovement(Vec3.ZERO);
         ModNetwork.showPounce(player, motion);
     }
 

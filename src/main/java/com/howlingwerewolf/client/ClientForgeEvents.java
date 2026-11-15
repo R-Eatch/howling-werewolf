@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderArmEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.event.TickEvent;
@@ -45,6 +46,7 @@ public final class ClientForgeEvents {
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft minecraft = Minecraft.getInstance();
+        ClientPounceTarget.tick();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
             dimensionResyncTicks = -1;
@@ -89,7 +91,7 @@ public final class ClientForgeEvents {
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.POUNCE.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.POUNCE));
+            ClientPounceTarget.toggle();
         }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             ModNetwork.CHANNEL.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
@@ -98,6 +100,13 @@ public final class ClientForgeEvents {
             ModNetwork.CHANNEL.sendToServer(new com.howlingwerewolf.network.CompanionActionPacket(
                     com.howlingwerewolf.network.CompanionActionPacket.Action.OPEN,
                     com.howlingwerewolf.network.CompanionActionPacket.NO_TARGET));
+        }
+    }
+
+    @SubscribeEvent
+    public static void renderPounceTarget(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            ClientPounceTarget.draw(event.getPoseStack(), event.getCamera());
         }
     }
 

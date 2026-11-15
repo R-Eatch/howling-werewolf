@@ -20,7 +20,7 @@ public record UseAbilityPacket(WerewolfAbility ability, int targetId) {
     public static void handle(UseAbilityPacket packet, Supplier<NetworkEvent.Context> context) {
         ServerPlayer sender = context.get().getSender();
         if (sender != null && (packet.ability == WerewolfAbility.SUMMON_WOLF_SPIRIT
-                || packet.ability == WerewolfAbility.BLOODY_BITE || packet.ability == WerewolfAbility.POUNCE
+                || packet.ability == WerewolfAbility.BLOODY_BITE
                 || packet.ability == WerewolfAbility.MOONBLOOD_SURGE)
                 && (packet.ability == WerewolfAbility.BLOODY_BITE || packet.targetId == -1)) {
             WerewolfGameplayEvents.useAbility(sender, packet.ability, packet.targetId);

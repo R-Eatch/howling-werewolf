@@ -55,7 +55,7 @@ public final class RitualAltarBlock extends BaseEntityBlock {
         }
         ItemStack held = player.getItemInHand(hand);
         if (player.isShiftKeyDown() && held.isEmpty() && !altar.getOffering().isEmpty()) {
-            if (!level.isClientSide) altar.returnOffering(player);
+            if (!level.isClientSide && !altar.isCompanionRitualActive()) altar.returnOffering(player);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
 

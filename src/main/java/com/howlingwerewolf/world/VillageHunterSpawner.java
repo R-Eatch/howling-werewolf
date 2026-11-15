@@ -86,7 +86,7 @@ public final class VillageHunterSpawner {
                 int z = anchor.getZ() + (int)Math.round(Math.sin(angle) * radius);
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
                 BlockPos pos = new BlockPos(x, y, z);
-                if (!hasGroundAndSpace(level, pos)) continue;
+                if (!hasGroundAndSpace(level, pos) || SettlementPositions.blocksHunterSpawn(level, pos)) continue;
 
                 HunterEntity hunter = ModEntities.HUNTER.get().create(level);
                 if (hunter == null) break;

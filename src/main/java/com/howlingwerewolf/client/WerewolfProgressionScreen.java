@@ -217,7 +217,10 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
     /** The tutorial: the chapter rail, the open chapter's text and its own controls. */
     private void buildGuide(@Nullable WerewolfData data) {
         List<WerewolfGuideBook.Chapter> chapters = WerewolfGuideBook.CHAPTERS;
-        for (int i = 0; i < chapters.size(); i++) addRenderableWidget(new ChapterButton(i, railX, TOP_BAND + 36 + i * 22, railWidth, 20));
+        int railTop = TOP_BAND + 36;
+        int chapterStep = Math.min(22, Math.max(11, (stageBottom - railTop - 6) / chapters.size()));
+        for (int i = 0; i < chapters.size(); i++)
+            addRenderableWidget(new ChapterButton(i, railX, railTop + i * chapterStep, railWidth, chapterStep - 2));
         WerewolfGuideBook.Chapter shown = chapters.get(chapter);
         int footer = cardY + cardHeight - 22, right = cardX + cardWidth - 14;
         if (chapter > 0) {
