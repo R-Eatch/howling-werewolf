@@ -4,4 +4,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'howlingwerewolf-fabric-1.21.1'
+rootProject.name = 'howlingwerewolf-fabric-26.3'

@@ -1,7 +1,6 @@
 package com.howlingwerewolf.world;
 
 import com.howlingwerewolf.content.ModBlockEntities;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -15,14 +14,12 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 public final class SettlementMarkerBlock extends BaseEntityBlock {
     public static final BooleanProperty TRIBE = BooleanProperty.create("tribe");
-    private static final MapCodec<SettlementMarkerBlock> CODEC = simpleCodec(SettlementMarkerBlock::new);
 
     public SettlementMarkerBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(TRIBE, false));
     }
 
-    @Override protected MapCodec<SettlementMarkerBlock> codec() { return CODEC; }
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     @Override
@@ -37,6 +34,6 @@ public final class SettlementMarkerBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlockEntities.SETTLEMENT_MARKER.get(), SettlementMarkerBlockEntity::tick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlockEntities.SETTLEMENT_MARKER.get(), SettlementMarkerBlockEntity::tick);
     }
 }

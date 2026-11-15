@@ -1,0 +1,19 @@
+{
+  "trades": [
+    "howlingwerewolf:werewolf_brother/silver_for_emeralds",
+    "howlingwerewolf:werewolf_brother/silver_for_iron",
+    "howlingwerewolf:werewolf_brother/pearl_for_emeralds",
+    "howlingwerewolf:werewolf_brother/pearl_for_wolfsbane",
+    "howlingwerewolf:werewolf_brother/wolfsbane_for_silver",
+    "howlingwerewolf:werewolf_brother/werewolf_potion",
+    "howlingwerewolf:werewolf_brother/wolfsbane_potion",
+    "howlingwerewolf:werewolf_brother/wolfsbane",
+    "howlingwerewolf:werewolf_brother/silver_for_wolfsbane",
+    "howlingwerewolf:werewolf_brother/pelt_for_wolfsbane",
+    "howlingwerewolf:werewolf_brother/pelt_for_silver",
+    "howlingwerewolf:werewolf_brother/wolfsbane_for_pelt",
+    "howlingwerewolf:werewolf_brother/silver_for_pelt"
+  ],
+  "amount": 8,
+  "allow_duplicates": false
+}

@@ -4,6 +4,7 @@ package com.howlingwerewolf.client;
 import com.howlingwerewolf.client.CompanionUi.Look;
 import com.howlingwerewolf.client.CompanionUi.UiButton;
 import com.howlingwerewolf.content.ModItems;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -51,7 +52,7 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
     }
     private static Component topicTitle(int index) { return Component.translatable(KEY + TOPICS.get(index) + ".title"); }
     private void open(int index) {
-        chapter = Mth.clamp(index, 0, TOPICS.size() - 1);
+        chapter = Math.clamp(index, 0, TOPICS.size() - 1);
         scroll = maximumScroll = 0;
         shown = 0;
         refreshControls();
@@ -74,7 +75,7 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
         if (previous.visible) previous.setMessage(Component.literal("‹ ").append(topicTitle(chapter - 1)));
         if (next.visible) next.setMessage(topicTitle(chapter + 1).copy().append(" ›"));
     }
-    @Override protected void body(MoonGraphics graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
+    @Override protected void body(GuiGraphicsExtractor graphics, MoonUi.Theme theme, int left, int top, float mouseX, float mouseY) {
         int x = left + PAGE_X, bottom = top + HEIGHT - LOWER_BAND - 6;
         // A faint moon sits behind the page, so the guide stays part of the same window.
         MoonUi.moon(graphics, x + PAGE_W - 60, top + 128, 92, 2, theme, 0.28F);
@@ -84,7 +85,7 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
         var lines = font.split(Component.translatable(KEY + TOPICS.get(chapter) + ".body"), PAGE_W - 14);
         int height = bottom - (top + PAGE_TOP);
         maximumScroll = Math.max(0, lines.size() * 11 - height);
-        scroll = Mth.clamp(scroll, 0, maximumScroll);
+        scroll = Math.clamp(scroll, 0, maximumScroll);
         shown = Mth.lerp(0.28F, shown, scroll);
         reading(graphics, lines, x, PAGE_W - 8, top + PAGE_TOP, bottom, shown, maximumScroll, theme.ink());
         if (maximumScroll > 0) {
@@ -98,7 +99,7 @@ public final class CompanionGuideScreen extends CompanionFrameScreen {
     @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
         double logicalX = x / scale, logicalY = y / scale;
         if (logicalX >= left() + PAGE_X && logicalX < left() + PAGE_X + PAGE_W && logicalY >= top() + TOP_BAND && logicalY < top() + HEIGHT - LOWER_BAND) {
-            scroll = Mth.clamp(scroll - (int) Math.signum(dy) * 33, 0, maximumScroll);
+            scroll = Math.clamp(scroll - (int) Math.signum(dy) * 33, 0, maximumScroll);
             return true;
         }
         return super.mouseScrolled(x, y, dx, dy);

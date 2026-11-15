@@ -20,7 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public final class WerewolfCommands {
     public static void register(com.mojang.brigadier.CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("werewolf").requires(source -> source.hasPermission(2))
+        dispatcher.register(Commands.literal("werewolf").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("infect").then(target(ctx -> infect(ctx, player(ctx)))))
                 .then(Commands.literal("awaken").then(target(ctx -> awaken(ctx, player(ctx)))))
                 .then(Commands.literal("cure").then(target(ctx -> cure(ctx, player(ctx)))))
@@ -194,7 +194,7 @@ public final class WerewolfCommands {
                             + ", alphaDefeated=" + data.hasDefeatedAlpha() + ", level=" + data.getLevel()
                             + ", xp=" + data.getExperience() + "/" + WerewolfData.experienceForNextLevel(data.getLevel())
                             + ", skillPoints=" + data.getAvailableSkillPoints() + ", treePoints=" + data.getAvailableTreePoints()
-                            + ", dimension=" + player.level().dimension().location()
+                            + ", dimension=" + player.level().dimension().identifier()
                             + ", persistedMirror=" + (mirror == null ? "missing" : mirrorMatches ? "match" : "DIFF")), false);
         });
         return 1;

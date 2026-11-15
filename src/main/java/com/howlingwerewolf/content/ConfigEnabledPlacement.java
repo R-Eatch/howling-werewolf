@@ -8,10 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementFilter;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
 /** A data-driven placement gate backed by the common world-generation config. */
-public final class ConfigEnabledPlacement extends PlacementFilter {
+public final class ConfigEnabledPlacement implements PlacementFilter {
     public static final MapCodec<ConfigEnabledPlacement> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.STRING.fieldOf("feature").forGetter(placement -> placement.feature),
@@ -28,7 +27,7 @@ public final class ConfigEnabledPlacement extends PlacementFilter {
     }
 
     @Override
-    protected boolean shouldPlace(PlacementContext context, RandomSource random, BlockPos pos) {
+    public boolean shouldPlace(PlacementContext context, RandomSource random, BlockPos pos) {
         return switch (feature) {
             case "silver" -> HWConfig.GENERATE_SILVER.get();
             case "wolfsbane" -> HWConfig.GENERATE_WOLFSBANE.get()
@@ -39,7 +38,7 @@ public final class ConfigEnabledPlacement extends PlacementFilter {
     }
 
     @Override
-    public PlacementModifierType<?> type() {
+    public MapCodec<ConfigEnabledPlacement> codec() {
         return ModPlacementModifiers.CONFIG_ENABLED.get();
     }
 }

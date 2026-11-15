@@ -3,17 +3,22 @@ package com.howlingwerewolf.world;
 import com.howlingwerewolf.ModernSkin;
 import com.howlingwerewolf.entity.SettlementLeaderEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.Codec;
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,21 +26,28 @@ import java.util.UUID;
 public final class SettlementData extends SavedData {
     static final int TRIBE_MEMBERS = 4;
     public static final int DAY = 24000;
-    private static final Factory<SettlementData> FACTORY = new Factory<>(SettlementData::new, SettlementData::load, null);
+    private static final Codec<SettlementData> CODEC = CompoundTag.CODEC.xmap(SettlementData::load, SettlementData::save);
+    private static final SavedDataType<SettlementData> TYPE = new SavedDataType<>(
+            Identifier.fromNamespaceAndPath("howlingwerewolf", "settlements"), SettlementData::new, CODEC,
+            DataFixTypes.SAVED_DATA_COMMAND_STORAGE);
     private final Map<BlockPos, Site> sites = new HashMap<>();
+    final Map<Long, List<BoundingBox>> tribeBounds = SettlementPositions.boundsCache();
 
     static final class Site {
         final ModernSkin coat;
         final UUID[] members = new UUID[1 + TRIBE_MEMBERS];
         final long[] replacementAt = new long[members.length];
         CompoundTag tradeStock = new CompoundTag();
+        Map<String, List<BlockPos>> schedule;
 
         Site(ModernSkin coat) { this.coat = coat; }
     }
 
     public static SettlementData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(FACTORY, "howlingwerewolf_settlements");
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
+
+    Site siteAt(BlockPos position) { return sites.get(position); }
 
     Site getOrCreate(BlockPos position, boolean tribe, RandomSource random) {
         return sites.computeIfAbsent(position.immutable(), ignored -> {
@@ -63,25 +75,25 @@ public final class SettlementData extends SavedData {
         }
     }
 
-    private static SettlementData load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static SettlementData load(CompoundTag tag) {
         SettlementData data = new SettlementData();
-        for (Tag entry : tag.getList("Sites", Tag.TAG_COMPOUND)) {
-            CompoundTag stored = (CompoundTag) entry;
-            Site site = new Site(ModernSkin.byId(stored.getString("Coat")));
-            ListTag members = stored.getList("Members", Tag.TAG_COMPOUND);
+        for (var entry : tag.getListOrEmpty("Sites")) {
+            if (!(entry instanceof CompoundTag stored)) continue;
+            Site site = new Site(ModernSkin.byId(stored.getStringOr("Coat", ModernSkin.ASHEN.id())));
+            ListTag members = stored.getListOrEmpty("Members");
             for (int slot = 0; slot < Math.min(members.size(), site.members.length); slot++) {
-                CompoundTag member = members.getCompound(slot);
-                if (member.hasUUID("Id")) site.members[slot] = member.getUUID("Id");
-                site.replacementAt[slot] = member.getLong("ReplacementAt");
+                CompoundTag member = members.getCompoundOrEmpty(slot);
+                site.members[slot] = member.read("Id", UUIDUtil.CODEC).orElse(null);
+                site.replacementAt[slot] = member.getLongOr("ReplacementAt", 0L);
             }
-            site.tradeStock = stored.getCompound("TradeStock");
-            data.sites.put(BlockPos.of(stored.getLong("Pos")), site);
+            site.tradeStock = stored.getCompoundOrEmpty("TradeStock");
+            data.sites.put(BlockPos.of(stored.getLongOr("Pos", 0L)), site);
         }
         return data;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag save() {
+        CompoundTag tag = new CompoundTag();
         ListTag entries = new ListTag();
         sites.forEach((position, site) -> {
             CompoundTag stored = new CompoundTag();
@@ -90,7 +102,7 @@ public final class SettlementData extends SavedData {
             ListTag members = new ListTag();
             for (int slot = 0; slot < site.members.length; slot++) {
                 CompoundTag member = new CompoundTag();
-                if (site.members[slot] != null) member.putUUID("Id", site.members[slot]);
+                if (site.members[slot] != null) member.store("Id", UUIDUtil.CODEC, site.members[slot]);
                 member.putLong("ReplacementAt", site.replacementAt[slot]);
                 members.add(member);
             }

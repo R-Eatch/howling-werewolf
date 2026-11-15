@@ -5,6 +5,7 @@ import com.howlingwerewolf.ability.PounceAbility;
 import com.howlingwerewolf.network.PounceMotionPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -14,26 +15,48 @@ import java.util.WeakHashMap;
 
 public final class ClientPouncePose {
     private record Phase(PounceAbility.Motion motion, long startedAt) {}
+    record Sample(PounceAbility.Motion motion, float ticks) {}
     private static final Map<LivingEntity, Phase> MOTION = new WeakHashMap<>();
 
     public static void receive(PounceMotionPacket packet) {
-        var level = Minecraft.getInstance().level;
+        var minecraft = Minecraft.getInstance();
+        var level = minecraft.level;
         if (level == null || !(level.getEntity(packet.entityId()) instanceof Player player)) return;
+        // Vanilla's entity motion packet clips each component to 3.9 blocks per tick.
+        if (packet.motion() == PounceAbility.Motion.FLIGHT && player == minecraft.player) {
+            player.setDeltaMovement(packet.velocity());
+            player.setOnGround(false);
+        } else if (packet.motion() == PounceAbility.Motion.LAND && player == minecraft.player) {
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        }
         if (packet.motion() == PounceAbility.Motion.CLEAR) MOTION.remove(player);
         else MOTION.put(player, new Phase(packet.motion(), level.getGameTime()));
     }
 
-    static boolean active(LivingEntity entity) { return MOTION.containsKey(entity); }
+    public static boolean flyingLocally() {
+        var player = Minecraft.getInstance().player;
+        var phase = player == null ? null : sample(player, 0);
+        return phase != null && phase.motion() == PounceAbility.Motion.FLIGHT;
+    }
 
-    static void apply(LivingEntity entity, float age, WerewolfForm form, ModelPart center, ModelPart head,
-                      ModelPart right, ModelPart left, ModelPart rightLeg, ModelPart leftLeg) {
+    static Sample sample(LivingEntity entity, float partialTick) {
         Phase phase = MOTION.get(entity);
-        if (phase == null) return;
-        float ticks = entity.level().getGameTime() - phase.startedAt() + (age - entity.tickCount);
-        if (ticks < 0 || ticks > (phase.motion() == PounceAbility.Motion.LAND ? 8 : 45)) {
+        if (phase == null) return null;
+        float ticks = entity.level().getGameTime() - phase.startedAt() + partialTick;
+        if (ticks < 0 || ticks > (phase.motion() == PounceAbility.Motion.LAND ? 8 : PounceAbility.MAX_FLIGHT_TICKS)) {
             MOTION.remove(entity);
-            return;
+            return null;
         }
+        return new Sample(phase.motion(), ticks);
+    }
+
+    static boolean active(HumanoidRenderState state) { return WerewolfRenderData.get(state).pounce() != null; }
+
+    static void apply(HumanoidRenderState state, WerewolfForm form, ModelPart center, ModelPart head,
+                      ModelPart right, ModelPart left, ModelPart rightLeg, ModelPart leftLeg) {
+        Sample phase = WerewolfRenderData.get(state).pounce();
+        if (phase == null) return;
+        float ticks = phase.ticks();
         float anticipation = phase.motion() == PounceAbility.Motion.WINDUP ? Mth.clamp((ticks + 1) / 3, 0, 1) : 0;
         float recovery = phase.motion() == PounceAbility.Motion.LAND ? 1 - smooth(ticks / 8) : 0;
         float launch = phase.motion() == PounceAbility.Motion.FLIGHT ? smooth(ticks / 2 + 0.25F) : 0;
@@ -59,14 +82,14 @@ public final class ClientPouncePose {
             }
             case BEAST -> {
                 float strike = launch * smooth((ticks - 6) / 10);
-                center.xRot += 0.32F * anticipation - 0.22F * launch + 0.70F * strike + 0.77F * recovery;
-                head.xRot -= 0.22F * anticipation + 0.38F * strike + 0.48F * recovery;
+                center.xRot += 0.19F * anticipation - 0.16F * launch + 0.38F * strike + 0.40F * recovery;
+                head.xRot -= 0.13F * anticipation + 0.23F * strike + 0.25F * recovery;
                 right.xRot = Mth.lerp(launch, right.xRot + 0.46F * anticipation, Mth.lerp(strike, -2.82F, -0.83F));
                 left.xRot = Mth.lerp(launch, left.xRot + 0.46F * anticipation, Mth.lerp(strike, -2.94F, -0.83F));
                 right.xRot -= 0.90F * recovery;
                 left.xRot -= 0.90F * recovery;
-                rightLeg.xRot = Mth.lerp(launch, rightLeg.xRot - 0.55F * recovery, 0.71F);
-                leftLeg.xRot = Mth.lerp(launch, leftLeg.xRot - 0.46F * recovery, 0.64F);
+                rightLeg.xRot = Mth.lerp(launch, -0.36F * recovery, 0.55F);
+                leftLeg.xRot = Mth.lerp(launch, -0.30F * recovery, 0.49F);
             }
             default -> { }
         }

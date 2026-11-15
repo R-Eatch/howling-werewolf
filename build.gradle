@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom-remap' version '1.16.1'
+    id 'net.fabricmc.fabric-loom' version '1.17.21'
     id 'maven-publish'
 }
 version = project.mod_version
@@ -19,17 +19,16 @@ loom {
 }
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.release = 21
+    options.release = 25
     options.compilerArgs += ['-Xmaxerrs', '500']
 }
 processResources {
@@ -49,4 +48,4 @@ tasks.named('jar', Jar) {
     }
 }
 def releaseVersion = project.mod_version.toString().split('-')[0]
-tasks.named('remapJar') { archiveFileName = "${project.archives_base_name}-${releaseVersion}-fabric-${project.minecraft_version}.jar" }
+tasks.named('jar') { archiveFileName = "${project.archives_base_name}-${releaseVersion}-fabric-${project.minecraft_version}.jar" }

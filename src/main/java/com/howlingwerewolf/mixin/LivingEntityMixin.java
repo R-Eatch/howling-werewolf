@@ -3,6 +3,7 @@ import com.howlingwerewolf.event.*;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,14 +13,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin {
-    @WrapMethod(method="hurt")
-    private boolean howling$damage(DamageSource source,float amount,Operation<Boolean> original) {
-        return DamageHooks.incoming((LivingEntity)(Object)this,source,amount,value -> original.call(source,value));
+    @WrapMethod(method="hurtServer")
+    private boolean howling$damage(ServerLevel level, DamageSource source,float amount,Operation<Boolean> original) {
+        return DamageHooks.incoming((LivingEntity) (Object) this, level, source, amount,
+                value -> original.call(level, source, value));
     }
     @WrapMethod(method="actuallyHurt")
-    private void howling$healthDamage(DamageSource source,float amount,Operation<Void> original) {
-        DamageHooks.healthDamage((LivingEntity)(Object)this,source,amount,() -> original.call(source,amount));
+    private void howling$healthDamage(ServerLevel level, DamageSource source,float amount,Operation<Void> original) {
+        DamageHooks.healthDamage((LivingEntity)(Object)this,source,amount,() -> original.call(level,source,amount));
     }
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "actuallyHurt", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterMagicAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float howling$silverhide(float damage, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) DamageSource source) {
+        return com.howlingwerewolf.content.PeltArmor.reduce((LivingEntity) (Object) this, source, damage);
+    }
+
     @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method="actuallyHurt",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V"))
     private void howling$beforeHealth(LivingEntity entity,float value,Operation<Void> original,
             @com.llamalad7.mixinextras.sugar.Local(argsOnly=true) DamageSource source) {
@@ -36,7 +44,7 @@ abstract class LivingEntityMixin {
     @Inject(method="jumpFromGround",at=@At("TAIL"))
     private void howling$jump(CallbackInfo ci) { WerewolfGameplayEvents.jumpBoost(new GameplayContext.Jump((LivingEntity)(Object)this)); }
     @Inject(method="causeFallDamage",at=@At("HEAD"),cancellable=true)
-    private void howling$fall(float distance,float multiplier,DamageSource source,CallbackInfoReturnable<Boolean> cir) {
+    private void howling$fall(double distance,float multiplier,DamageSource source,CallbackInfoReturnable<Boolean> cir) {
         var context=new GameplayContext.Fall((LivingEntity)(Object)this);
         WerewolfGameplayEvents.preventMaxRankFallImpact(context);
         if (context.isCanceled()) cir.setReturnValue(false);

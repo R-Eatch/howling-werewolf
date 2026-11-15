@@ -1,5 +1,7 @@
 package com.howlingwerewolf.client;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.minecraft.client.Minecraft;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -9,6 +11,9 @@ public final class HowlingWerewolfClient implements ClientModInitializer {
         ClientModEvents.initialize();
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> PunchyCompat.register());
         ClientTickEvents.END_CLIENT_TICK.register(ClientEvents::clientTick);
+        LevelRenderEvents.COLLECT_SUBMITS.register(context ->
+                ClientPounceTarget.draw(context.poseStack(), Minecraft.getInstance().gameRenderer.mainCamera(),
+                        context.submitNodeCollector()));
         ClientPlayNetworking.registerGlobalReceiver(SyncWerewolfDataPacket.TYPE,(packet,context) -> context.client().execute(() -> ClientPacketHandlers.applySync(packet)));
         ClientPlayNetworking.registerGlobalReceiver(CompanionViewPacket.TYPE,(packet,context) -> context.client().execute(() -> ClientPacketHandlers.companionView(packet)));
         ClientPlayNetworking.registerGlobalReceiver(BadgeActivationPacket.TYPE,(packet,context) -> context.client().execute(ClientPacketHandlers::showBadgeActivation));

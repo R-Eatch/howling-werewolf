@@ -6,66 +6,66 @@ import com.howlingwerewolf.content.ModBlockEntities;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.server.packs.PackType;
 
 public final class ClientModEvents {
     public static final ModelLayerLocation HUNTER_LAYER = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter"), "main");
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter"), "main");
     public static final ModelLayerLocation QUADRUPED_WEREWOLF_LAYER = new ModelLayerLocation(
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "quadruped_werewolf"), "main");
-    private static final String KEY_CATEGORY = "key.categories.howlingwerewolf";
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "quadruped_werewolf"), "main");
+    private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "howlingwerewolf"));
     public static final KeyMapping OPEN_PROGRESSION = new KeyMapping(
-            "key.howlingwerewolf.open_progression", InputConstants.Type.KEYSYM, InputConstants.KEY_K,
+            "key.howlingwerewolf.open_progression", InputConstants.Type.KEYBOARD, InputConstants.KEY_K,
             KEY_CATEGORY);
     public static final KeyMapping TRANSFORM = new KeyMapping(
-            "key.howlingwerewolf.transform", InputConstants.Type.KEYSYM, InputConstants.KEY_J,
+            "key.howlingwerewolf.transform", InputConstants.Type.KEYBOARD, InputConstants.KEY_J,
             KEY_CATEGORY);
     public static final KeyMapping OPEN_COMPANIONS = new KeyMapping(
-            "key.howlingwerewolf.open_companions", InputConstants.Type.KEYSYM, InputConstants.KEY_C,
+            "key.howlingwerewolf.open_companions", InputConstants.Type.KEYBOARD, InputConstants.KEY_C,
             KEY_CATEGORY);
     public static final KeyMapping BEAST_MODE = new KeyMapping(
-            "key.howlingwerewolf.beast_mode", InputConstants.Type.KEYSYM, InputConstants.KEY_H,
+            "key.howlingwerewolf.beast_mode", InputConstants.Type.KEYBOARD, InputConstants.KEY_H,
             KEY_CATEGORY);
     public static final KeyMapping QUADRUPED_MODE = new KeyMapping(
-            "key.howlingwerewolf.quadruped_mode", InputConstants.Type.KEYSYM, InputConstants.KEY_G,
+            "key.howlingwerewolf.quadruped_mode", InputConstants.Type.KEYBOARD, InputConstants.KEY_G,
             KEY_CATEGORY);
     public static final KeyMapping NIGHT_VISION = new KeyMapping(
-            "key.howlingwerewolf.night_vision", InputConstants.Type.KEYSYM, InputConstants.KEY_V,
+            "key.howlingwerewolf.night_vision", InputConstants.Type.KEYBOARD, InputConstants.KEY_V,
             KEY_CATEGORY);
     public static final KeyMapping SUMMON_WOLF_SPIRIT = new KeyMapping(
-            "key.howlingwerewolf.summon_wolf_spirit", InputConstants.Type.KEYSYM, InputConstants.KEY_N,
+            "key.howlingwerewolf.summon_wolf_spirit", InputConstants.Type.KEYBOARD, InputConstants.KEY_N,
             KEY_CATEGORY);
     public static final KeyMapping BLOODY_BITE = new KeyMapping(
-            "key.howlingwerewolf.bloody_bite", InputConstants.Type.KEYSYM, InputConstants.KEY_B,
+            "key.howlingwerewolf.bloody_bite", InputConstants.Type.KEYBOARD, InputConstants.KEY_B,
             KEY_CATEGORY);
     public static final KeyMapping POUNCE = new KeyMapping(
-            "key.howlingwerewolf.pounce", InputConstants.Type.KEYSYM, InputConstants.KEY_Z, KEY_CATEGORY);
+            "key.howlingwerewolf.pounce", InputConstants.Type.KEYBOARD, InputConstants.KEY_Z, KEY_CATEGORY);
     public static final KeyMapping MOONBLOOD_SURGE = new KeyMapping(
-            "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYSYM, InputConstants.KEY_R,
+            "key.howlingwerewolf.moonblood_surge", InputConstants.Type.KEYBOARD, InputConstants.KEY_R,
             KEY_CATEGORY);
 
     public static void initialize() {
-        BlockRenderLayerMap.INSTANCE.putBlock(com.howlingwerewolf.content.ModBlocks.WOLFSBANE.get(), RenderType.cutout());
         for (KeyMapping key : new KeyMapping[]{OPEN_PROGRESSION,OPEN_COMPANIONS,TRANSFORM,BEAST_MODE,QUADRUPED_MODE,NIGHT_VISION,SUMMON_WOLF_SPIRIT,BLOODY_BITE,POUNCE,MOONBLOOD_SURGE})
-            net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(key);
-        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(HUNTER_LAYER,HunterModel::createBodyLayer);
-        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(QUADRUPED_WEREWOLF_LAYER,QuadrupedWerewolfModel::createBodyLayer);
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.HUNTER.get(),HunterRenderer::new);
+            net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper.registerKeyMapping(key);
+        net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(HUNTER_LAYER,HunterModel::createBodyLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(QUADRUPED_WEREWOLF_LAYER,QuadrupedWerewolfModel::createBodyLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.HUNTER.get(), context -> {
+            WerewolfRenderHooks.initialize(context);
+            return new HunterRenderer(context);
+        });
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.WEREWOLF.get(),WerewolfEntityRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.ALPHA_WEREWOLF.get(),AlphaWerewolfRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.ALPHA_MINION.get(), context ->
-                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F));
+                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.QUADRUPED, 0.5F) {});
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.WEREWOLF_COMPANION.get(),CompanionRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), context ->
-                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F));
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_CHIEF.get(), context ->
-                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F));
+                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F) {});
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_CHIEF.get(), TribeChiefRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.SQUAD_HEALING_POTION.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(

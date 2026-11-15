@@ -14,7 +14,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "howlingwerewolf:silverhide_leggings"
+        "recipes": "howlingwerewolf:silverhide_leggings"
       }
     }
   },

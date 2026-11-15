@@ -2,7 +2,6 @@ package com.howlingwerewolf.capability;
 
 import com.howlingwerewolf.HowlingWerewolf;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -17,8 +16,8 @@ public final class WerewolfPersistence {
     public static void save(Player player, WerewolfData data) {
         if (player.level().isClientSide()) return;
         CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
-        CompoundTag persisted = root.contains("PlayerPersisted", Tag.TAG_COMPOUND)
-                ? root.getCompound("PlayerPersisted")
+        CompoundTag persisted = root.getCompound("PlayerPersisted").isPresent()
+                ? root.getCompoundOrEmpty("PlayerPersisted")
                 : new CompoundTag();
         persisted.put(DATA_KEY, data.serializeNBT());
         root.put("PlayerPersisted", persisted);
@@ -33,17 +32,17 @@ public final class WerewolfPersistence {
 
     public static CompoundTag readSnapshot(Player player) {
         CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
-        if (!root.contains("PlayerPersisted", Tag.TAG_COMPOUND)) return null;
-        CompoundTag persisted = root.getCompound("PlayerPersisted");
-        if (!persisted.contains(DATA_KEY, Tag.TAG_COMPOUND)) return null;
-        return persisted.getCompound(DATA_KEY).copy();
+        if (!root.getCompound("PlayerPersisted").isPresent()) return null;
+        CompoundTag persisted = root.getCompoundOrEmpty("PlayerPersisted");
+        if (!persisted.getCompound(DATA_KEY).isPresent()) return null;
+        return persisted.getCompoundOrEmpty(DATA_KEY).copy();
     }
 
     public static void writeSnapshot(Player player, CompoundTag snapshot) {
         if (player.level().isClientSide() || snapshot == null) return;
         CompoundTag root = player.getAttachedOrCreate(ModAttachments.LEGACY);
-        CompoundTag persisted = root.contains("PlayerPersisted", Tag.TAG_COMPOUND)
-                ? root.getCompound("PlayerPersisted")
+        CompoundTag persisted = root.getCompound("PlayerPersisted").isPresent()
+                ? root.getCompoundOrEmpty("PlayerPersisted")
                 : new CompoundTag();
         persisted.put(DATA_KEY, snapshot.copy());
         root.put("PlayerPersisted", persisted);
@@ -51,9 +50,9 @@ public final class WerewolfPersistence {
 
     public static void copyPersistentRoot(Player original, Player replacement) {
         CompoundTag root = original.getAttachedOrCreate(ModAttachments.LEGACY);
-        if (!root.contains("PlayerPersisted", Tag.TAG_COMPOUND)) return;
+        if (!root.getCompound("PlayerPersisted").isPresent()) return;
         replacement.getAttachedOrCreate(ModAttachments.LEGACY).put("PlayerPersisted",
-                root.getCompound("PlayerPersisted").copy());
+                root.getCompoundOrEmpty("PlayerPersisted").copy());
     }
 
     /**

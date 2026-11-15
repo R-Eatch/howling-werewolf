@@ -7,9 +7,7 @@
     "HHH"
   ],
   "key": {
-    "H": {
-      "item": "howlingwerewolf:silverhide"
-    }
+    "H": "howlingwerewolf:silverhide"
   },
   "result": {
     "id": "howlingwerewolf:silverhide_chestplate",

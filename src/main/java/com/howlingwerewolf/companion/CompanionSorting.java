@@ -9,13 +9,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +57,7 @@ public final class CompanionSorting {
     public enum Phase { IDLE, WALKING, OPENING, MOVING, CLOSING }
     public record ScanEntry(BlockPos position, boolean usable, Set<Item> filter) {}
     private record Preview(BlockPos center, List<ScanEntry> entries) {}
-    private record Lease(ResourceLocation dimension, BlockPos position) {}
+    private record Lease(Identifier dimension, BlockPos position) {}
     private record Endpoint(CompanionSortPlanner.Storage storage, List<BlockEntity> members, List<BlockState> layout) {
         boolean matches(@Nullable Endpoint current) {
             return current != null && members.equals(current.members) && layout.equals(current.layout)
@@ -118,7 +119,7 @@ public final class CompanionSorting {
         if (operation.equals("preview")) {
             if (enabled() && nearby && record.mode != CompanionMode.SORT && CompanionManager.enabled(player, record)) {
                 state(server).previews.put(record.id, new Preview(entity.blockPosition(), survey(player, entity, new CompanionSortSettings(
-                        player.level().dimension().location(), entity.blockPosition(), List.of(), record.sorting.consolidate()), new ArrayList<>())));
+                        player.level().dimension().identifier(), entity.blockPosition(), List.of(), record.sorting.consolidate()), new ArrayList<>())));
             }
             return;
         }
@@ -134,7 +135,7 @@ public final class CompanionSorting {
                 if (record.mode == CompanionMode.SORT) return;
                 if (!nearby) { CompanionManager.message(player, "sort_nearby"); return; }
                 cancel(server, record.id);
-                record.sorting = record.sorting.anchoredAt(player.level().dimension().location(), entity.blockPosition());
+                record.sorting = record.sorting.anchoredAt(player.level().dimension().identifier(), entity.blockPosition());
                 record.mode = CompanionMode.SORT;
                 CompanionDialogue.say(player, record, "sort");
                 entity.setTarget(null); entity.setAggressive(false); entity.getNavigation().stop(); entity.resetIdleDialogue();
@@ -185,7 +186,7 @@ public final class CompanionSorting {
     }
 
     @Nullable private static Endpoint resolve(ServerPlayer player, @Nullable WerewolfCompanionEntity self, CompanionSortSettings settings, BlockPos pos) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!settings.contains(pos) || !level.hasChunkAt(pos)) return null;
         BlockState block = level.getBlockState(pos);
         if (!supported(block)) return null;
@@ -224,7 +225,7 @@ public final class CompanionSorting {
 
     /** Nearest storage first; a double chest counts once. Unloaded chunks stay unloaded. */
     private static List<ScanEntry> survey(ServerPlayer player, @Nullable WerewolfCompanionEntity self, CompanionSortSettings settings, List<Endpoint> usable) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos center = settings.center();
         int radius = CompanionSortSettings.RADIUS;
         List<BlockPos> candidates = new ArrayList<>();
@@ -285,7 +286,7 @@ public final class CompanionSorting {
             if (record == null || !entity.isAlive() || !data.isCurrent(record, entity)
                     || record.mode != CompanionMode.SORT || player == null || !player.isAlive() || player.isSpectator()
                     || !CompanionManager.enabled(player, record) || entity.level() != player.level()
-                    || !record.sorting.dimension().equals(player.level().dimension().location())
+                    || !record.sorting.dimension().equals(player.level().dimension().identifier())
                     || entity.blockPosition().distSqr(record.sorting.center()) > LEASH * LEASH) continue;
             active.add(record.id);
             Task task = state.tasks.computeIfAbsent(record.id, ignored -> new Task());
@@ -324,7 +325,7 @@ public final class CompanionSorting {
             case OPENING -> {
                 Endpoint here = destination(task);
                 look(entity, here);
-                if (--task.timer == LID_TICKS / 2) entity.swing(InteractionHand.MAIN_HAND);
+                if (--task.timer == LID_TICKS / 2) entity.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                 if (task.timer > 0) return;
                 if (task.atTarget) { task.phase = Phase.MOVING; return; }
                 // The stack shown in hand is cosmetic: it stays in the source until the deposit commits.
@@ -350,7 +351,7 @@ public final class CompanionSorting {
         task.scan = survey(player, entity, record.sorting, usable);
         // Physical halves are leased too: splitting or joining a double chest cannot hand
         // the same slots to a second worker under a different logical identity.
-        ResourceLocation dimension = record.sorting.dimension();
+        Identifier dimension = record.sorting.dimension();
         List<Endpoint> endpoints = new ArrayList<>();
         for (Endpoint endpoint : usable) {
             boolean taken = task.unreachable.contains(endpoint.id()) || endpoint.members.stream()
@@ -482,7 +483,7 @@ public final class CompanionSorting {
             task.moved += move.amount();
         }
         if (!trip.moves.isEmpty()) return;
-        entity.swing(InteractionHand.MAIN_HAND);
+        entity.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         entity.setCarriedItem(ItemStack.EMPTY);
         entity.level().playSound(null, entity, SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.35F, 0.9F + entity.getRandom().nextFloat() * 0.2F);
         task.phase = Phase.CLOSING; task.timer = SETTLE_TICKS;

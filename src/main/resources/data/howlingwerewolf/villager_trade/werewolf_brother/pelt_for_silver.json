@@ -1,0 +1,12 @@
+{
+  "wants": {
+    "id": "howlingwerewolf:silver_ingot",
+    "count": 4
+  },
+  "gives": {
+    "id": "howlingwerewolf:werewolf_pelt",
+    "count": 1
+  },
+  "max_uses": 8,
+  "xp": 0
+}

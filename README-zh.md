@@ -1,18 +1,18 @@
-# 月厄狼人 · Fabric 1.21.1
+# 月厄狼人 · Fabric 26.3
 
 [English](README.md)
 
-这里是《月厄狼人》**Minecraft 1.21.1** 版的源码，分支 `1.21.1-fabric`。
+这里是《月厄狼人》**Minecraft 26.3** 版的源码，分支 `26.3-fabric`。
 
 | | |
 |---|---|
-| Mod 版本 | **1.4.0** |
-| Minecraft Java 版 | 1.21.1 |
-| Fabric Loader | 0.16.14 或更新版本 |
-| Fabric API | 0.116.4+1.21.1 或更新版本 |
-| Java | 21 |
+| Mod 版本 | **1.4.3** |
+| Minecraft Java 版 | 26.3 |
+| Fabric Loader | 0.20.1 或更新版本 |
+| Fabric API | 0.166.2+26.3 或更新版本 |
+| Java | 25 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.4.0-fabric-1.21.1.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.4.3-fabric-26.3.jar`。服务端和每个客户端需安装同一版本。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 

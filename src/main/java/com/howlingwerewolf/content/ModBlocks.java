@@ -10,18 +10,18 @@ import net.minecraft.world.level.material.MapColor;
 
 public final class ModBlocks {
     public static final ModRegistry.Blocks BLOCKS = new ModRegistry.Blocks();
-    public static final Supplier<com.howlingwerewolf.world.SettlementMarkerBlock> SETTLEMENT_MARKER = BLOCKS.register("settlement_marker", () ->
-            new com.howlingwerewolf.world.SettlementMarkerBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE)));
+    public static final Supplier<Block> SETTLEMENT_MARKER = BLOCKS.registerBlock("settlement_marker",
+            com.howlingwerewolf.world.SettlementMarkerBlock::new,
+            props -> props.mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE));
 
     public static final Supplier<Block> SILVER_ORE = BLOCKS.registerSimpleBlock("silver_ore",
             props -> props.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.STONE));
     public static final Supplier<Block> DEEPSLATE_SILVER_ORE = BLOCKS.registerSimpleBlock("deepslate_silver_ore",
             props -> props.mapColor(MapColor.DEEPSLATE).requiresCorrectToolForDrops().strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE));
     public static final Supplier<Block> WOLFSBANE = BLOCKS.registerBlock("wolfsbane",
-            props -> new WolfsbaneFlowerBlock(MobEffects.CONFUSION, 10, props),
+            props -> new WolfsbaneFlowerBlock(MobEffects.NAUSEA, 10, props),
             () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.POPPY)
-                    .mapColor(MapColor.COLOR_PURPLE).noCollission().instabreak().sound(SoundType.GRASS));
+                    .mapColor(MapColor.COLOR_PURPLE).noCollision().instabreak().sound(SoundType.GRASS));
     public static final Supplier<Block> RITUAL_ALTAR = BLOCKS.registerBlock("ritual_altar",
             props -> new RitualAltarBlock(props, false),
             props -> props.mapColor(MapColor.STONE).strength(3.5F, 6.0F).sound(SoundType.STONE));
@@ -35,7 +35,7 @@ public final class ModBlocks {
         ModItems.ITEMS.registerSimpleBlockItem(WOLFSBANE);
         ModItems.ITEMS.registerSimpleBlockItem(RITUAL_ALTAR);
         ModItems.ITEMS.registerBlockItem(CENTRAL_RITUAL_ALTAR, props -> new CentralRitualAltarBlockItem(
-                CENTRAL_RITUAL_ALTAR.get(), props.fireResistant()));
+                CENTRAL_RITUAL_ALTAR.get(), props.fireResistant().useBlockDescriptionPrefix()));
     }
 
     private ModBlocks() {}

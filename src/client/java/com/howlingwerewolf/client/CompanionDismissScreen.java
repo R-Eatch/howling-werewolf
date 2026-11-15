@@ -3,6 +3,7 @@ package com.howlingwerewolf.client;
 
 import com.howlingwerewolf.companion.CompanionMode;
 import com.howlingwerewolf.network.CompanionActionPacket;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -11,7 +12,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import java.util.UUID;
 
 /** Dismissal cannot be undone, so it asks once more on a page of its own, as the progression reset does. */
-final class CompanionDismissScreen extends MoonInput.Page {
+final class CompanionDismissScreen extends Screen {
     private static final String KEY = "screen.howlingwerewolf.companion.dismiss.";
     private static final int TOP_BAND = 28, BOTTOM_BAND = 40, TEXT_WIDTH = 320;
     private final Screen parent;
@@ -43,11 +44,11 @@ final class CompanionDismissScreen extends MoonInput.Page {
         if (minecraft.getConnection() != null) {
             ClientPlayNetworking.send(new CompanionActionPacket(CompanionActionPacket.Action.DISMISS, companion));
         }
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     @Override
-    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         MoonUi.Theme theme = MoonUi.theme();
         int center = width / 2, middle = (TOP_BAND + height - BOTTOM_BAND) / 2;
         backdrop.draw(graphics, theme, width, height, center, middle, mouseX, mouseY);
@@ -66,7 +67,7 @@ final class CompanionDismissScreen extends MoonInput.Page {
     }
 
     /** Centered lines that wrap on narrow windows; returns where the next line starts. */
-    private int paragraph(MoonGraphics graphics, Component text, int center, int y, int color) {
+    private int paragraph(GuiGraphicsExtractor graphics, Component text, int center, int y, int color) {
         for (FormattedCharSequence line : font.split(text, Math.min(TEXT_WIDTH, width - 32))) {
             graphics.text(font, line, center - font.width(line) / 2, y, color, false);
             y += 11;
@@ -75,10 +76,10 @@ final class CompanionDismissScreen extends MoonInput.Page {
     }
 
     @Override
-    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas is drawn with the dialog itself.
     }
 
-    @Override public void onClose() { minecraft.setScreen(parent); }
+    @Override public void onClose() { minecraft.gui.setScreen(parent); }
     @Override public boolean isPauseScreen() { return false; }
 }

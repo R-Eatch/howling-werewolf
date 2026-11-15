@@ -21,7 +21,7 @@ public final class FabricEvents {
             WerewolfCapabilityEvents.copy(oldPlayer,player,alive);
             WerewolfCapabilityEvents.restoreAndSync(player);
         });
-        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player,origin,destination) -> WerewolfCapabilityEvents.restoreAndSync(player));
+        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player,origin,destination) -> WerewolfCapabilityEvents.restoreAndSync(player));
         EntityTrackingEvents.START_TRACKING.register((entity,observer) -> {
             if (entity instanceof ServerPlayer target) WerewolfApi.get(target).ifPresent(data ->
                 ModNetwork.sendToPlayer(observer,ModNetwork.createSyncPacket(target.getId(),data)));

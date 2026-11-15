@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "howlingwerewolf:silver_ingot"
-    },
-    {
-      "item": "howlingwerewolf:wolfsbane"
-    },
-    {
-      "item": "howlingwerewolf:werewolf_pelt"
-    }
+    "howlingwerewolf:silver_ingot",
+    "howlingwerewolf:wolfsbane",
+    "howlingwerewolf:werewolf_pelt"
   ],
   "result": {
     "id": "howlingwerewolf:silverhide",

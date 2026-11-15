@@ -2,6 +2,8 @@ package com.howlingwerewolf.content;
 
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import com.howlingwerewolf.entity.HunterEntity;
 import com.howlingwerewolf.entity.SettlementLeaderEntity;
 import com.howlingwerewolf.entity.TribeWerewolfEntity;
@@ -21,41 +23,45 @@ public final class ModEntities {
             () -> EntityType.Builder.of(HunterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
-                    .build(ModRegistry.id("hunter").toString()));
+                    .build(key("hunter")));
     public static final Supplier<EntityType<WerewolfEntity>> WEREWOLF = ENTITIES.register("werewolf",
             () -> EntityType.Builder.of(WerewolfEntity::new, MobCategory.MONSTER)
                     .sized(0.9F, 2.0F)
                     .clientTrackingRange(10)
-                    .build(ModRegistry.id("werewolf").toString()));
+                    .build(key("werewolf")));
     public static final Supplier<EntityType<AlphaWerewolfEntity>> ALPHA_WEREWOLF =
             ENTITIES.register("alpha_werewolf",
                     () -> EntityType.Builder.of(AlphaWerewolfEntity::new, MobCategory.MONSTER)
                             .sized(1.0F, 3.0F)
                             .fireImmune()
                             .clientTrackingRange(12)
-                            .build(ModRegistry.id("alpha_werewolf").toString()));
+                            .build(key("alpha_werewolf")));
     public static final Supplier<EntityType<AlphaMinionEntity>> ALPHA_MINION =
             ENTITIES.register("alpha_minion",
                     () -> EntityType.Builder.of(AlphaMinionEntity::new, MobCategory.MONSTER)
                             .sized(0.6F, 0.85F)
                             .clientTrackingRange(10)
-                            .build(ModRegistry.id("alpha_minion").toString()));
+                            .build(key("alpha_minion")));
 
     public static final Supplier<EntityType<WerewolfCompanionEntity>> WEREWOLF_COMPANION =
             ENTITIES.register("werewolf_companion", () -> EntityType.Builder.of(WerewolfCompanionEntity::new, MobCategory.CREATURE)
                     .sized(0.9F, 2.0F).clientTrackingRange(10)
-                    .build(ModRegistry.id("werewolf_companion").toString()));
+                    .build(key("werewolf_companion")));
     public static final Supplier<EntityType<SettlementLeaderEntity>> HUNTER_CAPTAIN =
             ENTITIES.register("hunter_captain", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
-                    .sized(0.6F, 1.95F).clientTrackingRange(10).build("hunter_captain"));
+                    .sized(0.6F, 1.95F).clientTrackingRange(10).build(key("hunter_captain")));
     public static final Supplier<EntityType<TribeWerewolfEntity>> TRIBE_WEREWOLF =
             ENTITIES.register("tribe_werewolf", () -> EntityType.Builder.of(TribeWerewolfEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_werewolf"));
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(key("tribe_werewolf")));
     public static final Supplier<EntityType<SettlementLeaderEntity>> TRIBE_CHIEF =
             ENTITIES.register("tribe_chief", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build("tribe_chief"));
+                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(key("tribe_chief")));
     public static final Supplier<EntityType<SquadHealingPotion>> SQUAD_HEALING_POTION =
             ENTITIES.register("squad_healing_potion", () -> EntityType.Builder.<SquadHealingPotion>of(SquadHealingPotion::new, MobCategory.MISC)
-                    .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build("squad_healing_potion"));
+                    .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build(key("squad_healing_potion")));
+    private static ResourceKey<EntityType<?>> key(String path) {
+        return ResourceKey.create(Registries.ENTITY_TYPE, ModRegistry.id(path));
+    }
+
     private ModEntities() {}
 }

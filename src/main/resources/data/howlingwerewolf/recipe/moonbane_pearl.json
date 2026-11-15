@@ -1,10 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "pattern": [" S ", "SPS", " S "],
+  "pattern": [
+    " S ",
+    "SPS",
+    " S "
+  ],
   "key": {
-    "S": { "item": "howlingwerewolf:wolfsbane" },
-    "P": { "item": "minecraft:ender_pearl" }
+    "S": "howlingwerewolf:wolfsbane",
+    "P": "minecraft:ender_pearl"
   },
-  "result": { "id": "howlingwerewolf:moonbane_pearl", "count": 1 }
+  "result": {
+    "id": "howlingwerewolf:moonbane_pearl",
+    "count": 1
+  }
 }

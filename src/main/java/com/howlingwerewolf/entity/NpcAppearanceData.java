@@ -6,7 +6,8 @@ import com.howlingwerewolf.WerewolfModelSet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /** A persistent coat and a live, server-controlled model family, sent by vanilla entity tracking. */
 public final class NpcAppearanceData {
@@ -44,13 +45,13 @@ public final class NpcAppearanceData {
         return value >= 0 && value < ModernSkin.values().length ? ModernSkin.values()[value] : ModernSkin.ASHEN;
     }
 
-    public static void save(Entity entity, Keys keys, CompoundTag output) {
+    public static void save(Entity entity, Keys keys, ValueOutput output) {
         output.putString("ModernCoat", coat(entity.getEntityData(), keys).id());
     }
 
-    public static void load(Entity entity, Keys keys, CompoundTag input, boolean fixedAshen) {
+    public static void load(Entity entity, Keys keys, ValueInput input, boolean fixedAshen) {
         if (entity.level().isClientSide()) return;
-        String saved = input.getString("ModernCoat");
+        String saved = input.getStringOr("ModernCoat", "");
         if (fixedAshen || !saved.isEmpty()) {
             setCoat(entity.getEntityData(), keys, fixedAshen ? ModernSkin.ASHEN : ModernSkin.byId(saved));
         }

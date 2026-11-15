@@ -1,24 +1,20 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 package com.howlingwerewolf.mixin.client;
 
-import com.howlingwerewolf.client.ClientEvents;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.howlingwerewolf.client.WerewolfRenderHooks;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.entity.Avatar;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerRenderer.class)
+@Mixin(AvatarRenderer.class)
 abstract class PlayerRendererMixin {
-    @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-            at = @At("HEAD"), cancellable = true)
-    private void howling$renderPlayer(AbstractClientPlayer player, float yaw, float partial, PoseStack pose,
-                                       MultiBufferSource buffers, int light, CallbackInfo ci) {
-        if (ClientEvents.renderWerewolfPlayer((PlayerRenderer) (Object) this, player, yaw, partial, pose, buffers, light)) {
-            ci.cancel();
-        }
+    @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V", at = @At("TAIL"))
+    private void howling$extract(Avatar entity, AvatarRenderState state, float partialTick, CallbackInfo ci) {
+        if (entity instanceof AbstractClientPlayer player) WerewolfRenderHooks.extract(player, state, partialTick);
     }
 }

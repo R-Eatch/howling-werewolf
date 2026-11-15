@@ -1,7 +1,11 @@
 package com.howlingwerewolf.event;
 
 import java.util.ArrayDeque;
+import com.howlingwerewolf.content.HunterCrossbowItem;
+import com.howlingwerewolf.entity.SettlementCombat;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.function.Function;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -9,12 +13,13 @@ import net.minecraft.world.entity.LivingEntity;
 public final class DamageHooks {
     private static final ThreadLocal<ArrayDeque<Float>> ORIGINAL = ThreadLocal.withInitial(ArrayDeque::new);
 
-    public static boolean incoming(LivingEntity entity,DamageSource source,float amount,Function<Float,Boolean> original) {
-        if (entity.level().isClientSide() || entity.isInvulnerableTo(source)) return original.apply(amount);
-        var stack=ORIGINAL.get();
+    public static boolean incoming(LivingEntity entity, ServerLevel level, DamageSource source, float amount,
+                                   Function<Float, Boolean> original) {
+        if (entity.isInvulnerableTo(level, source)) return original.apply(amount);
+        var stack = ORIGINAL.get();
         stack.push(amount);
         try {
-            var context=new GameplayContext.Damage(entity,source,amount);
+            var context = new GameplayContext.Damage(entity, source, HunterCrossbowItem.damage(entity, source, amount));
             WerewolfGameplayEvents.beastVoidMeleeDamage(context);
             if (context.isCanceled()) return false;
             WerewolfGameplayEvents.formMeleeDamage(context);
@@ -26,20 +31,22 @@ public final class DamageHooks {
         }
     }
 
-    public static void healthDamage(LivingEntity entity,DamageSource source,float amount,Runnable original) {
-        float before=entity.getHealth();
+    public static void healthDamage(LivingEntity entity, DamageSource source, float amount, Runnable original) {
+        float before = entity.getHealth();
         original.run();
-        float loss=Math.max(0,before-entity.getHealth());
-        if (loss>0) {
-            var stack=ORIGINAL.get();
-            var context=new GameplayContext.Damage(entity,source,loss,stack.isEmpty() ? amount : stack.peek());
+        float loss = Math.max(0, before - entity.getHealth());
+        if (loss > 0) {
+            HunterCrossbowItem.onDamage(entity, source);
+            if (entity instanceof ServerPlayer player) SettlementCombat.defendPlayer(player, source.getEntity());
+            var stack = ORIGINAL.get();
+            var context = new GameplayContext.Damage(entity, source, loss, stack.isEmpty() ? amount : stack.peek());
             WerewolfGameplayEvents.lifesteal(context);
             WerewolfGameplayEvents.longClawSplash(context);
         }
     }
 
-    public static void beforeHealthChange(LivingEntity entity,DamageSource source,float newHealth) {
-        WerewolfGameplayEvents.fireClawAttack(new GameplayContext.Damage(entity,source,Math.max(0,entity.getHealth()-newHealth)));
+    public static void beforeHealthChange(LivingEntity entity, DamageSource source, float newHealth) {
+        WerewolfGameplayEvents.fireClawAttack(new GameplayContext.Damage(entity, source, Math.max(0, entity.getHealth() - newHealth)));
     }
     private DamageHooks() { }
 }

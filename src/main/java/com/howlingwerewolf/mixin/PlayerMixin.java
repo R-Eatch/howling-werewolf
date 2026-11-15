@@ -4,7 +4,8 @@ import com.howlingwerewolf.capability.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.ValueInput;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -35,9 +36,9 @@ abstract class PlayerMixin {
         return context.canHarvest();
     }
     @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method="actuallyHurt")
-    private void howling$healthDamage(net.minecraft.world.damagesource.DamageSource source,float amount,
+    private void howling$healthDamage(ServerLevel level, net.minecraft.world.damagesource.DamageSource source,float amount,
             com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
-        DamageHooks.healthDamage((Player)(Object)this,source,amount,() -> original.call(source,amount));
+        DamageHooks.healthDamage((Player)(Object)this,source,amount,() -> original.call(level,source,amount));
     }
     @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method="actuallyHurt",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/player/Player;setHealth(F)V"))
     private void howling$beforeHealth(Player player,float value,com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original,
@@ -55,16 +56,16 @@ abstract class PlayerMixin {
         return damage;
     }
     @Inject(method="readAdditionalSaveData",at=@At("TAIL"))
-    private void howling$legacy(CompoundTag input,CallbackInfo ci) {
+    private void howling$legacy(ValueInput input,CallbackInfo ci) {
         // Older Forge/NeoForge saves used this mirror. Fabric attachments remain authoritative.
-        if (input.contains("ForgeData", Tag.TAG_COMPOUND)) howling$restoreRoot(input.getCompound("ForgeData"));
-        if (input.contains("NeoForgeData", Tag.TAG_COMPOUND)) howling$restoreRoot(input.getCompound("NeoForgeData"));
+        input.read("ForgeData", CompoundTag.CODEC).ifPresent(this::howling$restoreRoot);
+        input.read("NeoForgeData", CompoundTag.CODEC).ifPresent(this::howling$restoreRoot);
     }
     @org.spongepowered.asm.mixin.Unique
     private void howling$restoreRoot(CompoundTag root) {
         var player=(Player)(Object)this;
         var data=WerewolfApi.get(player).orElseThrow();
-        if (data.isDefaultState() && root.contains("PlayerPersisted", Tag.TAG_COMPOUND)) {
+        if (data.isDefaultState() && root.getCompound("PlayerPersisted").isPresent()) {
             player.setAttached(ModAttachments.LEGACY,root.copy());
             WerewolfPersistence.recoverIfFresh(player,data);
         }

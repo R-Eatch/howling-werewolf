@@ -6,8 +6,8 @@ import com.howlingwerewolf.network.ModNetwork;
 import com.howlingwerewolf.capability.ModAttachments;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,9 +28,10 @@ public final class HowlingWerewolf implements ModInitializer {
         ModRecipes.SERIALIZERS.getClass();
         ModPlacementModifiers.PLACEMENT_MODIFIERS.getClass();
         ModStructures.TYPES.getClass();
+        DoubleLootCount.register();
         ModSounds.initialize();
         ModAttachments.initialize();
-        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricItemGroup.builder()
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModRegistry.id("main"), FabricCreativeModeTab.builder()
             .title(Component.translatable("itemGroup.howlingwerewolf"))
             .icon(() -> new ItemStack(ModItems.MOONBANE_PEARL.get()))
             .displayItems((parameters, output) -> {
@@ -50,31 +51,35 @@ public final class HowlingWerewolf implements ModInitializer {
 
     /** Fabric pages modded tabs after the vanilla ones, so the first page also lists every item by category. */
     private static void addToVanillaCreativeTabs() {
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.accept(ModItems.SILVER_INGOT.get()); entries.accept(ModItems.MOONBANE_PEARL.get());
             entries.accept(ModItems.ALPHA_WEREWOLF_BADGE.get());
             entries.accept(ModItems.WEREWOLF_PELT.get());
             entries.accept(ModItems.SILVERHIDE.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(entries -> {
             entries.accept(ModItems.SILVER_SWORD.get());
+            entries.accept(ModItems.HUNTER_CROSSBOW.get());
             entries.accept(ModItems.SILVERHIDE_HELMET.get());
             entries.accept(ModItems.SILVERHIDE_CHESTPLATE.get());
             entries.accept(ModItems.SILVERHIDE_LEGGINGS.get());
             entries.accept(ModItems.SILVERHIDE_BOOTS.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
             entries.accept(ModItems.WOLFSBANE_POTION.get()); entries.accept(ModItems.WEREWOLF_POTION.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> {
             entries.accept(ModItems.WEREWOLF_SPAWN_EGG.get()); entries.accept(ModItems.HUNTER_SPAWN_EGG.get());
             entries.accept(ModItems.ALPHA_WEREWOLF_SPAWN_EGG.get());
+            entries.accept(ModItems.HUNTER_CAPTAIN_SPAWN_EGG.get());
+            entries.accept(ModItems.TRIBE_CHIEF_SPAWN_EGG.get());
+            entries.accept(ModItems.TRIBE_WEREWOLF_SPAWN_EGG.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
             entries.accept(ModBlocks.SILVER_ORE.get()); entries.accept(ModBlocks.DEEPSLATE_SILVER_ORE.get());
             entries.accept(ModBlocks.WOLFSBANE.get());
         });
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
             entries.accept(ModBlocks.RITUAL_ALTAR.get()); entries.accept(ModBlocks.CENTRAL_RITUAL_ALTAR.get());
         });
     }

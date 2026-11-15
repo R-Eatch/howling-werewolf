@@ -1,8 +1,9 @@
 package com.howlingwerewolf.client;
 
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -10,10 +11,10 @@ import org.jetbrains.annotations.Nullable;
  * blank LivingEntityRenderer.getRenderType for players who use their model, which would hide the transformed body.
  */
 final class WerewolfBodyRenderType {
-    static @Nullable RenderType of(EntityModel<?> model, ResourceLocation texture, boolean visible, boolean translucent, boolean glowing) {
-        if (translucent) return RenderType.itemEntityTranslucentCull(texture);
+    static @Nullable RenderType of(EntityModel<?> model, Identifier texture, boolean visible, boolean translucent, boolean glowing) {
+        if (translucent) return RenderTypes.entityTranslucentCull(texture);
         if (visible) return model.renderType(texture);
-        return glowing ? RenderType.outline(texture) : null;
+        return glowing ? RenderTypes.outline(texture) : null;
     }
 
     private WerewolfBodyRenderType() {}

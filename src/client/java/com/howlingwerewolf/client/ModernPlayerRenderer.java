@@ -5,58 +5,61 @@ import com.howlingwerewolf.WerewolfModelSet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
 
-final class ModernPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, ModernPlayerModel<AbstractClientPlayer>> {
+/** Player-only renderers; Alpha and feral entities continue using their Classic renderers. */
+final class ModernPlayerRenderer extends WerewolfLivingRenderer<AbstractClientPlayer, AvatarRenderState, ModernPlayerModel<AvatarRenderState>> {
     private final WerewolfForm form;
 
     ModernPlayerRenderer(EntityRendererProvider.Context context, WerewolfForm form) {
-        super(context, new ModernPlayerModel<>(form), form == WerewolfForm.BEAST ? 0.85F : 0.5F);
+        super(context, new ModernPlayerModel<>(form), form == WerewolfForm.BEAST ? 0.85F : 0.5F, AvatarRenderState::new);
         this.form = form;
         if (form == WerewolfForm.QUADRUPED) {
             addLayer(new RenderLayer<>(this) {
-                @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player,
-                                             float limb, float speed, float partial, float age, float yaw, float pitch) {
-                    if (player.getMainHandItem().isEmpty()) return;
+                @Override public void submit(PoseStack pose, SubmitNodeCollector collector, int light,
+                                             AvatarRenderState state, float yRot, float xRot) {
+                    var item = WerewolfRenderData.get(state).mouthItem();
+                    if (item.isEmpty()) return;
                     pose.pushPose();
                     getParentModel().translateToMouth(pose);
-                    pose.mulPose(Axis.XP.rotationDegrees(90));
+                    pose.rotate(Axis.XP.rotationDegrees(90));
                     pose.scale(0.72F, 0.72F, 0.72F);
-                    context.getItemInHandRenderer().renderItem(player, player.getMainHandItem(), ItemDisplayContext.GROUND, false, pose, buffers, light);
+                    item.submit(pose, collector, light, OverlayTexture.NO_OVERLAY, state.outlineColor);
                     pose.popPose();
                 }
             });
         } else {
-            addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
+            addLayer(new ItemInHandLayer<>(this));
             if (form == WerewolfForm.WEREWOLF) {
-                addLayer(new ModernEquipmentLayer(this, context));
+                addLayer(new ModernEquipmentLayer<>(this, context));
                 addLayer(new ModernWingsLayer(this, context));
             }
         }
     }
 
-    @Override protected void setupRotations(AbstractClientPlayer player, PoseStack pose, float age, float yaw, float partial, float scale) {
-        super.setupRotations(player, pose, age, yaw, partial, scale);
-        if (form == WerewolfForm.QUADRUPED) WerewolfRenderTransforms.applyQuadrupedTravelPose(player, pose, partial);
-        else WerewolfRenderTransforms.applyPlayerTravelPose(player, pose, partial);
+    @Override protected void setupRotations(AvatarRenderState state, PoseStack pose, float bodyRot, float scale) {
+        super.setupRotations(state, pose, bodyRot, scale);
+        if (form == WerewolfForm.QUADRUPED) WerewolfRenderTransforms.applyQuadrupedTravelPose(state, pose);
+        else WerewolfRenderTransforms.applyPlayerTravelPose(state, pose);
     }
 
-    @Override public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
-        return WerewolfSkinCatalog.texture(WerewolfSkinRenderContext.getSkinId(player), WerewolfModelSet.MODERN, form);
+    @Override public Identifier getTextureLocation(AvatarRenderState state) {
+        return WerewolfSkinCatalog.texture(WerewolfRenderData.get(state).skinId(), WerewolfModelSet.MODERN, form);
     }
 
-    @Override protected RenderType getRenderType(AbstractClientPlayer player, boolean visible, boolean translucent, boolean glowing) {
-        return WerewolfBodyRenderType.of(model, getTextureLocation(player), visible, translucent, glowing);
+    @Override
+    protected RenderType getRenderType(AvatarRenderState state, boolean visible, boolean translucent, boolean glowing) {
+        return WerewolfBodyRenderType.of(model, getTextureLocation(state), visible, translucent, glowing);
     }
 
-    @Override protected boolean shouldShowName(AbstractClientPlayer player) {
-        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player);
+    @Override protected boolean shouldShowName(AbstractClientPlayer player, double distance) {
+        return !WerewolfSkinRenderContext.isPreview(player) && super.shouldShowName(player, distance);
     }
 }

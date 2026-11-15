@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.21.1, Fabric Loader 0.16.14, Fabric API 0.116.4+1.21.1 and Java 21, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 26.3, Fabric Loader 0.20.1, Fabric API 0.166.2+26.3 and Java 25, Howling Werewolf 1.4.3. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -30,7 +30,7 @@ The rite works at any hour and moon phase. The merchant stays 12000 game ticks (
 
 ## Trading and recruiting
 
-Each merchant draws six of nine trades, each with limited uses. See the [trade table](COMPANION-TABLES.md#merchant-trades).
+Each merchant draws eight of thirteen trades with limited stock and no restocks. See the [trade table](COMPANION-TABLES.md#merchant-trades).
 
 Hold an Alpha Werewolf Badge and right-click the merchant, then confirm to spend one badge and recruit him. The prompt lasts ten seconds. On confirming, the server checks distance, health, skill, party size and the badge again, and takes the badge once everything passes. He then stays with you for good, named after his coat by default.
 
@@ -76,7 +76,7 @@ When there is no safe ground nearby, recall, revival and returning hunters wait 
 
 Bring your companion to the middle of your storage, open the Sorting tab and choose **Start sorting**.
 
-The work area is a sphere with a radius of 16 blocks around where the companion stood when it started, and it stays put as the companion moves. That reaches 16 blocks straight up or down and less toward the corners. **Chests and barrels** inside it join the job, up to the nearest 64, with a double chest counting once.
+The work area is a sphere with a radius of 16 blocks around where the companion stood when it started, and it stays put as the companion moves. That reaches 16 blocks straight up or down and less toward the corners. **Chests, copper chests and barrels** inside it join the job, up to the nearest 64, with a double chest counting once.
 
 Your companion works the way you would: it walks over, opens the lid with the real animation and sound, takes the items, closes up, then walks to the destination, opens it and sets them down. After a full round it lets you know and stays on site, tidying anything added later. Any other order ends the job.
 
@@ -106,7 +106,7 @@ Your companion passes over **trapped chests and shulker boxes**, so keep anythin
 
 ### Your items are safe
 
-The stack in the companion's hand is only for show. Items change hands the moment they are set down, checked and committed within one server tick, with any failed half rolled back, so if you stop the job, the companion falls or the server restarts, everything is still in its original container.
+The stack in the companion's hand is only for show. Items change hands the moment they are set down, in a single NeoForge transaction, so if you stop the job, the companion falls or the server restarts, everything is still in its original container.
 
 ### What gets skipped
 
@@ -119,7 +119,7 @@ Gray dots on the radar are containers skipped for now, and hovering shows their 
 
 A container your companion cannot walk up to is still tidied from where it stands, as long as it lies within the sorting reach.
 
-Protection checks cover vanilla spawn and access rules plus Fabric API's block-use callback. Whether a claim plugin uses that event depends on the plugin, so try it on yours.
+Protection checks cover vanilla spawn and access rules plus NeoForge's right-click interaction event. Whether a claim plugin uses that event depends on the plugin, so try it on yours.
 
 ### Pausing and multiplayer
 
@@ -167,7 +167,7 @@ npcModelSet = "modern"
 - `enableCompanions = false` stops rites, trading, recruiting, inventories and all companion actions. Entities are put away, records and items are kept, and hunt and rest timers pause. The window still opens and explains why. Pack Oath takes new points again once this is back on, and learned ranks are kept. Other werewolf features carry on.
 - `enableCompanionSorting = false` turns off sorting alone.
 - `companionSortingReach` is how far a companion can still reach into a container it cannot walk up to: 3–64 blocks, 32 by default. At 3, anything it cannot reach on foot is skipped.
-- Data packs can override the hunt table at `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`. The merchant's nine trades are defined in [code](../src/main/java/com/howlingwerewolf/entity/WerewolfCompanionEntity.java).
+- Data packs can override `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`, `data/howlingwerewolf/trade_set/werewolf_brother.json` and `data/howlingwerewolf/villager_trade/werewolf_brother/*.json`.
 
 ## Combat detail
 

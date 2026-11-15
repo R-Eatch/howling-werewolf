@@ -15,8 +15,6 @@ import com.howlingwerewolf.companion.CompanionRecord;
 import com.howlingwerewolf.companion.CompanionRules;
 import com.howlingwerewolf.companion.CompanionSavedData;
 import com.howlingwerewolf.companion.CompanionDialogue;
-import com.howlingwerewolf.companion.CompanionSorting;
-import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.event.WerewolfGameplayEvents;
 import net.minecraft.core.BlockPos;
@@ -24,9 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -35,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityType;
@@ -51,31 +47,29 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TradeWithPlayerGoal;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BarrelBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /** A temporary merchant, or one live projection of a persistent, player-owned companion. */
-public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance {
+public final class WerewolfCompanionEntity extends AbstractVillager implements WerewolfNpcAppearance, ContainerUser {
     private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> RECRUITED = SynchedEntityData.defineId(WerewolfCompanionEntity.class, EntityDataSerializers.BOOLEAN);
     private CompanionRecord record;
@@ -91,6 +85,10 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     private long lastHurt;
     private long lastAmbientLine = -200;
     private long nextIdleLine;
+    private long nextContextLine;
+    private int previousContext;
+    private boolean merchantTimeWarning;
+    private long nextMerchantTrade;
     private String merchantClassicSkin;
     private String merchantModernSkin;
     private final SimpleContainer merchantInventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE);
@@ -287,14 +285,13 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         return player != null && record != null && record.mode == CompanionMode.GUARD
                 && CompanionManager.enabled(player, record) && CompanionManager.mayAttack(player, target) && super.canAttack(target);
     }
-    @Override public boolean doHurtTarget(Entity target) {
-        return target instanceof LivingEntity living && canAttack(living) && super.doHurtTarget(target);
+    @Override public boolean doHurtTarget(ServerLevel level, Entity target) {
+        return target instanceof LivingEntity living && canAttack(living) && super.doHurtTarget(level, target);
     }
 
     @Override public void aiStep() {
         if (!level().isClientSide() && !HWConfig.ENABLE_COMPANIONS.get()) { park(); return; }
         // Vanilla only advances the swing timer for monsters and players; villagers never attack.
-        updateSwingTime();
         if (!level().isClientSide() && getTarget() != null && !canAttack(getTarget())) {
             setTarget(null); setAggressive(false); getNavigation().stop();
         }
@@ -302,12 +299,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (!(level() instanceof ServerLevel level)) return;
         if (tickCount % 20 == 0) refreshAppearance();
         if (!isRecruited()) {
-            if (level.getGameTime() >= expiresAt) {
-                ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
-                if (visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16) sayTo(visitor, "farewell");
-                closeTrading(); discard(); return;
-            }
-            tickArrival(level);
+            tickMerchant(level);
             return;
         }
         if (record == null) { discard(); return; }
@@ -327,45 +319,31 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
                 heal(CompanionRules.regeneration(CompanionManager.effectiveTier(player, record)));
             }
             CompanionManager.remember(this);
+            tickContextDialogue(level, player);
             tickIdleDialogue(player);
         }
     }
-    /**
-     * Opens the lids the way a player would be seen to: chests through their lid block event and
-     * barrels through their OPEN state, with the vanilla sounds. A player's own counter wins.
-     */
+    @Override public boolean hasContainerOpen(ContainerOpenersCounter container, BlockPos pos) { return openedContainers.contains(pos); }
+    @Override public double getContainerInteractionRange() { return 4.0; }
+    /** Opens through the vanilla counter, giving the real lid motion, sounds and observer updates. */
     public void openSortContainers(List<BlockEntity> members) {
         closeSortContainers();
-        boolean sounded = false;
         for (BlockEntity member : members) {
-            if (!(member instanceof ChestBlockEntity) && !(member instanceof BarrelBlockEntity)) continue;
+            if (member instanceof ChestBlockEntity chest) chest.startOpen(this);
+            else if (member instanceof BarrelBlockEntity barrel) barrel.startOpen(this);
+            else continue;
             openedContainers.add(member.getBlockPos().immutable());
-            sounded |= showLid(member, true, sounded);
         }
     }
     public void closeSortContainers() {
-        boolean sounded = false;
         for (BlockPos pos : List.copyOf(openedContainers)) {
             openedContainers.remove(pos);
-            // An unloading chunk must stay unloaded.
+            // An unloading chunk must stay unloaded; its counter rebuilds from whoever is left.
             if (!level().hasChunkAt(pos)) continue;
             BlockEntity member = level().getBlockEntity(pos);
-            if (member instanceof ChestBlockEntity || member instanceof BarrelBlockEntity) sounded |= showLid(member, false, sounded);
+            if (member instanceof ChestBlockEntity chest) chest.stopOpen(this);
+            else if (member instanceof BarrelBlockEntity barrel) barrel.stopOpen(this);
         }
-    }
-    private boolean showLid(BlockEntity member, boolean open, boolean quiet) {
-        if (!(level() instanceof ServerLevel level)) return false;
-        BlockPos pos = member.getBlockPos();
-        BlockState state = member.getBlockState();
-        if (CompanionSorting.inUse(level, member)) return false;
-        if (member instanceof ChestBlockEntity) {
-            level.blockEvent(pos, state.getBlock(), 1, open ? 1 : 0);
-            if (!quiet) level.playSound(null, pos, open ? SoundEvents.CHEST_OPEN : SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
-        } else if (state.hasProperty(BarrelBlock.OPEN)) {
-            level.setBlock(pos, state.setValue(BarrelBlock.OPEN, open), 3);
-            if (!quiet) level.playSound(null, pos, open ? SoundEvents.BARREL_OPEN : SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
-        }
-        return true;
     }
     /** Display only, and never dropped: this entity is rebuilt from its record and owns no items. */
     public void setCarriedItem(ItemStack stack) {
@@ -380,6 +358,55 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         sortBusy = false;
     }
     public void resetIdleDialogue() { nextIdleLine = level().getGameTime() + 1200 + random.nextInt(1201); }
+
+    private void tickMerchant(ServerLevel level) {
+        long now = level.getGameTime();
+        ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
+        boolean nearby = visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16;
+        if (now >= expiresAt) {
+            if (nearby) sayTo(visitor, "farewell");
+            closeTrading();
+            discard();
+            return;
+        }
+        if (nearby && !merchantTimeWarning && expiresAt - now <= 2400) {
+            merchantTimeWarning = true;
+            sayTo(visitor, "time_warning");
+        } else if (nearby && altar == null && !isTrading() && now >= nextIdleLine) {
+            resetIdleDialogue();
+            sayTo(visitor, "idle");
+        }
+        tickArrival(level);
+    }
+
+    private void tickContextDialogue(ServerLevel level, ServerPlayer player) {
+        long now = level.getGameTime();
+        var data = com.howlingwerewolf.capability.WerewolfApi.get(player).orElseThrow();
+        long hour = Math.floorMod(level.getOverworldClockTime(), 24000);
+        boolean overworld = level.dimension().equals(Level.OVERWORLD);
+        var biome = level.getBiome(player.blockPosition());
+        boolean taiga = biome.is(net.minecraft.world.level.biome.Biomes.TAIGA) || biome.is(net.minecraft.world.level.biome.Biomes.SNOWY_TAIGA)
+                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_PINE_TAIGA)
+                || biome.is(net.minecraft.world.level.biome.Biomes.OLD_GROWTH_SPRUCE_TAIGA);
+        String[] cues = {"player_low_hp", "player_beast", "full_moon", "sunrise", "rain", "biome.taiga", "biome.nether", "water"};
+        boolean[] active = {
+                player.getHealth() <= player.getMaxHealth() * 0.25F, data.isBeastMode(),
+                overworld && hour >= 13000 && hour < 23000 && Math.floorMod(Math.floorDiv(level.getOverworldClockTime(), 24000), 8) == 0, overworld && hour < 900,
+                overworld && level.isRainingAt(player.blockPosition()), taiga, level.dimension().equals(Level.NETHER),
+                player.isInWater()
+        };
+        int current = 0;
+        for (int i = 0; i < active.length; i++) if (active[i]) current |= 1 << i;
+        int changed = current & ~previousContext;
+        previousContext = current;
+        if (changed == 0 || now < nextContextLine || distanceToSqr(player) > 12 * 12
+                || !player.isAlive() || player.isSpectator() || player.containerMenu != player.inventoryMenu) return;
+        if (getTarget() != null && (changed & 1) == 0) return;
+        nextContextLine = now + 1200;
+        nextIdleLine = Math.max(nextIdleLine, now + 1200);
+        sayTo(player, cues[Integer.numberOfTrailingZeros(changed)]);
+    }
+
     private void tickIdleDialogue(ServerPlayer player) {
         long now = level().getGameTime();
         if (now < nextIdleLine || record == null || !record.mode.hasEntity() || getTarget() != null
@@ -423,52 +450,57 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     public boolean canOfferRecruitment(ServerPlayer player) {
         return HWConfig.ENABLE_COMPANIONS.get() && !isRecruited() && isAlive() && !isTrading()
-                && level().getGameTime() < expiresAt && player.level() == level() && player.canInteractWithEntity(this, 1);
+                && level().getGameTime() < expiresAt && player.level() == level() && player.isWithinEntityInteractionRange(this, 1);
     }
     public void offerTo(ServerPlayer player) { offeredTo = player.getUUID(); offerExpires = level().getGameTime() + 200; }
     public boolean acceptsOffer(ServerPlayer player) {
         return canOfferRecruitment(player) && player.getUUID().equals(offeredTo) && level().getGameTime() <= offerExpires;
     }
-    @Override protected void updateTrades() {
-        if (!HWConfig.ENABLE_COMPANIONS.get() || isRecruited()) return;
-        WerewolfTrades.draw(getOffers(), WerewolfTrades.MerchantRole.BROTHER, random);
+    @Override protected void updateTrades(ServerLevel level) {
+        if (HWConfig.ENABLE_COMPANIONS.get() && !isRecruited()) WerewolfTrades.draw(this, level, getOffers(), WerewolfTrades.MerchantRole.BROTHER);
     }
     @Override protected void rewardTradeXp(MerchantOffer offer) {}
     // A werewolf merchant barks, pants and whines instead of haggling like a villager.
     @Override public net.minecraft.sounds.SoundEvent getNotifyTradeSound() {
-        return net.minecraft.sounds.SoundEvents.WOLF_AMBIENT;
+        return net.minecraft.sounds.SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().ambientSound().value();
     }
     @Override protected net.minecraft.sounds.SoundEvent getTradeUpdatedSound(boolean validTrade) {
-        return validTrade ? net.minecraft.sounds.SoundEvents.WOLF_PANT : net.minecraft.sounds.SoundEvents.WOLF_WHINE;
+        var sounds = net.minecraft.sounds.SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds();
+        return (validTrade ? sounds.pantSound() : sounds.whineSound()).value();
     }
     @Override public boolean showProgressBar() { return false; }
     @Override public void notifyTrade(MerchantOffer offer) {
         if (isRecruited() || !HWConfig.ENABLE_COMPANIONS.get()) return;
         super.notifyTrade(offer);
-        if (getTradingPlayer() instanceof ServerPlayer player) sayTo(player, "traded");
+        if (getTradingPlayer() instanceof ServerPlayer player && level().getGameTime() >= nextMerchantTrade) {
+            nextMerchantTrade = level().getGameTime() + 100;
+            sayTo(player, "traded");
+        }
+    }
+    @Override public boolean stillValid(Player player) {
+        return HWConfig.ENABLE_COMPANIONS.get() && !isRecruited() && level().getGameTime() < expiresAt && super.stillValid(player);
     }
     @Override public SimpleContainer getInventory() { return record == null ? merchantInventory : record.inventory; }
-    @Override public boolean wantsToPickUp(ItemStack stack) { return false; }
+    @Override public boolean wantsToPickUp(ServerLevel level, ItemStack stack) { return false; }
     @Override public boolean canBeLeashed() { return false; }
     @Override public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) { return null; }
 
     /** Owner protection stops the hit before hurt sounds or knockback; it covers projectiles and potions too. */
-    @Override public boolean hurt(DamageSource source, float amount) {
+    @Override public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         if (record != null && record.ignoreOwnerDamage && source.getEntity() != null
                 && record.belongsTo(source.getEntity().getUUID())) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(level, source, amount);
     }
 
-    @Override protected void actuallyHurt(DamageSource source, float amount) {
+    @Override protected void actuallyHurt(ServerLevel level, DamageSource source, float amount) {
         float previousHealth = getHealth();
-        lastHurt = level().getGameTime();
+        lastHurt = level.getGameTime();
         if (record != null && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             ServerPlayer player = owner();
             int tier = player == null ? record.tier : CompanionManager.effectiveTier(player, record);
             amount *= CompanionRules.damageMultiplier(tier);
         }
-        super.actuallyHurt(source, amount);
-        if (level().isClientSide()) return;
+        super.actuallyHurt(level, source, amount);
         CompanionManager.remember(this);
         ServerPlayer player = owner();
         if (isAlive() && getHealth() < previousHealth && source.getEntity() instanceof LivingEntity attacker && canAttack(attacker)) {
@@ -484,8 +516,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         closeTrading();
         super.die(source);
     }
-    /** Discards and deaths; a chunk unload never removes this non-saving entity (see trackingEnded). */
-    @Override public void remove(RemovalReason reason) {
+    @Override public void onRemoval(RemovalReason reason) {
         if (!level().isClientSide()) closeSortContainers();
         if (level() instanceof ServerLevel level) CompanionSavedData.get(level.getServer()).untrack(this);
         if (!level().isClientSide() && record != null) {
@@ -494,7 +525,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
             CompanionSavedData.get(((ServerLevel) level()).getServer()).release(record, this);
         }
         closeTrading();
-        super.remove(reason);
+        super.onRemoval(reason);
     }
     public void trackingStarted() {
         if (level() instanceof ServerLevel level) CompanionSavedData.get(level.getServer()).track(this);
@@ -522,23 +553,22 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     // Temporary merchants vanish on unload. Recruited entities are reconstructed from owner records.
     @Override public boolean shouldBeSaved() { return false; }
-    @Override public boolean saveAsPassenger(CompoundTag tag) { return false; }
+    @Override public boolean saveAsPassenger(ValueOutput output) { return false; }
     @Override public boolean canUsePortal(boolean ignorePassenger) { return false; }
-    @Override public boolean canChangeDimensions(Level from, Level to) { return false; }
-    @Override public Entity changeDimension(net.minecraft.world.level.portal.DimensionTransition transition) {
+    @Override public Entity teleport(net.minecraft.world.level.portal.TeleportTransition transition) {
         // Cross-dimension following/recall goes through the owner record. Vanilla would clone
         // this AbstractVillager and copy its inventory without transferring its record lease.
-        return transition.newLevel() == level() ? super.changeDimension(transition) : null;
+        return transition.newLevel() == level() ? super.teleport(transition) : null;
     }
-    @Override public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putBoolean("SharedTradeTable", true);
-        tag.putString("CompanionSkin", getNpcSkinId());
+    @Override protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putString("CompanionSkin", getNpcSkinId());
+        output.putBoolean("SharedTradeTable", true);
     }
-    @Override public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Offers") && !tag.contains("SharedTradeTable")) offers = null;
-        if (tag.contains("CompanionSkin")) setSkin(tag.getString("CompanionSkin"));
+    @Override protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        if (!input.getBooleanOr("SharedTradeTable", false)) offers = null;
+        setSkin(input.getStringOr("CompanionSkin", getNpcSkinId()));
     }
 
     public boolean beginArrival(ServerPlayer player, BlockPos center) {
@@ -588,7 +618,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     public void sayTo(ServerPlayer player, String key) {
         if (record != null) CompanionDialogue.say(player, record, key);
-        else CompanionDialogue.send(player, getName().getString(), key, random);
+        else CompanionDialogue.sendMerchant(player, getName(), key, random);
     }
     public void sayOccasionally(ServerPlayer player, String key) {
         long now = level().getGameTime();

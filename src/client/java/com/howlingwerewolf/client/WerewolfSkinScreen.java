@@ -13,7 +13,8 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.network.SetWerewolfSkinPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import com.howlingwerewolf.client.MoonInput.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.RemotePlayer;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -30,7 +32,7 @@ import java.util.List;
 import java.io.IOException;
 
 /** A cosmetic fitting room. Only Apply sends a request; preview entities never enter the level. */
-public final class WerewolfSkinScreen extends MoonInput.Page {
+public final class WerewolfSkinScreen extends Screen {
     private static final int MIN_WIDTH = 560, MIN_HEIGHT = 320, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     private static final int TOP_BAND = 28, BOTTOM_BAND = 50, MARGIN = 12, LIST_WIDTH = 150, CARD_HEIGHT = 50, CARD_GAP = 4;
     private static final WerewolfForm[] PREVIEW_FORMS = {
@@ -228,7 +230,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     }
 
     @Override
-    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int logicalMouseX = toLogical(mouseX);
         int logicalMouseY = toLogical(mouseY);
         MoonUi.Theme theme = MoonUi.theme();
@@ -302,11 +304,11 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     }
 
     @Override
-    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas is drawn with the screen itself.
     }
 
-    private void renderPreview(MoonGraphics graphics, int mouseX, int mouseY) {
+    private void renderPreview(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (previewPlayer == null) return;
         float blocks = switch (previewForm) {
             case BEAST -> 3.05F;
@@ -331,7 +333,16 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         graphics.enableScissor(x0, y0, x1, y1);
         try {
             WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, modelSet, selectedSkin, () -> {
-                graphics.entity(previewPlayer, scale, (x0 + x1) / 2.0F, baseline, pose, camera);
+                var dispatcher = minecraft.getEntityRenderDispatcher();
+                var state = dispatcher.getRenderer(previewPlayer).createRenderState(previewPlayer, 1.0F);
+                state.shadowPieces.clear();
+                state.outlineColor = 0;
+                state.nameTag = null;
+                state.scoreText = null;
+                graphics.entity(state, scale * uiScale,
+                        new Vector3f(0.0F, (baseline - (y0 + y1) / 2.0F) / scale, 0.0F), pose, camera,
+                        Math.round(x0 * uiScale), Math.round(y0 * uiScale),
+                        Math.round(x1 * uiScale), Math.round(y1 * uiScale));
             });
         } finally {
             graphics.disableScissor();
@@ -396,7 +407,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     @Override
@@ -452,16 +463,16 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     }
 
     private void openPacks() {
-        minecraft.setScreen(new PackSelectionScreen(minecraft.getResourcePackRepository(), repository -> {
+        minecraft.gui.setScreen(new PackSelectionScreen(minecraft.getResourcePackRepository(), repository -> {
             minecraft.options.updateResourcePacks(repository);
-            minecraft.setScreen(this);
+            minecraft.gui.setScreen(this);
         }, minecraft.getResourcePackDirectory(), Component.translatable("resourcePack.title")));
     }
 
     private void createTemplate() {
         try {
             var directory = WerewolfSkinTemplate.export(minecraft.getResourcePackDirectory(), modelSet, selectedSkin);
-            net.minecraft.Util.getPlatform().openFile(directory.toFile());
+            com.mojang.blaze3d.Blaze3D.openPath(directory);
             notice = Component.translatable("screen.howlingwerewolf.skins.template_created");
         } catch (IOException | RuntimeException error) {
             LogUtils.getLogger().warn("Unable to create werewolf skin template", error);
@@ -492,8 +503,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         }
 
         @Override
-        protected void renderWidget(net.minecraft.client.gui.GuiGraphics raw, int mouseX, int mouseY, float partialTick) {
-            MoonGraphics graphics = new MoonGraphics(raw);
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             boolean selected = selectedSkin.equals(skin.id());
             MoonUi.Theme theme = MoonUi.theme();
             int edge = selected ? theme.accent() : isHoveredOrFocused() ? theme.ink() : theme.line();

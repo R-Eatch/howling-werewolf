@@ -4,11 +4,12 @@ import com.howlingwerewolf.capability.WerewolfApi;
 import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.network.ResetProgressionPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
-public final class WerewolfResetConfirmScreen extends MoonInput.Page {
+public final class WerewolfResetConfirmScreen extends Screen {
     private static final int TOP_BAND = 28, BOTTOM_BAND = 40;
     private final Screen parent;
     private final MoonUi.Backdrop backdrop = new MoonUi.Backdrop();
@@ -31,11 +32,11 @@ public final class WerewolfResetConfirmScreen extends MoonInput.Page {
 
     private void confirmReset() {
         ClientPlayNetworking.send(new ResetProgressionPacket());
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     @Override
-    public void extractRenderState(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         MoonUi.Theme theme = MoonUi.theme();
         int center = width / 2, middle = (TOP_BAND + height - BOTTOM_BAND) / 2;
         backdrop.draw(graphics, theme, width, height, center, middle, mouseX, mouseY);
@@ -60,13 +61,13 @@ public final class WerewolfResetConfirmScreen extends MoonInput.Page {
     }
 
     @Override
-    public void extractBackground(MoonGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // The canvas is drawn with the dialog itself.
     }
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     private static WerewolfData getData() {

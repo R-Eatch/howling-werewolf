@@ -1,6 +1,6 @@
 # 随从指南
 
-适用于 Minecraft 1.21.1 / Fabric Loader 0.16.14 / Fabric API 0.116.4+1.21.1 / Java 21，Howling Werewolf 1.3.8。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
+适用于 Minecraft 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3 / Java 25，Howling Werewolf 1.4.3。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
 配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
@@ -30,7 +30,7 @@
 
 ## 交易与招募
 
-每位商人从九种交易中抽六种，每种次数有限。完整列表见[交易表](COMPANION-TABLES-zh.md#商人交易)。
+每位商人从十三种交易中抽八种，每种次数有限，且不会补货。完整列表见[交易表](COMPANION-TABLES-zh.md#商人交易)。
 
 手持狼人徽章右键商人，确认后消耗一枚徽章完成招募。确认框有效十秒，确认时服务端会重新检查距离、存活、技能、人数和徽章，全部满足才扣除徽章。招募后他成为你的长期同伴，默认名字是当前毛色的名字。
 
@@ -76,7 +76,7 @@
 
 把随从带到仓库中央，打开“整理”页，点 **开始整理**。
 
-工作范围是一个球形，以开始时随从所在的位置为中心，半径 16 格，随从走动时范围保持不变。正上方和正下方最远 16 格，斜角方向更短。范围内的 **箱子和木桶** 自动加入，最多照看最近的 64 个，双联箱算一个。
+工作范围是一个球形，以开始时随从所在的位置为中心，半径 16 格，随从走动时范围保持不变。正上方和正下方最远 16 格，斜角方向更短。范围内的 **箱子、铜箱和木桶** 自动加入，最多照看最近的 64 个，双联箱算一个。
 
 随从的工作方式和你一样：走到容器前开盖（有真实动画和音效）、拿起物品、合盖，走到目标容器开盖放下。一轮做完后它会告诉你，并留在现场，之后放进来的东西也会继续收拾。下达其他指令即可结束。
 
@@ -106,7 +106,7 @@
 
 ### 物品安全
 
-随从手上拿的只是展示。物品在放下的一刻才转移，在同一个服务器刻内检查并完成，任何一半不成立都会整步还原，所以中途停止、随从倒下或服务器重启时，物品都还在原来的容器里。
+随从手上拿的只是展示。物品在放下的一刻才转移，用一次 NeoForge 事务完成，所以中途停止、随从倒下或服务器重启时，物品都还在原来的容器里。
 
 ### 暂时跳过的容器
 
@@ -119,7 +119,7 @@
 
 走不到跟前的容器只要在整理距离以内，随从会站在原地伸手整理，不再跳过。
 
-保护检查包括原版出生点保护、访问规则，以及 Fabric API 的方块交互回调。领地插件是否经过这个事件要看插件本身，建议实际试一下。
+保护检查包括原版出生点保护、访问规则，以及 NeoForge 的右键交互事件。领地插件是否经过这个事件要看插件本身，建议实际试一下。
 
 ### 暂停与多人
 
@@ -167,7 +167,7 @@ npcModelSet = "modern"
 - `enableCompanions = false`：停用仪式、交易、招募、背包和所有随从操作，实体收起，档案和物品保留，狩猎与休整计时暂停。窗口仍可查看并显示提示。“狼群誓约”暂停加点，已学等级保留。其他狼人玩法照常。
 - `enableCompanionSorting = false`：只关闭整理。
 - `companionSortingReach`：随从走不到跟前时，仍能伸手整理的最远距离，3–64 格，默认 32。设为 3 时，走不到的容器一律跳过。
-- 数据包可覆盖狩猎表 `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`。商人的九项交易写在[代码](../src/main/java/com/howlingwerewolf/entity/WerewolfCompanionEntity.java)里。
+- 数据包可覆盖 `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`、`data/howlingwerewolf/trade_set/werewolf_brother.json` 和 `data/howlingwerewolf/villager_trade/werewolf_brother/*.json`。
 
 ## 战斗细节
 

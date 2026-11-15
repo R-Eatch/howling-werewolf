@@ -1,21 +1,32 @@
 package com.howlingwerewolf.entity;
 
+import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.content.ModBlocks;
 import com.howlingwerewolf.content.ModItems;
+import com.howlingwerewolf.entity.WerewolfTrades.MerchantRole;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Unit;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.item.trading.TradeSet;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 final class WerewolfTrades {
+    private static final ResourceKey<TradeSet> POOL = ResourceKey.create(Registries.TRADE_SET,
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "werewolf_brother"));
+
     enum MerchantRole {
         WARDEN(2, 2, 1, 4, 3, 2, 1),
         CHIEF(2, 2, 2, 5, 4, 2, 1),
@@ -37,42 +48,39 @@ final class WerewolfTrades {
 
     private enum Category { RESOURCE, BUY_PELT, SELL_PELT, PEARL, POTION }
 
-    private record Trade(Category category, Supplier<? extends ItemLike> input, int inputCount,
-                         Supplier<? extends ItemLike> extra, int extraCount, Supplier<? extends ItemLike> output,
-                         int outputCount, MerchantRole specialty) {
-        MerchantOffer offer(MerchantRole role) {
-            int uses = switch (category) {
+    private record Trade(MerchantOffer offer, Category category, MerchantRole specialty) {
+        MerchantOffer forRole(MerchantRole role) {
+            if (role == MerchantRole.BROTHER) return offer.copy();
+            int maxUses = switch (category) {
                 case RESOURCE -> role.resourceUses;
                 case BUY_PELT, SELL_PELT -> role.peltUses;
                 case PEARL -> role.pearlUses;
                 case POTION -> role.potionUses;
             };
-            Optional<ItemCost> second = extra == null ? Optional.empty() : Optional.of(new ItemCost(extra.get(), extraCount));
-            return new MerchantOffer(new ItemCost(input.get(), inputCount), second, new ItemStack(output.get(), outputCount), uses, 0, 0.0F);
+            return new MerchantOffer(offer.getItemCostA(), offer.getItemCostB(), offer.getResult().copy(),
+                    maxUses, offer.getXp(), offer.getPriceMultiplier());
         }
     }
 
-    private static final List<Trade> TRADES = List.of(
-            trade(Category.RESOURCE, () -> Items.EMERALD, 6, ModItems.SILVER_INGOT, 4, MerchantRole.WARDEN),
-            trade(Category.RESOURCE, () -> Items.IRON_INGOT, 16, ModItems.SILVER_INGOT, 2, MerchantRole.WARDEN),
-            trade(Category.RESOURCE, ModBlocks.WOLFSBANE, 4, ModItems.SILVER_INGOT, 2, MerchantRole.WARDEN),
-            trade(Category.RESOURCE, ModItems.SILVER_INGOT, 4, ModBlocks.WOLFSBANE, 2, MerchantRole.CHIEF),
-            trade(Category.RESOURCE, () -> Items.EMERALD, 4, ModBlocks.WOLFSBANE, 4, MerchantRole.CHIEF),
-            trade(Category.BUY_PELT, ModBlocks.WOLFSBANE, 4, ModItems.WEREWOLF_PELT, 1, null),
-            trade(Category.BUY_PELT, ModItems.SILVER_INGOT, 4, ModItems.WEREWOLF_PELT, 1, null),
-            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModBlocks.WOLFSBANE, 2, null),
-            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModItems.SILVER_INGOT, 2, null),
-            new Trade(Category.PEARL, () -> Items.EMERALD, 12, ModBlocks.WOLFSBANE, 4, ModItems.MOONBANE_PEARL, 1, null),
-            new Trade(Category.PEARL, ModBlocks.WOLFSBANE, 6, () -> Items.DIAMOND, 1, ModItems.MOONBANE_PEARL, 1, MerchantRole.CHIEF),
-            new Trade(Category.POTION, ModBlocks.WOLFSBANE, 4, () -> Items.EMERALD, 2, ModItems.WEREWOLF_POTION, 1, MerchantRole.CHIEF),
-            new Trade(Category.POTION, ModItems.SILVER_INGOT, 4, () -> Items.EMERALD, 2, ModItems.WOLFSBANE_POTION, 1, MerchantRole.WARDEN));
+    static void draw(AbstractVillager merchant, ServerLevel level, MerchantOffers offers, MerchantRole role) {
+        var pool = level.registryAccess().lookupOrThrow(Registries.TRADE_SET).getOptional(POOL).orElse(null);
+        if (pool == null) return;
+        var context = new LootContext.Builder(new LootParams.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, merchant.position())
+                .withParameter(LootContextParams.THIS_ENTITY, merchant)
+                .withParameter(LootContextParams.ADDITIONAL_COST_COMPONENT_ALLOWED, Unit.INSTANCE)
+                .create(LootContextParamSets.VILLAGER_TRADE)).create(pool.randomSequence());
+        int limit = role == MerchantRole.BROTHER ? pool.calculateNumberOfTrades(context) : role.resources + role.pelts + role.specials;
+        if (limit <= 0) return;
 
-    static void draw(MerchantOffers offers, MerchantRole role, RandomSource random) {
         List<Trade> resources = new ArrayList<>();
         List<Trade> buys = new ArrayList<>();
         List<Trade> sells = new ArrayList<>();
         List<Trade> specials = new ArrayList<>();
-        for (Trade trade : TRADES) {
+        for (var entry : pool.trades()) {
+            var offer = entry.value().getOffer(context);
+            if (offer == null) continue;
+            Trade trade = classify(offer);
             switch (trade.category()) {
                 case RESOURCE -> resources.add(trade);
                 case BUY_PELT -> buys.add(trade);
@@ -82,28 +90,64 @@ final class WerewolfTrades {
                 }
             }
         }
-        for (int i = 0; i < role.resources; i++) offers.add(take(resources, role, random, i == 0));
-        offers.add(take(buys, role, random, false));
-        offers.add(take(sells, role, random, false));
-        if (role.pelts == 3) offers.add(take(random.nextBoolean() ? buys : sells, role, random, false));
-        for (int i = 0; i < role.specials; i++) offers.add(take(specials, role, random, i == 0));
+
+        RandomSource random = context.getRandom();
+        List<Trade> all = new ArrayList<>();
+        if (pool.allowDuplicates() && role == MerchantRole.BROTHER) {
+            all.addAll(resources);
+            all.addAll(buys);
+            all.addAll(sells);
+            all.addAll(specials);
+        }
+        // Reserve both directions even when an external trade set reduces the requested count.
+        add(offers, buys, role, random, false, limit);
+        add(offers, sells, role, random, false, limit);
+        for (int i = 0; i < role.resources; i++) add(offers, resources, role, random, i == 0, limit);
+        if (role.pelts == 3) {
+            List<Trade> extra = (buys.isEmpty() || (!sells.isEmpty() && random.nextBoolean())) ? sells : buys;
+            add(offers, extra, role, random, false, limit);
+        }
+        for (int i = 0; i < role.specials; i++) add(offers, specials, role, random, i == 0, limit);
+        if (offers.size() >= limit) return;
+
+        List<Trade> remaining = new ArrayList<>(resources);
+        remaining.addAll(buys);
+        remaining.addAll(sells);
+        remaining.addAll(specials);
+        while (!remaining.isEmpty() && offers.size() < limit) add(offers, remaining, role, random, false, limit);
+        if (!all.isEmpty()) {
+            while (offers.size() < limit) offers.add(all.get(random.nextInt(all.size())).forRole(role));
+        }
     }
 
-    private static MerchantOffer take(List<Trade> pool, MerchantRole role, RandomSource random, boolean preferSpecialty) {
+    private static Trade classify(MerchantOffer offer) {
+        var output = offer.getResult();
+        var input = offer.getBaseCostA();
+        if (output.is(ModItems.WEREWOLF_PELT.get())) return new Trade(offer, Category.BUY_PELT, null);
+        if (input.is(ModItems.WEREWOLF_PELT.get())) return new Trade(offer, Category.SELL_PELT, null);
+        if (output.is(ModItems.MOONBANE_PEARL.get())) {
+            return new Trade(offer, Category.PEARL, input.is(ModBlocks.WOLFSBANE.get().asItem()) ? MerchantRole.CHIEF : null);
+        }
+        if (output.is(ModItems.WEREWOLF_POTION.get())) return new Trade(offer, Category.POTION, MerchantRole.CHIEF);
+        if (output.is(ModItems.WOLFSBANE_POTION.get())) return new Trade(offer, Category.POTION, MerchantRole.WARDEN);
+        if (output.is(ModItems.SILVER_INGOT.get())) return new Trade(offer, Category.RESOURCE, MerchantRole.WARDEN);
+        if (output.is(ModBlocks.WOLFSBANE.get().asItem())) return new Trade(offer, Category.RESOURCE, MerchantRole.CHIEF);
+        return new Trade(offer, Category.RESOURCE, null);
+    }
+
+    private static void add(MerchantOffers offers, List<Trade> pool, MerchantRole role, RandomSource random,
+                            boolean preferSpecialty, int limit) {
+        if (offers.size() >= limit || pool.isEmpty()) return;
         if (preferSpecialty) {
             List<Trade> preferred = pool.stream().filter(trade -> trade.specialty() == role).toList();
             if (!preferred.isEmpty()) {
                 Trade chosen = preferred.get(random.nextInt(preferred.size()));
                 pool.remove(chosen);
-                return chosen.offer(role);
+                offers.add(chosen.forRole(role));
+                return;
             }
         }
-        return pool.remove(random.nextInt(pool.size())).offer(role);
-    }
-
-    private static Trade trade(Category category, Supplier<? extends ItemLike> input, int inputCount,
-                               Supplier<? extends ItemLike> output, int outputCount, MerchantRole specialty) {
-        return new Trade(category, input, inputCount, null, 0, output, outputCount, specialty);
+        offers.add(pool.remove(random.nextInt(pool.size())).forRole(role));
     }
 
     private WerewolfTrades() {}

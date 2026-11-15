@@ -6,7 +6,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -29,7 +29,7 @@ import java.util.Optional;
 
 public final class VillageWatchtower extends Structure {
     public static final ResourceKey<Structure> KEY = ResourceKey.create(Registries.STRUCTURE,
-            ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter_watchtower"));
+            Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "hunter_watchtower"));
     public static final MapCodec<VillageWatchtower> CODEC = simpleCodec(VillageWatchtower::new);
 
     private static final int[] DISTANCES = {30, 38, 46};
@@ -43,13 +43,13 @@ public final class VillageWatchtower extends Structure {
 
     @Override
     protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
-        var villageSet = context.registryAccess().registryOrThrow(Registries.STRUCTURE_SET).get(BuiltinStructureSets.VILLAGES);
+        var villageSet = context.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET).get(BuiltinStructureSets.VILLAGES).map(holder -> holder.value()).orElse(null);
         if (villageSet == null || !(villageSet.placement() instanceof RandomSpreadStructurePlacement placement)
-                || !placement.getPotentialStructureChunk(context.seed(), context.chunkPos().x, context.chunkPos().z).equals(context.chunkPos())) {
+                || !placement.getPotentialStructureChunk(context.seed(), context.chunkPos().x(), context.chunkPos().z()).equals(context.chunkPos())) {
             return Optional.empty();
         }
 
-        RandomSource towerRandom = RandomSource.create(context.seed() ^ context.chunkPos().toLong() ^ 0x57385332L);
+        RandomSource towerRandom = RandomSource.create(context.seed() ^ context.chunkPos().pack() ^ 0x57385332L);
         if (towerRandom.nextInt(4) == 0) return Optional.empty();
         return findVillage(context, villageSet).flatMap(village -> findTower(context, village, towerRandom));
     }
@@ -57,7 +57,7 @@ public final class VillageWatchtower extends Structure {
     /** Follow the village structure set's weighted draw, including its fallback on invalid biomes. */
     private static Optional<Village> findVillage(GenerationContext context, StructureSet villageSet) {
         WorldgenRandom random = new WorldgenRandom(new LegacyRandomSource(0));
-        random.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+        random.setLargeFeatureSeed(context.seed(), context.chunkPos().x(), context.chunkPos().z());
         var entries = new ArrayList<>(villageSet.structures());
         int totalWeight = entries.stream().mapToInt(StructureSet.StructureSelectionEntry::weight).sum();
 
@@ -69,11 +69,11 @@ public final class VillageWatchtower extends Structure {
             totalWeight -= entry.weight();
             var structure = entry.structure().value();
             var villageContext = new GenerationContext(context.registryAccess(), context.chunkGenerator(), context.biomeSource(),
-                    context.randomState(), context.structureTemplateManager(), context.seed(), context.chunkPos(),
+                    context.climateSampler(), context.randomState(), context.structureTemplateManager(), context.seed(), context.chunkPos(),
                     context.heightAccessor(), structure.biomes()::contains);
             var start = structure.findValidGenerationPoint(villageContext);
             if (start.isPresent()) {
-                var id = entry.structure().unwrapKey().orElseThrow().location();
+                var id = entry.structure().unwrapKey().orElseThrow().identifier();
                 if (!id.getNamespace().equals("minecraft")) return Optional.empty();
                 return Optional.of(new Village(start.get(), id.getPath()));
             }
@@ -108,8 +108,8 @@ public final class VillageWatchtower extends Structure {
                     var element = elements.get(j);
                     BlockPos moduleOrigin = origin.offset(MODULES.get(j).offset().rotate(rotation));
                     BoundingBox box = element.getBoundingBox(templates, moduleOrigin, rotation);
-                    BoundingBox footprint = new BoundingBox(box.minX() - 1, context.heightAccessor().getMinBuildHeight(), box.minZ() - 1,
-                            box.maxX() + 1, context.heightAccessor().getMaxBuildHeight(), box.maxZ() + 1);
+                    BoundingBox footprint = new BoundingBox(box.minX() - 1, context.heightAccessor().getMinY(), box.minZ() - 1,
+                            box.maxX() + 1, context.heightAccessor().getMaxY(), box.maxZ() + 1);
                     if (pieces.findCollisionPiece(footprint) != null || (j != 0 && !fitsAnnex(context, box, y))) break;
                     modules.add(new PoolElementStructurePiece(templates, element, moduleOrigin, 4, rotation, box, LiquidSettings.IGNORE_WATERLOGGING));
                 }

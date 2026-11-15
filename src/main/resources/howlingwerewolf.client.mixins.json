@@ -1,8 +1,11 @@
 {
   "required": true,
   "package": "com.howlingwerewolf.mixin.client",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "AvatarSubmitMixin",
+    "PounceClickMixin",
+    "PounceMovementMixin",
     "PlayerRendererMixin",
     "ItemInHandRendererMixin"
   ],

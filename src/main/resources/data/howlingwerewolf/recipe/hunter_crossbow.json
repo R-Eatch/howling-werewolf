@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " S ",
+    "SCS",
+    " S "
+  ],
+  "key": {
+    "S": "howlingwerewolf:silver_ingot",
+    "C": "minecraft:crossbow"
+  },
+  "result": {
+    "id": "howlingwerewolf:hunter_crossbow",
+    "count": 1
+  }
+}

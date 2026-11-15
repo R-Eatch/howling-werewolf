@@ -1,6 +1,6 @@
 # 随从狩猎与交易表
 
-适用 Minecraft 1.21.1 / Fabric。狩猎表来自模组内置的 JSON，数据包覆盖后以服务器加载的内容为准；商人交易写在代码中。[随从指南](COMPANIONS-zh.md) · [English](COMPANION-TABLES.md)
+适用 Minecraft 26.3 / Fabric。表格来自模组内置的 JSON；数据包覆盖后，以服务器加载的内容为准。[随从指南](COMPANIONS-zh.md) · [English](COMPANION-TABLES.md)
 
 ## 狩猎权重与数量
 
@@ -70,29 +70,28 @@
 
 ## 商人交易
 
-交易池共 **9 种**；每位商人均匀抽出 **6 种不同交易**，因此每项被选入该商人列表的概率为 6/9 = 2/3。交易没有狩猎式的权重，不受随从阶数、技能或狩猎时长影响。次数耗尽后不补货；下表的次数是每位商人每项交易的上限。
+默认交易池有 **13 种**报价。三种商人都会抽到至少一项买入和一项卖出狼人毛皮的报价。下表的次数是每项报价的库存。
 
-| 玩家交付 | 玩家获得 | 次数上限 | 配方文件 |
-|---|---|---:|---|
-| 6 绿宝石 | 4 银锭 | 8 | `silver_for_emeralds.json` |
-| 16 铁锭 | 2 银锭 | 8 | `silver_for_iron.json` |
-| 12 绿宝石 ＋ 4 狼毒花 | 1 月厄珍珠 | 4 | `pearl_for_emeralds.json` |
-| 6 狼毒花 ＋ 1 钻石 | 1 月厄珍珠 | 4 | `pearl_for_wolfsbane.json` |
-| 4 银锭 | 2 狼毒花 | 8 | `wolfsbane_for_silver.json` |
-| 4 狼毒花 ＋ 2 绿宝石 | 1 狼人药水 | 2 | `werewolf_potion.json` |
-| 4 银锭 ＋ 2 绿宝石 | 1 狼毒花药水 | 2 | `wolfsbane_potion.json` |
-| 4 绿宝石 | 4 狼毒花 | 8 | `wolfsbane.json` |
-| 4 狼毒花 | 2 银锭 | 8 | `silver_for_wolfsbane.json` |
+| 商人 | 报价数 | 补给 | 毛皮 | 珍珠 | 药水 |
+|---|---:|---:|---:|---:|---:|
+| 召唤来的狼人兄弟 | 8 | 12 | 8 | 4 | 3 |
+| 银誓守月人 | 5 | 4 | 3 | 2 | 1 |
+| 部落酋长 | 6 | 5 | 4 | 2 | 1 |
 
-月厄珍珠有两条交易：**6 狼毒花＋1 钻石**或 **12 绿宝石＋4 狼毒花**，每项最多四次。
+守月人偏向银锭补给和狼毒花药水，酋长偏向狼毒花补给和狼人类特殊物品。两者在工作时段靠近工作点时补货，每游戏日最多两次。召唤来的狼人兄弟在 20 TPS 下停留十分钟，区块卸载时会离开，交易不会暂停计时。
 
-商人自然存在 **12000 游戏刻**，正常 20 TPS 时为 **10 分钟**，交易不暂停寿命，区块卸载仍会消失。召唤时先问候，再告知只停留十分钟。
-
-银锭与狼毒花的两条互换交易都是 4 换 2，不能循环套利。
-
-## 数据包入口与代码
-
-- 狩猎表：`data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`。
-- 商人交易与抽选：[WerewolfCompanionEntity.java](../src/main/java/com/howlingwerewolf/entity/WerewolfCompanionEntity.java)。
-- 阶数、时长与冷却规则：[CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java)。
-- 结算、背包合并和溢出：[CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java)。
+| 玩家交付 | 玩家获得 | 类别 |
+|---|---|---|
+| 6 绿宝石 | 4 银锭 | 补给 |
+| 16 铁锭 | 2 银锭 | 补给 |
+| 4 狼毒花 | 2 银锭 | 补给 |
+| 4 银锭 | 2 狼毒花 | 补给 |
+| 4 绿宝石 | 4 狼毒花 | 补给 |
+| 4 狼毒花 | 1 狼人毛皮 | 买入毛皮 |
+| 4 银锭 | 1 狼人毛皮 | 买入毛皮 |
+| 1 狼人毛皮 | 2 狼毒花 | 卖出毛皮 |
+| 1 狼人毛皮 | 2 银锭 | 卖出毛皮 |
+| 12 绿宝石＋4 狼毒花 | 1 月厄珍珠 | 珍珠 |
+| 6 狼毒花＋1 钻石 | 1 月厄珍珠 | 珍珠 |
+| 4 狼毒花＋2 绿宝石 | 1 狼人药水 | 药水 |
+| 4 银锭＋2 绿宝石 | 1 狼毒花药水 | 药水 |

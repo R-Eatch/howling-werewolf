@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
@@ -19,7 +19,7 @@ public final class ModEntityEvents {
 
     public static void register() {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER.get(), HunterEntity.createAttributes());
-        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), com.howlingwerewolf.entity.SettlementLeaderEntity.wardenAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), com.howlingwerewolf.entity.TribeWerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_CHIEF.get(), com.howlingwerewolf.entity.SettlementLeaderEntity.chiefAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes());
@@ -35,8 +35,8 @@ public final class ModEntityEvents {
 
     /** Wild werewolves enter forests only beneath a full Overworld moon. / 野生狼人只在主世界满月的森林中出现。 */
     private static boolean werewolfSpawnRules(EntityType<WerewolfEntity> type, ServerLevelAccessor level,
-                                              MobSpawnType reason, BlockPos pos, RandomSource random) {
-        if (reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION) return true;
+                                              EntitySpawnReason reason, BlockPos pos, RandomSource random) {
+        if (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION) return true;
         if (!(level instanceof ServerLevel serverLevel) || !isFeralWerewolfSpawnWindow(serverLevel)) return false;
         // Keep darkness limits, without vanilla's additional random light rejection.
         int light = serverLevel.isThundering()
@@ -44,22 +44,24 @@ public final class ModEntityEvents {
         return net.minecraft.world.entity.monster.Monster.checkAnyLightMonsterSpawnRules(
                 type, level, reason, pos, random)
                 && level.getBrightness(LightLayer.BLOCK, pos) <= level.dimensionType().monsterSpawnBlockLightLimit()
-                && light <= level.dimensionType().monsterSpawnLightTest().getMaxValue();
+                && light <= level.dimensionType().monsterSpawnLightTest().maxInclusive();
     }
 
     public static boolean isFeralWerewolfSpawnWindow(ServerLevel level) {
-        long time = Math.floorMod(level.getDayTime(), 24000L);
+        long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
         return level.dimension() == net.minecraft.world.level.Level.OVERWORLD
-                && time >= 13000L && time < 23000L && level.getMoonPhase() == 0;
+                && time >= 13000L && time < 23000L && level.environmentAttributes().getDimensionValue(net.minecraft.world.attribute.EnvironmentAttributes.MOON_PHASE)
+                == net.minecraft.world.level.MoonPhase.FULL_MOON;
     }
 
     private static boolean hunterSpawnRules(EntityType<HunterEntity> type, ServerLevelAccessor level,
-                                            MobSpawnType reason, BlockPos pos, RandomSource random) {
+                                            EntitySpawnReason reason, BlockPos pos, RandomSource random) {
         if (level.getDifficulty() == Difficulty.PEACEFUL
                 || !MonsterSpawnChecks.hasGroundAndSpace(type, level, pos)) return false;
         // Natural rarity is controlled by the biome modifier's low spawn weight. Applying another
         // random gate here made already-selected wild hunter spawns almost always fail.
-        return true;
+        return reason != EntitySpawnReason.NATURAL || !(level instanceof ServerLevel server)
+                || !com.howlingwerewolf.world.SettlementPositions.blocksHunterSpawn(server, pos);
     }
 
     /** Small local replacement for hostile-mob darkness checks: hunters may patrol in daylight. */
