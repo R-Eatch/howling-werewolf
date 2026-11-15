@@ -308,6 +308,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
         if (villageKey != null) output.putLong("VillageKey", villageKey);
         if (routine != null) output.store("Routine", CompoundTag.CODEC, routine.save());
         output.putLong("HealReadyAt", healReadyAt);
+        output.putLong("HealShoutReadyAt", dialogue.nextHealShout);
         output.store("TradeStock", CompoundTag.CODEC, saveTradeStock());
         NpcAppearanceData.save(this, APPEARANCE, output);
     }
@@ -321,6 +322,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
                     SettlementPositions.Routine.load(input.read("Routine", CompoundTag.CODEC).orElseGet(CompoundTag::new), pos));
         });
         healReadyAt = input.getLongOr("HealReadyAt", 0);
+        dialogue.nextHealShout = input.getLongOr("HealShoutReadyAt", 0);
         input.read("TradeStock", CompoundTag.CODEC).ifPresent(this::restoreTradeStock);
         NpcAppearanceData.load(this, APPEARANCE, input, false);
     }

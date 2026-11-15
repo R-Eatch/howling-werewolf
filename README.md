@@ -6,12 +6,14 @@ This is the source of Howling Werewolf for **Minecraft 26.1.2**, branch `26.1.2-
 
 | | |
 |---|---|
-| Mod version | **1.4.3** |
+| Mod version | **1.4.4** |
 | Minecraft Java Edition | 26.1.2 |
 | NeoForge | 26.1.2.122 or a later 26.1.2.x release |
 | Java | 25 |
 
-Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.4.3-neoforge-26.1.2.jar`. Install the same version on the server and on every client.
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.4.4-neoforge-26.1.2.jar`. Install the same version on the server and on every client.
+
+v1.4.4 sets the leaders’ healing callout interval to 60 seconds and adds companion dialogue for entering the Nether, the End, villages, and werewolf tribes. Each visit can trigger one randomly chosen line.
 
 The gameplay guide, the other editions and downloads are on the [main branch](https://github.com/R-Eatch/howling-werewolf).
 
