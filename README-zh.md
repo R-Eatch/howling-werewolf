@@ -6,13 +6,15 @@
 
 | | |
 |---|---|
-| Mod 版本 | **1.4.3** |
+| Mod 版本 | **1.4.4** |
 | Minecraft Java 版 | 1.21.1 |
 | Fabric Loader | 0.16.14 或更新版本 |
 | Fabric API | 0.116.4+1.21.1 或更新版本 |
 | Java | 21 |
 
-用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.4.3-fabric-1.21.1.jar`。服务端和每个客户端需安装同一版本。
+用 `./gradlew build` 构建，JAR 位于 `build/libs/howlingwerewolf-1.4.4-fabric-1.21.1.jar`。服务端和每个客户端需安装同一版本。
+
+v1.4.4 将首领治疗喊话间隔调为 60 秒，并新增下界、末地、村庄和狼人部落的随从入场对白。每次进入时随机播报一句，同一段停留只播报一次。
 
 玩法介绍、其他版本与下载见 [main 分支](https://github.com/R-Eatch/howling-werewolf)。
 

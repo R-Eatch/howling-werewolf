@@ -412,32 +412,37 @@ public final class CompanionManager {
     public static void tick(MinecraftServer server) {
         CompanionSavedData data = CompanionSavedData.get(server);
         data.removeUntracked();
-        data.synchronizeAvailability(HWConfig.ENABLE_COMPANIONS.get(), server.overworld().getGameTime());
+        long now = server.overworld().getGameTime();
+        data.synchronizeAvailability(HWConfig.ENABLE_COMPANIONS.get(), now);
         if (!HWConfig.ENABLE_COMPANIONS.get()) {
             CompanionSorting.tick(server);
             for (WerewolfCompanionEntity entity : data.activeEntities()) entity.park();
             return;
         }
         CompanionSorting.tick(server);
-        if (server.getTickCount() % 20 != 0) return;
+        boolean maintain = server.getTickCount() % 20 == 0;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (!player.isAlive() || player.isSpectator()) continue;
-            for (CompanionRecord record : data.ownedBy(player.getUUID())) {
-                if (!enabled(player, record) && record.mode.hasEntity() && record.mode != CompanionMode.REST) {
-                    record.mode = CompanionMode.REST;
-                    data.setDirty();
-                }
-                if (record.mode == CompanionMode.HUNT && server.overworld().getGameTime() >= record.huntEnd) {
-                    finishHunt(player, record, false);
-                } else if (record.mode == CompanionMode.FOLLOW || record.mode == CompanionMode.GUARD) {
-                    WerewolfCompanionEntity entity = data.loaded(record.id);
-                    if (entity == null || entity.level() != player.level() || entity.distanceToSqr(player) > 32 * 32) {
-                        spawnNear(player, record, record.health);
+            var roster = data.ownedBy(player.getUUID());
+            if (maintain) {
+                for (CompanionRecord record : roster) {
+                    if (!enabled(player, record) && record.mode.hasEntity() && record.mode != CompanionMode.REST) {
+                        record.mode = CompanionMode.REST;
+                        data.setDirty();
                     }
-                } else if ((record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT) && data.loaded(record.id) == null) {
-                    restoreResting(server, record);
+                    if (record.mode == CompanionMode.HUNT && now >= record.huntEnd) {
+                        finishHunt(player, record, false);
+                    } else if (record.mode == CompanionMode.FOLLOW || record.mode == CompanionMode.GUARD) {
+                        WerewolfCompanionEntity entity = data.loaded(record.id);
+                        if (entity == null || entity.level() != player.level() || entity.distanceToSqr(player) > 32 * 32) {
+                            spawnNear(player, record, record.health);
+                        }
+                    } else if ((record.mode == CompanionMode.REST || record.mode == CompanionMode.SORT) && data.loaded(record.id) == null) {
+                        restoreResting(server, record);
+                    }
                 }
             }
+            data.tickDialogue(player, player.serverLevel(), roster, now, maintain);
         }
     }
 
