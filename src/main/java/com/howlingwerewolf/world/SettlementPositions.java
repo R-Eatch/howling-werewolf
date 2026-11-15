@@ -93,6 +93,13 @@ public final class SettlementPositions {
         return result;
     }
 
+    public static BlockPos trainingYard(ServerLevel level, BlockPos marker) {
+        SettlementData.Site site = SettlementData.get(level).siteAt(marker);
+        if (site == null) return null;
+        if (site.schedule == null) site.schedule = schedule(level, marker, false);
+        return point(site.schedule, "warden_training", 0, null);
+    }
+
     public record Routine(BlockPos home, BlockPos bedside, BlockPos work, BlockPos plaza, BlockPos ritual, BlockPos tower) {
         static Routine from(Map<String, List<BlockPos>> points, BlockPos site, boolean tribe, int slot) {
             if (!tribe) return new Routine(point(points, "warden_home", 0, site.above()), null,

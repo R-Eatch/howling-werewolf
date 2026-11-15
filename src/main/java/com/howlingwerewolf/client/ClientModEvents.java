@@ -56,6 +56,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(PunchyCompat::register);
+        event.enqueueWork(HunterCrossbowRender::registerProperties);
     }
 
     @SubscribeEvent

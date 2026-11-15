@@ -49,7 +49,7 @@ public final class TribeWerewolfEntity extends PathfinderMob implements Werewolf
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return createMobAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.ARMOR, 2)
+        return createMobAttributes().add(Attributes.MAX_HEALTH, WerewolfEntity.FERAL_MAX_HEALTH).add(Attributes.ARMOR, 2)
                 .add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.ATTACK_DAMAGE, WerewolfEntity.feralAttackDamage(net.minecraft.world.Difficulty.NORMAL))
                 .add(Attributes.FOLLOW_RANGE, 30);
     }
@@ -146,6 +146,12 @@ public final class TribeWerewolfEntity extends PathfinderMob implements Werewolf
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        var health = getAttribute(Attributes.MAX_HEALTH);
+        if (health.getBaseValue() == 30.0) {
+            boolean wasFull = getHealth() >= getMaxHealth();
+            health.setBaseValue(WerewolfEntity.FERAL_MAX_HEALTH);
+            if (wasFull) setHealth(getMaxHealth());
+        }
         if (tag.contains("Settlement")) {
             BlockPos position = BlockPos.of(tag.getLong("Settlement"));
             settlementSpawn(position, ModernSkin.ASHEN, SettlementPositions.Routine.load(tag.getCompound("Routine"), position));

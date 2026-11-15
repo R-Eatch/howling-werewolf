@@ -7,6 +7,10 @@
     "EnchantmentHelperMixin",
     "LocateWatchtowerMixin"
   ],
+  "client": [
+    "client.PounceClickMixin",
+    "client.PounceMovementMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

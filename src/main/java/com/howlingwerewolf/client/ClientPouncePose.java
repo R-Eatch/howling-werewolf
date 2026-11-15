@@ -23,12 +23,23 @@ public final class ClientPouncePose {
         // Vanilla's entity motion packet clips each component to 3.9 blocks per tick.
         if (packet.motion() == PounceAbility.Motion.FLIGHT && player == minecraft.player) {
             player.setDeltaMovement(packet.velocity());
+            player.setOnGround(false);
+        } else if (packet.motion() == PounceAbility.Motion.LAND && player == minecraft.player) {
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
         }
         if (packet.motion() == PounceAbility.Motion.CLEAR) MOTION.remove(player);
         else MOTION.put(player, new Phase(packet.motion(), level.getGameTime()));
     }
 
     static boolean active(LivingEntity entity) { return MOTION.containsKey(entity); }
+
+    public static boolean flyingLocally() {
+        var player = Minecraft.getInstance().player;
+        if (player == null) return false;
+        var phase = MOTION.get(player);
+        return phase != null && phase.motion() == PounceAbility.Motion.FLIGHT
+                && player.level().getGameTime() - phase.startedAt() <= PounceAbility.MAX_FLIGHT_TICKS;
+    }
 
     static void apply(LivingEntity entity, float age, WerewolfForm form, ModelPart center, ModelPart head,
                       ModelPart right, ModelPart left, ModelPart rightLeg, ModelPart leftLeg) {

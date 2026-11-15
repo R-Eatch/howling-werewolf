@@ -1,22 +1,14 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
-import com.howlingwerewolf.capability.WerewolfApi;
-import com.howlingwerewolf.entity.AlphaWerewolfEntity;
-import com.howlingwerewolf.entity.AlphaMinionEntity;
-import com.howlingwerewolf.entity.SettlementLeaderEntity;
-import com.howlingwerewolf.entity.TribeWerewolfEntity;
-import com.howlingwerewolf.entity.WerewolfCompanionEntity;
-import com.howlingwerewolf.entity.WerewolfEntity;
+import com.howlingwerewolf.entity.SettlementCombat;
 import net.minecraft.core.Holder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
@@ -49,7 +41,7 @@ public final class PeltArmor {
             @Override
             public ItemAttributeModifiers getDefaultAttributeModifiers() {
                 return super.getDefaultAttributeModifiers().withModifierAdded(Attributes.MOVEMENT_SPEED,
-                        new AttributeModifier(SET.withSuffix("_speed_" + type.getName()), 0.025, AttributeModifier.Operation.ADD_VALUE),
+                        new AttributeModifier(SET.withSuffix("_speed_" + type.getName()), 0.0125, AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.bySlot(type.getSlot()));
             }
 
@@ -65,7 +57,7 @@ public final class PeltArmor {
         if (damage <= 0 || source.is(DamageTypes.GENERIC_KILL)) return damage;
         int pieces = countPieces(bearer);
         if (pieces == 4) damage *= source.is(DamageTypes.FELL_OUT_OF_WORLD) ? 0.95F : 0.90F;
-        if (pieces > 0 && (source.is(DamageTypeTags.IS_FREEZING) || fromWerewolf(source.getEntity())))
+        if (pieces > 0 && (source.is(DamageTypeTags.IS_FREEZING) || SettlementCombat.isWerewolf(source.getEntity())))
             damage *= 1 - pieces * SPECIAL_REDUCTION_PER_PIECE;
         return damage;
     }
@@ -77,12 +69,6 @@ public final class PeltArmor {
                 + (bearer.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.SILVERHIDE_CHESTPLATE.get()) ? 1 : 0)
                 + (bearer.getItemBySlot(EquipmentSlot.LEGS).is(ModItems.SILVERHIDE_LEGGINGS.get()) ? 1 : 0)
                 + (bearer.getItemBySlot(EquipmentSlot.FEET).is(ModItems.SILVERHIDE_BOOTS.get()) ? 1 : 0);
-    }
-
-    private static boolean fromWerewolf(Entity source) {
-        return source instanceof WerewolfEntity || source instanceof AlphaWerewolfEntity || source instanceof AlphaMinionEntity || source instanceof TribeWerewolfEntity
-                || source instanceof WerewolfCompanionEntity || source instanceof SettlementLeaderEntity leader && !leader.isWarden()
-                || source instanceof ServerPlayer player && WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false);
     }
 
     private PeltArmor() {}

@@ -5,23 +5,22 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "howlingwerewolf:werewolf_pelt",
+          "type": "minecraft:loot_table",
+          "value": "howlingwerewolf:entities/tribe_werewolf",
           "functions": [
             {
-              "function": "minecraft:set_count",
-              "count": 2
-            },
-            {
-              "function": "minecraft:enchanted_count_increase",
-              "enchantment": "minecraft:looting",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 2
-              }
+              "function": "howlingwerewolf:double_count"
             }
           ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "howlingwerewolf:moonbane_pearl"
         }
       ]
     }
