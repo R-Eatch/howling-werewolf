@@ -63,7 +63,7 @@ public final class ModNetwork {
     }
 
     public static void showPounce(ServerPlayer player, PounceAbility.Motion motion) {
-        var packet = new PounceMotionPacket(player.getId(), motion);
+        var packet = new PounceMotionPacket(player.getId(), motion, player.getDeltaMovement());
         sendToPlayer(player, packet);
         for (ServerPlayer observer : PlayerLookup.tracking(player)) sendToPlayer(observer, packet);
     }

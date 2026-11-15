@@ -52,4 +52,6 @@ class WerewolfNpcRenderer<T extends LivingEntity & WerewolfNpcAppearance> extend
     @Override public ResourceLocation getTextureLocation(T entity) {
         return WerewolfSkinCatalog.texture(entity.getNpcSkinId(), entity.getNpcModelSet(), form);
     }
+
+    ModernPlayerModel<T> modernModel() { return model == modern ? modern : null; }
 }

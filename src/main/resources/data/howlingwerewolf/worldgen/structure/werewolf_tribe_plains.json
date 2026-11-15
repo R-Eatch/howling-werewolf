@@ -1,0 +1,8 @@
+{
+  "type": "howlingwerewolf:werewolf_tribe",
+  "biomes": "#howlingwerewolf:has_structure/werewolf_tribe/plains",
+  "step": "top_layer_modification",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "howlingwerewolf:tribe/plains/start"
+}

@@ -43,7 +43,6 @@ public final class CompanionRitual {
             outer.add(other);
         }
         if (!altar.getOffering().is(ModItems.MOONBANE_PEARL.get())) return;
-        altar.consumeOffering();
         outer.forEach(RitualAltarBlockEntity::consumeOffering);
         altar.startCompanionRitual(player.getUUID());
         level.playSound(null, center, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.2F, 0.7F);
@@ -114,7 +113,6 @@ public final class CompanionRitual {
         if (!altar.isCompanionRitualActive() || !(altar.getLevel() instanceof ServerLevel level)) return;
         altar.resetCompanionRitual();
         BlockPos pos = altar.getBlockPos();
-        Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, new ItemStack(ModItems.MOONBANE_PEARL.get()));
         Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, new ItemStack(ModBlocks.WOLFSBANE.get().asItem(), 4));
     }
     private CompanionRitual() {}

@@ -64,8 +64,7 @@ public final class ClientModEvents {
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), context ->
                 new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F));
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_CHIEF.get(), context ->
-                new WerewolfNpcRenderer<>(context, com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.TRIBE_CHIEF.get(), TribeChiefRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(ModEntities.SQUAD_HEALING_POTION.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(

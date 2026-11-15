@@ -31,6 +31,8 @@ public final class DamageHooks {
         original.run();
         float loss=Math.max(0,before-entity.getHealth());
         if (loss>0) {
+            if (entity instanceof net.minecraft.server.level.ServerPlayer player)
+                com.howlingwerewolf.entity.SettlementCombat.defendPlayer(player, source.getEntity());
             var stack=ORIGINAL.get();
             var context=new GameplayContext.Damage(entity,source,loss,stack.isEmpty() ? amount : stack.peek());
             WerewolfGameplayEvents.lifesteal(context);

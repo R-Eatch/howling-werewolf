@@ -3,7 +3,6 @@ package com.howlingwerewolf.event;
 import com.howlingwerewolf.HWConfig;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.ability.PounceAbility;
-import com.howlingwerewolf.content.PeltArmor;
 import com.howlingwerewolf.WerewolfAbility;
 import com.howlingwerewolf.WerewolfCombatRules;
 import com.howlingwerewolf.WerewolfForm;
@@ -146,7 +145,6 @@ public final class WerewolfGameplayEvents {
             processMoonbloodCrash(player, data);
             refreshWerewolfModifiers(player, data);
             processFormRules(player, data);
-            PeltArmor.refreshSpeed(player);
             PounceAbility.tick(player, data);
             processTotemExperience(player, data);
             processSpiritWolves(player, data);

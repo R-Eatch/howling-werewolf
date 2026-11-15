@@ -4,6 +4,7 @@ import com.howlingwerewolf.ModernSkin;
 import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfModelSet;
 import com.howlingwerewolf.world.SettlementData;
+import com.howlingwerewolf.world.SettlementPositions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -17,44 +18,50 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
+import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Comparator;
-import java.util.EnumSet;
 
 public final class TribeWerewolfEntity extends PathfinderMob implements WerewolfNpcAppearance {
     private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
             SynchedEntityData.defineId(TribeWerewolfEntity.class, EntityDataSerializers.BOOLEAN),
             SynchedEntityData.defineId(TribeWerewolfEntity.class, EntityDataSerializers.INT));
     @Nullable private BlockPos site;
+    @Nullable private SettlementPositions.Routine routine;
 
     public TribeWerewolfEntity(EntityType<? extends TribeWerewolfEntity> type, Level level) {
         super(type, level);
         xpReward = 5;
         setPersistenceRequired();
         NpcAppearanceData.initialize(this, APPEARANCE, false);
+        ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
+        setPathfindingMalus(PathType.TRAPDOOR, -1.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return createMobAttributes().add(Attributes.MAX_HEALTH, 24).add(Attributes.ARMOR, 2)
-                .add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.ATTACK_DAMAGE, 4).add(Attributes.FOLLOW_RANGE, 24);
+        return createMobAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.ARMOR, 2)
+                .add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.ATTACK_DAMAGE, WerewolfEntity.feralAttackDamage(net.minecraft.world.Difficulty.NORMAL))
+                .add(Attributes.FOLLOW_RANGE, 30);
     }
 
-    public void settlementSpawn(BlockPos site, ModernSkin coat) {
+    public void settlementSpawn(BlockPos site, ModernSkin coat, SettlementPositions.Routine routine) {
         this.site = site.immutable();
-        restrictTo(site, 32);
+        this.routine = routine;
+        restrictTo(site, 48);
         NpcAppearanceData.setCoat(entityData, APPEARANCE, coat);
     }
 
+    public boolean hasSettlement() { return site != null; }
     public boolean belongsTo(BlockPos site) { return site.equals(this.site); }
 
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -69,16 +76,28 @@ public final class TribeWerewolfEntity extends PathfinderMob implements Werewolf
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(1, new OpenDoorGoal(this, true));
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.12, true));
-        goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 0.9));
-        goalSelector.addGoal(5, new StayNearChiefGoal());
-        goalSelector.addGoal(6, new RandomStrollGoal(this, 0.8));
+        goalSelector.addGoal(3, new SettlementRoutineGoal(this, () -> routine));
+        goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.9));
+        goalSelector.addGoal(6, new RandomStrollGoal(this, 0.8) {
+            @Override public boolean canUse() { return !isSleeping() && level().isDay() && super.canUse(); }
+        });
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 9));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, SettlementCombat::isHunter));
     }
 
-    public void protectChief(LivingEntity attacker) { setLastHurtByMob(attacker); setTarget(attacker); }
+    public void protectChief(LivingEntity attacker) {
+        setLastHurtByMob(attacker);
+        setTarget(attacker);
+    }
+
+    @Override public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (target != null && isSleeping()) stopSleeping();
+    }
 
     @Override
     public boolean isAlliedTo(Entity entity) {
@@ -101,7 +120,11 @@ public final class TribeWerewolfEntity extends PathfinderMob implements Werewolf
 
     @Override protected void customServerAiStep() {
         super.customServerAiStep();
-        if (tickCount % 20 == 0) NpcAppearanceData.refresh(this, APPEARANCE);
+        SettlementRoutineGoal.wakeForActivity(this);
+        if (tickCount % 20 == 0) {
+            NpcAppearanceData.refresh(this, APPEARANCE);
+            getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(WerewolfEntity.feralAttackDamage(level().getDifficulty()));
+        }
     }
 
     @Override public boolean canUsePortal(boolean ignorePassenger) { return false; }
@@ -117,29 +140,16 @@ public final class TribeWerewolfEntity extends PathfinderMob implements Werewolf
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         if (site != null) tag.putLong("Settlement", site.asLong());
+        if (routine != null) tag.put("Routine", routine.save());
         NpcAppearanceData.save(this, APPEARANCE, tag);
     }
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("Settlement")) settlementSpawn(BlockPos.of(tag.getLong("Settlement")), ModernSkin.ASHEN);
-        NpcAppearanceData.load(this, APPEARANCE, tag, false);
-    }
-
-    private final class StayNearChiefGoal extends Goal {
-        private SettlementLeaderEntity chief;
-
-        StayNearChiefGoal() { setFlags(EnumSet.of(Flag.MOVE)); }
-
-        @Override public boolean canUse() {
-            if (site == null || getTarget() != null || (tickCount + getId()) % 20 != 0) return false;
-            chief = level().getEntitiesOfClass(SettlementLeaderEntity.class, getBoundingBox().inflate(28),
-                            leader -> leader.isAlive() && leader.supports(TribeWerewolfEntity.this)).stream()
-                    .min(Comparator.comparingDouble(TribeWerewolfEntity.this::distanceToSqr)).orElse(null);
-            return chief != null && distanceToSqr(chief) > 10 * 10;
+        if (tag.contains("Settlement")) {
+            BlockPos position = BlockPos.of(tag.getLong("Settlement"));
+            settlementSpawn(position, ModernSkin.ASHEN, SettlementPositions.Routine.load(tag.getCompound("Routine"), position));
         }
-
-        @Override public void start() { getNavigation().moveTo(chief, 0.88); }
-        @Override public boolean canContinueToUse() { return chief.isAlive() && distanceToSqr(chief) > 6 * 6 && !getNavigation().isDone(); }
+        NpcAppearanceData.load(this, APPEARANCE, tag, false);
     }
 }

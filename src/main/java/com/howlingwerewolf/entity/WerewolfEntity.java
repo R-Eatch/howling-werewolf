@@ -110,7 +110,11 @@ public final class WerewolfEntity extends Monster implements WerewolfNpcAppearan
 
     private void applyDifficultyDamage(Difficulty difficulty) {
         AttributeInstance attack = getAttribute(Attributes.ATTACK_DAMAGE);
-        if (attack != null) attack.setBaseValue(difficulty == Difficulty.HARD ? 9.0D : 6.0D);
+        if (attack != null) attack.setBaseValue(feralAttackDamage(difficulty));
+    }
+
+    static double feralAttackDamage(Difficulty difficulty) {
+        return difficulty == Difficulty.HARD ? 9 : 6;
     }
 
     /** Configure an Alpha ally without changing the wild variant's behavior. / 配置月冠援军，不改变野生变体行为。 */

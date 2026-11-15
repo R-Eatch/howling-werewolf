@@ -2,7 +2,9 @@ package com.howlingwerewolf.event;
 
 import com.howlingwerewolf.content.ModEntities;
 import com.howlingwerewolf.entity.HunterEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
+import com.howlingwerewolf.world.SettlementPositions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -19,7 +21,7 @@ public final class ModEntityEvents {
 
     public static void register() {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER.get(), HunterEntity.createAttributes());
-        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), HunterEntity.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.HUNTER_CAPTAIN.get(), SettlementLeaderEntity.wardenAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_WEREWOLF.get(), com.howlingwerewolf.entity.TribeWerewolfEntity.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.TRIBE_CHIEF.get(), com.howlingwerewolf.entity.SettlementLeaderEntity.chiefAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes());
@@ -57,9 +59,8 @@ public final class ModEntityEvents {
                                             MobSpawnType reason, BlockPos pos, RandomSource random) {
         if (level.getDifficulty() == Difficulty.PEACEFUL
                 || !MonsterSpawnChecks.hasGroundAndSpace(type, level, pos)) return false;
-        // Natural rarity is controlled by the biome modifier's low spawn weight. Applying another
-        // random gate here made already-selected wild hunter spawns almost always fail.
-        return true;
+        return reason != MobSpawnType.NATURAL || !(level instanceof ServerLevel server)
+                || !SettlementPositions.blocksHunterSpawn(server, pos);
     }
 
     /** Small local replacement for hostile-mob darkness checks: hunters may patrol in daylight. */

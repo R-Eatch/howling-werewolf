@@ -37,6 +37,12 @@ public final class ModItems {
             props -> new SpawnEggItem(ModEntities.HUNTER.get(), 0xFFFFFF, 0xFFFFFF, props));
     public static final Supplier<Item> ALPHA_WEREWOLF_SPAWN_EGG = ITEMS.registerItem("alpha_werewolf_spawn_egg",
             props -> new SpawnEggItem(ModEntities.ALPHA_WEREWOLF.get(), 0xFFFFFF, 0xFFFFFF, props));
+    public static final Supplier<Item> HUNTER_CAPTAIN_SPAWN_EGG = ITEMS.registerItem("hunter_captain_spawn_egg",
+            props -> new SpawnEggItem(ModEntities.HUNTER_CAPTAIN.get(), 0xFFFFFF, 0xFFFFFF, props));
+    public static final Supplier<Item> TRIBE_CHIEF_SPAWN_EGG = ITEMS.registerItem("tribe_chief_spawn_egg",
+            props -> new SpawnEggItem(ModEntities.TRIBE_CHIEF.get(), 0xFFFFFF, 0xFFFFFF, props));
+    public static final Supplier<Item> TRIBE_WEREWOLF_SPAWN_EGG = ITEMS.registerItem("tribe_werewolf_spawn_egg",
+            props -> new SpawnEggItem(ModEntities.TRIBE_WEREWOLF.get(), 0xFFFFFF, 0xFFFFFF, props));
 
     public static final java.util.List<Supplier<Item>> ITEMS_LIST = java.util.List.of(
             SILVER_INGOT, MOONBANE_PEARL, SILVER_SWORD, WOLFSBANE_POTION, WEREWOLF_POTION,

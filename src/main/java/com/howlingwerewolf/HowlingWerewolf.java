@@ -69,6 +69,9 @@ public final class HowlingWerewolf implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> {
             entries.accept(ModItems.WEREWOLF_SPAWN_EGG.get()); entries.accept(ModItems.HUNTER_SPAWN_EGG.get());
             entries.accept(ModItems.ALPHA_WEREWOLF_SPAWN_EGG.get());
+            entries.accept(ModItems.HUNTER_CAPTAIN_SPAWN_EGG.get());
+            entries.accept(ModItems.TRIBE_CHIEF_SPAWN_EGG.get());
+            entries.accept(ModItems.TRIBE_WEREWOLF_SPAWN_EGG.get());
         });
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
             entries.accept(ModBlocks.SILVER_ORE.get()); entries.accept(ModBlocks.DEEPSLATE_SILVER_ORE.get());

@@ -1,6 +1,7 @@
 package com.howlingwerewolf.mixin;
 import com.howlingwerewolf.content.ModEntities;
 import com.howlingwerewolf.event.ModEntityEvents;
+import com.howlingwerewolf.world.SettlementPositions;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +20,13 @@ abstract class NaturalSpawnerMixin {
     @ModifyReturnValue(method="mobsAt",at=@At("RETURN"))
     private static WeightedRandomList<MobSpawnSettings.SpawnerData> howling$fullMoon(WeightedRandomList<MobSpawnSettings.SpawnerData> result,
             ServerLevel level,StructureManager structures,ChunkGenerator generator,MobCategory category,BlockPos pos,Holder<Biome> biome) {
-        if (category!=MobCategory.MONSTER || ModEntityEvents.isFeralWerewolfSpawnWindow(level)) return result;
-        return WeightedRandomList.create(result.unwrap().stream().filter(entry -> entry.type != ModEntities.WEREWOLF.get()).toList());
+        if (category != MobCategory.MONSTER) return result;
+        boolean feralAllowed = ModEntityEvents.isFeralWerewolfSpawnWindow(level);
+        boolean huntersAllowed = result.unwrap().stream().noneMatch(entry -> entry.type == ModEntities.HUNTER.get())
+                || !SettlementPositions.blocksHunterSpawn(level, pos);
+        if (feralAllowed && huntersAllowed) return result;
+        return WeightedRandomList.create(result.unwrap().stream()
+                .filter(entry -> (feralAllowed || entry.type != ModEntities.WEREWOLF.get())
+                        && (huntersAllowed || entry.type != ModEntities.HUNTER.get())).toList());
     }
 }

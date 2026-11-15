@@ -20,6 +20,11 @@ abstract class LivingEntityMixin {
     private void howling$healthDamage(DamageSource source,float amount,Operation<Void> original) {
         DamageHooks.healthDamage((LivingEntity)(Object)this,source,amount,() -> original.call(source,amount));
     }
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "actuallyHurt", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterMagicAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float howling$silverhide(float damage, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) DamageSource source) {
+        return com.howlingwerewolf.content.PeltArmor.reduce((LivingEntity) (Object) this, source, damage);
+    }
     @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method="actuallyHurt",at=@At(value="INVOKE",target="Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V"))
     private void howling$beforeHealth(LivingEntity entity,float value,Operation<Void> original,
             @com.llamalad7.mixinextras.sugar.Local(argsOnly=true) DamageSource source) {

@@ -12,8 +12,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,12 +25,14 @@ public final class SettlementData extends SavedData {
     public static final int DAY = 24000;
     private static final Factory<SettlementData> FACTORY = new Factory<>(SettlementData::new, SettlementData::load, null);
     private final Map<BlockPos, Site> sites = new HashMap<>();
+    final Map<Long, List<BoundingBox>> tribeBounds = SettlementPositions.boundsCache();
 
     static final class Site {
         final ModernSkin coat;
         final UUID[] members = new UUID[1 + TRIBE_MEMBERS];
         final long[] replacementAt = new long[members.length];
         CompoundTag tradeStock = new CompoundTag();
+        Map<String, List<BlockPos>> schedule;
 
         Site(ModernSkin coat) { this.coat = coat; }
     }

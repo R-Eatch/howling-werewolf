@@ -26,7 +26,7 @@ public final class SquadHealingPotion extends ThrowableItemProjectile {
             for (Mob ally : server.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(3, 1.5, 3),
                     mob -> mob.isAlive() && leader.supports(mob) && distanceToSqr(mob) < 9)) {
                 boolean direct = hit instanceof EntityHitResult entityHit && entityHit.getEntity() == ally;
-                float healing = direct ? 6 : (float) (4 * (1 - Math.sqrt(distanceToSqr(ally)) / 3));
+                float healing = direct ? 8 : Math.round(8 * (1 - Math.sqrt(distanceToSqr(ally)) / 3));
                 if (healing > 0) {
                     ally.heal(healing);
                     server.sendParticles(ParticleTypes.HEART, ally.getX(), ally.getEyeY() + 0.25, ally.getZ(), 1, 0.18, 0.1, 0.18, 0);
