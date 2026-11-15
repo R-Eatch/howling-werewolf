@@ -6,6 +6,7 @@ import com.howlingwerewolf.entity.HunterEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.entity.SettlementLeaderEntity;
 import com.howlingwerewolf.entity.TribeWerewolfEntity;
+import com.howlingwerewolf.world.SettlementPositions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -36,7 +37,7 @@ public final class ModEntityEvents {
                     com.howlingwerewolf.entity.AlphaMinionEntity.createAttributes().build());
             event.put(ModEntities.WEREWOLF.get(), WerewolfEntity.createAttributes().build());
             event.put(ModEntities.WEREWOLF_COMPANION.get(), com.howlingwerewolf.entity.WerewolfCompanionEntity.createAttributes().build());
-            event.put(ModEntities.HUNTER_CAPTAIN.get(), HunterEntity.createAttributes().build());
+            event.put(ModEntities.HUNTER_CAPTAIN.get(), SettlementLeaderEntity.wardenAttributes().build());
             event.put(ModEntities.TRIBE_WEREWOLF.get(), TribeWerewolfEntity.createAttributes().build());
             event.put(ModEntities.TRIBE_CHIEF.get(), SettlementLeaderEntity.chiefAttributes().build());
         }
@@ -54,10 +55,14 @@ public final class ModEntityEvents {
     /** Keep an ineligible werewolf entry from consuming a weighted natural-spawn selection. */
     public static void filterPotentialSpawns(LevelEvent.PotentialSpawns event) {
         if (event.getMobCategory() != MobCategory.MONSTER) return;
-        if (event.getLevel() instanceof ServerLevel serverLevel && isFeralWerewolfSpawnWindow(serverLevel)) return;
+        if (!(event.getLevel() instanceof ServerLevel server)) return;
+        boolean feralAllowed = isFeralWerewolfSpawnWindow(server);
+        boolean huntersAllowed = event.getSpawnerDataList().stream().noneMatch(entry -> entry.type == ModEntities.HUNTER.get())
+                || !SettlementPositions.blocksHunterSpawn(server, event.getPos());
         for (int i = event.getSpawnerDataList().size() - 1; i >= 0; i--) {
             var spawn = event.getSpawnerDataList().get(i);
-            if (spawn.type == ModEntities.WEREWOLF.get()) event.removeSpawnerData(spawn);
+            if (!feralAllowed && spawn.type == ModEntities.WEREWOLF.get()
+                    || !huntersAllowed && spawn.type == ModEntities.HUNTER.get()) event.removeSpawnerData(spawn);
         }
     }
 
@@ -85,9 +90,8 @@ public final class ModEntityEvents {
                                             MobSpawnType reason, BlockPos pos, RandomSource random) {
         if (level.getDifficulty() == Difficulty.PEACEFUL
                 || !MonsterSpawnChecks.hasGroundAndSpace(type, level, pos)) return false;
-        // Natural rarity is controlled by the biome modifier's low spawn weight. Applying another
-        // random gate here made already-selected wild hunter spawns almost always fail.
-        return true;
+        return reason != MobSpawnType.NATURAL || !(level instanceof ServerLevel server)
+                || !SettlementPositions.blocksHunterSpawn(server, pos);
     }
 
     /** Small local replacement for hostile-mob darkness checks: hunters may patrol in daylight. */

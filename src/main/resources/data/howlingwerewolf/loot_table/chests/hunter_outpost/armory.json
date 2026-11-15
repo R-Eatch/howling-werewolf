@@ -79,8 +79,8 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
+                "min": 2,
+                "max": 5
               }
             }
           ]
@@ -88,14 +88,14 @@
         {
           "type": "minecraft:item",
           "name": "howlingwerewolf:silver_ingot",
-          "weight": 3,
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
+                "min": 2,
+                "max": 5
               }
             }
           ]
@@ -108,7 +108,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:arrow",
-          "weight": 6,
+          "weight": 16,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -123,7 +123,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:iron_ingot",
-          "weight": 4,
+          "weight": 8,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -138,7 +138,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:leather",
-          "weight": 3,
+          "weight": 7,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -149,6 +149,11 @@
               }
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "howlingwerewolf:moonbane_pearl",
+          "weight": 1
         }
       ]
     }

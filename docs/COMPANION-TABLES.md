@@ -70,27 +70,35 @@ Each companion keeps its own cooldown of **48000 game ticks**, 40 minutes at 20 
 
 ## Merchant trades
 
-The pool holds **9 trades**, and each merchant evenly draws **6 different ones**, so any one trade appears on 6/9 = 2/3 of merchants. Companion tier, skills and hunts have no effect on them. Uses do not restock; the limit below is per trade, per merchant.
+The default pool holds **13 trades**. All three traders draw at least one offer to buy and one offer to sell Werewolf Pelts. The stock limits below apply to each offer.
 
-| You give | You get | Use limit | Recipe file |
-|---|---|---:|---|
-| 6 Emeralds | 4 Silver Ingots | 8 | `silver_for_emeralds.json` |
-| 16 Iron Ingots | 2 Silver Ingots | 8 | `silver_for_iron.json` |
-| 12 Emeralds + 4 Wolfsbane | 1 Moonbane Pearl | 4 | `pearl_for_emeralds.json` |
-| 6 Wolfsbane + 1 Diamond | 1 Moonbane Pearl | 4 | `pearl_for_wolfsbane.json` |
-| 4 Silver Ingots | 2 Wolfsbane | 8 | `wolfsbane_for_silver.json` |
-| 4 Wolfsbane + 2 Emeralds | 1 Werewolf Potion | 2 | `werewolf_potion.json` |
-| 4 Silver Ingots + 2 Emeralds | 1 Wolfsbane Potion | 2 | `wolfsbane_potion.json` |
-| 4 Emeralds | 4 Wolfsbane | 8 | `wolfsbane.json` |
-| 4 Wolfsbane | 2 Silver Ingots | 8 | `silver_for_wolfsbane.json` |
+| Trader | Offers | Supplies | Pelts | Pearls | Potions |
+|---|---:|---:|---:|---:|---:|
+| Summoned Werewolf Brother | 8 | 12 | 8 | 4 | 3 |
+| Silver-Oath Moonwarden | 5 | 4 | 3 | 2 | 1 |
+| Tribe chief | 6 | 5 | 4 | 2 | 1 |
 
-The two Silver and Wolfsbane exchanges are both 4 for 2, so they cannot be cycled for profit.
+The Moonwarden favors silver supplies and the Wolfsbane Potion. The chief favors Wolfsbane supplies and werewolf specials. They can restock when near their work spot during working hours, up to twice per game day. The summoned Werewolf Brother stays ten minutes at 20 TPS and leaves when his chunk unloads. Trading does not pause his timer.
 
-A merchant stays **12000 game ticks**, ten minutes at 20 TPS. Trading does not pause this, and it also leaves if its chunk unloads. It greets you first and then says how long it can stay.
+| You give | You get | Category |
+|---|---|---|
+| 6 Emeralds | 4 Silver Ingots | Supplies |
+| 16 Iron Ingots | 2 Silver Ingots | Supplies |
+| 4 Wolfsbane | 2 Silver Ingots | Supplies |
+| 4 Silver Ingots | 2 Wolfsbane | Supplies |
+| 4 Emeralds | 4 Wolfsbane | Supplies |
+| 4 Wolfsbane | 1 Werewolf Pelt | Buy pelt |
+| 4 Silver Ingots | 1 Werewolf Pelt | Buy pelt |
+| 1 Werewolf Pelt | 2 Wolfsbane | Sell pelt |
+| 1 Werewolf Pelt | 2 Silver Ingots | Sell pelt |
+| 12 Emeralds + 4 Wolfsbane | 1 Moonbane Pearl | Pearl |
+| 6 Wolfsbane + 1 Diamond | 1 Moonbane Pearl | Pearl |
+| 4 Wolfsbane + 2 Emeralds | 1 Werewolf Potion | Potion |
+| 4 Silver Ingots + 2 Emeralds | 1 Wolfsbane Potion | Potion |
 
 ## Data pack paths and code
 
-- Hunt table: `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`.
-- Merchant trades and draw: [WerewolfCompanionEntity.java](../src/main/java/com/howlingwerewolf/entity/WerewolfCompanionEntity.java).
-- Tier, length and cooldown rules: [CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java).
-- Settlement, inventory merging and overflow: [CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java).
+- The hunt table is at `data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`.
+- Trade prices and offer selection are defined in [WerewolfTrades.java](../src/main/java/com/howlingwerewolf/entity/WerewolfTrades.java).
+- Tier, length and cooldown rules are defined in [CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java).
+- Hunt settlement, inventory merging and overflow are handled by [CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java).

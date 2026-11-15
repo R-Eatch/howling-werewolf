@@ -66,7 +66,7 @@ public final class ModNetwork {
     }
 
     public static void showPounce(ServerPlayer player, PounceAbility.Motion motion) {
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new PounceMotionPacket(player.getId(), motion));
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new PounceMotionPacket(player.getId(), motion, player.getDeltaMovement()));
     }
 
     private ModNetwork() {}

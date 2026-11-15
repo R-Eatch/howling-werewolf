@@ -3,7 +3,7 @@ package com.howlingwerewolf;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class HWConfig {
-    private static final int HUNTER_BASE_WEIGHT = 50;
+    private static final int HUNTER_BASE_WEIGHT = 25;
     private static final int FERAL_WEREWOLF_BASE_WEIGHT = 200;
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.DoubleValue WOLF_INFECTION_CHANCE;

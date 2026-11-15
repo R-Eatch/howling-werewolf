@@ -1,6 +1,6 @@
 # Companion guide
 
-For Minecraft 1.21.1, NeoForge 21.1.248 and Java 21, Howling Werewolf 1.3.8. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
+For Minecraft 1.21.1, NeoForge 21.1.248 and Java 21, Howling Werewolf 1.4.1. Client and server need the same version. [简体中文](COMPANIONS-zh.md)
 
 Related: [hunt and trade tables](COMPANION-TABLES.md) · [architecture provenance](COMPANION-PROVENANCE.md)
 
@@ -26,11 +26,11 @@ Right-click the center altar with an empty hand to begin. Before it starts, snea
 
 The Brother runs in from safe ground at least 16 blocks away. If the way is blocked he comes straight to the altar, and he also returns there after 15 seconds of being stuck. If the altars are broken, you leave the dimension or there is no room, the rite stops and returns its offerings.
 
-The rite works at any hour and moon phase. The merchant stays 12000 game ticks (ten minutes at 20 TPS). The timer keeps running while you trade, and he also leaves if his chunk unloads.
+The rite works at any hour and moon phase. A successful ritual spends the four Wolfsbane and leaves the Moonbane Pearl on the central altar for reuse. The merchant stays 12000 game ticks (ten minutes at 20 TPS). The timer keeps running while you trade, and he also leaves if his chunk unloads.
 
 ## Trading and recruiting
 
-Each merchant draws six of nine trades, each with limited uses. See the [trade table](COMPANION-TABLES.md#merchant-trades).
+Each merchant draws eight of thirteen trades, each with limited uses. Summoned Werewolf Brothers do not restock. See the [trade table](COMPANION-TABLES.md#merchant-trades).
 
 Hold an Alpha Werewolf Badge and right-click the merchant, then confirm to spend one badge and recruit him. The prompt lasts ten seconds. On confirming, the server checks distance, health, skill, party size and the badge again, and takes the badge once everything passes. He then stays with you for good, named after his coat by default.
 

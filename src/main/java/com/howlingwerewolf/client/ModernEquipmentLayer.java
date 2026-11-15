@@ -37,12 +37,12 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
             @Override public ResourceLocation getTextureLocation(AbstractClientPlayer player) { return parent.getTextureLocation(player); }
         };
         armor = new HumanoidArmorLayer<>(bridge,
-                new RigArmorModel(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR), parent.getModel(), true),
-                new RigArmorModel(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR), parent.getModel(), false),
+                new RigArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR), parent.getModel(), true),
+                new RigArmorModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR), parent.getModel(), false),
                 context.getModelManager()) {
             @Override protected void setPartVisibility(HumanoidModel<AbstractClientPlayer> model, EquipmentSlot slot) {
                 super.setPartVisibility(model, slot);
-                if (model instanceof RigArmorModel rig) rig.slot = slot;
+                if (model instanceof RigArmorModel<?> rig) rig.slot = slot;
             }
         };
     }
@@ -92,14 +92,14 @@ final class ModernEquipmentLayer extends RenderLayer<AbstractClientPlayer, Moder
     }
 
 
-    private static final class RigArmorModel extends HumanoidModel<AbstractClientPlayer> {
-        private final ModernPlayerModel<AbstractClientPlayer> rig;
+    static final class RigArmorModel<T extends net.minecraft.world.entity.LivingEntity> extends HumanoidModel<T> {
+        private final ModernPlayerModel<T> rig;
         private final List<Piece> pieces = new ArrayList<>();
         /** Room left around the bone: the outer layer sits outside the inner one, as vanilla inflates it more. */
         private final float margin;
-        private EquipmentSlot slot;
+        EquipmentSlot slot;
 
-        RigArmorModel(ModelPart root, ModernPlayerModel<AbstractClientPlayer> rig, boolean inner) {
+        RigArmorModel(ModelPart root, ModernPlayerModel<T> rig, boolean inner) {
             super(root);
             this.rig = rig;
             this.margin = inner ? 0.45F : 0.9F;

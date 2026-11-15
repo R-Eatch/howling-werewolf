@@ -167,7 +167,6 @@ public final class WerewolfGameplayEvents {
             processMoonbloodCrash(player, data);
             refreshWerewolfModifiers(player, data);
             processFormRules(player, data);
-            PeltArmor.refreshSpeed(player);
             PounceAbility.tick(player, data);
             processTotemExperience(player, data);
             processSpiritWolves(player, data);
@@ -414,9 +413,13 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void reduceSilverhideDamage(LivingDamageEvent.Pre event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            event.setNewDamage(PeltArmor.reduce(player, event.getSource(), event.getNewDamage()));
-        }
+        event.setNewDamage(PeltArmor.reduce(event.getEntity(), event.getSource(), event.getNewDamage()));
+    }
+
+    @SubscribeEvent
+    public static void defendAttackedWerewolf(LivingDamageEvent.Post event) {
+        if (event.getNewDamage() > 0 && event.getEntity() instanceof ServerPlayer player)
+            com.howlingwerewolf.entity.SettlementCombat.defendPlayer(player, event.getSource().getEntity());
     }
 
     @SubscribeEvent

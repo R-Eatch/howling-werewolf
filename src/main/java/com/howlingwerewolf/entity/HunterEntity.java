@@ -104,6 +104,8 @@ public final class HunterEntity extends PathfinderMob {
         return entity instanceof WerewolfEntity
                 || entity instanceof AlphaWerewolfEntity
                 || entity instanceof AlphaMinionEntity
+                || entity instanceof TribeWerewolfEntity
+                || entity instanceof SettlementLeaderEntity leader && !leader.isWarden()
                 || isWerewolfPlayer(entity);
     }
 
