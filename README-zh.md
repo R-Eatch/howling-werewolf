@@ -5,11 +5,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.4.0-blue?style=flat-square" alt="最新源码： 1.4.0"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.4.7-blue?style=flat-square" alt="最新源码： 1.4.7"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="已发布的 GitHub Release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge 下载量"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth 下载量"></a>
-  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11 and 26.1.2">
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1_%7C_1.21.1_%7C_1.21.11_%7C_26.1.2_%7C_26.3-62B47A?style=flat-square" alt="Minecraft 1.20.1, 1.21.1, 1.21.11, 26.1.2 and 26.3">
   <img src="https://img.shields.io/badge/loaders-Forge_%7C_NeoForge_%7C_Fabric-E04E14?style=flat-square" alt="Forge, NeoForge and Fabric">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/code-MPL--2.0-blue?style=flat-square" alt="代码许可证： MPL-2.0"></a>
   <a href="LICENSE-ASSETS.md"><img src="https://img.shields.io/badge/assets-CC_BY--SA_4.0-lightgrey?style=flat-square" alt="美术资源许可证： CC BY-SA 4.0"></a>
@@ -17,7 +17,7 @@
 
 <p align="center"><a href="README.md">English</a></p>
 
-> `main` 当前使用 **Minecraft 26.1.2 / NeoForge** 源码。本介绍覆盖 1.4.0 的四个版本。
+> 本页面作为项目公开文档与 Wiki 使用，内容已更新至 **v1.4.7**。各 Minecraft 版本分支的对应发布包请前往发布页获取。
 
 > 一款面向 Minecraft Java 版的狼人变身与成长 Mod，围绕感染、月相变身、两套成长体系、三种狼人形态、猎人与银、狼毒花以及 Alpha 试炼展开。
 
@@ -40,6 +40,23 @@
 3. **学会控制变身。** 当前规则允许时，按 `J` 可以变身或恢复人形；月圆高悬，狼人的血脉让你无法控制自己的形态。
 4. **向旧日 Alpha 发起挑战。** 按进阶界面中的说明构筑月誓仪式，击败守夜人与月冠 Alpha，最终唤醒野兽形态。
 
+## v1.4.7 更新摘要（自 v1.3.8 以来）
+
+- **荒野据点与阵营**：
+  - **狼人部落**：在森林、白桦林、针叶林、平原与热带草原五种群系自然生成，使用当地材料构筑中央广场、酋长长屋、工坊、仓库、民居与现成的月誓祭坛区。由**狼人部落酋长**统领，支持白天补货交易、居民作息与小队治疗支援；部落周围 48 格内不会生成猎人。
+  - **猎人守望塔与银誓守月人**：部分村庄周边新增守望塔、军械库与训练场，由身穿银鞣皮甲的**银誓守月人**驻守，提供交易并以治疗药水支援巡逻队。
+  - 新增部落与守望塔的 `/locate structure` 定位支持，以及部落酋长、部落狼人与银誓守月人三枚刷怪蛋。
+- **新技能：野性飞跃（Feral Leap，默认 `Z` 键）**：消耗 3 技能点学习，按 `Z` 瞄准地面落点、左键飞跃、右键取消，三形态共享 15 秒冷却，落地获得 5 秒速度 I。双足、四足、野兽选点距离上限为 25 / 30 / 27 格；双足（半径 3 格）与野兽（半径 4 格）落地造成范围伤害（基础伤害 10，受利爪伤害倍率加成，野兽附带击退），四足落地施加缓慢。
+- **新武器与护甲**：
+  - **银鞣狼皮与银鞣皮甲四件套**：由狼人毛皮、银锭与狼毒花合成。护甲与耐久等同铁甲，更轻便、附魔潜能更高并附带移速加成；每件减免 10% 冰冻与狼人伤害，穿齐四件额外再获 10% 减伤。
+  - **银誓猎弩**：可合成并支持原版弩附魔，也装备于部分村庄巡猎队；箭矢对狼人额外造成 25% 伤害并施加 2 秒虚弱 I（同一目标每 5 秒最多触发一次）。
+- **Modern 模型与外观升级**：
+  - Modern 双足新增**完整模型 / 玩家模型（Player Overlay）**切换，玩家模型在原版皮肤与外层显示基础上附带狼耳、利爪与摆动尾巴；进阶与皮肤界面实时预览实际玩家皮肤。
+  - 修复 Sodium 下的 Modern 模型及裁切护甲贴图显示问题。
+- **对话、教程与体验优化**：
+  - 教程新增第 10 章「荒野据点与阵营」，全面润色中英文教程、指南、技能描述与角色台词；随从新增下界、末地、村庄与狼人部落入场对白及环境闲谈；守月人与酋长新增多条情境闲谈、满月与战斗台词。
+  - 召唤狼人兄弟仪式现在会保留中央祭坛的月厄珍珠供回收或复用；部落狼人与酋长攻击共享感染概率配置；满级野兽免疫 `generic_kill`。
+
 ## 狼人血脉带来了什么
 
 - 感染、延迟觉醒、主动变身，以及满月强制变身。
@@ -47,18 +64,18 @@
 - 兼具角色状态和游戏内指南作用的狼人进阶界面。
 - 技能树、主动与被动技能、形态解锁条件，以及月誓仪式指引。
 - 空手利爪战斗，以及随成长提升的伤害与自然减伤。
-- 吸血、长爪、火焰爪、工具爪、血腥撕咬和月血沸腾。
+- 吸血、长爪、火焰爪、工具爪、血腥撕咬、月血沸腾与野性飞跃。
 - 狼人商人与随从：召唤、交易、招募、跟随、守护、整理、狩猎、升阶与复活。
-- 野生失控狼人、中立猎人、村庄巡猎队、银制装备、狼毒花和两种对立药水。
+- 狼人部落、猎人守望塔、野生失控狼人、村庄巡猎队、银誓守月人、部落酋长、银剑、银誓猎弩、银鞣皮甲、狼毒花和两种对立药水。
 - 完整的单人 Alpha 试炼：祭坛结构、猎人阶段、多阶段首领战、重复奖励，以及永久野兽形态成长。
-- 内置狼人皮肤、游戏内预览，以及资源包自定义皮肤和绘画模板。
-- 狼人、猎人与月冠 Alpha 狼人的独立刷怪蛋图标。
+- 内置 Classic / Modern 狼人皮肤（含 Modern 玩家模型切换）、游戏内预览，以及资源包自定义皮肤和绘画模板。
+- 狼人、猎人、月冠 Alpha、部落居民、部落酋长与银誓守月人的独立刷怪蛋图标。
 - 完整英文与简体中文本地化。
 - 可配置感染率、经验倍率、最高等级等多项玩法参数。
 
 ## 狼人皮肤与自定义皮肤
 
-默认按 **K** 打开狼人菜单 → **皮肤**，在右上角切换 **Classic / Modern**，选择皮肤并点击**应用**保存。Classic 保留原棕色 **Adrian**、琥珀眼灰狼 **Ashen**、金眼黑狼 **Onyx** 与红眼白狼 **Ivory**；Modern 提供九套配色，每套均覆盖普通狼人、四足狼和野兽三种形态。
+默认按 **K** 打开狼人菜单 → **皮肤**，在右上角切换 **Classic / Modern**，选择皮肤并点击**应用**保存。Classic 保留原棕色 **Adrian**、琥珀眼灰狼 **Ashen**、金眼黑狼 **Onyx** 与红眼白狼 **Ivory**；Modern 提供九套配色，每套均覆盖普通狼人、四足狼和野兽三种形态，并且 Modern 双足支持在**完整模型**与**玩家模型**（在原版皮肤上叠加狼耳、利爪与摆动尾巴）之间自由切换。
 
 新玩家默认使用 **Modern / Ashen**；已有 Classic 选择和缺少模型字段的旧存档继续按 Classic 读取。预览支持鼠标跟随、拖动旋转、滚轮缩放和装备显示开关；预览不会解锁或切换实际形态。模型系列和皮肤逐玩家保存，死亡、换维度、重置等级以及治愈后再觉醒均保留，第三人称、背包预览与第一人称爪使用相应外观。
 
@@ -127,7 +144,8 @@
 - 长爪；
 - 工具爪；
 - 火焰爪；
-- 血腥撕咬。
+- 血腥撕咬；
+- 野性飞跃。
 
 长爪、工具爪和火焰爪学会后，可以在技能页随时关闭或重新开启，不消耗也不退还技能点。
 
@@ -158,21 +176,18 @@ Alpha 狼人徽章放在快捷栏任意位置时具有两种效果：
 | `N` | 召唤狼灵 |
 | `B` | 使用血腥撕咬 |
 | `R` | 释放月血沸腾 |
+| `Z` | 瞄准并释放野性飞跃 |
 | `C` | 打开随从窗口 |
 
-## 猎人、银、狼毒花、月厄珍珠与野外遭遇
+## 荒野据点、阵营与野外遭遇
 
-猎人对普通人类保持中立，对已经变身的狼人敌对。
+主世界散布着彼此敌对的**猎人前哨**与**狼人部落**。
 
-他们会以很低的权重单独出现在森林群系，也会在玩家到访的村庄周围组成 **4–6 人** 的持久巡猎队。村庄首次达到目标人数后，死亡缺员可以在一个 Minecraft 日冷却后逐名补充。
-
-银剑攻击会对狼人造成额外伤害并施加虚弱。普通猎人至少掉落一株狼毒花，并有概率额外掉落一株，且有低概率掉落银锭。
-
-狼毒花自然生成在森林群系，稳定的获取方式仍为击杀出现在村庄的猎人巡猎队。
-
-失控狼人只会在主世界符合条件的森林中，于黑暗的满月夜自然生成。严格的生成条件使其成为危险而少见的遭遇。
-
-月厄珍珠由末影珍珠和狼毒花合成，用于月誓，也可用于合成狼人徽章。
+- **猎人守望塔与巡猎队**：猎人对普通人类保持中立，对变身后的玩家和部落狼人敌对。部分村庄周边生成守望塔、军械库与训练场，并组成 **4–6 人** 的持久巡猎队（部落建筑周围 48 格内不会生成猎人）。巡逻猎人装备**银剑**或**银誓猎弩**（弩箭对狼人额外造成 25% 伤害并施加虚弱 I）；**银誓守月人**身穿**银鞣皮甲**，在战斗中以治疗 II 药水支援队员，并在白天工作点补货交易。
+- **狼人部落**：自然生成于森林、白桦林、针叶林、平原与热带草原，使用当地木材与石材修建酋长长屋、工坊、仓库、民居与现成的**月誓祭坛区**（带齐供品可直接开启 Alpha 试炼或召唤狼人兄弟）。居民白天在广场与工坊活动、夜间回屋歇息；**狼人部落酋长**白天提供交易，战斗时以治疗药水支援族人。
+- **银鞣皮甲与材料**：击败失控狼人、部落成员或交易可获得**狼人毛皮**，与银锭、狼毒花合成**银鞣狼皮**与四件套；护甲和耐久等同铁甲、附魔更容易且附带移速加成，每件减免 10% 冰冻与狼人伤害，穿齐四件再获额外 10% 减伤。
+- **银剑、狼毒花与失控狼人**：银剑对狼人额外造成 50% 伤害并施加虚弱 II。普通猎人必掉至少一株狼毒花，是最稳定的来源；失控狼人仅在主世界符合条件的森林、黑暗满月夜自然生成。月厄珍珠由末影珍珠与狼毒花合成，用于月誓仪式、随从升阶及合成 Alpha 狼人徽章。
+- **定位指令**：开启命令权限时，可使用 `/locate structure #howlingwerewolf:werewolf_tribes` 查找最近的狼人部落，或用 `/locate structure howlingwerewolf:hunter_watchtower` 查找猎人守望塔。
 
 ## 月誓与 Alpha 试炼
 
@@ -250,7 +265,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 | 召唤狼人兄弟 | 月厄珍珠 | 狼毒花 |
 | Alpha 试炼 | 狼人徽章 | 月厄珍珠 |
 
-召唤不限昼夜和月相。狼人兄弟会从远处跑来，停留10min。
+召唤不限昼夜和月相。消耗四株狼毒花，中央的月厄珍珠留在祭坛上可回收或重复使用；狼人兄弟会从远处跑来，停留 10 分钟。
 
 **交易**：普通右键打开交易。每位商人从十三种交易里抽八种，涉及银锭、狼毒花、狼人毛皮、月厄珍珠、狼人药水和狼毒花药水，次数有限、不会补货。
 
@@ -300,7 +315,7 @@ Alpha 试炼在狼人 **10 级**时开放，但解锁的野兽形态十分强大
 
 ## 源码与构建
 
-项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.1 Fabric** 与 **Minecraft 26.1.2 NeoForge**，最新 Mod 源码版本为 **1.4.0**。**Minecraft 1.21.11 Fabric** 在 **1.3.8** 暂停更新。
+项目目前维护 **Minecraft 1.20.1 Forge**、**Minecraft 1.21.1 NeoForge**、**Minecraft 1.21.1 Fabric**、**Minecraft 26.1.2 NeoForge** 与 **Minecraft 26.3 Fabric**，最新 Mod 版本为 **1.4.7**（当前以 NeoForge 1.21.1 为最新基线）。**Minecraft 1.21.11 Fabric** 在 **1.3.8** 暂停更新。
 
 [GitHub 项目与最新动态](https://github.com/R-Eatch/howling-werewolf) · [版本说明与已发布文件](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [反馈问题](https://github.com/R-Eatch/howling-werewolf/issues)
 
