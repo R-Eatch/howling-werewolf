@@ -34,6 +34,7 @@ final class PunchyCompat {
         return mainHand && player instanceof AbstractClientPlayer clientPlayer
                 && clientPlayer.getMainHandItem().isEmpty()
                 && !clientPlayer.isInvisible() && !clientPlayer.isScoping()
+                && !WerewolfSkinRenderContext.usesModernPlayerModel(clientPlayer)
                 && WerewolfApi.get(clientPlayer).map(WerewolfData::isTransformed).orElse(false);
     }
 

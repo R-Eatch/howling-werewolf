@@ -6,6 +6,7 @@ import com.howlingwerewolf.content.ModBlockEntities;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.api.distmarker.Dist;
@@ -84,6 +85,15 @@ public final class ClientModEvents {
         event.registerLayerDefinition(HUNTER_LAYER, HunterModel::createBodyLayer);
         event.registerLayerDefinition(QUADRUPED_WEREWOLF_LAYER,
                 QuadrupedWerewolfModel::createBodyLayer);
+    }
+
+    @SubscribeEvent
+    public static void addPlayerLayers(EntityRenderersEvent.AddLayers event) {
+        for (var skinModel : event.getSkins()) {
+            if (event.getSkin(skinModel) instanceof PlayerRenderer renderer) {
+                renderer.addLayer(new ModernPlayerOverlayLayer(renderer));
+            }
+        }
     }
 
     @SubscribeEvent

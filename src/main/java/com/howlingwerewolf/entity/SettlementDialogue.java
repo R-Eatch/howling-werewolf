@@ -93,7 +93,7 @@ final class SettlementDialogue {
         if (player == null) return;
         nextAmbient = now + 2400 + leader.getRandom().nextInt(1201);
         if (fullMoon) fullMoonDay = day;
-        say(player, fullMoon ? "ambient.full_moon" : "ambient.idle." + leader.getRandom().nextInt(4));
+        say(player, fullMoon ? "ambient.full_moon" : "ambient.idle." + leader.getRandom().nextInt(7));
     }
 
     private ServerPlayer nearestPlayer(double distance) {

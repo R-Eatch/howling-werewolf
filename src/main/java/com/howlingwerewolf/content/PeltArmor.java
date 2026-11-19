@@ -3,8 +3,6 @@ package com.howlingwerewolf.content;
 import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.entity.SettlementCombat;
 import net.minecraft.core.Holder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -19,8 +17,6 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -28,7 +24,7 @@ import java.util.List;
 
 public final class PeltArmor {
     private static final ResourceLocation SET = ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "silverhide");
-    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.125F;
+    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.10F;
 
     public static ArmorMaterial material() {
         return new ArmorMaterial(ArmorMaterials.IRON.value().defense(), ArmorMaterials.GOLD.value().enchantmentValue(),
@@ -43,12 +39,6 @@ public final class PeltArmor {
                 return super.getDefaultAttributeModifiers().withModifierAdded(Attributes.MOVEMENT_SPEED,
                         new AttributeModifier(SET.withSuffix("_speed_" + type.getName()), 0.0125, AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.bySlot(type.getSlot()));
-            }
-
-            @Override
-            public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-                super.appendHoverText(stack, context, tooltip, flag);
-                tooltip.add(Component.translatable("item.howlingwerewolf.silverhide.set_bonus").withStyle(ChatFormatting.GRAY));
             }
         };
     }

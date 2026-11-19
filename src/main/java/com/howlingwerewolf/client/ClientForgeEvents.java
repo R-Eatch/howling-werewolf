@@ -24,7 +24,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -120,7 +122,7 @@ public final class ClientForgeEvents {
     public static void renderWerewolfPlayer(RenderPlayerEvent.Pre event) {
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
         WerewolfForm form = WerewolfSkinRenderContext.getForm(player);
-        if (form == WerewolfForm.HUMAN) return;
+        if (form == WerewolfForm.HUMAN || WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
 
         event.setCanceled(true);
         // Another mod is drawing our body in first person: a werewolf body would fill the camera.
@@ -175,7 +177,16 @@ public final class ClientForgeEvents {
     }
 
     @SubscribeEvent
+    public static void hideModernPlayerPreviewName(RenderNameTagEvent event) {
+        if (event.getEntity() instanceof AbstractClientPlayer player && WerewolfSkinRenderContext.isPreview(player)
+                && WerewolfSkinRenderContext.usesModernPlayerModel(player)) {
+            event.setCanRender(TriState.FALSE);
+        }
+    }
+
+    @SubscribeEvent
     public static void renderWerewolfArm(RenderArmEvent event) {
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(event.getPlayer())) return;
         WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
             if (!data.isTransformed()) return;
             if (data.isQuadrupedMode()) event.setCanceled(true);
@@ -194,6 +205,7 @@ public final class ClientForgeEvents {
         AbstractClientPlayer player = Minecraft.getInstance().player;
         if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()
                 || player == null || player.isInvisible() || player.isScoping()) return;
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (!WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;
         event.setCanceled(true);
         net.minecraft.world.entity.HumanoidArm arm = player.getMainArm();
