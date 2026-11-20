@@ -117,7 +117,7 @@ public final class ClientEvents {
     public static boolean renderWerewolfPlayer(PlayerRenderer vanilla, AbstractClientPlayer player, float yaw,
                                                 float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         WerewolfForm form = WerewolfSkinRenderContext.getForm(player);
-        if (form == WerewolfForm.HUMAN) return false;
+        if (form == WerewolfForm.HUMAN || WerewolfSkinRenderContext.usesModernPlayerModel(player)) return false;
         // The transformed body would fill the camera during another mod's first-person pass.
         if (FirstPersonBodyCompat.active(null)) return true;
         if (rendererContext == null) initializeRenderers();
@@ -151,6 +151,7 @@ public final class ClientEvents {
     }
 
     public static void renderWerewolfArm(ArmRenderContext event) {
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(event.getPlayer())) return;
         WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
             if (!data.isTransformed()) return;
             if (data.isQuadrupedMode()) event.setCanceled(true);

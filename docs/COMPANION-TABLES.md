@@ -78,7 +78,7 @@ The default pool holds **13 trades**. All three traders draw at least one offer 
 | Silver-Oath Moonwarden | 5 | 4 | 3 | 2 | 1 |
 | Tribe chief | 6 | 5 | 4 | 2 | 1 |
 
-The Moonwarden favors silver supplies and the Wolfsbane Potion. The chief favors Wolfsbane supplies and werewolf specials. They can restock when near their work spot during working hours, up to twice per game day. The summoned Werewolf Brother stays ten minutes at 20 TPS and leaves when his chunk unloads. Trading does not pause his timer.
+The Moonwarden uses a moderate 2:1 weight preference for silver-ingot and silver-for-pelt offers and can only roll the Wolfsbane Potion (never the Werewolf Potion). The Tribe Chief uses a moderate 2:1 weight preference for Wolfsbane and Moonbane Pearl offers and can only roll the Werewolf Potion (never the Wolfsbane Potion). The summoned Werewolf Brother draws uniformly from all 13 offers. Both settlement leaders can restock when near their work spot during working hours, up to twice per game day. The summoned Werewolf Brother stays ten minutes at 20 TPS and leaves when his chunk unloads. Trading does not pause his timer.
 
 | You give | You get | Category |
 |---|---|---|

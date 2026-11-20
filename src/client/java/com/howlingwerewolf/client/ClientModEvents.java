@@ -6,6 +6,7 @@ import com.howlingwerewolf.content.ModBlockEntities;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
@@ -69,6 +70,12 @@ public final class ClientModEvents {
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
                 com.howlingwerewolf.network.PounceMotionPacket.TYPE, (packet, context) -> context.client().execute(() -> ClientPouncePose.receive(packet)));
+        net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT.register(
+                (type, renderer, helper, context) -> {
+                    if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer player) {
+                        helper.register(new ModernPlayerOverlayLayer(player));
+                    }
+                });
         BlockEntityRendererRegistry.register(ModBlockEntities.RITUAL_ALTAR.get(), RitualAltarRenderer::new);
         var resources = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
         resources.registerReloadListener(new ModernModelResources());

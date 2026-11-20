@@ -456,7 +456,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
     private void drawFigure(MoonGraphics graphics, @Nullable WerewolfData data, float x, float feet, float radius, float mouseX, float mouseY, boolean stage) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) { figure = null; return; }
-        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player.getGameProfile());
+        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player);
         RemotePlayer player = figure;
         boolean werewolf = data != null && data.isWerewolf();
         WerewolfForm form = !werewolf ? WerewolfForm.HUMAN : data.isTransformed() ? data.getForm() : WerewolfForm.WEREWOLF;
@@ -476,7 +476,7 @@ public final class WerewolfProgressionScreen extends MoonInput.Page {
         Quaternionf pose = new Quaternionf().rotateZ(Mth.PI).mul(camera);
         graphics.enableScissor(x0, y0, x1, y1);
         try {
-            WerewolfSkinRenderContext.withPreview(player, form, modelSet, skin, () -> {
+            WerewolfSkinRenderContext.withPreview(player, form, modelSet, skin, data != null && data.prefersModernPlayerModel(), () -> {
                 graphics.entity(player, size, (x0 + x1) / 2F, feet, pose, camera);
             });
         } finally {

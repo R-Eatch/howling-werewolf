@@ -13,7 +13,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 /** Requests a cosmetic change; the server validates and broadcasts the resulting state. */
-public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment) implements CustomPacketPayload {
+public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment,
+                                    boolean modernPlayerModel) implements CustomPacketPayload {
     public static final Type<SetWerewolfSkinPacket> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "set_werewolf_skin"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SetWerewolfSkinPacket> STREAM_CODEC = StreamCodec.of(
@@ -21,8 +22,14 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean sh
                 buf.writeUtf(packet.modelSetId(), 16);
                 buf.writeUtf(packet.skinId(), WerewolfSkinIds.MAX_ID_LENGTH);
                 buf.writeBoolean(packet.showEquipment());
+                buf.writeBoolean(packet.modernPlayerModel());
             },
-            buf -> new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH), buf.readBoolean()));
+            buf -> new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH),
+                    buf.readBoolean(), buf.readBoolean()));
+
+    public SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment) {
+        this(modelSetId, skinId, showEquipment, false);
+    }
 
     public SetWerewolfSkinPacket(String modelSetId, String skinId) {
         this(modelSetId, skinId, true);
@@ -49,6 +56,7 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean sh
                 if (!data.isWerewolf()) return;
                 data.setAppearance(modelSet, skinId);
                 data.setEquipmentShown(packet.showEquipment());
+                data.setModernPlayerModel(packet.modernPlayerModel());
                 sender.refreshDimensions();
                 ModNetwork.sync(sender, data);
             });

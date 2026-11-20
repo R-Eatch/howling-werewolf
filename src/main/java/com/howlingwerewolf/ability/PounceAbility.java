@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public final class PounceAbility {
-    public static final int COOLDOWN = 400;
+    public static final int COOLDOWN = 15 * 20;
     public static final int MAX_FLIGHT_TICKS = 70;
     private static final int WINDUP = 3;
     private static final ResourceKey<DamageType> IMPACT = ResourceKey.create(Registries.DAMAGE_TYPE,
@@ -36,7 +36,7 @@ public final class PounceAbility {
 
     public enum Motion { WINDUP, FLIGHT, LAND, CLEAR }
 
-    public record Flight(ServerLevel level, WerewolfForm form, Vec3 forward, Vec3 target, long startedAt,
+    public record Flight(ServerLevel level, WerewolfForm form, Vec3 target, long startedAt,
                          boolean launched, boolean airborne, double startY) {}
 
     public static void start(ServerPlayer player, Vec3 target) {
@@ -52,8 +52,7 @@ public final class PounceAbility {
             player.displayClientMessage(Component.translatable("message.howlingwerewolf.pounce_invalid"), true);
             return;
         }
-        Vec3 forward = target.subtract(player.position()).multiply(1, 0, 1).normalize();
-        data.setPounceFlight(new Flight(player.serverLevel(), data.getForm(), forward, target, now, false, false, player.getY()));
+        data.setPounceFlight(new Flight(player.serverLevel(), data.getForm(), target, now, false, false, player.getY()));
         ModNetwork.showPounce(player, Motion.WINDUP);
     }
 
@@ -73,12 +72,12 @@ public final class PounceAbility {
         }
         if (!player.onGround()) {
             if (!flight.airborne() && player.getY() > flight.startY() + 0.125) {
-                data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.forward(), flight.target(),
+                data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.target(),
                         flight.startedAt(), true, true, flight.startY()));
             }
         } else if (flight.airborne()) {
             end(player, data, Motion.LAND);
-            impact(player, flight);
+            impact(player, data, flight);
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100));
         } else if (now - flight.startedAt() > WINDUP + 6) end(player, data, Motion.CLEAR);
     }
@@ -95,8 +94,7 @@ public final class PounceAbility {
         player.setIgnoreFallDamageFromCurrentImpulse(true);
         player.setOnGround(false);
         player.hasImpulse = true;
-        Vec3 forward = velocity.multiply(1, 0, 1).normalize();
-        data.setPounceFlight(new Flight(flight.level(), flight.form(), forward, flight.target(), now, true, false, player.getY()));
+        data.setPounceFlight(new Flight(flight.level(), flight.form(), flight.target(), now, true, false, player.getY()));
         data.setPounceCooldownEnd(now + COOLDOWN);
         ModNetwork.sync(player, data);
         ModNetwork.showPounce(player, Motion.FLIGHT);
@@ -104,20 +102,20 @@ public final class PounceAbility {
                 flight.form() == WerewolfForm.BEAST ? 0.65F : 0.95F);
     }
 
-    private static void impact(ServerPlayer player, Flight flight) {
+    private static void impact(ServerPlayer player, WerewolfData data, Flight flight) {
         ServerLevel level = flight.level();
         boolean beast = flight.form() == WerewolfForm.BEAST;
         boolean wolf = flight.form() == WerewolfForm.QUADRUPED;
         double radius = PounceTargeting.impactRadius(flight.form());
+        float landingDamage = (beast ? 10.0F : 7.0F) * (float) data.clawDamageMultiplier();
         var damage = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(IMPACT), player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.25, radius),
                 target -> eligible(player, target))) {
             Vec3 horizontal = target.position().subtract(player.position()).multiply(1, 0, 1);
             if (horizontal.lengthSqr() > radius * radius || !player.hasLineOfSight(target)) continue;
-            if (!beast && !wolf && horizontal.lengthSqr() > 0.04 && horizontal.normalize().dot(flight.forward()) < 0.42) continue;
             if (wolf) {
                 target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 64, 0), player);
-            } else if (target.hurt(damage, beast ? 12.375F : 12.3F) && beast) {
+            } else if (target.hurt(damage, landingDamage) && beast) {
                 target.knockback(1.1, -horizontal.x, -horizontal.z);
             }
         }
