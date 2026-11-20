@@ -34,7 +34,7 @@ public final class ClientPounceTarget {
         if (data == null || !data.hasAbility(WerewolfAbility.POUNCE) || !data.isTransformed()) return;
         long remaining = data.getPounceCooldownEnd() - player.level().getGameTime();
         if (remaining > 0) {
-            minecraft.gui.setOverlayMessage(Component.translatable("message.howlingwerewolf.pounce_cooldown", (remaining + 19) / 20), true);
+            minecraft.gui.setOverlayMessage(Component.translatable("message.howlingwerewolf.pounce_cooldown", (remaining + 19) / 20), false);
             return;
         }
         caster = player;
@@ -42,7 +42,7 @@ public final class ClientPounceTarget {
         update();
         minecraft.gui.setOverlayMessage(Component.translatable("message.howlingwerewolf.pounce_aiming",
                 minecraft.options.keyAttack.getTranslatedKeyMessage(),
-                minecraft.options.keyUse.getTranslatedKeyMessage()), true);
+                minecraft.options.keyUse.getTranslatedKeyMessage()), false);
     }
 
     static void tick() {
@@ -67,7 +67,7 @@ public final class ClientPounceTarget {
         consumeHeldAttack = true;
         update();
         if (!reachable) {
-            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("message.howlingwerewolf.pounce_invalid"), true);
+            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("message.howlingwerewolf.pounce_invalid"), false);
             return true;
         }
         ClientPacketDistributor.sendToServer(new PounceTargetPacket(point));

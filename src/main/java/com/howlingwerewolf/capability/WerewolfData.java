@@ -36,6 +36,7 @@ public final class WerewolfData implements ValueIOSerializable {
     private WerewolfForm form = WerewolfForm.HUMAN;
     private String skinId = WerewolfModelSet.MODERN.defaultSkinId();
     private WerewolfModelSet modelSet = WerewolfModelSet.MODERN;
+    private boolean modernPlayerModel;
     private boolean alphaDefeated;
     private boolean nightVisionEnabled = true;
     private int level = 1;
@@ -70,6 +71,8 @@ public final class WerewolfData implements ValueIOSerializable {
     public WerewolfSkin getSkin() { return WerewolfSkin.byId(skinId); }
     public String getSkinId() { return skinId; }
     public WerewolfModelSet getModelSet() { return modelSet; }
+    public boolean prefersModernPlayerModel() { return modernPlayerModel; }
+    public void setModernPlayerModel(boolean value) { modernPlayerModel = value; }
     /** Whether worn armour and elytra show on the transformed werewolf model; a cosmetic preference like the coat. */
     public boolean showsEquipment() { return equipmentShown; }
     public void setEquipmentShown(boolean value) { equipmentShown = value; }
@@ -93,6 +96,10 @@ public final class WerewolfData implements ValueIOSerializable {
     public List<UUID> getSpiritWolfIds() { return spiritWolfIds; }
     public static int getMaxLevel() { return HWConfig.MAX_WEREWOLF_LEVEL.get(); }
     public int getEffectiveMaxLevel() { return syncedMaxLevel > 0 ? syncedMaxLevel : getMaxLevel(); }
+
+    public double clawDamageMultiplier() {
+        return 1.0D + getTreeSkillRank(WerewolfTreeSkill.DAMAGE) * 0.30D;
+    }
 
     public void setWerewolf(boolean value) { werewolf = value; if (!value) form = WerewolfForm.HUMAN; }
     public void setTransformed(boolean value) {
@@ -298,6 +305,7 @@ public final class WerewolfData implements ValueIOSerializable {
     public boolean isDefaultState() {
         return !werewolf && form == WerewolfForm.HUMAN && !infected && !moonForced && !alphaDefeated
                 && modelSet == WerewolfModelSet.MODERN && skinId.equals(WerewolfModelSet.MODERN.defaultSkinId()) && equipmentShown
+                && !modernPlayerModel
                 && nightVisionEnabled && level == 1 && experience == 0
                 && experienceGainRemainder == 0.0D
                 && bonusSkillPoints == 0 && bonusTreePoints == 0 && clawHotbarSlot == 1
@@ -347,6 +355,7 @@ public final class WerewolfData implements ValueIOSerializable {
         form = other.form;
         skinId = other.skinId;
         modelSet = other.modelSet;
+        modernPlayerModel = other.modernPlayerModel;
         equipmentShown = other.equipmentShown;
         alphaDefeated = other.alphaDefeated;
         nightVisionEnabled = other.nightVisionEnabled;
@@ -381,6 +390,7 @@ public final class WerewolfData implements ValueIOSerializable {
         tag.putString("Form", form.id());
         tag.putString("Skin", skinId);
         tag.putString("ModelSet", modelSet.id());
+        tag.putBoolean("ModernPlayerModel", modernPlayerModel);
         tag.putBoolean("ShowEquipment", equipmentShown);
         tag.putBoolean("AlphaDefeated", alphaDefeated);
         tag.putBoolean("NightVisionEnabled", nightVisionEnabled);
@@ -431,6 +441,7 @@ public final class WerewolfData implements ValueIOSerializable {
         form = WerewolfForm.byName(tag.getStringOr("Form", ""));
         setAppearance(WerewolfModelSet.byId(tag.getStringOr("ModelSet", fresh ? "modern" : "classic")), tag.getStringOr("Skin", ""));
         // Optional since 1.3.3: older saves show their equipment.
+        modernPlayerModel = tag.getBooleanOr("ModernPlayerModel", false);
         equipmentShown = !tag.contains("ShowEquipment") || tag.getBooleanOr("ShowEquipment", true);
         alphaDefeated = tag.getBooleanOr("AlphaDefeated", false);
         nightVisionEnabled = !tag.contains("NightVisionEnabled") || tag.getBooleanOr("NightVisionEnabled", false);

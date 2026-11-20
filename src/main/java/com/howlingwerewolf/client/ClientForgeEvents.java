@@ -135,7 +135,7 @@ public final class ClientForgeEvents {
         var state = event.getRenderState();
         var data = WerewolfRenderData.get(state);
         WerewolfForm form = data.form();
-        if (form == WerewolfForm.HUMAN || renderer == null) return;
+        if (form == WerewolfForm.HUMAN || data.modernPlayerModel() || renderer == null) return;
         event.setCanceled(true);
         // Another mod is drawing our body in first person: a werewolf body would fill the camera.
         if (FirstPersonBodyCompat.active(state)) return;
@@ -163,10 +163,11 @@ public final class ClientForgeEvents {
         }
     }
 
+
     @SubscribeEvent
     public static void renderWerewolfArm(RenderArmEvent event) {
         var data = WerewolfRenderData.forEntity(event.getPlayer());
-        if (data.form() == WerewolfForm.HUMAN) return;
+        if (data.form() == WerewolfForm.HUMAN || data.modernPlayerModel()) return;
         if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
         else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
         else WerewolfFirstPersonClawRenderer.render(event, data);
@@ -180,8 +181,10 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void renderWerewolfHand(RenderHandEvent event) {
         AbstractClientPlayer player = Minecraft.getInstance().player;
+        if (player != null && WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()
                 || player == null || player.isInvisible() || player.isScoping()) return;
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (!WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;
         event.setCanceled(true);
         net.minecraft.world.entity.HumanoidArm arm = player.getMainArm();

@@ -57,6 +57,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 public final class SettlementLeaderEntity extends AbstractVillager implements WerewolfNpcAppearance {
+    private static final double CHIEF_BASE_ARMOR = 8.0D;
+    private static final String CHIEF_ARMOR_MIGRATED = "ChiefArmorV145";
     private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
             SynchedEntityData.defineId(SettlementLeaderEntity.class, EntityDataSerializers.BOOLEAN),
             SynchedEntityData.defineId(SettlementLeaderEntity.class, EntityDataSerializers.INT));
@@ -112,7 +114,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     }
 
     public static AttributeSupplier.Builder chiefAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 40).add(Attributes.ARMOR, 4)
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 40).add(Attributes.ARMOR, CHIEF_BASE_ARMOR)
                 .add(Attributes.MOVEMENT_SPEED, 0.29).add(Attributes.ATTACK_DAMAGE,
                         WerewolfEntity.feralAttackDamage(net.minecraft.world.Difficulty.NORMAL) * 1.25).add(Attributes.FOLLOW_RANGE, 36);
     }
@@ -304,6 +306,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
 
     @Override protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
         super.addAdditionalSaveData(output);
+        if (!isWarden()) output.putBoolean(CHIEF_ARMOR_MIGRATED, true);
         if (site != null) output.putLong("Settlement", site.asLong());
         if (villageKey != null) output.putLong("VillageKey", villageKey);
         if (routine != null) output.store("Routine", CompoundTag.CODEC, routine.save());
@@ -315,6 +318,10 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
 
     @Override protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
         super.readAdditionalSaveData(input);
+        if (!isWarden() && !input.getBooleanOr(CHIEF_ARMOR_MIGRATED, false)) {
+            var armor = getAttribute(Attributes.ARMOR);
+            if (armor.getBaseValue() == 4.0D) armor.setBaseValue(CHIEF_BASE_ARMOR);
+        }
         if (isWarden()) equipSilverhideArmor();
         input.getLong("Settlement").ifPresent(value -> {
             BlockPos pos = BlockPos.of(value);

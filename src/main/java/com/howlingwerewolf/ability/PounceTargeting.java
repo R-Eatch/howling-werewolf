@@ -19,8 +19,8 @@ public final class PounceTargeting {
 
     public static double range(WerewolfForm form) {
         return switch (form) {
-            case QUADRUPED -> 28;
-            case BEAST -> 23;
+            case QUADRUPED -> 30;
+            case BEAST -> 27;
             default -> 25;
         };
     }
@@ -28,8 +28,8 @@ public final class PounceTargeting {
     public static double impactRadius(WerewolfForm form) {
         return switch (form) {
             case QUADRUPED -> 2.84;
-            case BEAST -> 3.4;
-            default -> 2.65;
+            case BEAST -> 4.0;
+            default -> 3.0;
         };
     }
 

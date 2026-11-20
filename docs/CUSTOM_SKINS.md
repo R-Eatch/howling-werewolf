@@ -1,6 +1,6 @@
 # Make your own werewolf skin
 
-For **Howling Werewolf 1.4.4 · Minecraft 26.1.2 NeoForge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
+For **Howling Werewolf 1.5.0 · Minecraft 26.1.2 NeoForge**. No extra mod is required. [简体中文](CUSTOM_SKINS-zh.md)
 
 ## Start in the game
 
@@ -20,9 +20,11 @@ The table above lists **Classic** sizes. **Modern** uses a **128 × 128** UV bas
 
 In-game exports replace `mywolf` with a unique `wolfskin_…` namespace to keep creations separate. Use the paths in your actual folder. Edit `name`, `description` and `author` in `assets/<your namespace>/werewolf_skins/custom.json`. The `"model": "classic"` or `"model": "modern"` field selects the model set; omitting it defaults to Classic. Edit `description` in `pack.mcmeta` to change the pack's description; its title in the resource-pack list comes from the folder or ZIP filename.
 
+Modern also offers a **Full Model / Player Overlay** switch beside the model set in the Skins screen. Both biped styles use the selected coat’s Werewolf texture. Player Overlay uses your Minecraft skin and animations for the body and the selected coat for its ears, claws, and tail.
+
 ## Sharing and troubleshooting
 
-- Zip the pack with `pack.mcmeta` and `assets` directly at the ZIP root. Friends put it in `resourcepacks` and enable it with version 1.4.4 of this mod. A server can also distribute it through Minecraft's standard server resource-pack feature.
+- Zip the pack with `pack.mcmeta` and `assets` directly at the ZIP root. Friends put it in `resourcepacks` and enable it with version 1.5.0 of this mod. A server can also distribute it through Minecraft's standard server resource-pack feature.
 - Multiplayer synchronizes the model set and skin ID; it does not upload artwork. A viewer missing the pack sees Adrian for Classic or Ashen for Modern. Your selected ID remains saved and works again when the pack is enabled. Keep the namespace folder and JSON filename stable after sharing: together they define the skin ID.
 - Regular 64 × 64 human player skins cannot be used directly. Supply all three PNGs at the base sizes above or an exact **2×, 3× or 4×** scale, with each file at most **1 MiB**.
 - Skin JSON is limited to 16 KiB: name and author at most 48 characters each, description at most 160. The `howlingwerewolf` namespace is reserved. Invalid entries are skipped; see `logs/latest.log` for the reason.

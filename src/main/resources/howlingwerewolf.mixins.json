@@ -3,10 +3,15 @@
   "minVersion": "0.8",
   "package": "com.howlingwerewolf.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": ["LocateWatchtowerMixin"],
+  "mixins": [
+    "LocateWatchtowerMixin"
+  ],
   "client": [
     "client.PounceClickMixin",
-    "client.PounceMovementMixin"
+    "client.PounceMovementMixin",
+    "client.ModernPlayerArmMixin"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

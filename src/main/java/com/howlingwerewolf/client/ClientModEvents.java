@@ -89,6 +89,13 @@ public final class ClientModEvents {
     }
 
     @SubscribeEvent
+    public static void addPlayerLayers(EntityRenderersEvent.AddLayers event) {
+        for (var skinModel : event.getSkins()) {
+            event.getPlayerRenderer(skinModel).addLayer(new ModernPlayerOverlayLayer(event.getPlayerRenderer(skinModel)));
+        }
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.HUNTER.get(), HunterRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_WEREWOLF.get(), AlphaWerewolfRenderer::new);

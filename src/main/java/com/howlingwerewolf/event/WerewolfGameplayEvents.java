@@ -15,6 +15,8 @@ import com.howlingwerewolf.content.ModSounds;
 import com.howlingwerewolf.content.ModTags;
 import com.howlingwerewolf.content.HunterCrossbowItem;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import com.howlingwerewolf.entity.TribeWerewolfEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.network.ModNetwork;
 import net.minecraft.ChatFormatting;
@@ -105,7 +107,7 @@ public final class WerewolfGameplayEvents {
     private static final Identifier CLAW_ENTITY_REACH_ID = modifierId("claw_entity_reach");
     private static final Identifier AUTO_STEP_ID = modifierId("auto_step");
     private static final int SPIRIT_DURATION_TICKS = 20 * 60 * 4;
-    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 60;
+    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 120;
     private static final int BLOODY_BITE_COOLDOWN_TICKS = 20 * 60;
     private static final int BLOODY_BITE_EFFECT_TICKS = 20 * 15;
     private static final int MOONBLOOD_REGENERATION_TICKS = 20 * 45;
@@ -333,7 +335,9 @@ public final class WerewolfGameplayEvents {
             Entity infectionSource = event.getSource().getEntity();
             double infectionChance = infectionSource instanceof Wolf wolf && !wolf.isTame()
                     ? HWConfig.WOLF_INFECTION_CHANCE.get()
-                    : infectionSource instanceof WerewolfEntity werewolf && !werewolf.isSummonedByAlpha()
+                    : (infectionSource instanceof WerewolfEntity werewolf && !werewolf.isSummonedByAlpha()
+                            || infectionSource instanceof TribeWerewolfEntity
+                            || infectionSource instanceof SettlementLeaderEntity leader && !leader.isWarden())
                     ? HWConfig.FERAL_WEREWOLF_INFECTION_CHANCE.get() : -1.0D;
             if (!data.isWerewolf() && !data.isInfected() && event.getAmount() > 0.0F
                     && infectionChance >= 0.0D
@@ -345,6 +349,11 @@ public final class WerewolfGameplayEvents {
                 ModNetwork.sync(victim, data);
             }
             if (!data.isWerewolf() || !data.isTransformed()) return;
+            if (event.getSource().is(DamageTypes.GENERIC_KILL)
+                    && data.isBeastMode() && data.getLevel() >= WerewolfData.getMaxLevel()) {
+                event.setCanceled(true);
+                return;
+            }
             float amount = event.getAmount();
             if (event.getSource().is(DamageTypeTags.IS_FIRE)) amount *= WEREWOLF_FIRE_MULTIPLIER;
             if (!HunterCrossbowItem.firedArrow(event.getSource()) && event.getSource().getEntity() instanceof LivingEntity attacker
@@ -1009,8 +1018,7 @@ public final class WerewolfGameplayEvents {
             removeModifier(player.getAttribute(Attributes.ATTACK_DAMAGE), CLAW_DAMAGE_ID);
             return;
         }
-        double damage = (4 + data.getLevel() / 5)
-                * (1.0D + data.getTreeSkillRank(WerewolfTreeSkill.DAMAGE) * 0.30D);
+        double damage = (4 + data.getLevel() / 5) * data.clawDamageMultiplier();
         setTransientModifier(player.getAttribute(Attributes.ATTACK_DAMAGE), CLAW_DAMAGE_ID,
                 "howlingwerewolf claw damage", damage - 1.0D);
     }
