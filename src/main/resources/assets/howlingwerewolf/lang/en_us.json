@@ -231,7 +231,7 @@
   "ability.howlingwerewolf.night_vision": "Night Vision",
   "ability.howlingwerewolf.night_vision.desc": "Provides Night Vision while transformed.",
   "ability.howlingwerewolf.summon_wolf_spirit": "Summon Wolf Spirits",
-  "ability.howlingwerewolf.summon_wolf_spirit.desc": "Press N to summon 5 Wolf Spirits that follow and fight alongside you for 4 minutes. Cooldown: 60s.",
+  "ability.howlingwerewolf.summon_wolf_spirit.desc": "Press N to summon 5 Wolf Spirits that follow and fight alongside you for 4 minutes. Cooldown: 120s.",
   "ability.howlingwerewolf.quadruped_form": "Wildstride Form",
   "ability.howlingwerewolf.quadruped_form.desc": "Press G while transformed to switch between bipedal and quadruped wolf form. Greatly boosts speed and jump height at a slight loss in attack damage. Cannot wear equipment.",
   "ability.howlingwerewolf.moonblood_surge": "Moonblood Surge",

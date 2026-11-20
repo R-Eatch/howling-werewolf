@@ -6,14 +6,14 @@ This is the source of Howling Werewolf for **Minecraft 1.21.1**, branch `1.21.1-
 
 | | |
 |---|---|
-| Mod version | **1.4.7** |
+| Mod version | **1.5.0** |
 | Minecraft Java Edition | 1.21.1 |
 | NeoForge | 21.1.248 or a later 21.1.x release |
 | Java | 21 |
 
-Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.4.7-neoforge.jar`. Install the same version on the server and on every client.
+Build with `./gradlew build`; the JAR is `build/libs/howlingwerewolf-1.5.0-neoforge.jar`. Install the same version on the server and on every client.
 
-v1.4.7 expands Feral Leap's impact area and targeting range, scales landing damage with Claw Damage, and protects max-level Beast Form from generic kill damage. Modern Player Overlay adds a swaying tail and uses the player's skin layers in previews. Silverhide grants 10% protection per piece against werewolf and freezing damage, plus 10% additional reduction for the full set. Tribe houses gain rear doors and the altar entrances gain new timber-and-stone arches. Tribe residents and chiefs use the configured feral-werewolf infection chance.
+v1.5.0 introduces wilderness werewolf tribes (5 biome variants, 40 templates) and village-side hunter outposts (4 biome variants, 12 templates), Feral Leap (biped base damage 7, Beast Form 10, 15s cooldown), Silverhide armor, Silver-Oath Crossbow, Modern Player Overlay, revised bilingual tutorials/dialogue, 120s Summon Wolf Spirits cooldown, and faction-weighted trading (2:1 preference for Moonwarden silver/pelt/Wolfsbane Potion and Tribe Chief Wolfsbane/Moonbane Pearl/Werewolf Potion; Werewolf Brother unchanged).
 
 The tutorial, companion guide, and existing dialogue use revised English and Chinese text. Tribe chiefs and Moonwardens each gain three additional ambient conversations.
 

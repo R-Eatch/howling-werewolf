@@ -104,7 +104,7 @@ public final class WerewolfGameplayEvents {
     private static final ResourceLocation CLAW_BLOCK_REACH_ID = modifierId("claw_block_reach");
     private static final ResourceLocation CLAW_ENTITY_REACH_ID = modifierId("claw_entity_reach");
     private static final int SPIRIT_DURATION_TICKS = 20 * 60 * 4;
-    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 60;
+    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 120;
     private static final int BLOODY_BITE_COOLDOWN_TICKS = 20 * 60;
     private static final int BLOODY_BITE_EFFECT_TICKS = 20 * 15;
     private static final int MOONBLOOD_REGENERATION_TICKS = 20 * 45;

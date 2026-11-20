@@ -107,7 +107,7 @@ public final class PounceAbility {
         boolean beast = flight.form() == WerewolfForm.BEAST;
         boolean wolf = flight.form() == WerewolfForm.QUADRUPED;
         double radius = PounceTargeting.impactRadius(flight.form());
-        float landingDamage = 10.0F * (float) data.clawDamageMultiplier();
+        float landingDamage = (beast ? 10.0F : 7.0F) * (float) data.clawDamageMultiplier();
         var damage = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(IMPACT), player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.25, radius),
                 target -> eligible(player, target))) {

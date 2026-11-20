@@ -230,7 +230,7 @@
   "ability.howlingwerewolf.night_vision": "夜视",
   "ability.howlingwerewolf.night_vision.desc": "变身时提供夜视。",
   "ability.howlingwerewolf.summon_wolf_spirit": "召唤狼灵",
-  "ability.howlingwerewolf.summon_wolf_spirit.desc": "按 N 召唤 5 只协助作战的狼灵，持续 4 分钟；冷却 60 秒。",
+  "ability.howlingwerewolf.summon_wolf_spirit.desc": "按 N 召唤 5 只协助作战的狼灵，持续 4 分钟；冷却 120 秒。",
   "ability.howlingwerewolf.quadruped_form": "荒野奔行",
   "ability.howlingwerewolf.quadruped_form.desc": "变身时按 G 在双足狼人与四足狼间切换。大幅提升移速和跳跃，攻击略微降低；四足狼无法穿戴装备。",
   "ability.howlingwerewolf.moonblood_surge": "月血沸腾",
