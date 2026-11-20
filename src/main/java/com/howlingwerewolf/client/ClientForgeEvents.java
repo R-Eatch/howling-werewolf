@@ -26,6 +26,7 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -44,6 +45,7 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void clientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
+        ClientPounceTarget.tick();
         if (minecraft.player == null || minecraft.level == null) {
             lastClientDimension = null;
             dimensionResyncTicks = -1;
@@ -93,11 +95,17 @@ public final class ClientForgeEvents {
         }
         while (ClientModEvents.BLOODY_BITE.consumeClick()) useBloodyBite();
         while (ClientModEvents.POUNCE.consumeClick()) {
-            ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.POUNCE));
+            ClientPounceTarget.toggle();
         }
         while (ClientModEvents.MOONBLOOD_SURGE.consumeClick()) {
             ClientPacketDistributor.sendToServer(new UseAbilityPacket(WerewolfAbility.MOONBLOOD_SURGE));
         }
+    }
+
+    @SubscribeEvent
+    public static void renderPounceTarget(SubmitCustomGeometryEvent event) {
+        ClientPounceTarget.draw(event.getPoseStack(), Minecraft.getInstance().gameRenderer.getMainCamera(),
+                event.getSubmitNodeCollector());
     }
 
     static void useBloodyBite() {
@@ -127,7 +135,7 @@ public final class ClientForgeEvents {
         var state = event.getRenderState();
         var data = WerewolfRenderData.get(state);
         WerewolfForm form = data.form();
-        if (form == WerewolfForm.HUMAN || renderer == null) return;
+        if (form == WerewolfForm.HUMAN || data.modernPlayerModel() || renderer == null) return;
         event.setCanceled(true);
         // Another mod is drawing our body in first person: a werewolf body would fill the camera.
         if (FirstPersonBodyCompat.active(state)) return;
@@ -155,10 +163,11 @@ public final class ClientForgeEvents {
         }
     }
 
+
     @SubscribeEvent
     public static void renderWerewolfArm(RenderArmEvent event) {
         var data = WerewolfRenderData.forEntity(event.getPlayer());
-        if (data.form() == WerewolfForm.HUMAN) return;
+        if (data.form() == WerewolfForm.HUMAN || data.modernPlayerModel()) return;
         if (data.form() == WerewolfForm.QUADRUPED) event.setCanceled(true);
         else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(event, data);
         else WerewolfFirstPersonClawRenderer.render(event, data);
@@ -172,8 +181,10 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void renderWerewolfHand(RenderHandEvent event) {
         AbstractClientPlayer player = Minecraft.getInstance().player;
+        if (player != null && WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()
                 || player == null || player.isInvisible() || player.isScoping()) return;
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (!WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;
         event.setCanceled(true);
         net.minecraft.world.entity.HumanoidArm arm = player.getMainArm();

@@ -96,7 +96,7 @@ public final class RitualAltarBlock extends BaseEntityBlock {
             return InteractionResult.PASS;
         }
         if (player.isShiftKeyDown() && !altar.getOffering().isEmpty()) {
-            if (!level.isClientSide()) altar.returnOffering(player);
+            if (!level.isClientSide() && !altar.isCompanionRitualActive()) altar.returnOffering(player);
             return InteractionResult.SUCCESS;
         }
         if (central && altar.hasExpectedOffering()

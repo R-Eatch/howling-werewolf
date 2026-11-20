@@ -2,7 +2,7 @@
 
 [简体中文](CONFIG-zh.md) · [Back to README](../README.md)
 
-This page covers all four editions of 1.4.0: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.1 and NeoForge 26.1.2. They share the same keys and defaults.
+This page covers all five maintained editions of 1.5.0: Forge 1.20.1, NeoForge 1.21.1, Fabric 1.21.1, NeoForge 26.1.2 and Fabric 26.3. They share the same keys and defaults.
 
 ## Where the files are
 
@@ -25,7 +25,7 @@ This page covers all four editions of 1.4.0: Forge 1.20.1, NeoForge 1.21.1, Fabr
 | `companionSortingReach` | `32` | 3–64 | How far, in blocks, a companion can still sort a container it cannot walk up to. It always walks over when there is a way; 3 means it skips anything it cannot reach on foot. |
 | `npcModelSet` | `"modern"` | `modern` / `classic` | Model set for wild werewolves, spawn-egg werewolves, the Alpha and its summoned pack. `modern`: the Alpha and pack use the Ashen coat, and wild werewolves keep a random coat; `classic`: all of them use Adrian. Existing entities update after the config reloads; players' own skins are not affected. |
 | `wolfInfectionChance` | `0.10` | 0.0–1.0 | Chance that damage from an untamed vanilla wolf infects a human player. |
-| `feralWerewolfInfectionChance` | `0.20` | 0.0–1.0 | Chance that damage from a wild Feral Werewolf infects a human player. Werewolves summoned by the Alpha never infect. |
+| `feralWerewolfInfectionChance` | `0.20` | 0.0–1.0 | Chance that damage from a wild Feral Werewolf, Tribe Werewolf, or Tribe Chief infects a human player. Werewolves summoned by the Alpha never infect. |
 | `werewolfExperienceGainMultiplier` | `1.0` | 0.0–100.0 | Final multiplier on werewolf experience. Administrator XP commands are not affected. |
 | `maxWerewolfLevel` | `20` | 1–25 | Maximum werewolf level. If you lower it, saved levels above the new limit are brought down to it on load. |
 | `beastModeVoidDamage` | `false` | true / false | When `true`, Beast Form melee uses the out-of-world damage type; when `false`, it uses the same type as normal werewolf attacks. |
@@ -41,7 +41,7 @@ This page covers all four editions of 1.4.0: Forge 1.20.1, NeoForge 1.21.1, Fabr
 |---|---|---|---|
 | `generateSilverOre` | `true` | true / false | Generates silver ore in newly generated chunks. Existing chunks are not changed. |
 | `generateWolfsbane` | `true` | true / false | Generates Wolfsbane in newly generated chunks. Existing chunks are not changed. |
-| `hunterSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | Multiplier on the Hunter's natural spawn weight (50 by default); 0 turns natural spawning off. This is a relative weight, not a spawn chance. Rejoin the world after changing it. |
+| `hunterSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | Multiplier on the Hunter's natural spawn weight (25 by default); 0 turns natural spawning off. This is a relative weight, not a spawn chance. Rejoin the world after changing it. |
 | `feralWerewolfSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | Multiplier on the Feral Werewolf's natural spawn weight (200 by default); 0 turns natural spawning off. The full-moon, night and light rules still apply. Rejoin the world after changing it. |
 | `wolfsbaneGenerationWeight` | `100` | 0–200 | How often Wolfsbane generates. 0 turns it off; 100 is the default rate (about one attempt per 8 taiga chunks or 22 forest chunks); 200 doubles it. |
 

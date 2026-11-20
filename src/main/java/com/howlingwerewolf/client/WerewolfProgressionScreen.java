@@ -220,7 +220,10 @@ public final class WerewolfProgressionScreen extends Screen {
     /** The tutorial: the chapter rail, the open chapter's text and its own controls. */
     private void buildGuide(@Nullable WerewolfData data) {
         List<WerewolfGuideBook.Chapter> chapters = WerewolfGuideBook.CHAPTERS;
-        for (int i = 0; i < chapters.size(); i++) addRenderableWidget(new ChapterButton(i, railX, TOP_BAND + 36 + i * 22, railWidth, 20));
+        int railTop = TOP_BAND + 36;
+        int chapterStep = Math.min(22, Math.max(11, (stageBottom - railTop - 6) / chapters.size()));
+        for (int i = 0; i < chapters.size(); i++)
+            addRenderableWidget(new ChapterButton(i, railX, railTop + i * chapterStep, railWidth, chapterStep - 2));
         WerewolfGuideBook.Chapter shown = chapters.get(chapter);
         int footer = cardY + cardHeight - 22, right = cardX + cardWidth - 14;
         if (chapter > 0) {
@@ -458,7 +461,7 @@ public final class WerewolfProgressionScreen extends Screen {
     private void drawFigure(GuiGraphicsExtractor graphics, @Nullable WerewolfData data, float x, float feet, float radius, float mouseX, float mouseY, boolean stage) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) { figure = null; return; }
-        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player.getGameProfile());
+        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player);
         RemotePlayer player = figure;
         boolean werewolf = data != null && data.isWerewolf();
         WerewolfForm form = !werewolf ? WerewolfForm.HUMAN : data.isTransformed() ? data.getForm() : WerewolfForm.WEREWOLF;

@@ -27,11 +27,17 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +77,12 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(1, new FloatGoal(this));
-        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.08D, false));
+        goalSelector.addGoal(2, new HunterCrossbowGoal(this));
+        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.08D, false) {
+            @Override public boolean canUse() { return !holdsHunterCrossbow() && super.canUse(); }
+            @Override public boolean canContinueToUse() { return !holdsHunterCrossbow() && super.canContinueToUse(); }
+        });
+        goalSelector.addGoal(5, new VisitTrainingYardGoal());
         goalSelector.addGoal(6, new RandomStrollGoal(this, 0.85D));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -90,7 +101,8 @@ public final class HunterEntity extends PathfinderMob {
         });
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10,
                 true, false, (entity, level) -> isWerewolfTarget(entity)));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+                (target, level) -> isTrialHunter() ? target instanceof Zombie : isVillageThreat(target)));
         targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers(HunterEntity.class));
     }
 
@@ -98,7 +110,22 @@ public final class HunterEntity extends PathfinderMob {
         return entity instanceof WerewolfEntity
                 || entity instanceof AlphaWerewolfEntity
                 || entity instanceof AlphaMinionEntity
+                || entity instanceof TribeWerewolfEntity
+                || entity instanceof SettlementLeaderEntity leader && !leader.isWarden()
                 || isWerewolfPlayer(entity);
+    }
+
+    static boolean isVillageThreat(LivingEntity entity) {
+        return entity instanceof Zombie || entity instanceof Raider;
+    }
+
+    public boolean holdsHunterCrossbow() {
+        return !isTrialHunter() && getMainHandItem().is(ModItems.HUNTER_CROSSBOW.get());
+    }
+
+    @Override public ItemStack getProjectile(ItemStack weapon) {
+        ItemStack ammunition = super.getProjectile(weapon);
+        return weapon.is(ModItems.HUNTER_CROSSBOW.get()) && ammunition.isEmpty() ? new ItemStack(Items.ARROW) : ammunition;
     }
 
     private static boolean isWerewolfPlayer(@Nullable LivingEntity entity) {
@@ -156,12 +183,67 @@ public final class HunterEntity extends PathfinderMob {
         this.villageKey = villageKey;
         setHomeTo(BlockPos.of(villageKey), 48);
         setPersistenceRequired();
-        setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.SILVER_SWORD.get()));
+        setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < 0.3F
+                ? ModItems.HUNTER_CROSSBOW.get() : ModItems.SILVER_SWORD.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0.0F);
     }
 
     public boolean belongsToVillage(long villageKey) {
         return villagePatrol && this.villageKey == villageKey;
+    }
+
+    private final class VisitTrainingYardGoal extends Goal {
+        private BlockPos yard;
+        private Path route;
+        private long nextVisit;
+        private long leaveAt;
+
+        VisitTrainingYardGoal() { setFlags(java.util.EnumSet.of(Flag.MOVE)); }
+
+        @Override public boolean canUse() {
+            if (!villagePatrol || isTrialHunter() || getTarget() != null || !com.howlingwerewolf.world.SettlementPositions.isDay(level())) return false;
+            long now = level().getGameTime();
+            if (nextVisit == 0) nextVisit = now + 20L * (10 + random.nextInt(31));
+            if (now < nextVisit) return false;
+            nextVisit = now + 20L * (45 + random.nextInt(61));
+
+            // The saved village key is a structure start in the XZ plane, with Y=0.
+            AABB village = new AABB(BlockPos.of(villageKey).atY(getBlockY())).inflate(64, 32, 64);
+            for (var warden : level().getEntitiesOfClass(SettlementLeaderEntity.class, village,
+                    leader -> leader.isAlive() && leader.isWarden() && leader.supports(HunterEntity.this))) {
+                yard = warden.trainingYard();
+                if (yard == null || !level().hasChunkAt(yard)) continue;
+                route = getNavigation().createPath(yard, 1, 64);
+                if (route != null && route.canReach()) return true;
+            }
+            return false;
+        }
+
+        @Override public void start() {
+            leaveAt = level().getGameTime() + 400;
+            getNavigation().moveTo(route, 0.95);
+        }
+
+        @Override public boolean canContinueToUse() {
+            return getTarget() == null && com.howlingwerewolf.world.SettlementPositions.isDay(level()) && level().getGameTime() < leaveAt
+                    && (!getNavigation().isDone() || yard.closerToCenterThan(position(), 5));
+        }
+
+        @Override public void tick() {
+            if (!getNavigation().isDone() || random.nextInt(reducedTickDelay(50)) != 0) return;
+            Vec3 step = LandRandomPos.getPos(HunterEntity.this, 3, 1);
+            if (step != null && yard.closerToCenterThan(step, 4)) {
+                getNavigation().moveTo(step.x, step.y, step.z, 0.7);
+            }
+        }
+
+        @Override public void stop() { getNavigation().stop(); }
+    }
+
+    void protectCaptain(LivingEntity attacker) {
+        if (!villagePatrol || isTrialHunter()) return;
+        captainAttacker = attacker;
+        protectUntil = level().getGameTime() + 160;
     }
 
     @Override
@@ -173,14 +255,9 @@ public final class HunterEntity extends PathfinderMob {
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
+        if (!isTrialHunter()) return;
         spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
         if (random.nextFloat() < 0.50F) spawnAtLocation(level, ModBlocks.WOLFSBANE.get());
-    }
-
-    void protectCaptain(LivingEntity attacker) {
-        if (!villagePatrol || isTrialHunter()) return;
-        captainAttacker = attacker;
-        protectUntil = level().getGameTime() + 160;
     }
 
     @Override

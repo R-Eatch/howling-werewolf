@@ -263,3 +263,8 @@ The current entity textures and ear fine-tuning were supplied via the user-edite
 - The Hunter model (hat crown and brim, high collar, front and back coat tails on the vanilla humanoid skeleton) and its two 64 × 64 textures, `hunter.png` and `hunter_watcher.png` for the Silver-Oath Watcher, are original work under CC BY-SA 4.0 and replace the earlier Hunter look.
 - `textures/item/silver_sword.png` is redrawn: a slim silver blade with a fuller, a gold crescent guard, a white-wrapped grip and a moonstone pommel. Original 16 × 16 work under CC BY-SA 4.0.
 - `textures/item/alpha_werewolf_badge.png` uses the 16 × 16 moon-oath seal selected by the author for 1.3.8. The 1.3.7 version used a 32 × 32 seal made for this project with the OpenAI image-generation workflow. CC BY-SA 4.0.
+
+## 1.4.5 Modern biped player overlay
+
+- `assets/howlingwerewolf/models/entity/modern/werewolf_player.bbmodel` extracts the geometry and UVs of the ears, claws, and tail from the maintainer-supplied `design/blockbench/Modern/Werewolf (Player) 2.bbmodel`.
+- The overlay reads the nine existing Modern Werewolf PNGs by thewolfulti. Each matches the corresponding embedded PNG in the supplied overlay project byte-for-byte.

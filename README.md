@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.4.7-blue?style=flat-square" alt="Latest source: 1.4.7"></a>
+  <a href="https://github.com/R-Eatch/howling-werewolf/tree/main"><img src="https://img.shields.io/badge/latest_source-1.5.0-blue?style=flat-square" alt="Latest source: 1.5.0"></a>
   <a href="https://github.com/R-Eatch/howling-werewolf/releases/latest"><img src="https://img.shields.io/github/v/release/R-Eatch/howling-werewolf?display_name=tag&amp;label=published%20release&amp;style=flat-square" alt="Published GitHub release"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/howling-werewolf"><img src="https://img.shields.io/curseforge/dt/1672944?style=flat-square&amp;logo=curseforge&amp;label=CurseForge&amp;color=F16436" alt="CurseForge downloads"></a>
   <a href="https://modrinth.com/mod/howling-werewolf"><img src="https://img.shields.io/modrinth/dt/howling-werewolf?style=flat-square&amp;logo=modrinth&amp;label=Modrinth&amp;color=1BD96A" alt="Modrinth downloads"></a>
@@ -17,7 +17,7 @@
 
 <p align="center"><a href="README-zh.md">简体中文</a></p>
 
-> This page serves as the project's public documentation and wiki, updated for **v1.4.7**. Download builds for each Minecraft edition from the releases page.
+> This page serves as the project's public documentation and wiki, updated for **v1.5.0**. Download builds for each Minecraft edition from the releases page.
 
 > A werewolf transformation and progression Mod for Minecraft Java Edition, centered on infection, lunar transformations, two progression systems, three werewolf forms, Hunters and Silver, Wolfsbane, and the Alpha Trial.
 
@@ -40,22 +40,23 @@ The Mod was inspired by several outstanding werewolf Mods created by the Minecra
 3. **Learn to control the transformation.** When the current rules allow it, press `J` to transform or return to human form. Under a full moon, your werewolf blood will leave you unable to control your form.
 4. **Challenge the Alpha of old.** Build the Moon-Oath ritual shown in the progression screen, defeat the Silver-Oath Watchers and the Moon-Crowned Alpha Werewolf, and finally awaken Beast Form.
 
-## What's new in v1.4.7 (since v1.3.8)
+## What's new in v1.5.0 (since v1.3.8)
 
-- **Settlements & Factions**:
-  - **Werewolf Tribes**: Generate across forests, birch forests, taigas, plains, and savannas using local timber and stone, featuring a central courtyard, Chieftain's longhouse, workshops, storehouse, homes, and a ready-to-use Moon-Oath ritual site. Led by the **Werewolf Chieftain**, who trades and restocks by day and supports the pack with healing potions in combat; Hunters cannot spawn within 48 blocks of tribe buildings.
-  - **Hunter Watchtowers & Silver-Oath Moonwarden**: Villages can now generate with an outpost watchtower, armory, and training yard guarded by the **Silver-Oath Moonwarden**, wearing Silverhide armor, offering trades, and supporting patrols with Instant Health II potions.
+- **Settlements, Architecture & Factions**:
+  - **Werewolf Tribes**: Generate across forests, birch forests, taigas, plains, and savannas using local timber and stone, featuring a central courtyard, the Chieftain's longhouse (with an upper-floor Moonbane Pearl altar loft and detailed furnishings), workshops, storehouse, homes, and a ready-to-use Moon-Oath ritual site. Led by the **Werewolf Chieftain**, who trades and restocks by day and supports the pack with healing potions in combat; Hunters cannot spawn within 48 blocks of tribe buildings.
+  - **Hunter Watchtowers & Silver-Oath Moonwarden**: Villages can now generate with a renovated outpost watchtower, armory, and training yard guarded by the **Silver-Oath Moonwarden**, wearing Silverhide armor, offering trades, and supporting patrols with Instant Health II potions.
+  - **Faction-Weighted Trading**: Settlement leaders now have distinct trade focuses (2:1 weight preference) and mutually exclusive potions—the **Silver-Oath Moonwarden** (5 offers) favors silver-ingot and silver-settled pelt trades and rolls only **Wolfsbane Potions**, while the **Werewolf Chieftain** (6 offers) favors Wolfsbane, Wolfsbane-settled pelt, and Moonbane Pearl trades and rolls only **Werewolf Potions**. The summoned Werewolf Brother (8 offers) continues to draw uniformly from all 13 trades.
   - Added `/locate structure` support for tribes and watchtowers, plus spawn eggs for the Werewolf Chieftain, Tribe Werewolf, and Silver-Oath Moonwarden.
-- **New Skill: Feral Leap (default `Z`)**: Costs 3 Skill Points. Press `Z` to aim a landing marker, left-click to leap, or right-click to cancel. Shares a 15-second cooldown across all forms and grants Speed I for 5 seconds on landing. Max horizontal ranges are 25 / 30 / 27 blocks (biped / quadruped / Beast). Biped (3-block radius) and Beast (4-block radius) deal area landing damage (base damage 10, scaled by Claw Damage; Beast also knocks enemies back), while Quadruped applies Slowness.
+- **New Skill: Feral Leap (default `Z`)**: Costs 3 Skill Points. Press `Z` to aim a landing marker, left-click to leap, or right-click to cancel. Shares a 15-second cooldown across all forms and grants Speed I for 5 seconds on landing. Max horizontal ranges are 25 / 30 / 27 blocks (biped / quadruped / Beast). Biped (3-block radius, base damage 7) and Beast (4-block radius, base damage 10, plus knockback) deal area landing damage scaled by Claw Damage, while Quadruped applies Slowness.
 - **New Gear & Weapons**:
   - **Silver-Tanned Hide & Silverhide Armor**: Crafted from Werewolf Pelts, Silver Ingots, and Wolfsbane. Matches iron armor in protection and durability while being lighter, easier to enchant, and granting a movement speed boost; each piece reduces freezing and werewolf damage by 10%, with an extra 10% reduction for wearing all four pieces.
   - **Silver-Oath Crossbow**: Craftable, supports vanilla crossbow enchantments, and also carried by village patrol Hunters. Its arrows deal 25% bonus damage to werewolves and inflict Weakness I for 2 seconds (once every 5 seconds per target).
 - **Modern Model & Appearance Upgrades**:
   - Modern bipedal werewolves can now switch between **Full Model** and **Player Overlay** (rendering wolf ears, claws, and an animated swaying tail over your vanilla player skin and outer layers); progression and skin screens preview your actual player skin.
   - Fixed Modern model and clipped armor UV rendering under Sodium.
-- **Dialogue, Guide & Gameplay Polish**:
+- **Dialogue, Guide & Gameplay Balance**:
   - Added Guide Chapter 10 (*Settlements & Factions*) and polished bilingual guides, skill descriptions, and NPC dialogue throughout. Companions now have arrival lines for the Nether, End, villages, and werewolf tribes plus ambient chatter; Moonwardens and Chieftains have expanded idle, full-moon, and combat dialogue.
-  - Summoning a werewolf brother now keeps the central Moonbane Pearl on the altar for reuse or retrieval; Tribe Werewolf and Chieftain attacks share the feral werewolf infection chance config; max-level Beast Form is immune to `generic_kill`.
+  - **Summon Wolf Spirits** cooldown adjusted to **120 seconds**; summoning a werewolf brother now keeps the central Moonbane Pearl on the altar for reuse or retrieval; Tribe Werewolf and Chieftain attacks share the feral werewolf infection chance config; max-level Beast Form is immune to `generic_kill`.
 
 ## What the bloodline brings
 
@@ -183,8 +184,8 @@ All key bindings can be changed in Minecraft's Controls settings.
 
 Hostile **Hunter Outposts** and **Werewolf Tribes** now dot the Overworld alongside wild encounters.
 
-- **Hunter Watchtowers & Patrols**: Hunters stay neutral toward ordinary humans and attack transformed players and tribe werewolves. Villages may feature a watchtower, armory, and training yard alongside persistent patrols of **4–6 Hunters** (Hunters cannot spawn within 48 blocks of tribe buildings). Patrol Hunters carry **Silver Swords** or **Silver-Oath Crossbows** (arrows deal 25% bonus damage to werewolves and inflict Weakness I); the **Silver-Oath Moonwarden** wears **Silverhide armor**, throws Instant Health II potions to support allies, and trades and restocks by day.
-- **Werewolf Tribes**: Generate in forests, birch forests, taigas, plains, and savannas from native materials, featuring the Chieftain's longhouse, workshops, storehouse, homes, and a ready-to-use **Moon-Oath ritual site** (bring offerings to start an Alpha Trial or summon a werewolf brother directly). Residents work by day and sleep at night; the **Werewolf Chieftain** trades by day and heals nearby kin in combat.
+- **Hunter Watchtowers & Patrols**: Hunters stay neutral toward ordinary humans and attack transformed players and tribe werewolves. Villages may feature a watchtower, armory, and training yard alongside persistent patrols of **4–6 Hunters** (Hunters cannot spawn within 48 blocks of tribe buildings). Patrol Hunters carry **Silver Swords** or **Silver-Oath Crossbows** (arrows deal 25% bonus damage to werewolves and inflict Weakness I); the **Silver-Oath Moonwarden** wears **Silverhide armor**, throws Instant Health II potions to support allies, and trades and restocks by day (5 offers favoring silver and silver-for-pelt trades, with Wolfsbane Potions only).
+- **Werewolf Tribes**: Generate in forests, birch forests, taigas, plains, and savannas from native materials, featuring the Chieftain's longhouse, workshops, storehouse, homes, and a ready-to-use **Moon-Oath ritual site** (bring offerings to start an Alpha Trial or summon a werewolf brother directly). Residents work by day and sleep at night; the **Werewolf Chieftain** trades and restocks by day (6 offers favoring Wolfsbane and Moonbane Pearls, with Werewolf Potions only) and heals nearby kin in combat. See the [trade tables](docs/COMPANION-TABLES.md#merchant-trades).
 - **Silverhide Armor & Pelts**: Slain Feral Werewolves, tribe members, and trades yield **Werewolf Pelts**, which combine with Silver Ingots and Wolfsbane into **Silver-Tanned Hide** and a four-piece armor set matching iron protection and durability while being lighter, easier to enchant, and granting speed. Each piece reduces freezing and werewolf damage by 10%, with an extra 10% damage reduction for the full set.
 - **Silver Swords, Wolfsbane, and Feral Werewolves**: Silver Swords deal 50% extra damage to werewolves and inflict Weakness II. Ordinary Hunters drop at least one Wolfsbane Flower, making them the steadiest source. Feral Werewolves naturally spawn only in eligible Overworld forests on dark full-moon nights. Moonbane Pearls are crafted from an Ender Pearl and Wolfsbane for rituals, companion upgrades, and Alpha Werewolf Badges.
 - **Locate Commands**: With command permissions, use `/locate structure #howlingwerewolf:werewolf_tribes` to locate the nearest werewolf tribe, or `/locate structure howlingwerewolf:hunter_watchtower` to find a watchtower.
@@ -315,7 +316,7 @@ When reporting an issue, provide:
 
 ## Source and building
 
-The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.1**, **NeoForge for Minecraft 26.1.2**, and **Fabric for Minecraft 26.3**. The latest Mod version is **1.4.7** (currently led by NeoForge 1.21.1). Updates for **Fabric on Minecraft 1.21.11** are paused at **1.3.8**.
+The project currently maintains **Forge for Minecraft 1.20.1**, **NeoForge for Minecraft 1.21.1**, **Fabric for Minecraft 1.21.1**, **NeoForge for Minecraft 26.1.2**, and **Fabric for Minecraft 26.3**. The latest Mod version is **1.5.0** (synced across all five maintained editions, led by NeoForge 1.21.1). Updates for **Fabric on Minecraft 1.21.11** are paused at **1.3.8**.
 
 [GitHub project and latest news](https://github.com/R-Eatch/howling-werewolf) · [Release notes and available files](https://github.com/R-Eatch/howling-werewolf/releases) · [Modrinth](https://modrinth.com/mod/howling-werewolf) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/howling-werewolf) · [Report an issue](https://github.com/R-Eatch/howling-werewolf/issues)
 

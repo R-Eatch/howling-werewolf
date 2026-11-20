@@ -1,5 +1,6 @@
 package com.howlingwerewolf.client;
 
+import com.howlingwerewolf.entity.HunterEntity;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;

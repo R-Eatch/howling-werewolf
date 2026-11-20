@@ -13,7 +13,10 @@ import com.howlingwerewolf.capability.WerewolfData;
 import com.howlingwerewolf.content.ModItems;
 import com.howlingwerewolf.content.ModSounds;
 import com.howlingwerewolf.content.ModTags;
+import com.howlingwerewolf.content.HunterCrossbowItem;
 import com.howlingwerewolf.entity.WerewolfCompanionEntity;
+import com.howlingwerewolf.entity.SettlementLeaderEntity;
+import com.howlingwerewolf.entity.TribeWerewolfEntity;
 import com.howlingwerewolf.entity.WerewolfEntity;
 import com.howlingwerewolf.network.ModNetwork;
 import net.minecraft.ChatFormatting;
@@ -104,7 +107,7 @@ public final class WerewolfGameplayEvents {
     private static final Identifier CLAW_ENTITY_REACH_ID = modifierId("claw_entity_reach");
     private static final Identifier AUTO_STEP_ID = modifierId("auto_step");
     private static final int SPIRIT_DURATION_TICKS = 20 * 60 * 4;
-    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 60;
+    private static final int SPIRIT_COOLDOWN_TICKS = 20 * 120;
     private static final int BLOODY_BITE_COOLDOWN_TICKS = 20 * 60;
     private static final int BLOODY_BITE_EFFECT_TICKS = 20 * 15;
     private static final int MOONBLOOD_REGENERATION_TICKS = 20 * 45;
@@ -170,7 +173,6 @@ public final class WerewolfGameplayEvents {
             processMoonbloodCrash(player, data);
             refreshWerewolfModifiers(player, data);
             processFormRules(player, data);
-            PeltArmor.refreshSpeed(player);
             PounceAbility.tick(player, data);
             processTotemExperience(player, data);
             processSpiritWolves(player, data);
@@ -327,12 +329,15 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void livingHurt(LivingIncomingDamageEvent event) {
+        event.setAmount(HunterCrossbowItem.damage(event.getEntity(), event.getSource(), event.getAmount()));
         if (!(event.getEntity() instanceof ServerPlayer victim)) return;
         WerewolfApi.get(victim).ifPresent(data -> {
             Entity infectionSource = event.getSource().getEntity();
             double infectionChance = infectionSource instanceof Wolf wolf && !wolf.isTame()
                     ? HWConfig.WOLF_INFECTION_CHANCE.get()
-                    : infectionSource instanceof WerewolfEntity werewolf && !werewolf.isSummonedByAlpha()
+                    : (infectionSource instanceof WerewolfEntity werewolf && !werewolf.isSummonedByAlpha()
+                            || infectionSource instanceof TribeWerewolfEntity
+                            || infectionSource instanceof SettlementLeaderEntity leader && !leader.isWarden())
                     ? HWConfig.FERAL_WEREWOLF_INFECTION_CHANCE.get() : -1.0D;
             if (!data.isWerewolf() && !data.isInfected() && event.getAmount() > 0.0F
                     && infectionChance >= 0.0D
@@ -344,9 +349,14 @@ public final class WerewolfGameplayEvents {
                 ModNetwork.sync(victim, data);
             }
             if (!data.isWerewolf() || !data.isTransformed()) return;
+            if (event.getSource().is(DamageTypes.GENERIC_KILL)
+                    && data.isBeastMode() && data.getLevel() >= WerewolfData.getMaxLevel()) {
+                event.setCanceled(true);
+                return;
+            }
             float amount = event.getAmount();
             if (event.getSource().is(DamageTypeTags.IS_FIRE)) amount *= WEREWOLF_FIRE_MULTIPLIER;
-            if (event.getSource().getEntity() instanceof LivingEntity attacker
+            if (!HunterCrossbowItem.firedArrow(event.getSource()) && event.getSource().getEntity() instanceof LivingEntity attacker
                     && attacker.getMainHandItem().is(ModTags.SILVER_WEAPONS)) {
                 amount *= 1.5F;
                 victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
@@ -385,9 +395,15 @@ public final class WerewolfGameplayEvents {
 
     @SubscribeEvent
     public static void reduceSilverhideDamage(LivingDamageEvent.Pre event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            event.setNewDamage(PeltArmor.reduce(player, event.getSource(), event.getNewDamage()));
-        }
+        event.setNewDamage(PeltArmor.reduce(event.getEntity(), event.getSource(), event.getNewDamage()));
+    }
+
+    @SubscribeEvent
+    public static void afterLivingDamage(LivingDamageEvent.Post event) {
+        if (event.getHealthDamage() <= 0) return;
+        HunterCrossbowItem.onDamage(event.getEntity(), event.getSource());
+        if (event.getEntity() instanceof ServerPlayer player)
+            com.howlingwerewolf.entity.SettlementCombat.defendPlayer(player, event.getSource().getEntity());
     }
 
     @SubscribeEvent
@@ -742,7 +758,6 @@ public final class WerewolfGameplayEvents {
     public static void useAbility(ServerPlayer player, WerewolfAbility ability, int targetId) {
         if (ability == WerewolfAbility.SUMMON_WOLF_SPIRIT) summonWolfSpirits(player);
         else if (ability == WerewolfAbility.BLOODY_BITE) bloodyBite(player, targetId);
-        else if (ability == WerewolfAbility.POUNCE) PounceAbility.start(player);
         else if (ability == WerewolfAbility.MOONBLOOD_SURGE) useMoonbloodSurge(player);
     }
 
@@ -1003,8 +1018,7 @@ public final class WerewolfGameplayEvents {
             removeModifier(player.getAttribute(Attributes.ATTACK_DAMAGE), CLAW_DAMAGE_ID);
             return;
         }
-        double damage = (4 + data.getLevel() / 5)
-                * (1.0D + data.getTreeSkillRank(WerewolfTreeSkill.DAMAGE) * 0.30D);
+        double damage = (4 + data.getLevel() / 5) * data.clawDamageMultiplier();
         setTransientModifier(player.getAttribute(Attributes.ATTACK_DAMAGE), CLAW_DAMAGE_ID,
                 "howlingwerewolf claw damage", damage - 1.0D);
     }

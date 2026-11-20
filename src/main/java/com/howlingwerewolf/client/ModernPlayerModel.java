@@ -122,8 +122,13 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
             target.y += (source.y - rest.y()) / rig.scale();
             target.z += (source.z - rest.z()) / rig.scale();
         }
-        if (!ClientPouncePose.active(state)) applyNativeHands(state);
-        if (form == WerewolfForm.BEAST && !ClientPouncePose.active(state)) {
+        boolean pouncing = ClientPouncePose.active(state);
+        if (!pouncing) applyNativeHands(state);
+        if (form == WerewolfForm.BEAST && pouncing) {
+            anchorPounceHip("rightLeg");
+            anchorPounceHip("leftLeg");
+        }
+        if (form == WerewolfForm.BEAST && !pouncing) {
             var motion = WerewolfRenderData.get(state);
             if (state.isCrouching && !state.isPassenger && !state.isInWater && !state.isFallFlying && state.isUsingItem) {
                 // Aiming keeps the upright crouch, so native arm poses still point at the target.
@@ -185,21 +190,21 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
     }
 
     private void animateTail(S state) {
-        float phase = state.ageInTicks * 0.085F;
-        float movement = Mth.clamp(state.walkAnimationSpeed, 0, 1);
         float strength = state.isCrouching ? 0.55F : form == WerewolfForm.BEAST
                 && WerewolfRenderData.get(state).beastRunAmount() > 0 ? 0.45F : 1;
-        String[] names = {"tail", "tail_main12", "tail_12"};
-        float[] amplitudes = {0.09F, 0.13F, 0.18F};
-        for (int index = 0; index < names.length; index++) {
-            ModelPart tail = rig.bone(names[index]);
-            float lag = index * 0.45F;
-            tail.yRot = tail.getInitialPose().yRot() + strength * (
-                    Mth.sin(phase - lag) * amplitudes[index]
-                    + Mth.sin(state.ageInTicks * 0.031F - lag) * 0.025F
-                    + Mth.sin(state.walkAnimationPos * 0.6F - lag) * movement * 0.045F);
-            tail.xRot += Mth.sin(state.ageInTicks * 0.06F - lag) * 0.012F * strength;
-        }
+        swayTail(rig.bone("tail"), 0, state.ageInTicks, state.walkAnimationPos, state.walkAnimationSpeed, strength);
+        swayTail(rig.bone("tail_main12"), 1, state.ageInTicks, state.walkAnimationPos, state.walkAnimationSpeed, strength);
+        swayTail(rig.bone("tail_12"), 2, state.ageInTicks, state.walkAnimationPos, state.walkAnimationSpeed, strength);
+    }
+
+    static void swayTail(ModelPart tail, int segment, float age, float swing, float speed, float strength) {
+        float amplitude = switch (segment) { case 0 -> 0.09F; case 1 -> 0.13F; default -> 0.18F; };
+        float lag = segment * 0.45F;
+        tail.yRot = tail.getInitialPose().yRot() + strength * (
+                Mth.sin(age * 0.085F - lag) * amplitude
+                + Mth.sin(age * 0.031F - lag) * 0.025F
+                + Mth.sin(swing * 0.6F - lag) * Mth.clamp(speed, 0, 1) * 0.045F);
+        tail.xRot += Mth.sin(age * 0.06F - lag) * 0.012F * strength;
     }
 
     private static boolean blockedQuadruped(HumanoidRenderState state) {
@@ -399,6 +404,11 @@ final class ModernPlayerModel<S extends HumanoidRenderState> extends EntityModel
         float angle = hip.xRot - rest;
         hip.y = baseY + HIP_SOCKET * (Mth.cos(angle) - 1);
         hip.z = baseZ + HIP_SOCKET * Mth.sin(angle);
+    }
+
+    private void anchorPounceHip(String bone) {
+        ModelPart thigh = rig.bone(bone);
+        swingFromSocket(thigh, thigh.getInitialPose().xRot(), thigh.y, thigh.z);
     }
 
     private void restBend(String effector, String[] joints) {

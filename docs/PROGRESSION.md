@@ -2,7 +2,7 @@
 
 [简体中文](PROGRESSION-zh.md) · [Back to README](../README.md)
 
-These values apply to all four editions of 1.4.0. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
+These values apply to all five maintained editions of 1.5.0. The default maximum level is 20 and can be raised to 25 in the [configuration](CONFIG.md); levels 21–25 exist only after raising it.
 
 ## Experience sources
 
@@ -78,7 +78,7 @@ Skills are unlocked with Skill Points, once each; unlocking all of them takes 28
 | Skill | Cost | Key | Numbers |
 |---|---:|---|---|
 | Night Vision | 1 | — | Night Vision while transformed. |
-| Summon Wolf Spirits | 3 | N | Summons 5 wolf spirits that follow and assist you for 4 minutes; 60-second cooldown. |
+| Summon Wolf Spirits | 3 | N | Summons 5 wolf spirits that follow and assist you for 4 minutes; 120-second cooldown. |
 | Wildstride Form | 4 | G | Switches between normal Werewolf and Quadruped Wolf. As a Quadruped Wolf, speed and jumping rise sharply, attack damage drops slightly, and no equipment can be worn. |
 | Moonblood Surge | 3 | R | Regeneration III for 45 s, Absorption IV for 60 s, decaying Resistance (III for 10 s → II for 15 s → I for 35 s), and Strength II / Speed II / Jump Boost I / Fire Resistance for 90 s. Afterwards: Weakness II, Mining Fatigue III and Slowness I for 60 s. 4-minute cooldown. |
 | Armored Instinct | 2 | — | Lets you wear armor and elytra in normal Werewolf form only. Each piece with an armor value: natural reduction −25%, movement and jump bonuses −17.5%; zero-armor pieces such as elytra do not count. |
@@ -88,7 +88,7 @@ Skills are unlocked with Skill Points, once each; unlocking all of them takes 28
 | Tool Claws | 2 | — | While transformed and empty-handed, your claws work like iron pickaxes, axes and shovels and can harvest iron-tier blocks. Can be switched on the Abilities page. |
 | Fire Claws | 2 | — | Transformed empty-hand attacks work like Fire Aspect II (8 seconds of fire). Can be switched on the Abilities page. |
 | Bloody Bite | 3 | B | Bites the aimed target for 1.8× your current claw damage and applies Weakness II, Slowness III, Hunger I and Poison I for 15 seconds each; 60-second cooldown. |
-| Pounce | 3 | Z | On landing, Werewolf strikes ahead, Quadruped slows nearby targets, and Beast damages and knocks back nearby targets. Enhanced Jump strengthens the pounce. Shared 5-second cooldown. |
+| Feral Leap | 3 | Z | Press `Z` to aim a landing marker, left-click to leap, or right-click to cancel. Max horizontal range: 25 / 30 / 27 blocks (biped / quadruped / Beast). Grants Speed I for 5 s on landing. Biped (3-block radius, base damage 7) and Beast (4-block radius, base damage 10, plus knockback) deal area damage scaled by Claw Damage; Quadruped applies Slowness. Shared 15-second cooldown. |
 
 ## Reset
 

@@ -11,6 +11,14 @@
     {
       "structure": "howlingwerewolf:werewolf_tribe_taiga",
       "weight": 1
+    },
+    {
+      "structure": "howlingwerewolf:werewolf_tribe_plains",
+      "weight": 1
+    },
+    {
+      "structure": "howlingwerewolf:werewolf_tribe_savanna",
+      "weight": 1
     }
   ],
   "placement": {

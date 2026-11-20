@@ -2,7 +2,7 @@
 
 [English](CONFIG.md) · [返回 README](../README-zh.md)
 
-本页适用于 1.4.0 的全部四个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.1 Fabric 和 26.1.2 NeoForge，各版本的配置项和默认值相同。
+本页适用于 1.5.0 维护的全部五个版本：1.20.1 Forge、1.21.1 NeoForge、1.21.1 Fabric、26.1.2 NeoForge 和 26.3 Fabric，各版本的配置项和默认值相同。
 
 ## 文件位置
 
@@ -25,7 +25,7 @@
 | `companionSortingReach` | `32` | 3–64 | 随从走不到跟前时，仍可隔空整理的最远距离（格）。能走到时随从总会走过去；设为 3 表示走不到就跳过。 |
 | `npcModelSet` | `"modern"` | `modern` / `classic` | 野生狼人、刷怪蛋狼人、Alpha 及其召唤狼群使用的模型。`modern`：Alpha 与狼群用 Ashen 毛色，野生狼人随机一种毛色并保存；`classic`：全部用 Adrian。配置重载后已有实体随之更新；玩家自己选的皮肤不受影响。 |
 | `wolfInfectionChance` | `0.10` | 0.0–1.0 | 未驯服的原版狼伤害人类玩家时的感染几率。 |
-| `feralWerewolfInfectionChance` | `0.20` | 0.0–1.0 | 野生失控狼人伤害人类玩家时的感染几率。Alpha 召唤的狼人不会感染。 |
+| `feralWerewolfInfectionChance` | `0.20` | 0.0–1.0 | 野生失控狼人、部落狼人或部落酋长伤害人类玩家时的感染几率。Alpha 召唤的狼人不会感染。 |
 | `werewolfExperienceGainMultiplier` | `1.0` | 0.0–100.0 | 狼人经验的最终倍率，不影响管理员经验命令。 |
 | `maxWerewolfLevel` | `20` | 1–25 | 狼人等级上限。调低后，存档里超出上限的等级会在加载时降到上限。 |
 | `beastModeVoidDamage` | `false` | true / false | 为 `true` 时，野兽形态的近战改用虚空伤害类型；为 `false` 时与普通狼人攻击相同。 |
@@ -41,7 +41,7 @@
 |---|---|---|---|
 | `generateSilverOre` | `true` | true / false | 在新生成的区块中生成银矿，不改动已有区块。 |
 | `generateWolfsbane` | `true` | true / false | 在新生成的区块中生成狼毒花，不改动已有区块。 |
-| `hunterSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | 猎人自然生成权重（默认 50）的倍率；0 关闭自然生成。这是相对权重，不是生成概率。修改后需重新进入世界。 |
+| `hunterSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | 猎人自然生成权重（默认 25）的倍率；0 关闭自然生成。这是相对权重，不是生成概率。修改后需重新进入世界。 |
 | `feralWerewolfSpawnWeightMultiplier` | `1.0` | 0.0–10.0 | 失控狼人自然生成权重（默认 200）的倍率；0 关闭自然生成。满月、夜晚和亮度规则仍然生效。修改后需重新进入世界。 |
 | `wolfsbaneGenerationWeight` | `100` | 0–200 | 狼毒花生成频率。0 不生成；100 为默认频率（约每 8 个针叶林区块或 22 个森林区块尝试一次）；200 为两倍。 |
 

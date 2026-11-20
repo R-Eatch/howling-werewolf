@@ -1,6 +1,6 @@
 # 制作自己的狼人皮肤
 
-适用于 **月厄狼人 1.4.0 · Minecraft 26.1.2 NeoForge**。无需安装额外 Mod。
+适用于 **月厄狼人 1.5.0 · Minecraft 26.1.2 NeoForge**。无需安装额外 Mod。
 
 ## 从游戏内开始
 
@@ -20,9 +20,11 @@
 
 游戏内创建的模板会把上述 `mywolf` 自动换成唯一的 `wolfskin_…` 文件夹名，以免多个作品互相覆盖。请使用你文件夹中实际存在的路径。可以编辑 `assets/<该文件夹名>/werewolf_skins/custom.json` 中的 `name`、`description`、`author`。JSON 的 `"model": "classic"` 或 `"model": "modern"` 决定使用哪套模型；省略时按 Classic 处理。`pack.mcmeta` 中的 `description` 用于修改资源包描述；资源包列表中的标题来自文件夹或 ZIP 文件名。
 
+在皮肤界面选择 Modern 后，可以在页首切换**完整模型／玩家模型**。两种双足样式读取同一套狼人的毛色纹理。玩家模型的身体仍使用你的 Minecraft 皮肤与动作，选中的毛色用于狼耳、利爪和尾巴。
+
 ## 分享与常见问题
 
-- 将 `pack.mcmeta`、`assets` 等文件压缩到 ZIP 根目录，发给朋友放入自己的 `resourcepacks` 并启用。双方还需要安装 1.4.0 Mod。服务器也可以通过原版服务器资源包分发功能提供同一个包。
+- 将 `pack.mcmeta`、`assets` 等文件压缩到 ZIP 根目录，发给朋友放入自己的 `resourcepacks` 并启用。双方还需要安装 1.5.0 Mod。服务器也可以通过原版服务器资源包分发功能提供同一个包。
 - 联机同步模型系列和皮肤 ID，不会自动上传图片。没有安装对应资源包的人会看到对应系列的默认皮肤（Classic 为 Adrian，Modern 为 Ashen）；已选皮肤 ID 仍保留，重新启用包后恢复。分享后不要随意改命名空间文件夹或 `custom.json` 文件名，它们共同决定皮肤 ID。
 - 普通玩家的 64 × 64 人形皮肤不能直接套用。三张 PNG 都必须存在，支持表中尺寸的 **1、2、3、4 倍等比放大**，每张不超过 **1 MiB**。
 - 皮肤 JSON 不超过 16 KiB；名称和作者各最多 48 字符，介绍最多 160 字符。自定义命名空间不能使用保留的 `howlingwerewolf`。无效条目会跳过，原因见 `logs/latest.log`。

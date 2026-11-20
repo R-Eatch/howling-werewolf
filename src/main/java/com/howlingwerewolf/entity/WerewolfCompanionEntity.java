@@ -85,6 +85,8 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     private long lastHurt;
     private long lastAmbientLine = -200;
     private long nextIdleLine;
+    private boolean merchantTimeWarning;
+    private long nextMerchantTrade;
     private String merchantClassicSkin;
     private String merchantModernSkin;
     private final SimpleContainer merchantInventory = new SimpleContainer(CompanionRules.INVENTORY_SIZE);
@@ -296,12 +298,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         if (!(level() instanceof ServerLevel level)) return;
         if (tickCount % 20 == 0) refreshAppearance();
         if (!isRecruited()) {
-            if (level.getGameTime() >= expiresAt) {
-                ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
-                if (visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16) sayTo(visitor, "farewell");
-                closeTrading(); discard(); return;
-            }
-            tickArrival(level);
+            tickMerchant(level);
             return;
         }
         if (record == null) { discard(); return; }
@@ -359,6 +356,31 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
         sortBusy = false;
     }
     public void resetIdleDialogue() { nextIdleLine = level().getGameTime() + 1200 + random.nextInt(1201); }
+
+    private void tickMerchant(ServerLevel level) {
+        long now = level.getGameTime();
+        ServerPlayer visitor = summoner == null ? null : level.getServer().getPlayerList().getPlayer(summoner);
+        boolean nearby = visitor != null && visitor.level() == level && distanceToSqr(visitor) <= 16 * 16;
+        if (now >= expiresAt) {
+            if (nearby) sayTo(visitor, "farewell");
+            closeTrading();
+            discard();
+            return;
+        }
+        if (nearby && !merchantTimeWarning && expiresAt - now <= 2400) {
+            merchantTimeWarning = true;
+            sayTo(visitor, "time_warning");
+        } else if (nearby && altar == null && !isTrading() && now >= nextIdleLine) {
+            resetIdleDialogue();
+            sayTo(visitor, "idle");
+        }
+        tickArrival(level);
+    }
+
+    public void deferIdleDialogue() {
+        nextIdleLine = Math.max(nextIdleLine, level().getGameTime() + 1200);
+    }
+
     private void tickIdleDialogue(ServerPlayer player) {
         long now = level().getGameTime();
         if (now < nextIdleLine || record == null || !record.mode.hasEntity() || getTarget() != null
@@ -424,7 +446,10 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     @Override public void notifyTrade(MerchantOffer offer) {
         if (isRecruited() || !HWConfig.ENABLE_COMPANIONS.get()) return;
         super.notifyTrade(offer);
-        if (getTradingPlayer() instanceof ServerPlayer player) sayTo(player, "traded");
+        if (getTradingPlayer() instanceof ServerPlayer player && level().getGameTime() >= nextMerchantTrade) {
+            nextMerchantTrade = level().getGameTime() + 100;
+            sayTo(player, "traded");
+        }
     }
     @Override public boolean stillValid(Player player) {
         return HWConfig.ENABLE_COMPANIONS.get() && !isRecruited() && level().getGameTime() < expiresAt && super.stillValid(player);
@@ -571,7 +596,7 @@ public final class WerewolfCompanionEntity extends AbstractVillager implements W
     }
     public void sayTo(ServerPlayer player, String key) {
         if (record != null) CompanionDialogue.say(player, record, key);
-        else CompanionDialogue.send(player, getName().getString(), key, random);
+        else CompanionDialogue.sendMerchant(player, getName(), key, random);
     }
     public void sayOccasionally(ServerPlayer player, String key) {
         long now = level().getGameTime();

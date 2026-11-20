@@ -38,7 +38,7 @@ final class ModernPlayerRenderer extends WerewolfLivingRenderer<AbstractClientPl
         } else {
             addLayer(new ItemInHandLayer<>(this));
             if (form == WerewolfForm.WEREWOLF) {
-                addLayer(new ModernEquipmentLayer(this, context));
+                addLayer(new ModernEquipmentLayer<>(this, context));
                 addLayer(new ModernWingsLayer(this, context));
             }
         }

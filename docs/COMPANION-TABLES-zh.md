@@ -78,7 +78,7 @@
 | 银誓守月人 | 5 | 4 | 3 | 2 | 1 |
 | 部落酋长 | 6 | 5 | 4 | 2 | 1 |
 
-守月人偏向银锭补给和狼毒花药水，酋长偏向狼毒花补给和狼人类特殊物品。两者在工作时段靠近工作点时补货，每游戏日最多两次。召唤来的狼人兄弟在 20 TPS 下停留十分钟，区块卸载时会离开，交易不会暂停计时。
+守月人按 2:1 的适度权重偏向银锭补给及银锭结算的毛皮交易，且药水只会抽到狼毒花药水（绝不出狼人药水）。部落酋长按 2:1 的适度权重偏向狼毒花补给、狼毒花结算的毛皮交易与月厄珍珠，且药水只会抽到狼人药水（绝不出狼毒花药水）。召唤来的狼人兄弟仍从全部 13 项中均匀抽取，保持不变。两位据点首领在工作时段靠近工作点时补货，每游戏日最多两次。召唤来的狼人兄弟在 20 TPS 下停留十分钟，区块卸载时会离开，交易不会暂停计时。
 
 | 玩家交付 | 玩家获得 | 类别 |
 |---|---|---|
@@ -95,3 +95,11 @@
 | 6 狼毒花＋1 钻石 | 1 月厄珍珠 | 珍珠 |
 | 4 狼毒花＋2 绿宝石 | 1 狼人药水 | 药水 |
 | 4 银锭＋2 绿宝石 | 1 狼毒花药水 | 药水 |
+
+## 数据包入口与代码
+
+- 狩猎表：`data/howlingwerewolf/loot_table/gameplay/companion_hunt.json`。
+- 商人抽选：`data/howlingwerewolf/trade_set/werewolf_brother.json`。
+- 单条交易：`data/howlingwerewolf/villager_trade/werewolf_brother/*.json`。
+- 阶数、时长与冷却规则：[CompanionRules.java](../src/main/java/com/howlingwerewolf/companion/CompanionRules.java)。
+- 结算、背包合并和溢出：[CompanionManager.java](../src/main/java/com/howlingwerewolf/companion/CompanionManager.java)。

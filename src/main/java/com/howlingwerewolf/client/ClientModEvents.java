@@ -89,6 +89,13 @@ public final class ClientModEvents {
     }
 
     @SubscribeEvent
+    public static void addPlayerLayers(EntityRenderersEvent.AddLayers event) {
+        for (var skinModel : event.getSkins()) {
+            event.getPlayerRenderer(skinModel).addLayer(new ModernPlayerOverlayLayer(event.getPlayerRenderer(skinModel)));
+        }
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.HUNTER.get(), HunterRenderer::new);
         event.registerEntityRenderer(ModEntities.ALPHA_WEREWOLF.get(), AlphaWerewolfRenderer::new);
@@ -96,8 +103,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.WEREWOLF.get(), WerewolfEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.WEREWOLF_COMPANION.get(), CompanionRenderer::new);
         event.registerEntityRenderer(ModEntities.HUNTER_CAPTAIN.get(), HunterCaptainRenderer::new);
-        event.registerEntityRenderer(ModEntities.TRIBE_CHIEF.get(), context -> new WerewolfNpcRenderer<>(context,
-                com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.60F) {});
+        event.registerEntityRenderer(ModEntities.TRIBE_CHIEF.get(), TribeChiefRenderer::new);
         event.registerEntityRenderer(ModEntities.TRIBE_WEREWOLF.get(), context -> new WerewolfNpcRenderer<>(context,
                 com.howlingwerewolf.WerewolfForm.WEREWOLF, 0.55F) {});
         event.registerEntityRenderer(ModEntities.SQUAD_HEALING_POTION.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);

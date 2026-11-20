@@ -21,6 +21,12 @@ public final class HunterRenderer extends WerewolfLivingRenderer<HunterEntity, H
     public void extractRenderState(HunterEntity entity, HunterRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         state.trialHunter = entity.isTrialHunter();
+        if (entity.holdsHunterCrossbow()) {
+            var pose = entity.isUsingItem() ? net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_CHARGE
+                    : net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD;
+            if (entity.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT) state.rightArmPose = pose;
+            else state.leftArmPose = pose;
+        }
     }
 
     @Override

@@ -62,12 +62,12 @@ public final class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<TribeWerewolfEntity>> TRIBE_WEREWOLF =
             ENTITIES.register("tribe_werewolf", () -> EntityType.Builder.<TribeWerewolfEntity>of(TribeWerewolfEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(ResourceKey.create(
+                    .sized(0.6F, 2.0F).clientTrackingRange(10).build(ResourceKey.create(
                             Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "tribe_werewolf"))));
 
     public static final DeferredHolder<EntityType<?>, EntityType<SettlementLeaderEntity>> TRIBE_CHIEF =
             ENTITIES.register("tribe_chief", () -> EntityType.Builder.<SettlementLeaderEntity>of(SettlementLeaderEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(ResourceKey.create(
+                    .sized(0.6F, 2.0F).clientTrackingRange(10).build(ResourceKey.create(
                             Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "tribe_chief"))));
 
     public static final DeferredHolder<EntityType<?>, EntityType<SquadHealingPotion>> SQUAD_HEALING_POTION =
