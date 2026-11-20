@@ -2,7 +2,7 @@
 
 [简体中文](ADMIN_COMMANDS-zh.md)
 
-This guide applies to Howling Werewolf `1.4.4` for Minecraft 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
+This guide applies to Howling Werewolf `1.5.0` for Minecraft 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3. These commands are intended for development, acceptance testing, server administration, and save diagnostics.
 
 ## Requirements
 

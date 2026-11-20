@@ -25,9 +25,14 @@ public final class WerewolfSkinRenderContext {
 
     public static void withPreview(AbstractClientPlayer player, WerewolfForm form,
                                    WerewolfModelSet modelSet, String skinId, Runnable render) {
+        withPreview(player, form, modelSet, skinId, false, render);
+    }
+
+    public static void withPreview(AbstractClientPlayer player, WerewolfForm form, WerewolfModelSet modelSet,
+                                   String skinId, boolean modernPlayerModel, Runnable render) {
         Preview previous = PREVIEW.get();
         PREVIEW.set(new Preview(Objects.requireNonNull(player), Objects.requireNonNull(form),
-                Objects.requireNonNull(modelSet), Objects.requireNonNull(skinId)));
+                Objects.requireNonNull(modelSet), Objects.requireNonNull(skinId), modernPlayerModel));
         try {
             render.run();
         } finally {
@@ -60,7 +65,18 @@ public final class WerewolfSkinRenderContext {
         return WerewolfApi.get(player).map(data -> data.getModelSet()).orElse(WerewolfModelSet.CLASSIC);
     }
 
-    private record Preview(AbstractClientPlayer player, WerewolfForm form, WerewolfModelSet modelSet, String skinId) {}
+    static boolean usesModernPlayerModel(AbstractClientPlayer player) {
+        Preview preview = PREVIEW.get();
+        if (preview != null && preview.player() == player) {
+            return preview.form() == WerewolfForm.WEREWOLF && preview.modelSet() == WerewolfModelSet.MODERN
+                    && preview.modernPlayerModel();
+        }
+        return WerewolfApi.get(player).map(data -> data.getForm() == WerewolfForm.WEREWOLF
+                && data.getModelSet() == WerewolfModelSet.MODERN && data.prefersModernPlayerModel()).orElse(false);
+    }
+
+    private record Preview(AbstractClientPlayer player, WerewolfForm form, WerewolfModelSet modelSet,
+                           String skinId, boolean modernPlayerModel) {}
 
     private WerewolfSkinRenderContext() {}
 }

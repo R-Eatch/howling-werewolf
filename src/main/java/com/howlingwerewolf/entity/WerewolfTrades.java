@@ -100,21 +100,21 @@ final class WerewolfTrades {
             all.addAll(specials);
         }
         // Reserve both directions even when an external trade set reduces the requested count.
-        add(offers, buys, role, random, false, limit);
-        add(offers, sells, role, random, false, limit);
-        for (int i = 0; i < role.resources; i++) add(offers, resources, role, random, i == 0, limit);
+        add(offers, buys, role, random, limit);
+        add(offers, sells, role, random, limit);
+        for (int i = 0; i < role.resources; i++) add(offers, resources, role, random, limit);
         if (role.pelts == 3) {
             List<Trade> extra = (buys.isEmpty() || (!sells.isEmpty() && random.nextBoolean())) ? sells : buys;
-            add(offers, extra, role, random, false, limit);
+            add(offers, extra, role, random, limit);
         }
-        for (int i = 0; i < role.specials; i++) add(offers, specials, role, random, i == 0, limit);
+        for (int i = 0; i < role.specials; i++) add(offers, specials, role, random, limit);
         if (offers.size() >= limit) return;
 
         List<Trade> remaining = new ArrayList<>(resources);
         remaining.addAll(buys);
         remaining.addAll(sells);
         remaining.addAll(specials);
-        while (!remaining.isEmpty() && offers.size() < limit) add(offers, remaining, role, random, false, limit);
+        while (!remaining.isEmpty() && offers.size() < limit) add(offers, remaining, role, random, limit);
         if (!all.isEmpty()) {
             while (offers.size() < limit) offers.add(all.get(random.nextInt(all.size())).forRole(role));
         }
@@ -123,8 +123,16 @@ final class WerewolfTrades {
     private static Trade classify(MerchantOffer offer) {
         var output = offer.getResult();
         var input = offer.getBaseCostA();
-        if (output.is(ModItems.WEREWOLF_PELT.get())) return new Trade(offer, Category.BUY_PELT, null);
-        if (input.is(ModItems.WEREWOLF_PELT.get())) return new Trade(offer, Category.SELL_PELT, null);
+        if (output.is(ModItems.WEREWOLF_PELT.get())) {
+            return new Trade(offer, Category.BUY_PELT,
+                    input.is(ModItems.SILVER_INGOT.get()) ? MerchantRole.WARDEN
+                            : input.is(ModBlocks.WOLFSBANE.get().asItem()) ? MerchantRole.CHIEF : null);
+        }
+        if (input.is(ModItems.WEREWOLF_PELT.get())) {
+            return new Trade(offer, Category.SELL_PELT,
+                    output.is(ModItems.SILVER_INGOT.get()) ? MerchantRole.WARDEN
+                            : output.is(ModBlocks.WOLFSBANE.get().asItem()) ? MerchantRole.CHIEF : null);
+        }
         if (output.is(ModItems.MOONBANE_PEARL.get())) {
             return new Trade(offer, Category.PEARL, input.is(ModBlocks.WOLFSBANE.get().asItem()) ? MerchantRole.CHIEF : null);
         }
@@ -135,19 +143,25 @@ final class WerewolfTrades {
         return new Trade(offer, Category.RESOURCE, null);
     }
 
-    private static void add(MerchantOffers offers, List<Trade> pool, MerchantRole role, RandomSource random,
-                            boolean preferSpecialty, int limit) {
+    private static void add(MerchantOffers offers, List<Trade> pool, MerchantRole role, RandomSource random, int limit) {
         if (offers.size() >= limit || pool.isEmpty()) return;
-        if (preferSpecialty) {
-            List<Trade> preferred = pool.stream().filter(trade -> trade.specialty() == role).toList();
-            if (!preferred.isEmpty()) {
-                Trade chosen = preferred.get(random.nextInt(preferred.size()));
-                pool.remove(chosen);
-                offers.add(chosen.forRole(role));
+        int totalWeight = 0;
+        for (Trade trade : pool) totalWeight += weight(trade, role);
+        int pick = random.nextInt(totalWeight);
+        for (int i = 0; i < pool.size(); i++) {
+            pick -= weight(pool.get(i), role);
+            if (pick < 0) {
+                offers.add(pool.remove(i).forRole(role));
                 return;
             }
         }
-        offers.add(pool.remove(random.nextInt(pool.size())).forRole(role));
+        offers.add(pool.remove(pool.size() - 1).forRole(role));
+    }
+
+    private static int weight(Trade trade, MerchantRole role) {
+        if (role == MerchantRole.BROTHER) return 1;
+        if (role == MerchantRole.WARDEN) return trade.specialty() == MerchantRole.WARDEN ? 2 : 1;
+        return (trade.category() == Category.PEARL || (trade.specialty() == MerchantRole.CHIEF && trade.category() != Category.POTION)) ? 2 : 1;
     }
 
     private WerewolfTrades() {}

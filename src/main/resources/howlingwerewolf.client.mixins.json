@@ -7,7 +7,9 @@
     "PounceClickMixin",
     "PounceMovementMixin",
     "PlayerRendererMixin",
-    "ItemInHandRendererMixin"
+    "ItemInHandRendererMixin",
+    "ModernPlayerArmMixin",
+    "PlayerOverlayLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

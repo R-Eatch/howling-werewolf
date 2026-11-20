@@ -54,7 +54,7 @@ final class CompanionPreview {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null) { player = null; return; }
         if (player == null || player.level() != minecraft.level) {
-            player = WerewolfSkinScreen.createPreviewPlayer(minecraft.level, minecraft.player.getGameProfile());
+            player = WerewolfSkinScreen.createPreviewPlayer(minecraft.level, minecraft.player);
         }
         player.tickCount = minecraft.player.tickCount;
         float horizontal = (float) Math.atan((moonX - mouseX) / 90.0);

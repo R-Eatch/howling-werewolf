@@ -461,7 +461,7 @@ public final class WerewolfProgressionScreen extends Screen {
     private void drawFigure(GuiGraphicsExtractor graphics, @Nullable WerewolfData data, float x, float feet, float radius, float mouseX, float mouseY, boolean stage) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) { figure = null; return; }
-        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player.getGameProfile());
+        if (figure == null || figure.level() != mc.level) figure = WerewolfSkinScreen.createPreviewPlayer(mc.level, mc.player);
         RemotePlayer player = figure;
         boolean werewolf = data != null && data.isWerewolf();
         WerewolfForm form = !werewolf ? WerewolfForm.HUMAN : data.isTransformed() ? data.getForm() : WerewolfForm.WEREWOLF;

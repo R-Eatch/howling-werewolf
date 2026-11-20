@@ -6,13 +6,16 @@ import com.howlingwerewolf.ModernSkin;
 import com.howlingwerewolf.WerewolfForm;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.HumanoidArm;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,10 +37,18 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
     }
 
     static final List<WerewolfForm> FORMS = List.of(WerewolfForm.WEREWOLF, WerewolfForm.QUADRUPED, WerewolfForm.BEAST);
+    private static final Identifier PLAYER_GEOMETRY = Identifier.fromNamespaceAndPath(
+            HowlingWerewolf.MOD_ID, "models/entity/modern/werewolf_player.bbmodel");
     private static Map<WerewolfForm, BlockbenchModel> models = Map.of();
+    private static PlayerParts playerParts;
     private static int revision;
 
-    protected record Prepared(Map<WerewolfForm, BlockbenchModel> models, Map<Identifier, byte[]> textures) {}
+    protected record Prepared(Map<WerewolfForm, BlockbenchModel> models, Map<Identifier, byte[]> textures,
+                              PlayerParts playerParts) {}
+
+    record PlayerParts(ModelPart head, ModelPart tail, ModelPart tailTip, ModelPart rightArm, ModelPart leftArm) {
+        ModelPart arm(HumanoidArm side) { return side == HumanoidArm.RIGHT ? rightArm : leftArm; }
+    }
 
     static Identifier modelId(WerewolfForm form) {
         return Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "models/entity/modern/" + form.id() + ".bbmodel");
@@ -54,16 +65,15 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
     }
 
     static int revision() { return revision; }
+    static PlayerParts playerParts() { return playerParts; }
 
     @Override
     protected Prepared prepare(ResourceManager manager, ProfilerFiller profiler) {
         Map<WerewolfForm, BlockbenchModel> definitions = new EnumMap<>(WerewolfForm.class);
         Map<Identifier, byte[]> textures = new LinkedHashMap<>();
         for (WerewolfForm form : FORMS) {
-            try (InputStream input = manager.open(modelId(form))) {
-                byte[] bytes = input.readNBytes(8 * 1024 * 1024 + 1);
-                if (bytes.length > 8 * 1024 * 1024) throw new IOException("bbmodel exceeds 8 MiB");
-                JsonObject json = GsonHelper.parse(new String(bytes, StandardCharsets.UTF_8));
+            try {
+                JsonObject json = readGeometry(manager, modelId(form));
                 BlockbenchModel definition = new BlockbenchModel(json);
                 definition.bake(ModernPlayerModel.height(form));
                 definitions.put(form, definition);
@@ -94,7 +104,33 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
                 throw new IllegalArgumentException("Invalid Modern model " + modelId(form), error);
             }
         }
-        return new Prepared(Map.copyOf(definitions), Map.copyOf(textures));
+        try {
+            var geometry = new BlockbenchModel(readGeometry(manager, PLAYER_GEOMETRY));
+            var bones = geometry.bake(ModernPlayerModel.height(WerewolfForm.WEREWOLF));
+            // The parent PlayerModel supplies the animated head, arm and torso transforms.
+            // Read the named subtrees directly at their Blockbench size, without the scaled root pose.
+            var parts = new PlayerParts(atParentOrigin(bones.bone("head")), bones.bone("tail_main12"), bones.bone("tail_12"),
+                    atParentOrigin(bones.bone("rightArm")), atParentOrigin(bones.bone("leftArm")));
+            return new Prepared(Map.copyOf(definitions), Map.copyOf(textures), parts);
+        } catch (IOException error) {
+            throw new UncheckedIOException("Unable to load Modern model " + PLAYER_GEOMETRY, error);
+        } catch (RuntimeException error) {
+            throw new IllegalArgumentException("Invalid Modern model " + PLAYER_GEOMETRY, error);
+        }
+    }
+
+    private static JsonObject readGeometry(ResourceManager manager, Identifier id) throws IOException {
+        try (InputStream input = manager.open(id)) {
+            byte[] bytes = input.readNBytes(8 * 1024 * 1024 + 1);
+            if (bytes.length > 8 * 1024 * 1024) throw new IOException("Model exceeds 8 MiB");
+            return GsonHelper.parse(new String(bytes, StandardCharsets.UTF_8));
+        }
+    }
+
+    private static ModelPart atParentOrigin(ModelPart part) {
+        part.setInitialPose(PartPose.ZERO);
+        part.loadPose(PartPose.ZERO);
+        return part;
     }
 
     @Override
@@ -109,14 +145,15 @@ public final class ModernModelResources extends SimplePreparableReloadListener<M
             }
             try {
                 NativeImage image = NativeImage.read(new ByteArrayInputStream(entry.getValue()));
-                textureManager.register(id, new DynamicTexture(id::toString, image));
+                textureManager.register(id, new DynamicTexture(() -> "Howling Werewolf Modern skin", image));
             } catch (IOException error) {
                 throw new UncheckedIOException("Unable to decode embedded Modern texture " + id, error);
             }
         }
         models = prepared.models();
+        playerParts = prepared.playerParts();
         revision++;
-        HowlingWerewolf.LOGGER.info("Loaded 3 Modern Blockbench models and 9 skin sets (27 embedded textures)");
+        HowlingWerewolf.LOGGER.info("Loaded 3 Modern form models, the player overlay, and 9 skin sets (27 embedded textures)");
     }
 
     private static void validatePng(byte[] png) throws IOException {

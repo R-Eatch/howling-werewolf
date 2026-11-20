@@ -50,7 +50,7 @@ public final class WerewolfRenderHooks {
     public static boolean submit(AvatarRenderState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
         var data = WerewolfRenderData.get(state);
         var form = data.form();
-        if (form == WerewolfForm.HUMAN || rendererContext == null) return false;
+        if (form == WerewolfForm.HUMAN || data.modernPlayerModel() || rendererContext == null) return false;
         if (FirstPersonBodyCompat.active(state)) return true;
         pose.pushPose();
         try {
@@ -81,7 +81,7 @@ public final class WerewolfRenderHooks {
 
     public static void renderArm(ArmRenderContext context, AvatarRenderState state) {
         var data = WerewolfRenderData.get(state);
-        if (data.form() == WerewolfForm.HUMAN) return;
+        if (data.form() == WerewolfForm.HUMAN || data.modernPlayerModel()) return;
         if (data.form() == WerewolfForm.QUADRUPED) context.setCanceled(true);
         else if (data.modelSet() == WerewolfModelSet.MODERN) ModernFirstPersonClawRenderer.render(context, data);
         else WerewolfFirstPersonClawRenderer.render(context, data);

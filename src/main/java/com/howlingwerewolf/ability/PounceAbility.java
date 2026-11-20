@@ -29,7 +29,7 @@ import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.phys.Vec3;
 
 public final class PounceAbility {
-    public static final int COOLDOWN = 400;
+    public static final int COOLDOWN = 15 * 20;
     public static final int MAX_FLIGHT_TICKS = 70;
     private static final int WINDUP = 3;
     private static final ResourceKey<DamageType> IMPACT = ResourceKey.create(Registries.DAMAGE_TYPE,
@@ -79,7 +79,7 @@ public final class PounceAbility {
             }
         } else if (flight.airborne()) {
             end(player, data, Motion.LAND);
-            impact(player, flight);
+            impact(player, data, flight);
             player.addEffect(new MobEffectInstance(MobEffects.SPEED, 100));
         } else if (now - flight.startedAt() > WINDUP + 6) end(player, data, Motion.CLEAR);
     }
@@ -104,20 +104,20 @@ public final class PounceAbility {
                 flight.form() == WerewolfForm.BEAST ? 0.65F : 0.95F);
     }
 
-    private static void impact(ServerPlayer player, Flight flight) {
+    private static void impact(ServerPlayer player, WerewolfData data, Flight flight) {
         ServerLevel level = flight.level();
         boolean beast = flight.form() == WerewolfForm.BEAST;
         boolean wolf = flight.form() == WerewolfForm.QUADRUPED;
         double radius = PounceTargeting.impactRadius(flight.form());
+        float landingDamage = (beast ? 10.0F : 7.0F) * (float) data.clawDamageMultiplier();
         var damage = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(IMPACT), player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.25, radius),
                 target -> eligible(player, target))) {
             Vec3 horizontal = target.position().subtract(player.position()).multiply(1, 0, 1);
             if (horizontal.lengthSqr() > radius * radius || !player.hasLineOfSight(target)) continue;
-            if (!beast && !wolf && horizontal.lengthSqr() > 0.04 && horizontal.normalize().dot(flight.forward()) < 0.42) continue;
             if (wolf) {
                 target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 64, 0), player);
-            } else if (target.hurtServer(level, damage, beast ? 12.375F : 12.3F) && beast) {
+            } else if (target.hurtServer(level, damage, landingDamage) && beast) {
                 target.knockback(1.1, -horizontal.x, -horizontal.z, damage, 12.375F);
             }
         }

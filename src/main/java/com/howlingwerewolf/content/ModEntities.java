@@ -52,10 +52,10 @@ public final class ModEntities {
                     .sized(0.6F, 1.95F).clientTrackingRange(10).build(key("hunter_captain")));
     public static final Supplier<EntityType<TribeWerewolfEntity>> TRIBE_WEREWOLF =
             ENTITIES.register("tribe_werewolf", () -> EntityType.Builder.of(TribeWerewolfEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(key("tribe_werewolf")));
+                    .sized(0.6F, 2.0F).clientTrackingRange(10).build(key("tribe_werewolf")));
     public static final Supplier<EntityType<SettlementLeaderEntity>> TRIBE_CHIEF =
             ENTITIES.register("tribe_chief", () -> EntityType.Builder.of(SettlementLeaderEntity::new, MobCategory.CREATURE)
-                    .sized(0.9F, 2.0F).clientTrackingRange(10).build(key("tribe_chief")));
+                    .sized(0.6F, 2.0F).clientTrackingRange(10).build(key("tribe_chief")));
     public static final Supplier<EntityType<SquadHealingPotion>> SQUAD_HEALING_POTION =
             ENTITIES.register("squad_healing_potion", () -> EntityType.Builder.<SquadHealingPotion>of(SquadHealingPotion::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build(key("squad_healing_potion")));

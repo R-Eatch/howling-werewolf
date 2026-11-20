@@ -1,12 +1,10 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.HowlingWerewolf;
-import net.minecraft.ChatFormatting;
 import com.howlingwerewolf.entity.SettlementCombat;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -18,19 +16,16 @@ import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 
-import java.util.function.Consumer;
 
 public final class PeltArmor {
     private static final Identifier SET = Identifier.fromNamespaceAndPath(HowlingWerewolf.MOD_ID, "silverhide");
-    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.125F;
+    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.10F;
 
     private static final ArmorMaterial MATERIAL = new ArmorMaterial(
             ArmorMaterials.IRON.durability(), ArmorMaterials.IRON.defense(), ArmorMaterials.GOLD.enchantmentValue(),
@@ -42,12 +37,6 @@ public final class PeltArmor {
                 .withModifierAdded(Attributes.MOVEMENT_SPEED,
                         new AttributeModifier(SET.withSuffix("_speed_" + type.getName()), 0.0125, AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.bySlot(type.getSlot())))) {
-            @Override
-            public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
-                                        Consumer<Component> tooltip, TooltipFlag flag) {
-                super.appendHoverText(stack, context, display, tooltip, flag);
-                tooltip.accept(Component.translatable("item.howlingwerewolf.silverhide.set_bonus").withStyle(ChatFormatting.GRAY));
-            }
         };
     }
 

@@ -1,6 +1,6 @@
 # 随从指南
 
-适用于 Minecraft 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3 / Java 25，Howling Werewolf 1.4.4。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
+适用于 Minecraft 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3 / Java 25，Howling Werewolf 1.5.0。客户端和服务端需要安装相同版本。[English](COMPANIONS.md)
 
 配套资料：[狩猎与交易表](COMPANION-TABLES-zh.md) · [架构来源核查](COMPANION-PROVENANCE.md)
 
