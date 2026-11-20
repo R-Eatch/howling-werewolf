@@ -121,7 +121,7 @@ public final class ClientForgeEvents {
     public static void renderWerewolfPlayer(RenderPlayerEvent.Pre event) {
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) return;
         WerewolfForm form = WerewolfSkinRenderContext.getForm(player);
-        if (form == WerewolfForm.HUMAN) return;
+        if (form == WerewolfForm.HUMAN || WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
 
         event.setCanceled(true);
         // Another mod is drawing our body in first person: a werewolf body would fill the camera.
@@ -176,7 +176,16 @@ public final class ClientForgeEvents {
     }
 
     @SubscribeEvent
+    public static void hideModernPlayerPreviewName(net.minecraftforge.client.event.RenderNameTagEvent event) {
+        if (event.getEntity() instanceof AbstractClientPlayer player && WerewolfSkinRenderContext.isPreview(player)
+                && WerewolfSkinRenderContext.usesModernPlayerModel(player)) {
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
     public static void renderWerewolfArm(RenderArmEvent event) {
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(event.getPlayer())) return;
         WerewolfApi.get(event.getPlayer()).ifPresent(data -> {
             if (!data.isTransformed()) return;
             if (data.isQuadrupedMode()) event.setCanceled(true);
@@ -195,6 +204,7 @@ public final class ClientForgeEvents {
         AbstractClientPlayer player = Minecraft.getInstance().player;
         if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()
                 || player == null || player.isInvisible() || player.isScoping()) return;
+        if (WerewolfSkinRenderContext.usesModernPlayerModel(player)) return;
         if (!WerewolfApi.get(player).map(data -> data.isTransformed()).orElse(false)) return;
         event.setCanceled(true);
         net.minecraft.world.entity.HumanoidArm arm = player.getMainArm();

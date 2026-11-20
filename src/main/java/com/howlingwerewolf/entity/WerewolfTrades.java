@@ -56,10 +56,10 @@ final class WerewolfTrades {
             trade(Category.RESOURCE, ModBlocks.WOLFSBANE, 4, ModItems.SILVER_INGOT, 2, MerchantRole.WARDEN),
             trade(Category.RESOURCE, ModItems.SILVER_INGOT, 4, ModBlocks.WOLFSBANE, 2, MerchantRole.CHIEF),
             trade(Category.RESOURCE, () -> Items.EMERALD, 4, ModBlocks.WOLFSBANE, 4, MerchantRole.CHIEF),
-            trade(Category.BUY_PELT, ModBlocks.WOLFSBANE, 4, ModItems.WEREWOLF_PELT, 1, null),
-            trade(Category.BUY_PELT, ModItems.SILVER_INGOT, 4, ModItems.WEREWOLF_PELT, 1, null),
-            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModBlocks.WOLFSBANE, 2, null),
-            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModItems.SILVER_INGOT, 2, null),
+            trade(Category.BUY_PELT, ModBlocks.WOLFSBANE, 4, ModItems.WEREWOLF_PELT, 1, MerchantRole.CHIEF),
+            trade(Category.BUY_PELT, ModItems.SILVER_INGOT, 4, ModItems.WEREWOLF_PELT, 1, MerchantRole.WARDEN),
+            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModBlocks.WOLFSBANE, 2, MerchantRole.CHIEF),
+            trade(Category.SELL_PELT, ModItems.WEREWOLF_PELT, 1, ModItems.SILVER_INGOT, 2, MerchantRole.WARDEN),
             new Trade(Category.PEARL, () -> Items.EMERALD, 12, ModBlocks.WOLFSBANE, 4, ModItems.MOONBANE_PEARL, 1, null),
             new Trade(Category.PEARL, ModBlocks.WOLFSBANE, 6, () -> Items.DIAMOND, 1, ModItems.MOONBANE_PEARL, 1, MerchantRole.CHIEF),
             new Trade(Category.POTION, ModBlocks.WOLFSBANE, 4, () -> Items.EMERALD, 2, ModItems.WEREWOLF_POTION, 1, MerchantRole.CHIEF),
@@ -80,23 +80,28 @@ final class WerewolfTrades {
                 }
             }
         }
-        for (int i = 0; i < role.resources; i++) offers.add(take(resources, role, random, i == 0));
-        offers.add(take(buys, role, random, false));
-        offers.add(take(sells, role, random, false));
-        if (role.pelts == 3) offers.add(take(random.nextBoolean() ? buys : sells, role, random, false));
-        for (int i = 0; i < role.specials; i++) offers.add(take(specials, role, random, i == 0));
+        for (int i = 0; i < role.resources; i++) offers.add(take(resources, role, random));
+        offers.add(take(buys, role, random));
+        offers.add(take(sells, role, random));
+        if (role.pelts == 3) offers.add(take(random.nextBoolean() ? buys : sells, role, random));
+        for (int i = 0; i < role.specials; i++) offers.add(take(specials, role, random));
     }
 
-    private static MerchantOffer take(List<Trade> pool, MerchantRole role, RandomSource random, boolean preferSpecialty) {
-        if (preferSpecialty) {
-            List<Trade> preferred = pool.stream().filter(trade -> trade.specialty() == role).toList();
-            if (!preferred.isEmpty()) {
-                Trade chosen = preferred.get(random.nextInt(preferred.size()));
-                pool.remove(chosen);
-                return chosen.offer(role);
-            }
+    private static MerchantOffer take(List<Trade> pool, MerchantRole role, RandomSource random) {
+        int totalWeight = 0;
+        for (Trade trade : pool) totalWeight += weight(trade, role);
+        int pick = random.nextInt(totalWeight);
+        for (int i = 0; i < pool.size(); i++) {
+            pick -= weight(pool.get(i), role);
+            if (pick < 0) return pool.remove(i).offer(role);
         }
-        return pool.remove(random.nextInt(pool.size())).offer(role);
+        return pool.remove(pool.size() - 1).offer(role);
+    }
+
+    private static int weight(Trade trade, MerchantRole role) {
+        if (role == MerchantRole.BROTHER) return 1;
+        if (role == MerchantRole.WARDEN) return trade.specialty() == MerchantRole.WARDEN ? 2 : 1;
+        return (trade.category() == Category.PEARL || (trade.specialty() == MerchantRole.CHIEF && trade.category() != Category.POTION)) ? 2 : 1;
     }
 
     private static Trade trade(Category category, Supplier<? extends ItemLike> input, int inputCount,

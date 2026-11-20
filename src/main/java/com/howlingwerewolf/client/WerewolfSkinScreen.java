@@ -4,7 +4,9 @@ import com.howlingwerewolf.WerewolfForm;
 import com.howlingwerewolf.WerewolfSkin;
 import com.howlingwerewolf.WerewolfSkinIds;
 import com.howlingwerewolf.WerewolfModelSet;
-import com.mojang.authlib.GameProfile;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import com.mojang.logging.LogUtils;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
@@ -34,6 +36,7 @@ import java.io.IOException;
 public final class WerewolfSkinScreen extends MoonInput.Page {
     private static final int MIN_WIDTH = 560, MIN_HEIGHT = 320, COMFORT_WIDTH = 640, COMFORT_HEIGHT = 360;
     private static final int TOP_BAND = 28, BOTTOM_BAND = 50, MARGIN = 12, LIST_WIDTH = 150, CARD_HEIGHT = 50, CARD_GAP = 4;
+    private static final int MODEL_SET_WIDTH = 84, BIPED_MODEL_WIDTH = 106;
     private static final WerewolfForm[] PREVIEW_FORMS = {
             WerewolfForm.WEREWOLF, WerewolfForm.QUADRUPED, WerewolfForm.BEAST
     };
@@ -54,10 +57,13 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     private MoonUi.Pill applyButton;
     private MoonUi.Pill equipmentButton;
     private MoonUi.Pill modelButton;
+    private MoonUi.Pill bipedModelButton;
     private int wide, tall, stageX, stageWidth, moonX, moonY, moonRadius;
     private boolean initializedSelection;
     private boolean showEquipment = true;
     private boolean pendingEquipment;
+    private boolean modernPlayerModel;
+    private boolean pendingModernPlayerModel;
     private boolean draggingPreview;
     private boolean confirmationTimedOut;
     private int pendingTicks;
@@ -89,8 +95,12 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         catalogRevision = WerewolfSkinCatalog.revision();
         skinPage = Mth.clamp(skinPage, 0, pageCount() - 1);
         List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries(modelSet);
-        modelButton = addRenderableWidget(new MoonUi.Pill(wide - MARGIN - 84, 6, 84, 16, Component.literal(modelSet.displayName()), false, this::switchModelSet));
-        modelButton.active = pendingSkin == null;
+        int modelX = wide - MARGIN - MODEL_SET_WIDTH;
+        modelButton = addRenderableWidget(new MoonUi.Pill(modelX, 6, MODEL_SET_WIDTH, 16,
+                Component.literal(modelSet.displayName()), false, this::switchModelSet));
+        bipedModelButton = modelSet == WerewolfModelSet.MODERN
+                ? addRenderableWidget(new MoonUi.Pill(modelX - 4 - BIPED_MODEL_WIDTH, 6, BIPED_MODEL_WIDTH, 16,
+                        bipedModelLabel(), false, this::switchBipedModel)) : null;
         int cardY = TOP_BAND + 6;
         for (int row = 0; row < 4 && skinPage * 4 + row < skins.size(); row++) {
             addRenderableWidget(new SkinChoiceButton(MARGIN, cardY + row * (CARD_HEIGHT + CARD_GAP), skins.get(skinPage * 4 + row)));
@@ -107,6 +117,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
             formButtons.put(form, addRenderableWidget(new MoonUi.Pill(formX + index * (formWidth + 4), stageTop, formWidth, 16, formName(form), false, () -> {
                 previewForm = form;
                 resetView();
+                refreshPreviewPlayer();
                 updateButtons();
             })));
         }
@@ -131,6 +142,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
             selectedSkin = data.getSkinId();
             modelSet = data.getModelSet();
             showEquipment = data.showsEquipment();
+            modernPlayerModel = data.prefersModernPlayerModel();
             rememberedSkins.put(modelSet, selectedSkin);
             List<WerewolfSkinCatalog.Entry> skins = WerewolfSkinCatalog.entries(modelSet);
             for (int index = 0; index < skins.size(); index++) {
@@ -154,9 +166,10 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         pendingSkin = selectedSkin;
         pendingModelSet = modelSet;
         pendingEquipment = showEquipment;
+        pendingModernPlayerModel = modernPlayerModel;
         pendingTicks = 0;
         confirmationTimedOut = false;
-        ModNetwork.CHANNEL.sendToServer(new SetWerewolfSkinPacket(modelSet.id(), selectedSkin, showEquipment));
+        ModNetwork.CHANNEL.sendToServer(new SetWerewolfSkinPacket(modelSet.id(), selectedSkin, showEquipment, modernPlayerModel));
         updateButtons();
     }
 
@@ -168,7 +181,8 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         if ((!hadSelection && initializedSelection) || catalogRevision != WerewolfSkinCatalog.revision()) rebuildWidgets();
         if (noticeTicks > 0 && --noticeTicks == 0) notice = null;
         if (pendingSkin != null) {
-            if (data != null && pendingModelSet == data.getModelSet() && pendingSkin.equals(data.getSkinId()) && pendingEquipment == data.showsEquipment()) {
+            if (data != null && pendingModelSet == data.getModelSet() && pendingSkin.equals(data.getSkinId())
+                    && pendingEquipment == data.showsEquipment() && pendingModernPlayerModel == data.prefersModernPlayerModel()) {
                 pendingSkin = null;
                 confirmationTimedOut = false;
             } else if (++pendingTicks >= 200) {
@@ -190,9 +204,15 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
                     ? "screen.howlingwerewolf.skins.applying"
                     : current ? "screen.howlingwerewolf.skins.applied" : "screen.howlingwerewolf.skins.apply"));
         }
-        if (equipmentButton != null) equipmentButton.setMessage(equipmentLabel());
+        if (equipmentButton != null) {
+            equipmentButton.setMessage(equipmentLabel());
+            equipmentButton.active = pendingSkin == null && !usesPlayerModelPreview();
+        }
         if (modelButton != null) modelButton.active = pendingSkin == null;
-        if (equipmentButton != null) equipmentButton.active = pendingSkin == null;
+        if (bipedModelButton != null) {
+            bipedModelButton.setMessage(bipedModelLabel());
+            bipedModelButton.active = pendingSkin == null;
+        }
         formButtons.forEach((form, button) -> {
             button.active = form != previewForm;
             button.selected(form == previewForm);
@@ -206,21 +226,31 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         }
         if (previewPlayer == null || previewPlayer.level() != minecraft.level
                 || !previewPlayer.getUUID().equals(minecraft.player.getUUID())) {
-            previewPlayer = createPreviewPlayer(minecraft.level, minecraft.player.getGameProfile());
+            previewPlayer = createPreviewPlayer(minecraft.level, minecraft.player);
         }
         previewPlayer.setMainArm(minecraft.player.getMainArm());
         previewPlayer.tickCount = minecraft.player.tickCount;
+        boolean showWorn = showEquipment || usesPlayerModelPreview();
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             // Hidden equipment means worn armour and elytra; held items always show, as in the world.
-            ItemStack stack = showEquipment || !isArmorSlot(slot) ? minecraft.player.getItemBySlot(slot) : ItemStack.EMPTY;
+            ItemStack stack = showWorn || !isArmorSlot(slot) ? minecraft.player.getItemBySlot(slot) : ItemStack.EMPTY;
             if (!ItemStack.matches(previewPlayer.getItemBySlot(slot), stack)) {
                 previewPlayer.setItemSlot(slot, stack.copy());
             }
         }
     }
 
-    static RemotePlayer createPreviewPlayer(ClientLevel level, GameProfile profile) {
-        RemotePlayer player = new RemotePlayer(level, profile);
+    static RemotePlayer createPreviewPlayer(ClientLevel level, AbstractClientPlayer source) {
+        RemotePlayer player = new RemotePlayer(level, source.getGameProfile()) {
+            @Override public ResourceLocation getSkinTextureLocation() { return source.getSkinTextureLocation(); }
+            @Override public String getModelName() { return source.getModelName(); }
+            @Override public ResourceLocation getCloakTextureLocation() { return source.getCloakTextureLocation(); }
+            @Override public ResourceLocation getElytraTextureLocation() { return source.getElytraTextureLocation(); }
+
+            @Override public boolean isModelPartShown(PlayerModelPart part) {
+                return source.isModelPartShown(part);
+            }
+        };
         // This GUI-only entity never receives a spawn packet, but item/avatar extraction
         // still requires an ID.
         // Keep it detached from the level and separate from the live player's positive ID.
@@ -244,13 +274,15 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
             MoonUi.centered(graphics, font, Component.literal((skinPage + 1) + " / " + pageCount()), MARGIN + LIST_WIDTH / 2, tall - BOTTOM_BAND - 16, theme.sub());
             graphics.fill(0, 0, wide, TOP_BAND, MoonUi.BAND);
             graphics.fill(0, tall - BOTTOM_BAND, wide, tall, MoonUi.BAND);
-            Component subtitle = Component.translatable(WerewolfSkinCatalog.errorCount() > 0
-                    ? "screen.howlingwerewolf.skins.invalid_packs" : "screen.howlingwerewolf.skins.subtitle", WerewolfSkinCatalog.errorCount());
-            int titleRoom = wide - MARGIN * 2 - 92;
+            Component subtitle = WerewolfSkinCatalog.errorCount() > 0
+                    ? Component.translatable("screen.howlingwerewolf.skins.invalid_packs", WerewolfSkinCatalog.errorCount())
+                    : Component.empty();
+            int controlsWidth = MODEL_SET_WIDTH + 8 + (bipedModelButton == null ? 0 : BIPED_MODEL_WIDTH + 4);
+            int titleRoom = wide - MARGIN * 2 - controlsWidth;
             if (font.width(title) * 2 <= titleRoom / 2) {
                 MoonUi.large(graphics, font, title, MARGIN, 6, 2, MoonUi.BAND_TEXT);
                 int subtitleX = MARGIN + font.width(title) * 2 + 12;
-                CompanionUi.label(graphics, font, subtitle, subtitleX, 10, wide - MARGIN - 92 - subtitleX, MoonUi.BAND_FAINT);
+                CompanionUi.label(graphics, font, subtitle, subtitleX, 10, wide - MARGIN - controlsWidth - subtitleX, MoonUi.BAND_FAINT);
             } else {
                 CompanionUi.label(graphics, font, title, MARGIN, 10, titleRoom, MoonUi.BAND_TEXT);
             }
@@ -286,6 +318,11 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
             super.extractRenderState(graphics, logicalMouseX, logicalMouseY, partialTick);
             if (modelButton != null && modelButton.isHovered()) {
                 Component detail = Component.translatable("screen.howlingwerewolf.skins.model." + modelSet.id() + ".tooltip");
+                graphics.setTooltipForNextFrame(font, font.split(detail, Math.round(260 * uiScale)), mouseX, mouseY);
+            }
+            if (bipedModelButton != null && bipedModelButton.isHovered()) {
+                Component detail = Component.translatable("screen.howlingwerewolf.skins.biped_model.tooltip.player")
+                        .append("\n").append(Component.translatable("screen.howlingwerewolf.skins.biped_model.tooltip.full"));
                 graphics.setTooltipForNextFrame(font, font.split(detail, Math.round(260 * uiScale)), mouseX, mouseY);
             }
             for (var child : children()) {
@@ -331,7 +368,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
         // The scissor follows the GUI matrix; the deferred entity viewport uses screen coordinates.
         graphics.enableScissor(x0, y0, x1, y1);
         try {
-            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, modelSet, selectedSkin, () -> {
+            WerewolfSkinRenderContext.withPreview(previewPlayer, previewForm, modelSet, selectedSkin, modernPlayerModel, () -> {
                 graphics.entity(previewPlayer, scale, (x0 + x1) / 2.0F, baseline, pose, camera);
             });
         } finally {
@@ -406,6 +443,7 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     private int toLogical(double coordinate) { return (int) Math.floor(coordinate / uiScale); }
 
     private Component equipmentLabel() {
+        if (usesPlayerModelPreview()) return Component.translatable("screen.howlingwerewolf.skins.player_equipment");
         return Component.translatable(showEquipment ? "screen.howlingwerewolf.skins.equipment_on"
                 : "screen.howlingwerewolf.skins.equipment_off");
     }
@@ -426,7 +464,25 @@ public final class WerewolfSkinScreen extends MoonInput.Page {
     private int pageCount() { return Math.max(1, (WerewolfSkinCatalog.entries(modelSet).size() + 3) / 4); }
 
     private boolean isCurrent(WerewolfData data) {
-        return data != null && modelSet == data.getModelSet() && selectedSkin.equals(data.getSkinId()) && showEquipment == data.showsEquipment();
+        return data != null && modelSet == data.getModelSet() && selectedSkin.equals(data.getSkinId())
+                && showEquipment == data.showsEquipment() && modernPlayerModel == data.prefersModernPlayerModel();
+    }
+
+    private boolean usesPlayerModelPreview() {
+        return modelSet == WerewolfModelSet.MODERN && modernPlayerModel && previewForm == WerewolfForm.WEREWOLF;
+    }
+
+    private Component bipedModelLabel() {
+        return Component.translatable(modernPlayerModel ? "screen.howlingwerewolf.skins.biped_model.player"
+                : "screen.howlingwerewolf.skins.biped_model.full");
+    }
+
+    private void switchBipedModel() {
+        modernPlayerModel = !modernPlayerModel;
+        previewForm = WerewolfForm.WEREWOLF;
+        resetView();
+        refreshPreviewPlayer();
+        updateButtons();
     }
 
     private static boolean isArmorSlot(EquipmentSlot slot) {

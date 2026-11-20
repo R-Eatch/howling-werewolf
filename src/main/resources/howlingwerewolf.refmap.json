@@ -1,5 +1,8 @@
 {
   "mappings": {
+    "com/howlingwerewolf/mixin/client/ModernPlayerArmMixin": {
+      "renderHand": "Lnet/minecraft/client/renderer/entity/player/PlayerRenderer;m_117775_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V"
+    },
     "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
       "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
     },
@@ -17,6 +20,9 @@
   },
   "data": {
     "searge": {
+      "com/howlingwerewolf/mixin/client/ModernPlayerArmMixin": {
+        "renderHand": "Lnet/minecraft/client/renderer/entity/player/PlayerRenderer;m_117775_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V"
+      },
       "com/howlingwerewolf/mixin/LocateWatchtowerMixin": {
         "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
       },

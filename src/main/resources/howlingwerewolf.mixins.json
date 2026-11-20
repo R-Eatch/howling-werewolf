@@ -9,6 +9,7 @@
     "LocateWatchtowerMixin"
   ],
   "client": [
+    "client.ModernPlayerArmMixin",
     "client.PounceClickMixin",
     "client.PounceMovementMixin"
   ],

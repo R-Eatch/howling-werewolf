@@ -1,8 +1,6 @@
 package com.howlingwerewolf.content;
 
 import com.howlingwerewolf.entity.SettlementCombat;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -11,10 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -45,9 +41,4 @@ public final class HunterCrossbowItem extends CrossbowItem {
         NEXT_WEAKNESS.put(target, now + WEAKNESS_COOLDOWN);
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, Level context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add(Component.translatable("item.howlingwerewolf.hunter_crossbow.desc").withStyle(ChatFormatting.GRAY));
-    }
 }

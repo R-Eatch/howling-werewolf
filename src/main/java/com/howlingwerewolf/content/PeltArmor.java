@@ -4,8 +4,6 @@ import com.howlingwerewolf.HowlingWerewolf;
 import com.howlingwerewolf.entity.SettlementCombat;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -22,14 +20,12 @@ import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.List;
 import java.util.UUID;
 
 public final class PeltArmor {
-    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.125F;
+    private static final float SPECIAL_REDUCTION_PER_PIECE = 0.10F;
 
     public static ArmorMaterial material() {
         return new ArmorMaterial() {
@@ -58,11 +54,6 @@ public final class PeltArmor {
                         .putAll(defaults).put(Attributes.MOVEMENT_SPEED, speed).build();
             }
 
-            @Override
-            public void appendHoverText(ItemStack stack, Level context, List<Component> tooltip, TooltipFlag flag) {
-                super.appendHoverText(stack, context, tooltip, flag);
-                tooltip.add(Component.translatable("item.howlingwerewolf.silverhide.set_bonus").withStyle(ChatFormatting.GRAY));
-            }
         };
     }
 

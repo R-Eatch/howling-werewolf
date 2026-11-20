@@ -11,7 +11,11 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 /** Requests a cosmetic change; the server validates and broadcasts the resulting state. */
-public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment) {
+public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment, boolean modernPlayerModel) {
+    public SetWerewolfSkinPacket(String modelSetId, String skinId, boolean showEquipment) {
+        this(modelSetId, skinId, showEquipment, false);
+    }
+
     public SetWerewolfSkinPacket(String modelSetId, String skinId) {
         this(modelSetId, skinId, true);
     }
@@ -23,10 +27,11 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean sh
         buf.writeUtf(packet.modelSetId, 16);
         buf.writeUtf(packet.skinId, WerewolfSkinIds.MAX_ID_LENGTH);
         buf.writeBoolean(packet.showEquipment);
+        buf.writeBoolean(packet.modernPlayerModel);
     }
 
     public static SetWerewolfSkinPacket decode(FriendlyByteBuf buf) {
-        return new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH), buf.readBoolean());
+        return new SetWerewolfSkinPacket(buf.readUtf(16), buf.readUtf(WerewolfSkinIds.MAX_ID_LENGTH), buf.readBoolean(), buf.readBoolean());
     }
 
     public static void handle(SetWerewolfSkinPacket packet, Supplier<NetworkEvent.Context> context) {
@@ -40,6 +45,7 @@ public record SetWerewolfSkinPacket(String modelSetId, String skinId, boolean sh
                 if (!data.isWerewolf()) return;
                 data.setAppearance(modelSet, skinId);
                 data.setEquipmentShown(packet.showEquipment);
+                data.setModernPlayerModel(packet.modernPlayerModel);
                 sender.refreshDimensions();
                 ModNetwork.sync(sender, data);
             });

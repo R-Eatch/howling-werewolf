@@ -51,7 +51,7 @@ public final class HWConfig {
                         "Chance that damage from an untamed vanilla wolf infects a human player. Default is 10%.")
                 .defineInRange("wolfInfectionChance", 0.10D, 0.0D, 1.0D);
         FERAL_WEREWOLF_INFECTION_CHANCE = builder.comment(
-                        "Chance that damage from a wild Feral Werewolf infects a human player. Alpha-summoned werewolves do not use this chance. Default is 20%.")
+                        "Chance that damage from a wild Feral Werewolf, Tribe Werewolf, or Tribe Chief infects a human player. Alpha-summoned werewolves do not use this chance. Default is 20%.")
                 .defineInRange("feralWerewolfInfectionChance", 0.20D, 0.0D, 1.0D);
         WEREWOLF_EXPERIENCE_GAIN_MULTIPLIER = builder.comment(
                         "Final multiplier applied to normal werewolf experience gains. Does not affect administrator XP commands. Default is 1.0.")

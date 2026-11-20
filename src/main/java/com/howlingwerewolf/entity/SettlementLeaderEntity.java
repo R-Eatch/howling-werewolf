@@ -56,6 +56,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 public final class SettlementLeaderEntity extends AbstractVillager implements WerewolfNpcAppearance {
+    private static final double CHIEF_BASE_ARMOR = 8.0D;
+    private static final String CHIEF_ARMOR_MIGRATED = "ChiefArmorV145";
     private static final NpcAppearanceData.Keys APPEARANCE = new NpcAppearanceData.Keys(
             SynchedEntityData.defineId(SettlementLeaderEntity.class, EntityDataSerializers.BOOLEAN),
             SynchedEntityData.defineId(SettlementLeaderEntity.class, EntityDataSerializers.INT));
@@ -110,7 +112,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     }
 
     public static AttributeSupplier.Builder chiefAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 40).add(Attributes.ARMOR, 4)
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 40).add(Attributes.ARMOR, CHIEF_BASE_ARMOR)
                 .add(Attributes.MOVEMENT_SPEED, 0.29).add(Attributes.ATTACK_DAMAGE,
                         WerewolfEntity.feralAttackDamage(net.minecraft.world.Difficulty.NORMAL) * 1.25).add(Attributes.FOLLOW_RANGE, 36);
     }
@@ -302,6 +304,7 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        if (!isWarden()) tag.putBoolean(CHIEF_ARMOR_MIGRATED, true);
         if (site != null) tag.putLong("Settlement", site.asLong());
         if (villageKey != null) tag.putLong("VillageKey", villageKey);
         if (routine != null) tag.put("Routine", routine.save());
@@ -315,6 +318,11 @@ public final class SettlementLeaderEntity extends AbstractVillager implements We
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (isWarden()) equipSilverhideArmor();
+        else if (!tag.getBoolean(CHIEF_ARMOR_MIGRATED)) {
+            // Update the old default while preserving manually assigned base armor.
+            var armor = getAttribute(Attributes.ARMOR);
+            if (armor.getBaseValue() == 4.0D) armor.setBaseValue(CHIEF_BASE_ARMOR);
+        }
         if (tag.contains("Settlement")) {
             BlockPos position = BlockPos.of(tag.getLong("Settlement"));
             settlementSpawn(position, tag.contains("VillageKey") ? tag.getLong("VillageKey") : null,
